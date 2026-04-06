@@ -68,7 +68,7 @@ AutoTabML Studio brings tabular ML workflows into one local-first workspace inst
 - Production serving or deployment endpoints.
 - Background job orchestration or worker infrastructure.
 - Full notebook execution.
-- Production-ready remote execution through `colab_mcp`.
+- Production-ready remote execution through `colab_mcp` (transport layer validated; browser-connected execution pending).
 - Monitoring, drift detection, fairness reporting, or observability pipelines.
 
 ## 🧭 Workflow
@@ -376,7 +376,7 @@ pytest -m integration
 ## ⚠️ Current Limitations
 
 - Notebook mode exists as a workspace concept, but it is currently a placeholder rather than a full notebook runner.
-- The `colab_mcp` backend is scaffolded only; real remote execution is not implemented.
+- The `colab_mcp` backend MCP transport is validated (server spawns, handshake works, tools listed), but full remote execution requires a browser-connected Colab notebook.
 - Optional dependencies must be installed explicitly for validation, profiling, benchmarking, MLflow, and PyCaret workflows.
 - PyCaret-backed experiment, finalize/save, and local saved-model prediction flows are not currently validated on Python 3.13 in this environment.
 - The project is local-first and does not implement deployment, serving, background job orchestration, or monitoring pipelines.

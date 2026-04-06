@@ -16,7 +16,7 @@ Notebook mode exists as a first-class workspace mode and page entrypoint, but it
 
 ### `colab_mcp`
 
-The backend choice exists in config and settings, but real remote execution is not implemented yet.
+The MCP transport layer is validated: the colab-mcp server (ColabMCP v2.14.5) spawns via `uvx`, the MCP handshake completes, and tool listing works. However, full remote execution requires a browser-connected Google Colab notebook. Without a live browser session the only exposed tool is `open_colab_browser_connection`; additional execution tools unlock after the browser link is established.
 
 ### GX Data Docs
 
