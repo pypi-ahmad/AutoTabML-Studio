@@ -76,10 +76,9 @@ def _execute_specs(df: pd.DataFrame, specs: list[ExpectationSpec]) -> list[Check
         gx.ExpectationSuite(name="autotabml_validation_suite")
     )
     for spec in specs:
-        # TODO: If GX changes the expectation constructor API in a future
-        # release, update this mapping. ``spec["type"]`` stores the
-        # expectation type name (snake_case) and is resolved to the current GX
-        # expectation class exported from ``gx.expectations``.
+        # NOTE(gx-api-compat): ``spec["type"]`` is resolved to the current GX
+        # expectation class via ``gx.expectations``.  If a future GX release
+        # changes the constructor API, update ``_resolve_expectation_class``.
         expectation_class = _resolve_expectation_class(gx, spec["type"])
         if expectation_class is None:
             logger.warning("Unknown GX expectation type: %s – skipping.", spec["type"])

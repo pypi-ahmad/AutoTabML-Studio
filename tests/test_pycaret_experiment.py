@@ -782,17 +782,26 @@ class TestConfigDefaults:
 
 
 class TestCliBoundary:
-    def test_experiment_run_cli_loads_dataset_and_invokes_service(self, classification_df, monkeypatch, capsys):
+    def test_experiment_run_cli_loads_dataset_and_invokes_service(self, classification_df, monkeypatch, capsys, tmp_path):
         from app import cli as cli_module
+        from app.ingestion import DatasetInputSpec, DatasetMetadata, IngestionSourceType, LoadedDataset
 
-        fake_loaded = type(
-            "LoadedDataset",
-            (),
-            {
-                "dataframe": classification_df,
-                "metadata": type("Meta", (), {"content_hash": "fp", "schema_hash": None})(),
-            },
-        )()
+        fake_metadata = DatasetMetadata(
+            source_type=IngestionSourceType.CSV,
+            source_locator="train.csv",
+            ingestion_timestamp=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+            row_count=len(classification_df),
+            column_count=len(classification_df.columns),
+            column_names=list(classification_df.columns),
+            dtype_summary={c: str(classification_df[c].dtype) for c in classification_df.columns},
+            schema_hash="schema-test",
+            content_hash="fp",
+        )
+        fake_loaded = LoadedDataset(
+            dataframe=classification_df,
+            metadata=fake_metadata,
+            input_spec=DatasetInputSpec(source_type=IngestionSourceType.CSV, path=__import__("pathlib").Path("train.csv")),
+        )
 
         monkeypatch.setattr(cli_module, "_load_cli_dataset", lambda locator, source_type=None: (fake_loaded, "train"))
         monkeypatch.setattr(
@@ -806,6 +815,7 @@ class TestCliBoundary:
                     "workspace_mode": WorkspaceMode.DASHBOARD,
                     "pycaret": PyCaretExperimentSettings(),
                     "tracking": type("Tracking", (), {"tracking_uri": None, "registry_uri": None})(),
+                    "database": type("Database", (), {"path": tmp_path / "app.sqlite3"})(),
                 },
             )(),
         )
@@ -876,17 +886,26 @@ class TestCliBoundary:
         assert "=== Experiment: train ===" in output
         assert "Best baseline: Logistic Regression" in output
 
-    def test_experiment_run_cli_auto_task_keeps_fold_strategy_unset(self, classification_df, monkeypatch):
+    def test_experiment_run_cli_auto_task_keeps_fold_strategy_unset(self, classification_df, monkeypatch, tmp_path):
         from app import cli as cli_module
+        from app.ingestion import DatasetInputSpec, DatasetMetadata, IngestionSourceType, LoadedDataset
 
-        fake_loaded = type(
-            "LoadedDataset",
-            (),
-            {
-                "dataframe": classification_df,
-                "metadata": type("Meta", (), {"content_hash": "fp", "schema_hash": None})(),
-            },
-        )()
+        fake_metadata = DatasetMetadata(
+            source_type=IngestionSourceType.CSV,
+            source_locator="train.csv",
+            ingestion_timestamp=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+            row_count=len(classification_df),
+            column_count=len(classification_df.columns),
+            column_names=list(classification_df.columns),
+            dtype_summary={c: str(classification_df[c].dtype) for c in classification_df.columns},
+            schema_hash="schema-test",
+            content_hash="fp",
+        )
+        fake_loaded = LoadedDataset(
+            dataframe=classification_df,
+            metadata=fake_metadata,
+            input_spec=DatasetInputSpec(source_type=IngestionSourceType.CSV, path=__import__("pathlib").Path("train.csv")),
+        )
 
         monkeypatch.setattr(cli_module, "_load_cli_dataset", lambda locator, source_type=None: (fake_loaded, "train"))
         monkeypatch.setattr(
@@ -900,6 +919,7 @@ class TestCliBoundary:
                     "workspace_mode": WorkspaceMode.DASHBOARD,
                     "pycaret": PyCaretExperimentSettings(),
                     "tracking": type("Tracking", (), {"tracking_uri": None, "registry_uri": None})(),
+                    "database": type("Database", (), {"path": tmp_path / "app.sqlite3"})(),
                 },
             )(),
         )

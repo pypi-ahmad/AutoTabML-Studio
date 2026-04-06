@@ -23,8 +23,9 @@ class LocalExecutionBackend(BaseExecutionBackend):
         return {"backend": "local", "status": "ready"}
 
     async def run_job(self, job_payload: dict[str, Any]) -> dict[str, Any]:
-        # TODO: Wire in actual local training/benchmark pipeline here.
-        raise NotImplementedError(
-            "Local job execution is not yet implemented. "
-            "This will be connected when the training pipeline is built."
-        )
+        # TODO(local-pipeline): Wire in actual local training/benchmark pipeline.
+        # Blocked until a unified job-dispatch layer is designed.  The existing
+        # CLI-driven validation/profile/benchmark/experiment paths work without
+        # this backend method; it is only needed for future notebook-style or
+        # Streamlit-triggered async job execution.
+        raise NotImplementedError("Local async job execution is not yet implemented.")

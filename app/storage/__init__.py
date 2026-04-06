@@ -27,11 +27,7 @@ from app.storage.store import AppMetadataStore
 def build_metadata_store(settings: AppSettings) -> AppMetadataStore | None:
     """Return the local app metadata store for the supplied settings when configured."""
 
-    database_settings = getattr(settings, "database", None)
-    database_path = getattr(database_settings, "path", None)
-    if database_path is None:
-        return None
-
+    database_path = settings.database.path
     store = AppMetadataStore(database_path)
     store.initialize_if_needed()
     return store
