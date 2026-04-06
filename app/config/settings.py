@@ -34,8 +34,7 @@ logger = logging.getLogger(__name__)
 _SETTINGS_DIR = Path.home() / ".autotabml"
 _SETTINGS_FILE = _SETTINGS_DIR / "settings.json"
 
-# Fields that must never be persisted to disk
-_EXCLUDE_FIELDS = {"provider": {"api_key"}}
+
 
 
 class _EnvironmentSettings(BaseSettings):
@@ -86,7 +85,7 @@ def load_settings() -> AppSettings:
 def save_settings(settings: AppSettings) -> None:
     """Persist settings to ~/.autotabml/settings.json (secrets excluded)."""
     _SETTINGS_DIR.mkdir(parents=True, exist_ok=True)
-    data = settings.model_dump(mode="json", exclude=_EXCLUDE_FIELDS)
+    data = settings.model_dump(mode="json")
     temp_path = _SETTINGS_FILE.with_name(f"{_SETTINGS_FILE.name}.tmp")
     temp_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
     temp_path.replace(_SETTINGS_FILE)

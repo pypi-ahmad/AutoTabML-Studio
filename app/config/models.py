@@ -6,7 +6,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.config.enums import (
     DEFAULT_MODELS,
@@ -56,7 +56,6 @@ class DatabaseSettings(BaseModel):
 class ProviderSettings(BaseModel):
     """Credentials and connection settings for a single LLM provider."""
     provider: LLMProvider = LLMProvider.OPENAI
-    api_key: SecretStr | None = None
     base_url: str | None = None
 
     @field_validator("base_url", mode="before")
@@ -66,10 +65,6 @@ class ProviderSettings(BaseModel):
             return None
         cleaned = value.strip()
         return cleaned or None
-
-    def get_api_key_value(self) -> str | None:
-        """Return the raw API key string, or None."""
-        return self.api_key.get_secret_value() if self.api_key else None
 
 
 class ExecutionSettings(BaseModel):

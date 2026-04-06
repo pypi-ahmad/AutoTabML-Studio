@@ -99,8 +99,8 @@ class TestAppSettings:
     def test_benchmark_prefers_gpu_by_default(self, default_settings: AppSettings):
         assert default_settings.benchmark.prefer_gpu is True
 
-    def test_provider_api_key_initially_none(self, default_settings: AppSettings):
-        assert default_settings.provider.get_api_key_value() is None
+    def test_provider_settings_has_no_api_key_field(self, default_settings: AppSettings):
+        assert not hasattr(default_settings.provider, "api_key")
 
     def test_tracking_alias_maps_to_mlflow(self):
         settings = AppSettings.model_validate(
@@ -136,17 +136,15 @@ class TestAppSettings:
 # ---------------------------------------------------------------------------
 
 class TestSettingsPersistence:
-    def test_save_excludes_api_key(self, tmp_path: Path, monkeypatch):
+    def test_save_contains_no_secret_fields(self, tmp_path: Path, monkeypatch):
         monkeypatch.setattr("app.config.settings._SETTINGS_DIR", tmp_path)
         monkeypatch.setattr("app.config.settings._SETTINGS_FILE", tmp_path / "settings.json")
 
-        from pydantic import SecretStr
         settings = AppSettings()
-        settings.provider.api_key = SecretStr("super-secret-key")
         save_settings(settings)
 
         raw = json.loads((tmp_path / "settings.json").read_text())
-        # api_key must NOT be in the persisted data
+        # ProviderSettings no longer carries api_key at all
         assert "api_key" not in raw.get("provider", {})
 
     def test_round_trip(self, tmp_path: Path, monkeypatch):
