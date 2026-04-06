@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment / secrets
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Logs
+*.log
+
+# Local runtime outputs
+artifacts/
+mlruns/
+catboost_info/
+mlflow.db
+.playwright-mcp/
+
+# Oversized local dataset artifacts
+datasets/sklearn/20_Newsgroups/20newsgroups.csv
+datasets/sklearn/Covtype/covtype.csv
+datasets/sklearn/KDD_Cup_99/kddcup99.csv
+datasets/sklearn/LFW_Pairs/lfw_pairs.csv
+datasets/uci/Amazon_Google_Reviews/amazon_google_reviews.csv
+datasets/uci/Amazon_Google_Reviews/y_amazon-google-large.csv
+datasets/uci/Electricity_Load/LD2011_2014.txt.zip
+datasets/uci/HAR_Smartphones/UCI HAR Dataset.zip
+datasets/uci/HAR_Smartphones/har_smartphones.csv
+datasets/uci/Household_Power/household_power.csv
+datasets/uci/Household_Power/household_power_clean.csv
+

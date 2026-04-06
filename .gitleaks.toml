@@ -1,0 +1,21 @@
+title = "AutoTabML Studio gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore documented placeholders and intentional fake-secret fixtures"
+paths = [
+  '''tests/''',
+  '''docs/''',
+  '''README\.md''',
+  '''\.env\.example''',
+  '''app/security/masking\.py''',
+  '''\.venv/''',
+  '''artifacts/''',
+  '''dist/''',
+  '''mlruns/''',
+  '''\.pytest_cache/''',
+  '''autotabml_studio\.egg-info/''',
+  '''detect-secrets-report\.json''',
+]
