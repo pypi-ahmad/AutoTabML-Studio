@@ -299,38 +299,6 @@ def render_sidebar_dataset_status() -> None:
         )
 
 
-# ---------------------------------------------------------------------------
-# Backward-compatible aliases
-# ---------------------------------------------------------------------------
-
-
-def render_dataset_gateway_notice(workflow_label: str, *, key_prefix: str) -> None:
-    """Render the standard no-active-dataset gateway notice.
-
-    .. deprecated:: Use :func:`render_dataset_header` for inline loading.
-    """
-
-    st.warning(
-        f"Select an active dataset on Dataset Intake before running {workflow_label.lower()}."
-    )
-    if st.button("Open Dataset Intake", key=f"{key_prefix}_open_dataset_intake"):
-        go_to_page("Dataset Intake")
-
-
-def render_active_dataset_banner(dataset_name: str, *, key_prefix: str) -> None:
-    """Render the shared active-dataset banner used on workflow pages.
-
-    .. deprecated:: Use :func:`render_dataset_header` for inline loading.
-    """
-
-    info_col, action_col = st.columns([5, 2])
-    info_col.info(
-        f"Using active dataset '{dataset_name}'. Change the selection on Dataset Intake if you need a different source."
-    )
-    if action_col.button("Dataset Intake", key=f"{key_prefix}_change_dataset"):
-        go_to_page("Dataset Intake")
-
-
 def uploaded_file_to_input_spec(uploaded_file) -> DatasetInputSpec:  # noqa: ANN001
     """Persist one uploaded file to the app temp area and return an input spec."""
 
