@@ -4,10 +4,10 @@ from app.modeling.pycaret.schemas import (
     CustomMetricSpec,
     ExperimentConfig,
     ExperimentResultBundle,
-    SavedModelArtifact,
     ExperimentSummary,
     ExperimentTaskType,
     ModelSelectionSpec,
+    SavedModelArtifact,
     SavedModelMetadata,
 )
 from app.modeling.pycaret.service import PyCaretExperimentService

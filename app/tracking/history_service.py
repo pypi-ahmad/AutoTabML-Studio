@@ -10,7 +10,7 @@ from app.tracking.filters import (
     SortDirection,
     build_mlflow_filter_string,
 )
-from app.tracking.schemas import RunDetailView, RunHistoryItem, RunType
+from app.tracking.schemas import RunDetailView, RunHistoryItem
 
 
 class HistoryService:

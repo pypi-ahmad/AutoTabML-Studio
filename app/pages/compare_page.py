@@ -5,9 +5,9 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.tracking.mlflow_query import is_mlflow_available
-from app.security.masking import safe_error_message
 
 
 def render_compare_page() -> None:
@@ -111,10 +111,10 @@ def render_compare_page() -> None:
     st.subheader("Artifact Availability")
     artifact_col1, artifact_col2 = st.columns(2)
     with artifact_col1:
-        st.markdown(f"**Left** artifact URI:")
+        st.markdown("**Left** artifact URI:")
         st.caption(f"`{left_run.artifact_uri or 'N/A'}`")
     with artifact_col2:
-        st.markdown(f"**Right** artifact URI:")
+        st.markdown("**Right** artifact URI:")
         st.caption(f"`{right_run.artifact_uri or 'N/A'}`")
     st.caption("Artifact URIs are references only. Use Run History to inspect artifact paths; direct download is not implemented yet.")
 

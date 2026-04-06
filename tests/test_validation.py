@@ -16,12 +16,10 @@ from app.validation.rules import run_app_rules
 from app.validation.schemas import (
     CheckResult,
     CheckSeverity,
-    ValidationResultSummary,
     ValidationRuleConfig,
 )
 from app.validation.service import validate_dataset
 from app.validation.summary import build_summary
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from app.path_utils import safe_artifact_stem
 from app.prediction.schemas import (
     LoadedModel,
     PredictionHistoryEntry,
@@ -12,7 +13,6 @@ from app.prediction.schemas import (
     PredictionSummary,
     SchemaValidationMode,
 )
-from app.path_utils import safe_artifact_stem
 
 
 def build_prediction_summary(

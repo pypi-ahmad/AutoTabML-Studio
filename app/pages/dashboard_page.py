@@ -6,8 +6,8 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import get_active_loaded_dataset, get_loaded_datasets, go_to_page
-from app.storage import build_metadata_store
 from app.state.session import get_or_init_state
+from app.storage import build_metadata_store
 
 
 def render_dashboard_page() -> None:

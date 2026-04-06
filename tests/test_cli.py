@@ -13,8 +13,8 @@ from app.cli import _build_input_spec
 from app.config.enums import ExecutionBackend, WorkspaceMode
 from app.config.models import AppSettings
 from app.ingestion.types import IngestionSourceType
-from app.storage.models import BatchItemStatus, BatchRunItemRecord, BatchRunRecord, BatchRunStatus
 from app.startup import StartupIssue, StartupStatus
+from app.storage.models import BatchItemStatus, BatchRunItemRecord, BatchRunRecord, BatchRunStatus
 
 
 class TestBuildInputSpec:
@@ -328,6 +328,7 @@ class TestCliOutputEncoding:
     def test_compare_output_is_ascii_safe(self):
         """Ensure compare CLI output uses ASCII-safe arrows (->), not Unicode → (\u2192)."""
         import inspect
+
         from app import cli as cli_module
 
         source = inspect.getsource(cli_module.cmd_compare_runs)
@@ -335,6 +336,7 @@ class TestCliOutputEncoding:
 
     def test_registry_list_output_is_ascii_safe(self):
         import inspect
+
         from app import cli as cli_module
 
         source = inspect.getsource(cli_module.cmd_registry_list)
@@ -342,6 +344,7 @@ class TestCliOutputEncoding:
 
     def test_registry_promote_output_is_ascii_safe(self):
         import inspect
+
         from app import cli as cli_module
 
         source = inspect.getsource(cli_module.cmd_registry_promote)
@@ -349,6 +352,7 @@ class TestCliOutputEncoding:
 
     def test_registry_service_alias_messages_are_ascii_safe(self):
         import inspect
+
         from app.registry import registry_service
 
         source = inspect.getsource(registry_service.RegistryService.promote)

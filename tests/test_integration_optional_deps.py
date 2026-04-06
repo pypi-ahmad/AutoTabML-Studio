@@ -21,7 +21,6 @@ from app.profiling.service import profile_dataset
 from app.validation.schemas import ValidationRuleConfig
 from app.validation.service import validate_dataset
 
-
 pytestmark = pytest.mark.integration
 
 

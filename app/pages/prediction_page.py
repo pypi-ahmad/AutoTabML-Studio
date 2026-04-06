@@ -8,8 +8,6 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from app.ingestion import DatasetInputSpec, IngestionSourceType
-from app.pages.dataset_workspace import uploaded_file_to_input_spec
 from app.prediction import (
     BatchPredictionRequest,
     ModelSourceType,
@@ -20,10 +18,10 @@ from app.prediction import (
     SchemaValidationMode,
     SingleRowPredictionRequest,
 )
-from app.storage import build_metadata_store
-from app.state.session import get_or_init_state
-from app.tracking.mlflow_query import is_mlflow_available
 from app.security.masking import safe_error_message
+from app.state.session import get_or_init_state
+from app.storage import build_metadata_store
+from app.tracking.mlflow_query import is_mlflow_available
 
 
 def render_prediction_page() -> None:

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from math import inf
 from collections.abc import Iterable
+from math import inf
 
 import pandas as pd
 

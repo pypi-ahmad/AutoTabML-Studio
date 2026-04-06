@@ -250,7 +250,7 @@ class AppSettings(BaseModel):
         return data
 
     @model_validator(mode="after")
-    def _synchronize_path_sections(self) -> "AppSettings":
+    def _synchronize_path_sections(self) -> AppSettings:
         root_relative_artifact_paths = [
             ("validation_dir", _VALIDATION_DIR),
             ("profiling_dir", _PROFILING_DIR),
