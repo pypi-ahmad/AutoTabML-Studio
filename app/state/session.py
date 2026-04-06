@@ -29,7 +29,6 @@ class RuntimeState:
         self.provider_api_keys: dict[LLMProvider, SecretStr] = {}
         self.fetched_models: list[ModelItem] = []
         self.model_fetch_error: str | None = None
-        self.backend_valid: bool | None = None
 
     # --- convenience accessors ---
     @property
@@ -48,7 +47,14 @@ class RuntimeState:
     def execution_backend(self, value: ExecutionBackend) -> None:
         if value != self.settings.execution.backend:
             self.clear_model_catalog()
-        self.settings.execution.backend = value
+            self.settings.execution.backend = value
+            # Cascade: reset provider if it's no longer valid for the new backend.
+            from app.config.enums import PROVIDERS_BY_BACKEND
+            allowed = PROVIDERS_BY_BACKEND.get(value, [])
+            if self.provider not in allowed and allowed:
+                self.provider = allowed[0]
+        else:
+            self.settings.execution.backend = value
 
     @property
     def provider(self) -> LLMProvider:
@@ -97,7 +103,6 @@ class RuntimeState:
             "provider": self.provider.value,
             "selected_model_id": self.selected_model_id,
             "model_count": len(self.fetched_models),
-            "backend_valid": self.backend_valid,
         }
 
 
