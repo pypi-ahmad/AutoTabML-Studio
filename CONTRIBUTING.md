@@ -34,7 +34,7 @@ pytest -q
 - update [CHANGELOG.md](CHANGELOG.md) for user-visible or maintainer-visible changes
 - keep [.env.example](.env.example) aligned with the real settings model
 - keep [README.md](README.md) and [docs/developer-guide.md](docs/developer-guide.md) aligned with actual entrypoints and local commands
-- do not present notebook mode or `colab_mcp` as finished capabilities
+- do not present notebook mode or `colab_mcp` as finished capabilities (MCP transport is validated; browser-connected execution is not yet CI-testable)
 - if public owner/contact metadata or license terms are still undecided, leave them unset instead of inventing placeholders
 - run `python -m app.release_metadata` before any public release or tag meant for distribution
 

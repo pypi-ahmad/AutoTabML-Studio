@@ -20,6 +20,7 @@ This repository does not have a published tagged release yet. Keep upcoming rele
 - E2E smoke test suite (`tests/test_e2e_local_smoke.py`) covering 13 real-dependency paths.
 - CI lint job (`ruff`), E2E smoke CI job, and Dependabot configuration.
 - Full CLI subcommand test coverage: all 23 subcommands now have direct functional tests plus argparse parser integration tests.
+- Colab MCP spike: real MCP transport validated — server spawns via `uvx`, handshake completes, tools listed (ColabMCP v2.14.5). Spike script (`scripts/colab_mcp_spike.py`) and integration tests (`tests/test_colab_mcp_real.py`).
 
 ### Changed
 
