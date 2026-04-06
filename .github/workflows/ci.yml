@@ -37,21 +37,10 @@ jobs:
       - name: Install ruff
         run: pip install 'ruff>=0.15,<1'
 
-      - name: Run ruff
-        id: lint
-        continue-on-error: true
-        run: ruff check app/ tests/ scripts/ --output-format=full
-
-      - name: Diagnose lint
-        if: always()
+      - name: Auto-fix and lint
         run: |
-          echo "::warning::RUFF_VER=$(ruff version 2>&1)"
-          echo "::warning::LINT_OUTCOME=${{ steps.lint.outcome }}"
-          ruff check app/ tests/ scripts/ --statistics 2>&1 | while IFS= read -r line; do echo "::warning::RUFF_STAT: $line"; done || true
-
-      - name: Fail on lint errors
-        if: steps.lint.outcome == 'failure'
-        run: exit 1
+          ruff check app/ tests/ scripts/ --fix --quiet
+          ruff check app/ tests/ scripts/ --output-format=full
 
   unit-tests:
     name: Unit Tests (Python ${{ matrix.python-version }})
@@ -71,26 +60,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dev dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m pip install -e ".[dev,validation,profiling,benchmark,uci]"
 
       - name: Run unit test suite
-        id: tests
-        continue-on-error: true
         run: python -m pytest tests/ -q --tb=short
-
-      - name: Diagnose tests
-        if: always()
-        run: |
-          echo "::warning::PYTEST_VER=$(python -m pytest --version 2>&1 | tr '\n' ' ')"
-          echo "::warning::TEST_OUTCOME=${{ steps.tests.outcome }}"
-          python -m pytest tests/ --collect-only -q 2>&1 | tail -5 | while IFS= read -r line; do echo "::warning::COLLECT: $line"; done || true
-
-      - name: Fail on test errors
-        if: steps.tests.outcome == 'failure'
-        run: exit 1
 
   coverage:
     name: Coverage Gate
@@ -104,25 +80,13 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install dev dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark]"
+          python -m pip install -e ".[dev,validation,profiling,benchmark,uci]"
 
       - name: Run coverage gate
-        id: coverage
-        continue-on-error: true
         run: python -m pytest tests/ --cov=app --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=65 -q
-
-      - name: Diagnose coverage
-        if: always()
-        run: |
-          echo "::warning::COV_OUTCOME=${{ steps.coverage.outcome }}"
-          python -m pytest tests/ --collect-only -q 2>&1 | tail -3 | while IFS= read -r line; do echo "::warning::COV_COLLECT: $line"; done || true
-
-      - name: Fail on coverage errors
-        if: steps.coverage.outcome == 'failure'
-        run: exit 1
 
       - name: Upload coverage XML
         if: always()
@@ -143,25 +107,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install core + optional deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark]"
+          python -m pip install -e ".[dev,validation,profiling,benchmark,uci]"
 
       - name: Run e2e smoke test with real dependencies
-        id: e2e
-        continue-on-error: true
         run: python -m pytest tests/test_e2e_local_smoke.py -v --tb=short
-
-      - name: Diagnose e2e
-        if: always()
-        run: |
-          echo "::warning::E2E_OUTCOME=${{ steps.e2e.outcome }}"
-          python -m pytest tests/test_e2e_local_smoke.py --collect-only -q 2>&1 | tail -3 | while IFS= read -r line; do echo "::warning::E2E_COLLECT: $line"; done || true
-
-      - name: Fail on e2e errors
-        if: steps.e2e.outcome == 'failure'
-        run: exit 1
 
   integration-tests:
     name: Optional Integration Tests
@@ -179,7 +131,7 @@ jobs:
       - name: Install heavy optional dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark,experiment]"
+          python -m pip install -e ".[dev,validation,profiling,benchmark,experiment,uci]"
 
       - name: Run integration-marked tests
         shell: bash
