@@ -1140,6 +1140,228 @@ class TestCmdRegistryPromote:
         assert "champion -> v2" in output
         assert "app.status = champion" in output
 
+    def test_registry_promote_exits_when_disabled(self, monkeypatch):
+        from app import cli as cli_module
+
+        settings = AppSettings()
+        settings.tracking.registry_enabled = False
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: settings)
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
+
+        args = type("Args", (), {"model_name": "m", "version": "1", "action": "champion"})()
+        with pytest.raises(SystemExit):
+            cli_module.cmd_registry_promote(args)
+
+
+class TestCmdDoctorHappyPath:
+    """Direct test for cmd_doctor when no errors are found."""
+
+    def test_doctor_happy_path_prints_summary(self, monkeypatch, capsys, tmp_path: Path):
+        from app import cli as cli_module
+
+        status = StartupStatus(
+            artifact_dirs=[tmp_path / "artifacts"],
+            database_path=tmp_path / "app.sqlite3",
+            issues=[StartupIssue(severity="info", message="all good")],
+        )
+
+        monkeypatch.setattr(cli_module, "load_settings", lambda: AppSettings())
+        monkeypatch.setattr(
+            cli_module,
+            "initialize_local_runtime",
+            lambda settings, include_optional_network_checks=True: status,
+        )
+
+        cli_module.cmd_doctor(type("Args", (), {})())
+        output = capsys.readouterr().out
+
+        assert "AutoTabML Doctor" in output
+        assert "CUDA available:" in output
+        assert str(tmp_path / "app.sqlite3") in output
+        assert "Artifact directories checked: 1" in output
+        assert "[info] all good" in output
+
+    def test_doctor_clean_system_no_issues(self, monkeypatch, capsys):
+        from app import cli as cli_module
+
+        status = StartupStatus(issues=[])
+        monkeypatch.setattr(cli_module, "load_settings", lambda: AppSettings())
+        monkeypatch.setattr(
+            cli_module,
+            "initialize_local_runtime",
+            lambda settings, include_optional_network_checks=True: status,
+        )
+
+        cli_module.cmd_doctor(type("Args", (), {})())
+        output = capsys.readouterr().out
+
+        assert "[ok] no startup issues detected" in output
+
+
+class TestCmdCompareRuns:
+    """Direct functional tests for cmd_compare_runs."""
+
+    def test_compare_runs_prints_comparison(self, monkeypatch, capsys):
+        from app import cli as cli_module
+        from app.tracking.schemas import (
+            ComparisonBundle,
+            ConfigDifference,
+            MetricDelta,
+            RunHistoryItem,
+        )
+
+        left = RunHistoryItem(
+            run_id="aaaa1111bbbb2222",
+            experiment_id="0",
+            run_name="benchmark-run-left",
+            run_type="benchmark",
+        )
+        right = RunHistoryItem(
+            run_id="cccc3333dddd4444",
+            experiment_id="0",
+            run_name="benchmark-run-right",
+            run_type="benchmark",
+        )
+        bundle = ComparisonBundle(
+            left=left,
+            right=right,
+            comparable=True,
+            metric_deltas=[
+                MetricDelta(name="R2", left_value=0.42, right_value=0.55, delta=0.13, better_side="right"),
+            ],
+            config_differences=[
+                ConfigDifference(key="random_state", left_value="42", right_value="99"),
+            ],
+        )
+
+        detail_left = SimpleNamespace(
+            run_id="aaaa1111bbbb2222",
+            run_name="benchmark-run-left",
+            run_type=SimpleNamespace(value="benchmark"),
+            task_type="regression",
+            status=SimpleNamespace(value="FINISHED"),
+            duration_seconds=1.0,
+            model_name=None,
+            primary_metric_name=None,
+            primary_metric_value=None,
+            params={},
+            metrics={"R2": 0.42},
+            artifact_paths=[],
+        )
+        detail_right = SimpleNamespace(
+            run_id="cccc3333dddd4444",
+            run_name="benchmark-run-right",
+            run_type=SimpleNamespace(value="benchmark"),
+            task_type="regression",
+            status=SimpleNamespace(value="FINISHED"),
+            duration_seconds=2.0,
+            model_name=None,
+            primary_metric_name=None,
+            primary_metric_value=None,
+            params={},
+            metrics={"R2": 0.55},
+            artifact_paths=[],
+        )
+
+        class FakeHistoryService:
+            def __init__(self, **kw):
+                pass
+
+            def resolve_run_id(self, run_id):
+                return run_id
+
+            def get_run_detail(self, run_id):
+                return detail_left if run_id == "aaaa1111bbbb2222" else detail_right
+
+        class FakeComparisonService:
+            def compare(self, left, right):
+                return bundle
+
+        settings = AppSettings()
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: settings)
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
+        monkeypatch.setattr("app.tracking.history_service.HistoryService", FakeHistoryService)
+        monkeypatch.setattr("app.tracking.compare_service.ComparisonService", FakeComparisonService)
+
+        args = type("Args", (), {
+            "left_run_id": "aaaa1111bbbb2222",
+            "right_run_id": "cccc3333dddd4444",
+            "artifacts_dir": None,
+        })()
+        cli_module.cmd_compare_runs(args)
+        output = capsys.readouterr().out
+
+        assert "Comparison:" in output
+        assert "Comparable: Yes" in output
+        assert "R2:" in output
+        assert "0.4200" in output
+        assert "0.5500" in output
+        assert "+0.1300" in output
+        assert "(right)" in output
+        assert "random_state:" in output
+
+    def test_compare_runs_exits_without_mlflow(self, monkeypatch):
+        from app import cli as cli_module
+
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: False)
+
+        args = type("Args", (), {"left_run_id": "a", "right_run_id": "b", "artifacts_dir": None})()
+        with pytest.raises(SystemExit):
+            cli_module.cmd_compare_runs(args)
+
+
+class TestCmdRegistryGates:
+    """Test that registry commands exit cleanly when registry is disabled or mlflow missing."""
+
+    def test_registry_list_exits_when_disabled(self, monkeypatch):
+        from app import cli as cli_module
+
+        settings = AppSettings()
+        settings.tracking.registry_enabled = False
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: settings)
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
+
+        with pytest.raises(SystemExit):
+            cli_module.cmd_registry_list(type("Args", (), {})())
+
+    def test_registry_register_exits_when_disabled(self, monkeypatch):
+        from app import cli as cli_module
+
+        settings = AppSettings()
+        settings.tracking.registry_enabled = False
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: settings)
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
+
+        args = type("Args", (), {"model_name": "m", "source": "s", "run_id": None, "description": None})()
+        with pytest.raises(SystemExit):
+            cli_module.cmd_registry_register(args)
+
+    def test_registry_list_exits_without_mlflow(self, monkeypatch):
+        from app import cli as cli_module
+
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: False)
+
+        with pytest.raises(SystemExit):
+            cli_module.cmd_registry_list(type("Args", (), {})())
+
+    def test_registry_register_exits_without_mlflow(self, monkeypatch):
+        from app import cli as cli_module
+
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: False)
+
+        args = type("Args", (), {"model_name": "m", "source": "s", "run_id": None, "description": None})()
+        with pytest.raises(SystemExit):
+            cli_module.cmd_registry_register(args)
+
+    def test_registry_promote_exits_without_mlflow(self, monkeypatch):
+        from app import cli as cli_module
+
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: False)
+
+        args = type("Args", (), {"model_name": "m", "version": "1", "action": "champion"})()
+        with pytest.raises(SystemExit):
+            cli_module.cmd_registry_promote(args)
+
 
 class TestCmdExperimentRun:
     """Direct functional tests for cmd_experiment_run."""
@@ -1247,6 +1469,91 @@ class TestParserIntegration:
 
         with pytest.raises(SystemExit):
             cli_module.main()
+
+    def test_init_local_storage_subcommand_dispatches(self, monkeypatch, capsys, tmp_path: Path):
+        from app import cli as cli_module
+
+        status = StartupStatus(artifact_dirs=[tmp_path / "artifacts"])
+        settings = AppSettings()
+        settings.mlflow.tracking_uri = "sqlite:///test.db"
+        settings.artifacts.root_dir = tmp_path / "artifacts"
+        monkeypatch.setattr(cli_module, "configure_logging", lambda: None)
+        monkeypatch.setattr(cli_module, "load_settings", lambda: settings)
+        monkeypatch.setattr(cli_module, "save_settings", lambda s: None)
+        monkeypatch.setattr(
+            cli_module,
+            "initialize_local_runtime",
+            lambda settings, include_optional_network_checks=False: status,
+        )
+        monkeypatch.setattr("sys.argv", ["autotabml", "init-local-storage"])
+
+        cli_module.main()
+        output = capsys.readouterr().out
+
+        assert "Local Storage Initialized" in output
+
+    def test_history_list_subcommand_dispatches(self, monkeypatch, capsys):
+        from app import cli as cli_module
+
+        monkeypatch.setattr(cli_module, "configure_logging", lambda: None)
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: AppSettings())
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
+
+        class FakeHistoryService:
+            def __init__(self, **kw):
+                pass
+
+            def list_runs(self, **kw):
+                return []
+
+        monkeypatch.setattr("app.tracking.history_service.HistoryService", FakeHistoryService)
+        monkeypatch.setattr("sys.argv", ["autotabml", "history-list"])
+
+        cli_module.main()
+        output = capsys.readouterr().out
+
+        assert "No runs found." in output
+
+    def test_predict_history_subcommand_dispatches(self, monkeypatch, capsys):
+        from app import cli as cli_module
+
+        class FakeService:
+            def list_history(self, limit=20):
+                return []
+
+        monkeypatch.setattr(cli_module, "configure_logging", lambda: None)
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: AppSettings())
+        monkeypatch.setattr(cli_module, "_build_prediction_service", lambda s: FakeService())
+        monkeypatch.setattr("sys.argv", ["autotabml", "predict-history"])
+
+        cli_module.main()
+        output = capsys.readouterr().out
+
+        assert "No prediction history found." in output
+
+    def test_registry_list_subcommand_dispatches(self, monkeypatch, capsys):
+        from app import cli as cli_module
+
+        settings = AppSettings()
+        settings.tracking.registry_enabled = True
+        monkeypatch.setattr(cli_module, "configure_logging", lambda: None)
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: settings)
+        monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
+
+        class FakeRegistryService:
+            def __init__(self, **kw):
+                pass
+
+            def list_models(self):
+                return []
+
+        monkeypatch.setattr("app.registry.registry_service.RegistryService", FakeRegistryService)
+        monkeypatch.setattr("sys.argv", ["autotabml", "registry-list"])
+
+        cli_module.main()
+        output = capsys.readouterr().out
+
+        assert "No registered models found." in output
 
     def test_validate_parser_resolves_args(self, monkeypatch, capsys, tmp_path: Path):
         from app import cli as cli_module
