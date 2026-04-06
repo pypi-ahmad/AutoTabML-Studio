@@ -127,12 +127,21 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 	</tr>
 	<tr>
 		<td width="50%">
+			<img src="docs/assets/screenshots/profiling-report.png" alt="Profiling report">
+			<br>
+			<strong>Profiling</strong>
+			<br>
+			Run real local profiling and inspect summary cards plus generated artifacts.
+		</td>
+		<td width="50%">
 			<img src="docs/assets/screenshots/history-view.png" alt="History view">
 			<br>
 			<strong>History</strong>
 			<br>
 			Inspect MLflow-backed run history for benchmarks and experiments.
 		</td>
+	</tr>
+	<tr>
 		<td width="50%">
 			<img src="docs/assets/screenshots/registry-view.png" alt="Registry view">
 			<br>
@@ -140,10 +149,17 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 			<br>
 			Review registered models and promote versions with alias-driven semantics.
 		</td>
+		<td width="50%">
+			<img src="docs/assets/screenshots/settings-view.png" alt="Settings view">
+			<br>
+			<strong>Settings</strong>
+			<br>
+			Inspect execution defaults, local runtime choices, and hardware detection.
+		</td>
 	</tr>
 </table>
 
-Additional capture notes live in [docs/assets/screenshots/README.md](docs/assets/screenshots/README.md).
+All screenshots above were captured from a real local Streamlit session. The capture inventory and refresh notes live in [docs/assets/screenshots/README.md](docs/assets/screenshots/README.md), and the repeatable capture script is [scripts/capture_screenshots.py](scripts/capture_screenshots.py).
 
 ## 🧱 Tech Stack
 
