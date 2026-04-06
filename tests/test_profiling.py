@@ -6,6 +6,7 @@ Tests that need ydata-profiling are skipped if the library is unavailable.
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 import types
 import warnings
@@ -155,6 +156,10 @@ class TestYDataProfilingNoiseSuppression:
         assert captured_kwargs["minimal"] is True
         assert captured_kwargs["title"] == "demo"
 
+    @pytest.mark.skipif(
+        not importlib.util.find_spec("pyparsing"),
+        reason="pyparsing not installed (profiling extra)",
+    )
     def test_known_dependency_warnings_are_suppressed(self):
         from pyparsing.warnings import PyparsingDeprecationWarning
 

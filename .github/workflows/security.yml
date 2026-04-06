@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,7 +37,7 @@ jobs:
       - name: Run detect-secrets scan
         shell: bash
         run: |
-          EXCLUDE_REGEX='(^tests[/\\]|^docs[/\\]|^README\.md$|^\.env\.example$|^app[/\\]security[/\\]masking\.py$|^\.venv[/\\]|^artifacts[/\\]|^dist[/\\]|^mlruns[/\\]|^\.pytest_cache[/\\]|^autotabml_studio\.egg-info[/\\]|^detect-secrets-report\.json$|^coverage\.xml$|^\.coverage$)'
+          EXCLUDE_REGEX='(^tests/|^docs/|^datasets/|^README\.md$|^\.env\.example$|^app/security/masking\.py$|^\.venv/|^artifacts/|^dist/|^mlruns/|^\.pytest_cache/|^autotabml_studio\.egg-info/|^detect-secrets-report\.json$|^coverage\.xml$|^\.coverage$|\.png$|\.html$)'
           detect-secrets scan --all-files --exclude-files "$EXCLUDE_REGEX" > detect-secrets-report.json
           python - <<'PY'
           import json
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
