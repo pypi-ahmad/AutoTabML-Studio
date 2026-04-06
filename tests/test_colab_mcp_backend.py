@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
@@ -92,8 +93,12 @@ class TestColabMCPExecutionBackend:
         monkeypatch.setattr(
             "app.backends.colab_mcp_backend._find_uvx", lambda: "/usr/bin/uvx"
         )
+        # Ensure the mcp import inside validate_backend succeeds regardless of
+        # whether the real mcp package is installed in this test environment.
+        fake_mcp = type(sys)("mcp")
+        fake_mcp.ClientSession = object
+        monkeypatch.setitem(sys.modules, "mcp", fake_mcp)
         backend = ColabMCPExecutionBackend()
-        # mcp is installed in the test env
         assert await backend.validate_backend() is True
 
     @pytest.mark.asyncio
@@ -101,6 +106,17 @@ class TestColabMCPExecutionBackend:
         monkeypatch.setattr(
             "app.backends.colab_mcp_backend._find_uvx", lambda: None
         )
+        # Ensure the mcp import inside prepare_session succeeds so we reach the
+        # uvx-not-found branch rather than the mcp-missing branch.
+        fake_mcp = type(sys)("mcp")
+        fake_mcp.ClientSession = object
+        fake_mcp.StdioServerParameters = object
+        fake_mcp_client = type(sys)("mcp.client")
+        fake_mcp_stdio = type(sys)("mcp.client.stdio")
+        fake_mcp_stdio.stdio_client = object
+        monkeypatch.setitem(sys.modules, "mcp", fake_mcp)
+        monkeypatch.setitem(sys.modules, "mcp.client", fake_mcp_client)
+        monkeypatch.setitem(sys.modules, "mcp.client.stdio", fake_mcp_stdio)
         backend = ColabMCPExecutionBackend()
         result = await backend.prepare_session()
         assert result["status"] == "error"
