@@ -1,0 +1,109 @@
+[build-system]
+requires = [
+    "setuptools>=68",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autotabml-studio"
+dynamic = ["version"]
+description = "Local-first tabular ML workbench with Streamlit UI and CLI"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+maintainers = [
+    {name = "Ahmad", email = "datasciahmad@gmail.com"},
+]
+keywords = ["automl", "machine-learning", "tabular-data", "streamlit", "mlflow"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.2",
+    "streamlit>=1.30",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "httpx>=0.27",
+    "openpyxl>=3.1",
+    "xlrd>=2.0",
+    "lxml>=5.2",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+kaggle = [
+    "kaggle>=1.7",
+]
+uci = [
+    "ucimlrepo>=0.0.7",
+]
+validation = [
+    "great_expectations>=1.0",
+]
+profiling = [
+    "setuptools>=68,<82",
+    "ydata-profiling>=4.6",
+]
+benchmark = [
+    "lazypredict>=0.3.0",
+    "scikit-learn>=1.4",
+    "mlflow>=2.12",
+    "matplotlib>=3.8",
+    "xgboost>=2.0",
+    "lightgbm>=4.0",
+    "catboost>=1.2",
+]
+experiment = [
+    "pycaret>=3.0.4; python_version < '3.13'",
+    "mlflow>=2.12",
+    "matplotlib>=3.8",
+    "xgboost>=2.0",
+    "lightgbm>=4.0",
+    "catboost>=1.2",
+]
+gpu = [
+    "xgboost>=2.0",
+    "lightgbm>=4.0",
+    "catboost>=1.2",
+]
+colab = [
+    "mcp>=1.0",
+]
+dev = [
+    "build>=1.2",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-asyncio>=0.23",
+    "respx>=0.21",
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.scripts]
+autotabml = "app.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "app.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: optional heavy-dependency integration tests run in the manual CI job",
+]
+
+

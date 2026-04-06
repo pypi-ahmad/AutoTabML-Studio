@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: Run optional heavy-dependency integration tests
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - '3.11'
+          - '3.13'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run unit test suite
+        run: pytest tests/ -m "not integration" -q --tb=short
+
+  coverage:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run coverage gate
+        run: |
+          # TODO: ratchet this threshold toward 80 as CLI/UI modules gain deeper coverage.
+          pytest tests/ -m "not integration" --cov=app --cov-report=term --cov-report=xml --cov-fail-under=65 -q
+
+      - name: Upload coverage XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+
+  integration-tests:
+    name: Optional Integration Tests
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_integration }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install heavy optional dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,validation,profiling,benchmark,experiment]"
+
+      - name: Run integration-marked tests
+        shell: bash
+        run: |
+          set +e
+          pytest tests/ -m integration -q --tb=short
+          code=$?
+          if [ "$code" -eq 5 ]; then
+            echo "No integration-marked tests were collected."
+            exit 0
+          fi
+          exit "$code"
