@@ -31,12 +31,6 @@ class RuntimeState:
         self.model_fetch_error: str | None = None
         self.backend_valid: bool | None = None
 
-        # Backwards-compatible transfer for any in-memory active-provider key.
-        existing_api_key = self.settings.provider.get_api_key_value()
-        if existing_api_key:
-            self.provider_api_keys[self.settings.provider.provider] = SecretStr(existing_api_key)
-            self.settings.provider.api_key = None
-
     # --- convenience accessors ---
     @property
     def workspace_mode(self) -> WorkspaceMode:
