@@ -99,6 +99,67 @@ pytest -m integration
 
 The integration marker now covers real Great Expectations execution, real `ydata-profiling` artifact generation, real LazyPredict plus MLflow benchmark smoke runs, and the clean PyCaret-unavailable path on interpreters where PyCaret is not supported.
 
+### Canonical end-to-end CLI smoke flow
+
+Run this sequence on a clean venv to verify the full local pipeline. Validated on Windows + Python 3.13.12 (2026-04-06). PyCaret experiment steps require Python ≤3.12.
+
+```bash
+# 0. Bootstrap
+autotabml --version
+autotabml info
+autotabml init-local-storage
+autotabml doctor
+
+# 1. Prepare dataset (Iris via sklearn or any CSV with a target column)
+python -c "
+from sklearn.datasets import load_iris; import pandas as pd
+df = load_iris(as_frame=True).frame
+df.to_csv('artifacts/tmp/smoke_iris.csv', index=False)
+df.drop(columns=['target']).head(10).to_csv('artifacts/tmp/smoke_iris_predict.csv', index=False)
+"
+
+# 2. Validate
+autotabml validate artifacts/tmp/smoke_iris.csv --target target
+
+# 3. Profile
+autotabml profile artifacts/tmp/smoke_iris.csv
+
+# 4. Benchmark (fast: 2 models only)
+autotabml benchmark artifacts/tmp/smoke_iris.csv --target target \
+  --task-type classification \
+  --include-model DummyClassifier --include-model DecisionTreeClassifier
+
+# 5. Experiment (requires Python ≤3.12 + pip install -e ".[experiment]")
+autotabml experiment-run artifacts/tmp/smoke_iris.csv --target target \
+  --task-type classification --n-select 1 --fold 3
+
+# 6. Inspect history
+autotabml history-list
+autotabml history-show <RUN_ID>       # use id from benchmark output
+
+# 7. Compare runs
+autotabml compare-runs <RUN_ID_1> <RUN_ID_2>
+
+# 8. Registry
+autotabml registry-list
+autotabml registry-show <MODEL_NAME>
+
+# 9. Predict (feature-only CSV, no target column)
+autotabml predict-batch artifacts/tmp/smoke_iris_predict.csv \
+  --model-source mlflow_registered_model \
+  --model-name <REGISTERED_MODEL_NAME> --model-version 1 \
+  --task-type classification
+
+# 10. Prediction history
+autotabml predict-history
+```
+
+Expected outcomes:
+- Steps 0-4, 6-10: all work on Python 3.13 with `.[dev,validation,profiling,benchmark]`
+- Step 5: requires Python ≤3.12 with `.[experiment]` extra; prints clean error on 3.13
+- Benchmark creates an MLflow run visible in `history-list`
+- Predict uses a registered model and writes scored CSV + summary artifacts
+
 ### Discover CLI usage
 
 ```bash
