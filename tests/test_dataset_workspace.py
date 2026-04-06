@@ -16,6 +16,8 @@ from app.pages.dataset_workspace import (
     build_url_input_spec,
     get_active_loaded_dataset,
     infer_local_source_type,
+    render_dataset_header,
+    render_sidebar_dataset_status,
     resolve_session_dataset_name,
     set_active_dataset,
 )
@@ -145,3 +147,197 @@ class TestActiveDatasetSelection:
         assert selected_name == "reloaded"
         assert selected_dataset == restored_dataset
         assert fake_streamlit.session_state["active_dataset_name"] == "reloaded"
+
+
+class TestRenderDatasetHeader:
+    """Tests for the unified render_dataset_header helper."""
+
+    def test_returns_active_dataset_when_available(self, monkeypatch, tmp_path: Path):
+        store = AppMetadataStore(tmp_path / "app.sqlite3")
+        dataset = _make_loaded_dataset(path="data/train.csv", schema_hash="h1")
+
+        # Build a comprehensive fake st that supports all Streamlit calls used
+        # by render_dataset_header and its sub-helpers.
+        _captured_calls: dict[str, list] = {}
+
+        class FakeColumns:
+            def __init__(self, *_a, **_kw):
+                pass
+
+            def caption(self, *a, **kw):
+                _captured_calls.setdefault("caption", []).append(a)
+
+            def button(self, *a, **kw):
+                return False
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                pass
+
+        class FakeSt:
+            session_state = {
+                "loaded_datasets": {"train": dataset},
+                "active_dataset_name": "train",
+            }
+
+            @staticmethod
+            def columns(*a, **kw):
+                return [FakeColumns(), FakeColumns()]
+
+            @staticmethod
+            def caption(*a, **kw):
+                _captured_calls.setdefault("caption", []).append(a)
+
+            @staticmethod
+            def info(*a, **kw):
+                pass
+
+            @staticmethod
+            def tabs(*a, **kw):
+                return [FakeColumns(), FakeColumns()]
+
+            @staticmethod
+            def file_uploader(*a, **kw):
+                return None
+
+            @staticmethod
+            def text_input(*a, **kw):
+                return ""
+
+            @staticmethod
+            def button(*a, **kw):
+                return False
+
+            @staticmethod
+            def rerun(*a, **kw):
+                pass
+
+            @staticmethod
+            def divider(*a, **kw):
+                pass
+
+            @staticmethod
+            def success(*a, **kw):
+                pass
+
+            @staticmethod
+            def error(*a, **kw):
+                pass
+
+            @staticmethod
+            def warning(*a, **kw):
+                pass
+
+            class sidebar:
+                @staticmethod
+                def divider(*a, **kw):
+                    pass
+
+                @staticmethod
+                def caption(*a, **kw):
+                    pass
+
+                @staticmethod
+                def selectbox(*a, **kw):
+                    return None
+
+        monkeypatch.setattr(dataset_workspace_module, "st", FakeSt)
+
+        name, ds = render_dataset_header("Validation", key_prefix="val_test", metadata_store=store)
+
+        assert name == "train"
+        assert ds is dataset
+
+    def test_returns_none_when_no_datasets(self, monkeypatch, tmp_path: Path):
+        store = AppMetadataStore(tmp_path / "app.sqlite3")
+
+        class FakeColumns:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                pass
+
+            def caption(self, *a, **kw):
+                pass
+
+            def button(self, *a, **kw):
+                return False
+
+        class FakeSt:
+            session_state: dict = {"loaded_datasets": {}}
+
+            @staticmethod
+            def info(*a, **kw):
+                pass
+
+            @staticmethod
+            def tabs(*a, **kw):
+                return [FakeColumns(), FakeColumns()]
+
+            @staticmethod
+            def file_uploader(*a, **kw):
+                return None
+
+            @staticmethod
+            def text_input(*a, **kw):
+                return ""
+
+            @staticmethod
+            def button(*a, **kw):
+                return False
+
+            @staticmethod
+            def caption(*a, **kw):
+                pass
+
+            @staticmethod
+            def columns(*a, **kw):
+                return [FakeColumns(), FakeColumns()]
+
+            @staticmethod
+            def rerun(*a, **kw):
+                pass
+
+            @staticmethod
+            def divider(*a, **kw):
+                pass
+
+            @staticmethod
+            def success(*a, **kw):
+                pass
+
+            @staticmethod
+            def error(*a, **kw):
+                pass
+
+            @staticmethod
+            def warning(*a, **kw):
+                pass
+
+            class sidebar:
+                @staticmethod
+                def divider(*a, **kw):
+                    pass
+
+                @staticmethod
+                def caption(*a, **kw):
+                    pass
+
+                @staticmethod
+                def selectbox(*a, **kw):
+                    return None
+
+        monkeypatch.setattr(dataset_workspace_module, "st", FakeSt)
+
+        name, ds = render_dataset_header("Benchmark", key_prefix="bench_test", metadata_store=store)
+
+        assert name is None
+        assert ds is None
+
+    def test_new_exports_importable(self):
+        """Verify render_dataset_header and render_sidebar_dataset_status are public."""
+        assert callable(render_dataset_header)
+        assert callable(render_sidebar_dataset_status)

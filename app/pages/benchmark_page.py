@@ -10,11 +10,7 @@ from app.modeling.benchmark.lazypredict_runner import is_lazypredict_available
 from app.modeling.benchmark.schemas import BenchmarkConfig, BenchmarkSplitConfig, BenchmarkTaskType
 from app.modeling.benchmark.service import benchmark_dataset
 from app.modeling.benchmark.summary import leaderboard_to_dataframe
-from app.pages.dataset_workspace import (
-    get_active_loaded_dataset,
-    render_active_dataset_banner,
-    render_dataset_gateway_notice,
-)
+from app.pages.dataset_workspace import render_dataset_header
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
@@ -49,12 +45,10 @@ def render_benchmark_page() -> None:
     metadata_store = build_metadata_store(state.settings)
     st.title("🏁 Benchmark")
 
-    selected_name, loaded_dataset = get_active_loaded_dataset(metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header("Benchmark", key_prefix="benchmark", metadata_store=metadata_store)
     if selected_name is None or loaded_dataset is None:
-        render_dataset_gateway_notice("Benchmark", key_prefix="benchmark")
         return
 
-    render_active_dataset_banner(selected_name, key_prefix="benchmark")
     df = loaded_dataset.dataframe
     metadata = loaded_dataset.metadata
     gpu_info = cuda_summary()

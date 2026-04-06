@@ -20,10 +20,8 @@ from app.modeling.pycaret.service import PyCaretExperimentService
 from app.modeling.pycaret.setup_runner import is_pycaret_available, pycaret_install_guidance
 from app.modeling.pycaret.summary import leaderboard_to_dataframe
 from app.pages.dataset_workspace import (
-    get_active_loaded_dataset,
     go_to_page,
-    render_active_dataset_banner,
-    render_dataset_gateway_notice,
+    render_dataset_header,
 )
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
@@ -89,12 +87,10 @@ def render_experiment_page() -> None:
         st.error(pycaret_install_guidance())
         return
 
-    selected_name, loaded_dataset = get_active_loaded_dataset(metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header("Experiment", key_prefix="experiment", metadata_store=metadata_store)
     if selected_name is None or loaded_dataset is None:
-        render_dataset_gateway_notice("Experiment", key_prefix="experiment")
         return
 
-    render_active_dataset_banner(selected_name, key_prefix="experiment")
     df = loaded_dataset.dataframe
     metadata = loaded_dataset.metadata
     ensure_dataset_record(metadata_store, loaded_dataset, dataset_name=selected_name)
