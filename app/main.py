@@ -5,6 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from app.logging_config import configure_logging
+from app.pages.dataset_workspace import render_sidebar_dataset_status
 from app.pages.registry import default_page_label, get_page_by_label, get_page_registry, render_registered_page
 from app.security.masking import safe_error_message
 from app.startup import format_startup_issues, initialize_local_runtime
@@ -40,6 +41,8 @@ if startup_status.issues:
     with st.sidebar.expander("Local Environment", expanded=bool(startup_status.errors)):
         for line in format_startup_issues(startup_status):
             st.caption(line)
+
+render_sidebar_dataset_status()
 
 try:
     render_registered_page(page)
