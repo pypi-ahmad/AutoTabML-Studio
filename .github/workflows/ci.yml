@@ -68,6 +68,15 @@ jobs:
       - name: Run unit test suite
         run: python -m pytest tests/ -q --tb=short
 
+      - name: Diagnose collection errors
+        if: failure()
+        run: |
+          python -m pytest tests/ --collect-only --tb=short 2>&1 | grep -E 'ERROR|Error|error|ModuleNotFound|ImportError|cannot import' | head -20 | while IFS= read -r line; do echo "::warning::$line"; done || true
+          python -c "import app; print('app importable')" 2>&1 | while IFS= read -r line; do echo "::warning::APP_IMPORT: $line"; done || true
+          python -c "from app.modeling.benchmark.schemas import BenchmarkConfig; print('benchmark.schemas OK')" 2>&1 | while IFS= read -r line; do echo "::warning::BENCH: $line"; done || true
+          python -c "from app.validation.rules import run_app_rules; print('validation.rules OK')" 2>&1 | while IFS= read -r line; do echo "::warning::VALID: $line"; done || true
+          pip list --format=freeze 2>&1 | grep -iE 'great.expect|ydata|lazy|pycaret|mlflow|uci|sklearn|scikit' | while IFS= read -r line; do echo "::warning::PKG: $line"; done || true
+
   coverage:
     name: Coverage Gate
     runs-on: ubuntu-latest
@@ -87,6 +96,11 @@ jobs:
 
       - name: Run coverage gate
         run: python -m pytest tests/ --cov=app --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=65 -q
+
+      - name: Diagnose coverage errors
+        if: failure()
+        run: |
+          python -m pytest tests/ --collect-only --tb=short 2>&1 | grep -E 'ERROR|Error|error|ModuleNotFound|ImportError|cannot import' | head -20 | while IFS= read -r line; do echo "::warning::COV_DIAG: $line"; done || true
 
       - name: Upload coverage XML
         if: always()
@@ -114,6 +128,11 @@ jobs:
 
       - name: Run e2e smoke test with real dependencies
         run: python -m pytest tests/test_e2e_local_smoke.py -v --tb=short
+
+      - name: Diagnose e2e errors
+        if: failure()
+        run: |
+          python -m pytest tests/test_e2e_local_smoke.py --collect-only --tb=short 2>&1 | grep -E 'ERROR|Error|error|ModuleNotFound|ImportError|cannot import' | head -10 | while IFS= read -r line; do echo "::warning::E2E_DIAG: $line"; done || true
 
   integration-tests:
     name: Optional Integration Tests
