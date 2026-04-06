@@ -40,7 +40,7 @@ coverage.xml
 *.log
 
 # Local runtime outputs
-artifacts/
+/artifacts/
 mlruns/
 catboost_info/
 mlflow.db
