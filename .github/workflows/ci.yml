@@ -39,11 +39,14 @@ jobs:
 
       - name: Run ruff
         run: |
-          echo "Python: $(python --version)"
-          echo "ruff: $(ruff version)"
-          echo "Working dir: $(pwd)"
-          echo "Files in app/: $(find app/ -name '*.py' | wc -l)"
-          ruff check app/ tests/ scripts/ --output-format=full
+          echo "## Lint Results" >> $GITHUB_STEP_SUMMARY
+          echo "Python: $(python --version)" >> $GITHUB_STEP_SUMMARY
+          echo "ruff: $(ruff version)" >> $GITHUB_STEP_SUMMARY
+          echo "Working dir: $(pwd)" >> $GITHUB_STEP_SUMMARY
+          echo "Files in app/: $(find app/ -name '*.py' | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ruff check app/ tests/ scripts/ --output-format=full 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   unit-tests:
     name: Unit Tests (Python ${{ matrix.python-version }})
@@ -70,10 +73,11 @@ jobs:
 
       - name: Run unit test suite
         run: |
-          echo "Python: $(python --version)"
-          echo "pytest: $(python -m pytest --version)"
-          python -m pytest tests/ -q --tb=long -v 2>&1 || true
-          python -m pytest tests/ -q --tb=short -v
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Python: $(python --version)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python -m pytest tests/ -q --tb=short 2>&1 | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   coverage:
     name: Coverage Gate
