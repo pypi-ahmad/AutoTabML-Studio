@@ -368,10 +368,10 @@ pytest -m integration
 
 ### Automation in `.github/workflows/`
 
-- CI runs unit tests on Python 3.11 and 3.13.
-- A repo-wide coverage gate runs on every push and pull request.
+- CI runs lint (`ruff`), unit tests on Python 3.11 and 3.13, a coverage gate, and an E2E smoke test with real optional dependencies on Python 3.11.
 - Security workflows run `detect-secrets` and `gitleaks`.
 - Release-readiness checks validate build metadata and `twine` compatibility for tagged releases.
+- Dependabot is configured for GitHub Actions and pip dependency updates.
 
 ## ⚠️ Current Limitations
 
