@@ -322,6 +322,115 @@ class TestExperimentCommandsErrorHandling:
             cli_module.cmd_experiment_save(args)
 
 
+class TestExperimentCommandsHappyPath:
+    """Happy-path coverage for experiment-tune, experiment-evaluate, experiment-save."""
+
+    def _make_args(self, tmp_path: Path, **overrides):
+        csv = tmp_path / "data.csv"
+        csv.write_text("a,b,target\n1,2,0\n3,4,1\n5,6,0\n7,8,1\n", encoding="utf-8")
+        defaults = {
+            "dataset": str(csv),
+            "target": "target",
+            "task_type": "classification",
+            "source_type": None,
+            "model_id": "lr",
+            "tune_metric": None,
+            "n_iter": 10,
+            "plot": ["confusion_matrix"],
+            "save_name": "test_model",
+            "save_snapshot": False,
+        }
+        defaults.update(overrides)
+        return type("Args", (), defaults)()
+
+    def test_experiment_tune_happy_path(self, monkeypatch, capsys, tmp_path: Path):
+        from app import cli as cli_module
+
+        bundle = SimpleNamespace(
+            tuned_result=SimpleNamespace(
+                optimize_metric="Accuracy",
+                baseline_score=0.80,
+                tuned_score=0.88,
+            ),
+        )
+
+        class FakeService:
+            def setup_experiment(self, *a, **kw):
+                return bundle
+
+            def tune_model(self, b, selection):
+                return b
+
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: AppSettings())
+        monkeypatch.setattr(cli_module, "build_metadata_store", lambda s: None)
+        monkeypatch.setattr(cli_module, "_build_pycaret_service", lambda s, **kw: FakeService())
+
+        cli_module.cmd_experiment_tune(self._make_args(tmp_path))
+        output = capsys.readouterr().out
+
+        assert "Experiment Tune: data" in output
+        assert "Model: lr" in output
+        assert "Tune metric: Accuracy" in output
+        assert "Baseline score: 0.8" in output
+        assert "Tuned score: 0.88" in output
+
+    def test_experiment_evaluate_happy_path(self, monkeypatch, capsys, tmp_path: Path):
+        from app import cli as cli_module
+
+        bundle = SimpleNamespace(
+            evaluation_plots=[
+                SimpleNamespace(plot_id="confusion_matrix", path="/tmp/cm.png"),
+            ],
+            warnings=["Some warning"],
+        )
+
+        class FakeService:
+            def setup_experiment(self, *a, **kw):
+                return bundle
+
+            def evaluate_model(self, b, selection):
+                return b
+
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: AppSettings())
+        monkeypatch.setattr(cli_module, "build_metadata_store", lambda s: None)
+        monkeypatch.setattr(cli_module, "_build_pycaret_service", lambda s, **kw: FakeService())
+
+        cli_module.cmd_experiment_evaluate(self._make_args(tmp_path))
+        output = capsys.readouterr().out
+
+        assert "Experiment Evaluate: data" in output
+        assert "confusion_matrix" in output
+        assert "Some warning" in output
+
+    def test_experiment_save_happy_path(self, monkeypatch, capsys, tmp_path: Path):
+        from app import cli as cli_module
+
+        bundle = SimpleNamespace(
+            saved_model_metadata=SimpleNamespace(
+                model_path="/tmp/test_model",
+                experiment_snapshot_path="/tmp/snapshot.pkl",
+            ),
+        )
+
+        class FakeService:
+            def setup_experiment(self, *a, **kw):
+                return bundle
+
+            def finalize_and_save_model(self, b, selection, save_name=None):
+                return b
+
+        monkeypatch.setattr(cli_module, "_load_runtime_settings", lambda: AppSettings())
+        monkeypatch.setattr(cli_module, "build_metadata_store", lambda s: None)
+        monkeypatch.setattr(cli_module, "_build_pycaret_service", lambda s, **kw: FakeService())
+
+        cli_module.cmd_experiment_save(self._make_args(tmp_path))
+        output = capsys.readouterr().out
+
+        assert "Experiment Save: data" in output
+        assert "Model path: /tmp/test_model" in output
+        assert "Snapshot: /tmp/snapshot.pkl" in output
+
+
 class TestCliOutputEncoding:
     """Regression tests for CLI output encoding on Windows cp1252."""
 
