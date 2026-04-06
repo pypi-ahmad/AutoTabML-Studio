@@ -151,8 +151,164 @@ def go_to_page(page_label: str) -> None:
     st.rerun()
 
 
+def render_dataset_header(
+    workflow_label: str,
+    *,
+    key_prefix: str,
+    metadata_store=None,  # noqa: ANN001
+) -> tuple[str | None, LoadedDataset | None]:
+    """Unified dataset selection header for workflow pages.
+
+    When an active dataset exists the header renders a compact info bar.
+    When no dataset is loaded yet an inline quick-loader is displayed so the
+    user can upload a file or enter a local path *without* leaving the page.
+
+    Returns ``(active_name, LoadedDataset)`` or ``(None, None)``.
+    """
+
+    if metadata_store is None:
+        metadata_store = build_metadata_store(get_or_init_state().settings)
+
+    loaded = get_loaded_datasets()
+    active_name = get_active_dataset_name(metadata_store=metadata_store)
+    active_ds = loaded.get(active_name) if active_name else None
+
+    if active_ds is not None:
+        _render_dataset_info_bar(active_name, active_ds, loaded, key_prefix=key_prefix)
+        return active_name, active_ds
+
+    if loaded:
+        first = next(iter(loaded))
+        set_active_dataset(first, metadata_store=metadata_store)
+        st.rerun()
+
+    _render_inline_dataset_loader(workflow_label, key_prefix=key_prefix, metadata_store=metadata_store)
+    return None, None
+
+
+def _render_dataset_info_bar(
+    active_name: str,
+    active_ds: LoadedDataset,
+    loaded: dict[str, LoadedDataset],
+    *,
+    key_prefix: str,
+) -> None:
+    """Compact banner showing active dataset stats."""
+
+    df = active_ds.dataframe
+    source = active_ds.metadata.source_type.value
+    n_loaded = len(loaded)
+    extra = f"  ·  {n_loaded} datasets in session" if n_loaded > 1 else ""
+
+    col_info, col_action = st.columns([6, 1])
+    col_info.caption(
+        f"📋 **{active_name}**  ·  {len(df):,} rows × {len(df.columns)} cols  ·  {source}{extra}"
+    )
+    if col_action.button("📂", key=f"{key_prefix}_open_intake", help="Open full Dataset Intake"):
+        go_to_page("Dataset Intake")
+
+
+def _render_inline_dataset_loader(
+    workflow_label: str,
+    *,
+    key_prefix: str,
+    metadata_store,  # noqa: ANN001
+) -> None:
+    """Inline dataset loader shown when no dataset is active."""
+
+    st.info(f"Load a dataset to start {workflow_label.lower()}.")
+
+    upload_tab, path_tab = st.tabs(["📁 Upload File", "📂 Local Path"])
+
+    with upload_tab:
+        uploaded = st.file_uploader(
+            "CSV, delimited text, or Excel",
+            type=_SUPPORTED_UPLOAD_TYPES,
+            key=f"{key_prefix}_gw_file",
+        )
+        if st.button("Load", key=f"{key_prefix}_gw_upload_btn", disabled=uploaded is None):
+            if uploaded is not None:
+                name = _load_into_session(
+                    uploaded_file_to_input_spec(uploaded),
+                    preferred_name=Path(uploaded.name).stem,
+                    metadata_store=metadata_store,
+                )
+                if name:
+                    st.rerun()
+
+    with path_tab:
+        local = st.text_input(
+            "File path",
+            key=f"{key_prefix}_gw_path",
+            placeholder=r"datasets/sklearn/Diabetes/diabetes.csv",
+        )
+        if st.button("Load", key=f"{key_prefix}_gw_path_btn"):
+            if local.strip():
+                try:
+                    spec = build_local_path_input_spec(local)
+                except Exception as exc:
+                    st.error(safe_error_message(exc))
+                else:
+                    name = _load_into_session(
+                        spec,
+                        preferred_name=Path(local).stem,
+                        metadata_store=metadata_store,
+                    )
+                    if name:
+                        st.rerun()
+            else:
+                st.error("Enter a file path.")
+
+    st.caption("For URL, UCI Repository, or advanced options:")
+    if st.button("Open Dataset Intake", key=f"{key_prefix}_gw_intake"):
+        go_to_page("Dataset Intake")
+
+
+def render_sidebar_dataset_status() -> None:
+    """Render compact dataset status and switcher in the Streamlit sidebar."""
+
+    state = get_or_init_state()
+    metadata_store = build_metadata_store(state.settings)
+    loaded = get_loaded_datasets()
+    active_name = get_active_dataset_name(metadata_store=metadata_store)
+
+    if not loaded or not active_name:
+        st.sidebar.caption("📋 No dataset loaded")
+        return
+
+    st.sidebar.divider()
+
+    if len(loaded) > 1:
+        options = list(loaded.keys())
+        idx = options.index(active_name) if active_name in options else 0
+        new_name = st.sidebar.selectbox(
+            "📋 Active dataset",
+            options=options,
+            index=idx,
+            key="sidebar_ds_pick",
+        )
+        if new_name != active_name:
+            set_active_dataset(new_name, metadata_store=metadata_store)
+            st.rerun()
+        ds = loaded[new_name]
+        st.sidebar.caption(f"{len(ds.dataframe):,} rows × {len(ds.dataframe.columns)} cols")
+    else:
+        ds = loaded[active_name]
+        st.sidebar.caption(
+            f"📋 **{active_name}**  \n{len(ds.dataframe):,} rows × {len(ds.dataframe.columns)} cols"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Backward-compatible aliases
+# ---------------------------------------------------------------------------
+
+
 def render_dataset_gateway_notice(workflow_label: str, *, key_prefix: str) -> None:
-    """Render the standard no-active-dataset gateway notice."""
+    """Render the standard no-active-dataset gateway notice.
+
+    .. deprecated:: Use :func:`render_dataset_header` for inline loading.
+    """
 
     st.warning(
         f"Select an active dataset on Dataset Intake before running {workflow_label.lower()}."
@@ -162,7 +318,10 @@ def render_dataset_gateway_notice(workflow_label: str, *, key_prefix: str) -> No
 
 
 def render_active_dataset_banner(dataset_name: str, *, key_prefix: str) -> None:
-    """Render the shared active-dataset banner used on workflow pages."""
+    """Render the shared active-dataset banner used on workflow pages.
+
+    .. deprecated:: Use :func:`render_dataset_header` for inline loading.
+    """
 
     info_col, action_col = st.columns([5, 2])
     info_col.info(

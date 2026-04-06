@@ -4,11 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.pages.dataset_workspace import (
-    get_active_loaded_dataset,
-    render_active_dataset_banner,
-    render_dataset_gateway_notice,
-)
+from app.pages.dataset_workspace import render_dataset_header
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
@@ -20,12 +16,10 @@ def render_profiling_page() -> None:
     prof_settings = state.settings.profiling
     metadata_store = build_metadata_store(state.settings)
 
-    selected_name, loaded_dataset = get_active_loaded_dataset(metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header("Profiling", key_prefix="profiling", metadata_store=metadata_store)
     if selected_name is None or loaded_dataset is None:
-        render_dataset_gateway_notice("Profiling", key_prefix="profiling")
         return
 
-    render_active_dataset_banner(selected_name, key_prefix="profiling")
     df = loaded_dataset.dataframe
     n_rows, n_cols = df.shape
 
