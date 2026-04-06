@@ -14,7 +14,6 @@ Ollama is intentionally unsupported for this backend (local-only provider).
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import shutil
 from contextlib import AsyncExitStack

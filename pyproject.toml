@@ -106,4 +106,14 @@ markers = [
     "integration: optional heavy-dependency integration tests run in the manual CI job",
 ]
 
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["F", "E4", "E7", "E9", "I", "UP"]
+ignore = ["E741", "E402"]
+per-file-ignores = {"app/pages/*" = ["F821"], "app/cli.py" = ["F841"]}
+
+
 

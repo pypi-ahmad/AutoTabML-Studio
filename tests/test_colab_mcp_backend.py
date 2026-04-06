@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from app.backends import build_backend
-from app.backends.colab_mcp_backend import ColabMCPExecutionBackend, _find_uvx
+from app.backends.colab_mcp_backend import ColabMCPExecutionBackend
 from app.backends.local_backend import LocalExecutionBackend
 from app.config.enums import ExecutionBackend
 from app.config.models import AppSettings, ExecutionSettings
-
 
 # ---------------------------------------------------------------------------
 # Default backend is Colab MCP

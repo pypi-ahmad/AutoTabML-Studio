@@ -10,13 +10,13 @@ and logs all output to artifacts/batch_runs/<batch_id>/batch.log.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 import json
 import logging
 import sys
 import time
 import traceback
 import uuid
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -278,8 +278,8 @@ def _run_validate(locator: str, target: str | None) -> dict:
 
 def _run_profile(loaded, name: str) -> dict:
     """Run profiling via programmatic call."""
-    from app.profiling.ydata_runner import is_ydata_available
     from app.profiling.service import profile_dataset
+    from app.profiling.ydata_runner import is_ydata_available
 
     settings = load_settings()
     metadata_store = build_metadata_store(settings)
@@ -309,7 +309,6 @@ def _run_profile(loaded, name: str) -> dict:
 
 def _run_benchmark(loaded, name: str, target: str, task_type: str) -> dict:
     """Run benchmark via programmatic call."""
-    from app.modeling.benchmark.errors import BenchmarkError
     from app.modeling.benchmark.schemas import BenchmarkConfig, BenchmarkSplitConfig, BenchmarkTaskType
     from app.modeling.benchmark.service import benchmark_dataset
 

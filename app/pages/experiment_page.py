@@ -5,12 +5,6 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from app.pages.dataset_workspace import (
-    get_active_loaded_dataset,
-    go_to_page,
-    render_active_dataset_banner,
-    render_dataset_gateway_notice,
-)
 from app.modeling.pycaret.errors import PyCaretExperimentError
 from app.modeling.pycaret.schemas import (
     ExperimentCompareConfig,
@@ -25,9 +19,15 @@ from app.modeling.pycaret.schemas import (
 from app.modeling.pycaret.service import PyCaretExperimentService
 from app.modeling.pycaret.setup_runner import is_pycaret_available, pycaret_install_guidance
 from app.modeling.pycaret.summary import leaderboard_to_dataframe
-from app.storage import build_metadata_store, ensure_dataset_record
-from app.state.session import get_or_init_state
+from app.pages.dataset_workspace import (
+    get_active_loaded_dataset,
+    go_to_page,
+    render_active_dataset_banner,
+    render_dataset_gateway_notice,
+)
 from app.security.masking import safe_error_message
+from app.state.session import get_or_init_state
+from app.storage import build_metadata_store, ensure_dataset_record
 
 
 def build_experiment_run_key(

@@ -8,6 +8,7 @@ from time import perf_counter
 import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
+from app.modeling.pycaret import setup_runner
 from app.modeling.pycaret.artifacts import write_experiment_artifacts
 from app.modeling.pycaret.base import BaseExperimentService
 from app.modeling.pycaret.compare_runner import create_model, run_compare_models
@@ -33,7 +34,6 @@ from app.modeling.pycaret.schemas import (
     SavedModelArtifact,
 )
 from app.modeling.pycaret.selectors import metric_sort_direction, resolve_model_id, resolve_task_type
-from app.modeling.pycaret import setup_runner
 from app.modeling.pycaret.summary import extract_mean_metrics, normalize_compare_grid
 from app.path_utils import safe_artifact_stem
 from app.storage import AppMetadataStore, record_experiment_job

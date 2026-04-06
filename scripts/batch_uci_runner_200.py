@@ -19,8 +19,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Reuse all core logic from the original batch runner
-from scripts.batch_uci_runner import run_batch  # noqa: E402
 import argparse  # noqa: E402
+
+from scripts.batch_uci_runner import run_batch  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # 200 NEW UCI datasets: (uci_id, dataset_name, target_column, task_hint)

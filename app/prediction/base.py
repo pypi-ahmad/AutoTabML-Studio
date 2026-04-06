@@ -5,12 +5,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from app.storage import AppJobStatus, AppJobType, AppMetadataStore, record_prediction_history_entry
 from app.prediction.artifacts import write_prediction_artifacts
 from app.prediction.batch_predict import build_batch_prediction_result, resolve_batch_dataframe
 from app.prediction.history import PredictionHistoryStore
 from app.prediction.loader import LocalPyCaretModelLoader, MLflowModelLoader
-from app.prediction.scorer import PredictionScorer
 from app.prediction.schemas import (
     BatchPredictionRequest,
     BatchPredictionResult,
@@ -19,12 +17,13 @@ from app.prediction.schemas import (
     PredictionHistoryEntry,
     PredictionMode,
     PredictionRequest,
+    PredictionResult,
     PredictionStatus,
     PredictionTaskType,
-    PredictionResult,
     SchemaValidationMode,
     SingleRowPredictionRequest,
 )
+from app.prediction.scorer import PredictionScorer
 from app.prediction.single_row_predict import build_single_prediction_result
 from app.prediction.summary import build_history_entry, build_prediction_summary
 from app.prediction.validators import (
@@ -34,6 +33,7 @@ from app.prediction.validators import (
     validate_single_row_shape,
 )
 from app.registry.registry_service import RegistryService
+from app.storage import AppJobStatus, AppJobType, AppMetadataStore, record_prediction_history_entry
 
 
 class BasePredictionService(ABC):

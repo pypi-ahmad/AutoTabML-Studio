@@ -19,7 +19,6 @@ from app.profiling.schemas import ProfilingConfig, ProfilingResultSummary
 from app.profiling.selectors import maybe_sample, select_profiling_mode
 from app.profiling.ydata_runner import profiling_install_guidance
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

@@ -15,7 +15,6 @@ from app.ingestion.schemas import DatasetInputSpec
 from app.ingestion.types import IngestionSourceType
 from app.ingestion.uci_loader import UCIRepoLoader, list_available_uci_datasets
 
-
 # ---------------------------------------------------------------------------
 # IngestionSourceType enum
 # ---------------------------------------------------------------------------
@@ -140,7 +139,7 @@ class TestUCIRepoLoader:
     def test_load_by_id(self, monkeypatch):
         mock_ds = _build_mock_uci_dataset()
         mock_fetch = MagicMock(return_value=mock_ds)
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", mock_fetch)
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=53)
@@ -165,7 +164,7 @@ class TestUCIRepoLoader:
         targets = pd.DataFrame({"target": [0, 1]})
         original = pd.concat([ids, features, targets], axis=1)
         mock_ds = _build_mock_uci_dataset(ids=ids, features=features, targets=targets, original=original)
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=1)
@@ -180,7 +179,7 @@ class TestUCIRepoLoader:
     def test_load_by_name(self, monkeypatch):
         mock_ds = _build_mock_uci_dataset(name="Heart Disease", uci_id=45)
         mock_fetch = MagicMock(return_value=mock_ds)
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", mock_fetch)
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_name="Heart Disease")
@@ -194,7 +193,7 @@ class TestUCIRepoLoader:
         features = pd.DataFrame({"a": range(100)})
         targets = pd.DataFrame({"t": range(100)})
         mock_ds = _build_mock_uci_dataset(features=features, targets=targets)
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=1)
@@ -207,7 +206,7 @@ class TestUCIRepoLoader:
         features = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
         targets = pd.DataFrame()
         mock_ds = _build_mock_uci_dataset(features=features, targets=targets)
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=1)
@@ -221,7 +220,7 @@ class TestUCIRepoLoader:
         features = pd.DataFrame({"a": [1, 2]})
         mock_ds = _build_mock_uci_dataset(features=features, targets=pd.DataFrame(), original=features)
         mock_ds.data.targets = None
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=1)
@@ -232,7 +231,7 @@ class TestUCIRepoLoader:
         assert source_details["target_columns"] == []
 
     def test_fetch_failure_raises_remote_access_error(self, monkeypatch):
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(
             ucimlrepo, "fetch_ucirepo", MagicMock(side_effect=Exception("Network error"))
         )
@@ -261,6 +260,7 @@ class TestUCIRepoLoader:
             loader.load_raw_dataframe(spec)
 
     def test_requires_id_or_name(self):
+        pytest.importorskip("ucimlrepo")
         spec = DatasetInputSpec.__new__(DatasetInputSpec)
         object.__setattr__(spec, "uci_id", None)
         object.__setattr__(spec, "uci_name", None)
@@ -271,6 +271,7 @@ class TestUCIRepoLoader:
             loader.load_raw_dataframe(spec)
 
     def test_requires_exactly_one_of_id_or_name(self):
+        pytest.importorskip("ucimlrepo")
         spec = DatasetInputSpec.__new__(DatasetInputSpec)
         object.__setattr__(spec, "uci_id", 53)
         object.__setattr__(spec, "uci_name", "Iris")
@@ -283,7 +284,7 @@ class TestUCIRepoLoader:
 
 class TestUCICatalog:
     def test_list_available_datasets_parses_results(self, monkeypatch):
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
 
         def _fake_list_available_datasets(*, filter=None, search=None, area=None):
             print("-------------------------------------------------------------")
@@ -300,7 +301,7 @@ class TestUCICatalog:
         assert rows == [{"uci_id": 53, "name": "Iris"}]
 
     def test_list_available_datasets_handles_no_results(self, monkeypatch):
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
 
         monkeypatch.setattr(ucimlrepo, "list_available_datasets", lambda **kwargs: print("No datasets found"))
 
@@ -314,7 +315,7 @@ class TestUCICatalog:
 class TestUCIFullPipeline:
     def test_load_dataset_through_pipeline(self, monkeypatch):
         mock_ds = _build_mock_uci_dataset()
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
         loaded = load_dataset(
@@ -329,7 +330,7 @@ class TestUCIFullPipeline:
 
     def test_metadata_includes_uci_details(self, monkeypatch):
         mock_ds = _build_mock_uci_dataset()
-        import ucimlrepo
+        ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
         loaded = load_dataset(

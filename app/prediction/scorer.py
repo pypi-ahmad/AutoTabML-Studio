@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import pandas as pd
 
 from app.modeling.pycaret.setup_runner import build_pycaret_experiment

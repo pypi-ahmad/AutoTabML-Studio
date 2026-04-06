@@ -13,6 +13,8 @@
 </p>
 
 <p align="center">
+	<a href="https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"></a>
+	<a href="https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/security.yml"><img src="https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/security.yml?branch=main&style=for-the-badge&logo=shieldsdotio&logoColor=white&label=Security" alt="Security"></a>
 	<a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-0F172A?style=for-the-badge&logo=apache&logoColor=white" alt="License: Apache 2.0"></a>
 	<img src="https://img.shields.io/badge/Python-3.10%20to%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10 to 3.13">
 	<img src="https://img.shields.io/badge/Interface-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit UI">
