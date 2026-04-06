@@ -18,7 +18,7 @@ AutoTabML Studio is organized around local-first tabular ML workflows. The repo 
 - `app/storage/`: SQLite metadata store and workflow recorders for local workspace activity
 - `app/artifacts/`: canonical artifact path construction and cleanup
 - `app/providers/`: LLM provider abstraction (OpenAI, Anthropic, Gemini, Ollama)
-- `app/backends/`: execution backend abstraction (local, colab_mcp scaffold)
+- `app/backends/`: execution backend abstraction (local, colab_mcp — MCP transport validated)
 - `app/security/`: input validation and safe error masking
 - `app/state/`: session state management (`RuntimeState`, provider API key store)
 - `app/gpu.py`: CUDA detection utilities
