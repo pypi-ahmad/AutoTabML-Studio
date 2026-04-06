@@ -37,23 +37,49 @@ jobs:
         shell: bash
         run: |
           EXCLUDE_REGEX='(^tests/|^docs/|^datasets/|^README\.md$|^\.env\.example$|^app/security/masking\.py$|^\.venv/|^artifacts/|^dist/|^mlruns/|^\.pytest_cache/|^autotabml_studio\.egg-info/|^detect-secrets-report\.json$|^coverage\.xml$|^\.coverage$|\.png$|\.html$)'
+          echo "::group::Files being scanned"
+          find . -type f \
+            | sed 's|^\./||' \
+            | grep -Ev "$EXCLUDE_REGEX" \
+            | head -200
+          echo "::endgroup::"
           detect-secrets scan --all-files --exclude-files "$EXCLUDE_REGEX" > detect-secrets-report.json
           python - <<'PY'
-          import json
-          import sys
+          import json, os, sys
 
-          with open('detect-secrets-report.json', encoding='utf-8') as handle:
-              report = json.load(handle)
+          with open('detect-secrets-report.json', encoding='utf-8') as fh:
+              report = json.load(fh)
 
           results = report.get('results', {})
-          findings = sum(len(items) for items in results.values())
-          if findings:
-              print('detect-secrets findings:')
+          total = sum(len(v) for v in results.values())
+
+          summary = os.environ.get('GITHUB_STEP_SUMMARY', '')
+
+          lines = []
+          if total:
+              lines.append('## detect-secrets findings\n')
+              lines.append(f'**{total}** potential secret(s) in **{len([v for v in results.values() if v])}** file(s).\n')
+              lines.append('| File | Line | Type | Hashed Secret |')
+              lines.append('|------|------|------|---------------|')
               for path, items in sorted(results.items()):
-                  print(f' - {path}: {len(items)} finding(s)')
+                  for item in items:
+                      lines.append(
+                          f'| `{path}` | {item.get("line_number", "?")} '
+                          f'| {item.get("type", "?")} '
+                          f'| `{item.get("hashed_secret", "?")[:12]}…` |'
+                      )
+              detail = '\n'.join(lines)
+              print(detail)
+              if summary:
+                  with open(summary, 'a') as sf:
+                      sf.write(detail + '\n')
               sys.exit(1)
 
+          msg = '## detect-secrets\n\nNo findings.'
           print('No detect-secrets findings.')
+          if summary:
+              with open(summary, 'a') as sf:
+                  sf.write(msg + '\n')
           PY
 
   gitleaks:
