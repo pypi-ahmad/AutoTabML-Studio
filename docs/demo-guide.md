@@ -123,49 +123,93 @@ Do not claim that the project currently provides:
 
 ## Rehearsed CLI Demo Path
 
-This exact sequence was validated end-to-end on the workspace environment. Copy and run it in order:
+This exact sequence was validated end-to-end on a clean virtual environment (Python 3.13, `pip install -e ".[dev,validation,profiling,benchmark]"`). Copy and run it in order:
 
 ```bash
 # 1. Bootstrap
 autotabml init-local-storage
 autotabml doctor
+autotabml info
 
 # 2. Validate
-autotabml validate artifacts/tmp/e2e_demo.csv --target approved
+autotabml validate datasets/sklearn/Diabetes/diabetes.csv --target target
 
 # 3. Profile
-autotabml profile artifacts/tmp/e2e_demo.csv
+autotabml profile datasets/sklearn/Diabetes/diabetes.csv
 
-# 4. Benchmark
-autotabml benchmark artifacts/tmp/e2e_demo.csv --target approved --task-type classification
+# 4. Benchmark (43 models, CatBoostRegressor ranked #1)
+autotabml benchmark datasets/sklearn/Diabetes/diabetes.csv \
+  --target target --task-type regression --test-size 0.2 --ranking-metric r2 --top-k 5
 
 # 5. History
-autotabml history-list
+autotabml history-list --limit 5
 autotabml history-show <run-id-from-step-4>
 
-# 6. Predict (requires a logged MLflow model — see step 4's MLflow run id)
-autotabml predict-single --model-source mlflow_run_model --run-id <run-id> --artifact-path model --task-type classification --row-json '{"age": 35, "income": 55000.0, "credit_score": 720, "loan_amount": 15000.0}'
+# 6. Compare two benchmark runs (if you have a prior run)
+autotabml compare-runs <left-run-id> <right-run-id>
 
-# 7. Registry
-autotabml registry-register my-classifier --source "runs:/<run-id>/model" --run-id <run-id>
-autotabml registry-promote my-classifier 1 --action candidate
+# 7. Train + log a model (benchmark does not log a model artifact,
+#    so train one with sklearn and log via MLflow for predict)
+python -c "
+import mlflow, pandas as pd
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import train_test_split
+mlflow.set_tracking_uri('sqlite:///artifacts/mlflow/mlflow.db')
+mlflow.set_experiment('demo-walkthrough')
+df = pd.read_csv('datasets/sklearn/Diabetes/diabetes.csv')
+X, y = df.drop(columns=['target']), df['target']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = Ridge(alpha=1.0); model.fit(X_train, y_train)
+with mlflow.start_run(run_name='demo-ridge') as run:
+    mlflow.log_metric('r2', model.score(X_test, y_test))
+    mlflow.sklearn.log_model(model, 'model', input_example=X_test.iloc[:1])
+    print(f'Run ID: {run.info.run_id}')
+"
+
+# 8. Predict single row
+autotabml predict-single \
+  --model-source mlflow_run_model --run-id <run-id-from-step-7> --artifact-path model \
+  --row-json '{"age":0.038,"sex":0.051,"bmi":0.062,"bp":-0.044,"s1":-0.035,"s2":-0.043,"s3":-0.002,"s4":0.002,"s5":0.020,"s6":-0.018}'
+
+# 9. Predict batch (442 rows)
+autotabml predict-batch datasets/sklearn/Diabetes/diabetes.csv \
+  --model-source mlflow_run_model --run-id <run-id-from-step-7> --artifact-path model \
+  --output-path artifacts/predictions/demo_scored.csv
+
+# 10. Prediction history
+autotabml predict-history --limit 5
+
+# 11. Registry
+autotabml registry-register demo-ridge \
+  --source "runs:/<run-id-from-step-7>/model" --description "Ridge regression demo"
+autotabml registry-promote demo-ridge 1 --action champion
 autotabml registry-list
+autotabml registry-show demo-ridge
 
-# 8. Predict from registry
-autotabml predict-single --model-source mlflow_registered_model --model-name my-classifier --model-alias candidate --task-type classification --row-json '{"age": 45, "income": 62000.0, "credit_score": 750, "loan_amount": 18000.0}'
+# 12. Predict from registered champion
+autotabml predict-single \
+  --model-source mlflow_registered_model --model-name demo-ridge --model-alias champion \
+  --row-json '{"age":0.038,"sex":0.051,"bmi":0.062,"bp":-0.044,"s1":-0.035,"s2":-0.043,"s3":-0.002,"s4":0.002,"s5":0.020,"s6":-0.018}'
 ```
 
-For the Streamlit demo, use Dataset Intake to load the same CSV, then navigate through Validation, Profiling, Benchmark, History, and Registry pages.
+On Python 3.13 the `experiment-run` command will exit with a clear message explaining PyCaret is unavailable.
+
+For the Streamlit demo, use Dataset Intake to load the same diabetes CSV, then navigate through Validation, Profiling, Benchmark, History, and Registry pages.
 
 ## Rehearsed Streamlit Click Path
 
-Use the same stable dataset throughout: `artifacts/tmp/e2e_demo.csv`.
+Use the same stable dataset throughout: `datasets/sklearn/Diabetes/diabetes.csv`.
 
-1. Open Dashboard and mention the local-first scope plus recent jobs.
-2. Open Dataset Intake, choose Local Path, load `artifacts/tmp/e2e_demo.csv`.
-3. Open Validation, choose `approved` as the target, run validation, and point to the 5/5 passed summary.
-4. Open Prediction to show that local and MLflow-backed model loading live in one surface.
-5. Open History to show the recorded benchmark and prediction jobs.
-6. Open Registry to show the promoted `candidate` alias on the demo model.
+1. Open Dashboard — mention local-first scope, recent jobs, active dataset banner.
+2. Open Dataset Intake, choose Local Path, enter `datasets/sklearn/Diabetes/diabetes.csv`, click Load.
+3. Scroll down to see the 4-metric bar, 50-row preview, schema table, and "Continue" buttons.
+4. Open Validation, choose `target` as the target column, run validation, point to the 5/5 passed summary.
+5. Open Profiling, generate the profile — show the summary cards and HTML artifact path.
+6. Open Benchmark, set task to regression, target to `target`, run benchmark, show the leaderboard.
+7. Open Prediction to show that local and MLflow-backed model loading live in one surface.
+8. Open History to show the recorded benchmark and prediction jobs.
+9. Open Compare to demonstrate side-by-side run comparison.
+10. Open Registry to show registered models and promoted aliases.
+11. Open Settings to show runtime defaults (backend, CUDA detection, artifact paths).
 
 Keep the demo under five minutes. Do not branch into notebook mode or remote execution.
