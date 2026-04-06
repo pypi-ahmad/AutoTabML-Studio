@@ -13,10 +13,13 @@ from app.storage.recorders import ensure_dataset_record
 
 
 class TestMetadataStore:
-    def test_build_metadata_store_returns_none_without_database_config(self):
-        settings = type("Settings", (), {})()
+    def test_build_metadata_store_returns_working_store(self, tmp_path: Path):
+        settings = AppSettings(database={"path": tmp_path / "app.sqlite3"})
 
-        assert build_metadata_store(settings) is None
+        store = build_metadata_store(settings)
+
+        assert store is not None
+        assert isinstance(store, AppMetadataStore)
 
     def test_ensure_dataset_record_tolerates_none_store(self):
         result = ensure_dataset_record(None, None, dataset_name="test")
