@@ -1663,7 +1663,6 @@ def main() -> None:
 
 
 def _build_pycaret_service(settings, *, artifacts_dir: Path | None = None, metadata_store=None) -> PyCaretExperimentService:
-    tracking_settings = getattr(settings, "tracking", None)
     return PyCaretExperimentService(
         artifacts_dir=artifacts_dir if artifacts_dir is not None else settings.pycaret.artifacts_dir,
         models_dir=settings.pycaret.models_dir,
@@ -1673,8 +1672,8 @@ def _build_pycaret_service(settings, *, artifacts_dir: Path | None = None, metad
         classification_tune_metric=settings.pycaret.default_tune_metric_classification,
         regression_tune_metric=settings.pycaret.default_tune_metric_regression,
         mlflow_experiment_name=settings.pycaret.mlflow_experiment_name,
-        tracking_uri=getattr(tracking_settings, "tracking_uri", None),
-        registry_uri=getattr(tracking_settings, "registry_uri", None),
+        tracking_uri=settings.tracking.tracking_uri,
+        registry_uri=settings.tracking.registry_uri,
         metadata_store=metadata_store,
     )
 

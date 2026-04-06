@@ -805,6 +805,7 @@ class TestCliBoundary:
                     "execution": type("Exec", (), {"backend": ExecutionBackend.LOCAL})(),
                     "workspace_mode": WorkspaceMode.DASHBOARD,
                     "pycaret": PyCaretExperimentSettings(),
+                    "tracking": type("Tracking", (), {"tracking_uri": None, "registry_uri": None})(),
                 },
             )(),
         )
@@ -898,6 +899,7 @@ class TestCliBoundary:
                     "execution": type("Exec", (), {"backend": ExecutionBackend.LOCAL})(),
                     "workspace_mode": WorkspaceMode.DASHBOARD,
                     "pycaret": PyCaretExperimentSettings(),
+                    "tracking": type("Tracking", (), {"tracking_uri": None, "registry_uri": None})(),
                 },
             )(),
         )
