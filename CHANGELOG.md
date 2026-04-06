@@ -2,40 +2,64 @@
 
 All notable changes to AutoTabML Studio should be recorded here.
 
-This repository does not have a published tagged release yet. Keep upcoming release work under `Unreleased` until an actual version is cut.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] — 2026-04-06
+
+First public portfolio release. The repo is feature-complete for the demo scope:
+full CLI + Streamlit UI covering dataset intake → validation → profiling →
+benchmark → experiment → prediction → model registry, backed by MLflow tracking
+and local artifact storage.
 
 ### Added
 
-- `autotabml --version` and `autotabml info` for lightweight local release inspection.
-- `CHANGELOG.md` and [docs/release-notes-template.md](docs/release-notes-template.md) for manual release packaging.
-- [CONTRIBUTING.md](CONTRIBUTING.md) with the canonical local maintainer workflow.
-- `python -m app.release_metadata` plus a manual/tagged release-readiness workflow to block public packaging when required license or maintainer/contact metadata is missing.
-- CUDA detection, GPU-aware `doctor` output, and GPU-first PyCaret experiment defaults in the Streamlit UI and CLI.
-- Apache-2.0 licensing plus public maintainer metadata for broader repository and package publication.
-- Inline dataset upload/selection on Validation, Profiling, Benchmark, and Experiment pages so users can load data without navigating away.
-- Sidebar dataset status indicator and multi-dataset switcher.
-- Real Streamlit screenshots captured via Playwright (`scripts/capture_screenshots.py`).
-- E2E smoke test suite (`tests/test_e2e_local_smoke.py`) covering 13 real-dependency paths.
-- CI lint job (`ruff`), E2E smoke CI job, and Dependabot configuration.
-- Full CLI subcommand test coverage: all 23 subcommands now have direct functional tests plus argparse parser integration tests.
-- Colab MCP spike: real MCP transport validated — server spawns via `uvx`, handshake completes, tools listed (ColabMCP v2.14.5). Spike script (`scripts/colab_mcp_spike.py`) and integration tests (`tests/test_colab_mcp_real.py`).
+- **Streamlit dashboard** with 10 pages: Dashboard, Dataset Intake, Validation,
+  Profiling, Benchmark, Experiment Lab, Prediction Center, History, Registry,
+  Settings.
+- **CLI** (`autotabml`) with 23 subcommands including `info`, `doctor`,
+  `validate`, `profile`, `benchmark`, `experiment-run/tune/evaluate/save`,
+  `train`, `predict-single/batch`, `history`, `compare-runs`, and full model
+  registry lifecycle (`registry-list/promote/delete`).
+- **Dataset workspace** — 5-tab layout supporting 8 formats (CSV, Parquet, JSON,
+  Excel, Feather, ORC, SQLite, UCI), inline upload on every workflow page, sidebar
+  status indicator, multi-dataset switcher.
+- **Validation engine** powered by Great Expectations with 5 built-in checks and
+  JSON artifact output.
+- **Profiling** via ydata-profiling with HTML report generation.
+- **Benchmark** via LazyPredict comparing 40+ models with GPU-first defaults.
+- **Experiment Lab** via PyCaret (Python <3.13) with setup, compare, tune,
+  evaluate, finalize, and save pipelines.
+- **Prediction Center** — single-row and batch prediction from local or
+  MLflow-backed models.
+- **MLflow tracking** — automatic run logging, run history, cross-run comparison,
+  and model registry with champion/challenger promotion.
+- **Security** — credential masking (`app.security.masking`), secret-free codebase
+  (detect-secrets + gitleaks CI), `SECURITY.md` with responsible disclosure policy.
+- **CI/CD** — GitHub Actions: lint (ruff), unit tests (3.11 + 3.13), coverage
+  gate (≥65%), E2E smoke tests, security scans, release-readiness check.
+- **Testing** — 426 unit/integration tests, all hermetic. E2E smoke suite
+  (`tests/test_e2e_local_smoke.py`) covering 13 real-dependency paths.
+- **Documentation** — README with 8 real screenshots, demo guide with full CLI +
+  Streamlit walkthrough, architecture overview, limitations disclosure,
+  developer guide, contributing guide, issue/PR templates.
+- **Colab MCP spike** — validated real MCP transport (server spawn, handshake,
+  tool listing) as future integration proof-of-concept.
+- GPU-aware `doctor` output and CUDA-first experiment defaults.
+- Apache-2.0 license.
 
-### Changed
+### Infrastructure
 
-- Project versioning now uses `app.__version__` as the single in-repo source of truth.
-- `pyproject.toml` now declares an explicit setuptools build backend and package README metadata.
-- `.env.example` now reflects the actual `AUTOTABML_*` settings keys used by the app, including local database and Ollama overrides.
-- Release-facing docs now point to the same local install, CLI, Streamlit, and test commands.
-- Provider fallback defaults now use vendor-verified production model IDs, including `gemini-2.5-flash` instead of a preview Gemini placeholder.
-- Benchmark and experiment workflows now prefer CUDA by default where the installed runtime supports it, including LazyPredict GPU mode and GPU-ready experiment dependency bundles.
-
-### Removed
-
-- Legacy `ProviderSettings.api_key` field and the `RuntimeState.__init__` backwards-compat bridge that transferred it to the per-provider key store. API keys now live exclusively in `RuntimeState.provider_api_keys` (session-only, never persisted).
+- `pyproject.toml` with optional dependency groups (`[dev]`, `[validation]`,
+  `[profiling]`, `[benchmark]`, `[uci]`, `[colab]`).
+- Version sourced from `app.__version__` (single truth).
+- GitHub metadata: `[project.urls]`, issue/PR templates, `SECURITY.md`.
+- Dependabot configuration for pip ecosystem.
 
 ### Notes
 
-- `0.1.0` is the current planned first public release version.
-- No package registry publication or tagged public release has been performed from this repository yet.
+- PyCaret extras require Python <3.13 (tracked in `docs/limitations.md`).
+- Colab MCP integration is transport-validated only; notebook execution is not
+  wired end-to-end.
+- This is a portfolio/demo release — not intended for unattended production use
+  (see disclaimers in README and `docs/limitations.md`).
