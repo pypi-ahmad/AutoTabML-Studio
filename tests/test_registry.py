@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.config.models import TrackingSettings
-from app.registry.errors import ModelNotFoundError, PromotionError, RegistryUnavailableError
+from app.registry.errors import ModelNotFoundError, PromotionError
 from app.registry.registry_service import RegistryService
 from app.registry.schemas import (
     PromotionAction,
@@ -16,7 +16,6 @@ from app.registry.schemas import (
     RegistryModelSummary,
     RegistryVersionSummary,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fake MLflow objects

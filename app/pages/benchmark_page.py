@@ -5,15 +5,19 @@ from __future__ import annotations
 import streamlit as st
 
 from app.gpu import cuda_summary
-from app.pages.dataset_workspace import get_active_loaded_dataset, render_active_dataset_banner, render_dataset_gateway_notice
 from app.modeling.benchmark.errors import BenchmarkError
 from app.modeling.benchmark.lazypredict_runner import is_lazypredict_available
 from app.modeling.benchmark.schemas import BenchmarkConfig, BenchmarkSplitConfig, BenchmarkTaskType
 from app.modeling.benchmark.service import benchmark_dataset
 from app.modeling.benchmark.summary import leaderboard_to_dataframe
-from app.storage import build_metadata_store
-from app.state.session import get_or_init_state
+from app.pages.dataset_workspace import (
+    get_active_loaded_dataset,
+    render_active_dataset_banner,
+    render_dataset_gateway_notice,
+)
 from app.security.masking import safe_error_message
+from app.state.session import get_or_init_state
+from app.storage import build_metadata_store
 
 
 def build_benchmark_run_key(

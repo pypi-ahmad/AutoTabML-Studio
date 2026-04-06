@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.pages.dataset_workspace import get_active_loaded_dataset, render_active_dataset_banner, render_dataset_gateway_notice
-from app.storage import build_metadata_store
+from app.pages.dataset_workspace import (
+    get_active_loaded_dataset,
+    render_active_dataset_banner,
+    render_dataset_gateway_notice,
+)
 from app.state.session import get_or_init_state
+from app.storage import build_metadata_store
 
 
 def render_validation_page() -> None:

@@ -68,8 +68,8 @@ class TestNormalization:
 
         assert normalized.shape == (1, 2)
         assert normalized.columns.tolist() == ["dup", "dup__2"]
-        assert any("Dropped 1 fully empty row(s)." == action for action in actions)
-        assert any("Dropped 1 fully empty column(s)." == action for action in actions)
+        assert any(action == "Dropped 1 fully empty row(s)." for action in actions)
+        assert any(action == "Dropped 1 fully empty column(s)." for action in actions)
         assert any("Normalized duplicate column names" in action for action in actions)
 
 

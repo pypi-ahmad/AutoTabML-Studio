@@ -9,9 +9,9 @@ from app.prediction.schemas import (
     PredictionArtifactBundle,
     PredictionHistoryEntry,
     PredictionResult,
+    PredictionSummary,
     PredictionTaskType,
     PredictionValidationResult,
-    PredictionSummary,
 )
 
 

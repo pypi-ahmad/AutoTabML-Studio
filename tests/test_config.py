@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 from app.config.enums import (
     DEFAULT_MODELS,
@@ -13,9 +14,8 @@ from app.config.enums import (
     LLMProvider,
     WorkspaceMode,
 )
-from app.config.models import AppSettings, ProviderSettings, TrackingSettings
-from app.config.settings import save_settings, load_settings
-
+from app.config.models import AppSettings, TrackingSettings
+from app.config.settings import load_settings, save_settings
 
 # ---------------------------------------------------------------------------
 # Enum basics

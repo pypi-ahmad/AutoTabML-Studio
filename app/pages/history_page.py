@@ -5,11 +5,11 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.tracking.filters import RunHistoryFilter, RunHistorySort, RunSortField, SortDirection
 from app.tracking.mlflow_query import is_mlflow_available
 from app.tracking.schemas import RunStatus, RunType
-from app.security.masking import safe_error_message
 
 
 def render_history_page() -> None:

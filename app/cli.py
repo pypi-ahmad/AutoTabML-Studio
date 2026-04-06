@@ -40,13 +40,13 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from app import APP_NAME, CLI_ENTRYPOINT, DIST_NAME, STREAMLIT_ENTRYPOINT, __version__
-from app.gpu import cuda_summary
-from app.logging_config import configure_logging
 from app.config.settings import load_settings, save_settings
+from app.gpu import cuda_summary
 from app.ingestion import DatasetInputSpec, IngestionSourceType, load_dataset
 from app.ingestion.errors import IngestionError
 from app.ingestion.types import DELIMITED_FILE_SUFFIXES, EXCEL_FILE_SUFFIXES
 from app.ingestion.uci_loader import list_available_uci_datasets
+from app.logging_config import configure_logging
 from app.modeling.pycaret.service import PyCaretExperimentService
 from app.security.masking import safe_error_message
 from app.startup import format_startup_issues, initialize_local_runtime
@@ -166,7 +166,7 @@ def cmd_validate(args: argparse.Namespace) -> None:
         print(f"  [{icon}] {check.check_name}: {check.message}")
 
     if bundle:
-        print(f"\nArtifacts:")
+        print("\nArtifacts:")
         if bundle.summary_json_path:
             print(f"  JSON:     {bundle.summary_json_path}")
         if bundle.markdown_report_path:
@@ -220,7 +220,7 @@ def cmd_profile(args: argparse.Namespace) -> None:
         print(f"High-cardinality: {', '.join(summary.high_cardinality_columns)}")
 
     if bundle:
-        print(f"\nArtifacts:")
+        print("\nArtifacts:")
         if bundle.html_report_path:
             print(f"  HTML:  {bundle.html_report_path}")
         if bundle.summary_json_path:

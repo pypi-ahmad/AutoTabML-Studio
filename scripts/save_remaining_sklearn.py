@@ -1,12 +1,13 @@
 """Save remaining viable sklearn fetch_* datasets as CSVs."""
+import os
+
 import numpy as np
 import pandas as pd
-import os
 from sklearn.datasets import (
-    fetch_olivetti_faces,
     fetch_20newsgroups_vectorized,
-    fetch_lfw_people,
     fetch_lfw_pairs,
+    fetch_lfw_people,
+    fetch_olivetti_faces,
 )
 
 # 1. Olivetti Faces: 400 x 4096, 40-class classification

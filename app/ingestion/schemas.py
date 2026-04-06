@@ -53,7 +53,7 @@ class DatasetInputSpec(BaseModel):
         return "<in-memory-dataframe>"
 
     @model_validator(mode="after")
-    def validate_required_fields(self) -> "DatasetInputSpec":
+    def validate_required_fields(self) -> DatasetInputSpec:
         """Validate source-specific input requirements."""
 
         if self.source_type in {

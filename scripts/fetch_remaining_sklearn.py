@@ -1,12 +1,11 @@
 """Fetch and inspect remaining sklearn fetch_* datasets."""
 import numpy as np
-import pandas as pd
 import scipy.sparse
 from sklearn.datasets import (
-    fetch_olivetti_faces,
     fetch_20newsgroups_vectorized,
-    fetch_lfw_people,
     fetch_lfw_pairs,
+    fetch_lfw_people,
+    fetch_olivetti_faces,
     fetch_rcv1,
     fetch_species_distributions,
 )

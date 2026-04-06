@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.registry.errors import ModelNotFoundError, PromotionError, RegistryUnavailableError
+from app.registry.errors import ModelNotFoundError, PromotionError
 from app.registry.schemas import (
     PromotionAction,
     PromotionRequest,

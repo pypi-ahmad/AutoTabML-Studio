@@ -1,5 +1,6 @@
 """Temporary script to fetch UCI dataset metadata for the 200-dataset batch."""
 import sys
+
 from ucimlrepo import fetch_ucirepo
 
 NEW_IDS = [

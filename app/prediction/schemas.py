@@ -153,7 +153,7 @@ class PredictionRequest(BaseModel):
     output_stem: str | None = None
 
     @model_validator(mode="after")
-    def validate_source_fields(self) -> "PredictionRequest":
+    def validate_source_fields(self) -> PredictionRequest:
         if self.source_type == ModelSourceType.LOCAL_SAVED_MODEL:
             if self.model_path is None and not self.model_identifier:
                 raise ValueError("Local saved-model prediction requires a model_path or model_identifier.")
@@ -197,7 +197,7 @@ class BatchPredictionRequest(PredictionRequest):
     output_path: Path | None = None
 
     @model_validator(mode="after")
-    def validate_batch_input(self) -> "BatchPredictionRequest":
+    def validate_batch_input(self) -> BatchPredictionRequest:
         if self.dataframe is None and self.input_spec is None:
             raise ValueError("Batch prediction requires a dataframe or an ingestion input_spec.")
         return self

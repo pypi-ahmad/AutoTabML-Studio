@@ -4,8 +4,8 @@ import builtins
 
 import pytest
 
-from app.modeling.pycaret.errors import PyCaretDependencyError
 from app.modeling.pycaret import setup_runner
+from app.modeling.pycaret.errors import PyCaretDependencyError
 
 
 def test_probe_pycaret_import_error_captures_runtimeerror(monkeypatch):

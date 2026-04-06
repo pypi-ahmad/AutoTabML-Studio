@@ -5,17 +5,16 @@ from __future__ import annotations
 import pytest
 
 from app.config.enums import DEFAULT_MODELS, ExecutionBackend, LLMProvider
+from app.providers.anthropic_provider import AnthropicProvider
 from app.providers.base import ModelItem
 from app.providers.catalog_service import (
     build_provider,
     get_allowed_providers,
     resolve_default_model,
 )
-from app.providers.openai_provider import OpenAIProvider
-from app.providers.anthropic_provider import AnthropicProvider
 from app.providers.gemini_provider import GeminiProvider
 from app.providers.ollama_provider import OllamaProvider
-
+from app.providers.openai_provider import OpenAIProvider
 
 # ---------------------------------------------------------------------------
 # get_allowed_providers
