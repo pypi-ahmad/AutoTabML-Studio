@@ -38,6 +38,4 @@ Configuration placeholders exist, but a full Data Docs workflow is not implement
 
 ## Demo Constraints
 
-- screenshots are not committed yet
-- social preview assets are not committed yet
 - public demo packaging should avoid claiming features outside the currently implemented local-first workflow

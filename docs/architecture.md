@@ -17,7 +17,13 @@ AutoTabML Studio is organized around local-first tabular ML workflows. The repo 
 - `app/registry/`: model registration and promotion workflows on top of MLflow registry APIs
 - `app/storage/`: SQLite metadata store and workflow recorders for local workspace activity
 - `app/artifacts/`: canonical artifact path construction and cleanup
-- `app/pages/`: Streamlit page entrypoints only
+- `app/providers/`: LLM provider abstraction (OpenAI, Anthropic, Gemini, Ollama)
+- `app/backends/`: execution backend abstraction (local, colab_mcp scaffold)
+- `app/security/`: input validation and safe error masking
+- `app/state/`: session state management (`RuntimeState`, provider API key store)
+- `app/gpu.py`: CUDA detection utilities
+- `app/startup.py`: local runtime initialization and diagnostic checks
+- `app/pages/`: Streamlit page entrypoints only (12 pages registered in `app/pages/registry.py`)
 - `app/cli.py`: argparse command wiring over the same service layer
 
 ## Boundary Rules
@@ -84,7 +90,12 @@ Startup initialization also performs conservative cleanup of stale temp files an
 
 ## UI and CLI Entry Points
 
-- Streamlit app: `app/main.py`
-- CLI entrypoint: `autotabml` -> `app.cli:main`
+- Streamlit app: `app/main.py` — 12 registered pages (Dashboard, Dataset Intake, Validation, Profiling, Benchmark, Experiment, Prediction, History, Compare, Registry, Notebook, Settings)
+- CLI entrypoint: `autotabml` -> `app.cli:main` — 23 subcommands
+- Sidebar shows navigation, startup diagnostics, and active dataset status
 
 Both surfaces share the same service modules rather than implementing duplicate business logic.
+
+## Dataset UX
+
+Workflow pages (Validation, Profiling, Benchmark, Experiment) include an inline dataset loader so users can upload a file or enter a local path without navigating away. When a dataset is already active, a compact info bar replaces the loader. The sidebar also shows the active dataset and supports switching when multiple datasets are loaded.

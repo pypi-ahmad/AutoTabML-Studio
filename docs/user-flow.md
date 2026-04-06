@@ -15,6 +15,12 @@ The main product story is a local-first tabular ML workflow:
 
 ## Page-Level Flow
 
+### Dataset Intake
+
+- load local files, URLs, UCI datasets, or use file upload
+- preview the normalized dataframe, inspect schema and metadata
+- set the active dataset for all downstream workflows
+
 ### Dashboard
 
 - check startup status
@@ -23,7 +29,7 @@ The main product story is a local-first tabular ML workflow:
 
 ### Validation
 
-- select a loaded dataset
+- select a loaded dataset (or upload one inline without leaving the page)
 - optionally set target, required columns, uniqueness checks, and leakage heuristics
 - run validation
 - inspect summary counts and generated artifacts

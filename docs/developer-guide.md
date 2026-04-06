@@ -73,10 +73,22 @@ streamlit run app/main.py
 pytest
 ```
 
+### Run lint
+
+```bash
+ruff check app/ tests/ scripts/
+```
+
 ### Run the CI-equivalent coverage gate
 
 ```bash
 pytest tests/ --cov=app --cov-report=term --cov-fail-under=65
+```
+
+### Run the E2E smoke test (requires validation, profiling, and benchmark extras)
+
+```bash
+pytest tests/test_e2e_local_smoke.py -v
 ```
 
 ### Run optional heavy-dependency integration checks
