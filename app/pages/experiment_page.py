@@ -20,13 +20,13 @@ from app.modeling.pycaret.schemas import (
 )
 from app.modeling.pycaret.service import PyCaretExperimentService
 from app.modeling.pycaret.setup_runner import is_pycaret_available, pycaret_install_guidance
-from app.path_utils import model_save_name
 from app.modeling.pycaret.summary import leaderboard_to_dataframe
 from app.pages.dataset_workspace import (
     go_to_page,
     render_dataset_header,
 )
 from app.pages.workflow_guide import render_next_step_hint, render_workflow_banner
+from app.path_utils import model_save_name
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store, ensure_dataset_record
@@ -137,10 +137,9 @@ def render_experiment_page() -> None:
         else default_plots
     )
 
-    from app.pages.ui_labels import PLOT_LABELS
-
     # ── Run mode presets ───────────────────────────────────────────────
     from app.pages.glossary import EXPERIMENT_PRESETS
+    from app.pages.ui_labels import PLOT_LABELS
 
     _exp_preset_names = list(EXPERIMENT_PRESETS.keys())
     exp_run_mode = st.radio(
@@ -247,7 +246,8 @@ def render_experiment_page() -> None:
         st.caption("**Hardware**")
         from app.gpu import cuda_summary
         gpu_info = cuda_summary()
-        from app.pages.ui_labels import GPU_LABELS, make_format_func as _mff
+        from app.pages.ui_labels import GPU_LABELS
+        from app.pages.ui_labels import make_format_func as _mff
         gpu_options: list[bool | str] = [True, False, "force"]
         default_gpu = settings.default_use_gpu if settings.default_use_gpu in gpu_options else True
         use_gpu = st.selectbox(
@@ -414,7 +414,7 @@ def render_experiment_page() -> None:
 
 
 def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
-    from app.pages.ui_labels import format_enum_value, PLOT_LABELS
+    from app.pages.ui_labels import PLOT_LABELS, format_enum_value
 
     summary = bundle.summary
 

@@ -12,8 +12,8 @@ from app.artifacts import LocalArtifactManager
 from app.ingestion import DatasetInputSpec, IngestionSourceType, LoadedDataset, load_dataset
 from app.ingestion.types import DELIMITED_FILE_SUFFIXES, EXCEL_FILE_SUFFIXES
 from app.ingestion.uci_loader import list_available_uci_datasets
-from app.security.masking import safe_error_message
 from app.pages.ui_labels import render_metadata_table
+from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import ProjectRecord, build_metadata_store, ensure_dataset_record
 

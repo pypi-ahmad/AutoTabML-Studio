@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from app.pages.ui_labels import render_metadata_table, format_enum_value, PREDICTION_TASK_TYPE_LABELS
+from app.pages.ui_labels import PREDICTION_TASK_TYPE_LABELS, format_enum_value, render_metadata_table
 from app.storage.models import AppJobType
 
 
@@ -82,7 +82,7 @@ def render_saved_models_section(
 ) -> None:
     """Render a 'Saved Models' expander with model discovery and detail cards."""
 
-    from app.prediction.selectors import discover_local_saved_models, PredictionTaskType
+    from app.prediction.selectors import PredictionTaskType, discover_local_saved_models
 
     refs = discover_local_saved_models(
         model_dirs=prediction_settings.supported_local_model_dirs,
