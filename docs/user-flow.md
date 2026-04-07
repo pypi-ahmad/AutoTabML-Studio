@@ -10,8 +10,8 @@ The main product story is a local-first tabular ML workflow:
 4. benchmark baseline models with LazyPredict
 5. run deeper PyCaret experiments on promising candidates
 6. finalize and save one model or save all compared models locally
-7. score new rows or batches through the prediction center
-8. inspect run history, compare runs, and optionally register models in MLflow
+7. score new rows or batches through the Predictions page
+8. inspect run history, compare runs, and optionally register models in the Registry
 
 ## Page-Level Flow
 

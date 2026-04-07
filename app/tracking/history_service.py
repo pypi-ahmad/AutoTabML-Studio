@@ -137,6 +137,10 @@ class HistoryService:
         if history_filter.run_type is not None:
             runs = [r for r in runs if r.run_type == history_filter.run_type]
 
+        if history_filter.dataset_name:
+            target = history_filter.dataset_name.lower()
+            runs = [r for r in runs if r.dataset_name and target in r.dataset_name.lower()]
+
         if history_filter.model_name:
             target = history_filter.model_name.lower()
             runs = [r for r in runs if r.model_name and target in r.model_name.lower()]

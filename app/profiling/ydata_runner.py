@@ -59,11 +59,16 @@ def profiling_install_guidance(import_error: ImportError | None = None) -> str:
         missing_name = getattr(effective_error, "name", None)
         if missing_name == "pkg_resources" or "pkg_resources" in str(effective_error):
             return (
-                "ydata-profiling requires pkg_resources at runtime, and setuptools 82+ removes it. "
-                f"Install with: {install_command}"
+                "Data profiling is not available yet. "
+                "A required system package is incompatible. "
+                "Ask your administrator to reinstall the profiling add-on."
             )
 
-    return f"ydata-profiling is not installed. Install with: {install_command}"
+    return (
+        "Data profiling is not available yet. "
+        "The profiling add-on has not been installed. "
+        "Ask your administrator to set it up."
+    )
 
 
 def is_ydata_available() -> bool:

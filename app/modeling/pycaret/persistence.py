@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from app.artifacts import ArtifactKind, LocalArtifactManager
@@ -18,6 +18,7 @@ def build_saved_model_metadata(
     model_id: str | None,
     model_name: str,
     model_path: Path,
+    dataset_name: str | None = None,
     dataset_fingerprint: str | None,
     feature_columns: list[str],
     feature_dtypes: dict[str, str],
@@ -33,7 +34,9 @@ def build_saved_model_metadata(
         model_id=model_id,
         model_name=model_name,
         model_path=model_path,
+        dataset_name=dataset_name,
         dataset_fingerprint=dataset_fingerprint,
+        trained_at=datetime.now(timezone.utc).isoformat(),
         feature_columns=feature_columns,
         feature_dtypes=feature_dtypes,
         target_dtype=target_dtype,
@@ -54,6 +57,7 @@ def save_finalized_model(
     save_name: str,
     models_dir: Path,
     snapshots_dir: Path,
+    dataset_name: str | None = None,
     dataset_fingerprint: str | None,
     feature_columns: list[str],
     feature_dtypes: dict[str, str],
@@ -86,6 +90,7 @@ def save_finalized_model(
         model_id=model_id,
         model_name=model_name,
         model_path=Path(saved_path),
+        dataset_name=dataset_name,
         dataset_fingerprint=dataset_fingerprint,
         feature_columns=feature_columns,
         feature_dtypes=feature_dtypes,

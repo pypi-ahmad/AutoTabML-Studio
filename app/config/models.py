@@ -231,6 +231,10 @@ class AppSettings(BaseModel):
     mlflow: MLflowSettings = Field(default_factory=MLflowSettings)
     prediction: PredictionSettings = Field(default_factory=PredictionSettings)
 
+    # --- Feature flags ---
+    mlflow_descriptions_enabled: bool = True
+    llm_descriptions_enabled: bool = False
+
     # --- Ollama-specific defaults ---
     ollama_base_url: str = "http://localhost:11434"
 

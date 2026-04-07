@@ -404,7 +404,7 @@ def cmd_experiment_run(args: argparse.Namespace) -> None:
 
     print(f"\n=== Experiment: {name} ===")
     print(f"Task: {bundle.summary.task_type.value}  Target: {bundle.summary.target_column}")
-    print(f"Compare metric: {bundle.summary.compare_optimize_metric}")
+    print(f"Ranking score: {bundle.summary.compare_optimize_metric}")
     if bundle.summary.best_baseline_model_name is not None:
         print(
             f"Best baseline: {bundle.summary.best_baseline_model_name} "
@@ -467,7 +467,7 @@ def cmd_experiment_tune(args: argparse.Namespace) -> None:
         _cli_error(exc)
     print(f"\n=== Experiment Tune: {name} ===")
     print(f"Model: {selection.model_name}")
-    print(f"Tune metric: {bundle.tuned_result.optimize_metric if bundle.tuned_result else 'N/A'}")
+    print(f"Optimization score: {bundle.tuned_result.optimize_metric if bundle.tuned_result else 'N/A'}")
     if bundle.tuned_result is not None:
         print(f"Baseline score: {bundle.tuned_result.baseline_score}")
         print(f"Tuned score: {bundle.tuned_result.tuned_score}")
@@ -1426,7 +1426,7 @@ def main() -> None:
         help="Optional explicit ingestion source type",
     )
     run_parser.add_argument("--train-size", type=float, default=None, help="PyCaret train_size")
-    run_parser.add_argument("--fold", type=int, default=None, help="Cross-validation folds")
+    run_parser.add_argument("--fold", type=int, default=None, help="Number of validation rounds (folds)")
     run_parser.add_argument("--fold-strategy", default=None, help="Optional fold strategy override")
     run_parser.add_argument(
         "--preprocess",

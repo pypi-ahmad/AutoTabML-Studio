@@ -14,8 +14,8 @@ and local artifact storage.
 
 ### Added
 
-- **Streamlit dashboard** with 10 pages: Dashboard, Dataset Intake, Validation,
-  Profiling, Benchmark, Experiment Lab, Prediction Center, History, Registry,
+- **Streamlit dashboard** with 10 pages: Dashboard, Load Data, Validation,
+  Profiling, Quick Benchmark, Train & Tune, Predictions, History, Registry,
   Settings.
 - **CLI** (`autotabml`) with 23 subcommands including `info`, `doctor`,
   `validate`, `profile`, `benchmark`, `experiment-run/tune/evaluate/save`,
@@ -30,8 +30,8 @@ and local artifact storage.
 - **Benchmark** via LazyPredict comparing 40+ models with GPU-first defaults.
 - **Experiment Lab** via PyCaret (Python <3.13) with setup, compare, tune,
   evaluate, finalize, and save pipelines.
-- **Prediction Center** — single-row and batch prediction from local or
-  MLflow-backed models.
+- **Predictions** — single-row and batch prediction from local or
+  registry-backed models.
 - **MLflow tracking** — automatic run logging, run history, cross-run comparison,
   and model registry with champion/challenger promotion.
 - **Security** — credential masking (`app.security.masking`), secret-free codebase

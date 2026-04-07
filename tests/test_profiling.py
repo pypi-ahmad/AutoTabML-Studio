@@ -120,13 +120,14 @@ class TestProfilingConfig:
     def test_profiling_install_guidance_pins_compatible_setuptools(self):
         guidance = profiling_install_guidance()
 
-        assert 'setuptools<82' in guidance
+        assert 'not available' in guidance.lower()
+        assert 'administrator' in guidance.lower()
 
     def test_profiling_install_guidance_mentions_pkg_resources_when_missing(self):
         guidance = profiling_install_guidance(ModuleNotFoundError("No module named 'pkg_resources'"))
 
-        assert 'pkg_resources' in guidance
-        assert 'setuptools<82' in guidance
+        assert 'not available' in guidance.lower()
+        assert 'administrator' in guidance.lower()
 
 
 class TestYDataProfilingNoiseSuppression:

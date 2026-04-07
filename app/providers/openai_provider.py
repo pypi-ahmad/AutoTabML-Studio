@@ -71,6 +71,31 @@ class OpenAIProvider(BaseProvider):
             )
         return sorted(items, key=lambda x: x.id)
 
+    async def generate_text(
+        self,
+        prompt: str,
+        *,
+        model_id: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.3,
+    ) -> str:
+        chosen_model = model_id or self.get_default_model() or "gpt-4o-mini"
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{_BASE_URL}/v1/chat/completions",
+                headers=self._auth_headers(),
+                json={
+                    "model": chosen_model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return data["choices"][0]["message"]["content"]
+
     # --- internals ---
     def _auth_headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self._api_key}"}
