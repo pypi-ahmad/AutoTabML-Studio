@@ -621,7 +621,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
 
     if bundle.saved_model_metadata is not None:
         st.subheader("Saved Model")
-        st.success(f"Model saved successfully.")
+        st.success("Model saved successfully.")
         with st.expander("Saved files", expanded=False):
             st.caption(f"Model file: **{Path(str(bundle.saved_model_metadata.model_path)).name}**")
             if bundle.saved_model_metadata.experiment_snapshot_path is not None:

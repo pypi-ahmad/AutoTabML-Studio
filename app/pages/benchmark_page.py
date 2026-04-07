@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
 
 import streamlit as st
 
@@ -95,7 +94,6 @@ def render_benchmark_page() -> None:
 
     # ── Smart defaults (user can override in Advanced) ─────────────────
     default_metric = default_ranking_metric_for_task(task_type, settings)
-    sample_rows_default = int(settings.default_sample_rows or 0)
 
     # ── Run mode presets ───────────────────────────────────────────────
     from app.pages.glossary import BENCHMARK_PRESETS
