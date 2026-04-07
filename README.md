@@ -163,7 +163,7 @@ See [docs/user-flow.md](docs/user-flow.md) for the detailed product flow and [US
 	</tr>
 </table>
 
-All screenshots above were captured from a real local Streamlit session. The capture inventory and refresh notes live in [docs/assets/screenshots/README.md](docs/assets/screenshots/README.md), and the repeatable capture script is [scripts/capture_screenshots.py](scripts/capture_screenshots.py).
+All screenshots above were captured from a real local Streamlit session. The repeatable capture script is [scripts/capture_screenshots.py](scripts/capture_screenshots.py).
 
 ## 🧱 Tech Stack
 
@@ -416,8 +416,6 @@ Dependabot is configured for weekly pip and GitHub Actions dependency updates.
 - **Single-user.** Designed for individual use on a local machine, not concurrent multi-user access.
 - **AI summaries** require an API key (OpenAI/Anthropic/Gemini) or a local Ollama instance.
 
-See [docs/limitations.md](docs/limitations.md) for additional detail.
-
 ## 📚 Documentation
 
 - [USAGE.md](USAGE.md) — Complete usage guide with step-by-step instructions for every feature.
@@ -425,7 +423,6 @@ See [docs/limitations.md](docs/limitations.md) for additional detail.
 - [docs/architecture.md](docs/architecture.md) — Module boundaries and responsibilities.
 - [docs/developer-guide.md](docs/developer-guide.md) — Implementation notes and development workflow.
 - [docs/demo-guide.md](docs/demo-guide.md) — Concise demo walkthrough script.
-- [docs/limitations.md](docs/limitations.md) — Known limitations and caveats.
 - [CHANGELOG.md](CHANGELOG.md) — Release notes.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — Contribution guidelines.
 - [SECURITY.md](SECURITY.md) — Security policy.
