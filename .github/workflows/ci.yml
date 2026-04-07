@@ -39,7 +39,7 @@ jobs:
 
       - name: Auto-fix and lint
         run: |
-          ruff check app/ tests/ scripts/ --fix --quiet
+          ruff check app/ tests/ scripts/ --fix --quiet || true
           ruff check app/ tests/ scripts/ --output-format=full
 
   unit-tests:

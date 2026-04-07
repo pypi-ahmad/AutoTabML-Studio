@@ -8,10 +8,9 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from app.security.masking import safe_error_message
 from app.pages.dataset_workspace import go_to_page
-from app.pages.ui_labels import format_enum_value
-from app.pages.ui_labels import render_metadata_table
+from app.pages.ui_labels import format_enum_value, render_metadata_table
+from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
 from app.storage.models import AppJobType

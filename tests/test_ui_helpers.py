@@ -16,7 +16,6 @@ from app.pages.ui_labels import (
 from app.storage.models import AppJobType
 from app.tracking.description_generator import generate_template_description
 
-
 # ── format_enum_value ─────────────────────────────────────────────────
 
 

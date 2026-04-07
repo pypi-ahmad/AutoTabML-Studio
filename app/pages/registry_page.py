@@ -5,9 +5,9 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.dataset_workspace import go_to_page
-from app.pages.ui_labels import format_enum_value, PROMOTION_LABELS, make_format_func
+from app.pages.shared_history import render_past_runs_section, render_saved_models_section
+from app.pages.ui_labels import PROMOTION_LABELS, format_enum_value, make_format_func
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store

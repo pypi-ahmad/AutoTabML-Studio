@@ -19,9 +19,9 @@ from app.backends import build_backend
 from app.config.enums import ExecutionBackend
 from app.notebooks.generator import generate_job_notebook
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_labels import format_enum_value
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
-from app.pages.ui_labels import format_enum_value
 from app.storage.models import AppJobType
 
 logger = logging.getLogger(__name__)
