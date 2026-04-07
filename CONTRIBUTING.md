@@ -31,7 +31,6 @@ pytest -q
 
 ## Release Hygiene
 
-- update [CHANGELOG.md](CHANGELOG.md) for user-visible or maintainer-visible changes
 - keep [.env.example](.env.example) aligned with the real settings model
 - keep [README.md](README.md) and [docs/developer-guide.md](docs/developer-guide.md) aligned with actual entrypoints and local commands
 - do not present notebook mode or `colab_mcp` as finished capabilities (MCP transport is validated; browser-connected execution is not yet CI-testable)

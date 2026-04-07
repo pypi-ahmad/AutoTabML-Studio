@@ -92,7 +92,7 @@ Ingest -> Validate -> Profile -> Benchmark -> Experiment -> Save -> Predict -> C
 6. **Predict** — score new data (single row or batch file) with your saved model.
 7. **Compare & Register** — review run history, compare algorithms, and promote models.
 
-See [docs/user-flow.md](docs/user-flow.md) for the detailed product flow and [USAGE.md](USAGE.md) for the full usage guide.
+See [USAGE.md](USAGE.md) for the full usage guide.
 
 ## 🖼️ Screens
 
@@ -234,7 +234,7 @@ Streamlit pages are thin entry points. Business logic lives in the service layer
 - **SQLite** stores local workspace metadata: loaded datasets, job records, and saved model records.
 - **`artifacts/`** holds all generated output: reports, models, predictions, and tracking databases.
 
-For more detail, see [docs/architecture.md](docs/architecture.md) and [docs/developer-guide.md](docs/developer-guide.md).
+For more detail, see [docs/developer-guide.md](docs/developer-guide.md).
 
 ## ⚙️ Quickstart
 
@@ -338,8 +338,6 @@ autotabml history-list --run-type experiment --limit 10
 autotabml registry-list
 ```
 
-For a rehearsed product walkthrough, use [docs/demo-guide.md](docs/demo-guide.md).
-
 ## 🔐 Configuration
 
 Settings are managed through three layers:
@@ -419,13 +417,8 @@ Dependabot is configured for weekly pip and GitHub Actions dependency updates.
 ## 📚 Documentation
 
 - [USAGE.md](USAGE.md) — Complete usage guide with step-by-step instructions for every feature.
-- [docs/user-flow.md](docs/user-flow.md) — End-to-end product flow.
-- [docs/architecture.md](docs/architecture.md) — Module boundaries and responsibilities.
 - [docs/developer-guide.md](docs/developer-guide.md) — Implementation notes and development workflow.
-- [docs/demo-guide.md](docs/demo-guide.md) — Concise demo walkthrough script.
-- [CHANGELOG.md](CHANGELOG.md) — Release notes.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — Contribution guidelines.
-- [SECURITY.md](SECURITY.md) — Security policy.
 
 ## 📄 License
 
