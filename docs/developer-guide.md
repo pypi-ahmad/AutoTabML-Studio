@@ -170,8 +170,6 @@ autotabml --help
 
 ## Release Hygiene
 
-- update [CHANGELOG.md](../CHANGELOG.md) before cutting or announcing a version
-- use [release-notes-template.md](release-notes-template.md) for manual release summaries
 - keep [.env.example](../.env.example) aligned with the real settings keys
 - keep notebook mode and `colab_mcp` messaging explicitly scoped to their current implemented state
 - run `python -m app.release_metadata` before any public release build or tag; it verifies the committed license and public maintainer/contact metadata in `pyproject.toml`
