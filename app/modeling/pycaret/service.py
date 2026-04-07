@@ -35,7 +35,7 @@ from app.modeling.pycaret.schemas import (
 )
 from app.modeling.pycaret.selectors import metric_sort_direction, resolve_model_id, resolve_task_type
 from app.modeling.pycaret.summary import extract_mean_metrics, normalize_compare_grid
-from app.path_utils import model_save_name, safe_artifact_stem
+from app.path_utils import model_save_name
 from app.storage import AppMetadataStore, record_experiment_job
 
 

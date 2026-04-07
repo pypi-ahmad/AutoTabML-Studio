@@ -53,7 +53,6 @@ def _suppress_profiling_runtime_noise():
 def profiling_install_guidance(import_error: ImportError | None = None) -> str:
     """Return a user-facing installation hint for profiling dependencies."""
     effective_error = import_error or _YDATA_IMPORT_ERROR
-    install_command = 'pip install "ydata-profiling" "setuptools<82"'
 
     if effective_error is not None:
         missing_name = getattr(effective_error, "name", None)

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -12,13 +11,11 @@ import streamlit as st
 from app.pages.dataset_workspace import go_to_page
 from app.pages.ui_labels import PREDICTION_TASK_TYPE_LABELS, format_enum_value, render_model_trust_card
 from app.prediction import (
-    ModelSourceType,
     PredictionService,
     PredictionTaskType,
     SchemaValidationMode,
 )
 from app.prediction.selectors import discover_local_saved_models
-from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
 from app.tracking.mlflow_query import is_mlflow_available
@@ -45,10 +42,6 @@ def render_models_page() -> None:
     benchmark_models = _discover_benchmark_models(state.settings.pycaret.models_dir)
 
     # DB-tracked models (may overlap with discovered ones)
-    db_models = []
-    if metadata_store is not None:
-        db_models = metadata_store.list_saved_local_models(limit=100)
-
     # MLflow registry models
     registry_models = []
     if is_mlflow_available() and tracking_settings.registry_enabled:

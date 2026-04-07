@@ -10,7 +10,6 @@ from app.pages.ui_labels import (
     PROMOTION_LABELS,
     PROVIDER_LABELS,
     SOURCE_TYPE_LABELS,
-    TASK_TYPE_LABELS,
     format_enum_value,
     make_format_func,
 )

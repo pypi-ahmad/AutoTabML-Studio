@@ -187,7 +187,7 @@ def render_dashboard_page() -> None:
             if num <= completed:
                 col_a, col_b = st.columns([6, 2])
                 col_a.markdown(f"~~✓ Step {num} · {label}~~ ✅")
-                if col_b.button(f"Revisit", key=f"dash_revisit_{step['page']}", use_container_width=True):
+                if col_b.button("Revisit", key=f"dash_revisit_{step['page']}", use_container_width=True):
                     go_to_page(step["page"])
             elif num == recommended:
                 st.markdown(f"**▶ Step {num} · {label}** — *you are here*")

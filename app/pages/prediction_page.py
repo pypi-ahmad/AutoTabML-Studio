@@ -11,7 +11,6 @@ import streamlit as st
 from app.prediction import (
     BatchPredictionRequest,
     ModelSourceType,
-    PredictionMode,
     PredictionRequest,
     PredictionService,
     PredictionTaskType,
