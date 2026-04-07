@@ -8,6 +8,14 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from app.pages.dataset_workspace import go_to_page, uploaded_file_to_input_spec
+from app.pages.ui_labels import (
+    PREDICTION_TASK_TYPE_LABELS,
+    SOURCE_TYPE_LABELS,
+    format_enum_value,
+    make_format_func,
+)
+from app.pages.workflow_guide import render_workflow_banner
 from app.prediction import (
     BatchPredictionRequest,
     ModelSourceType,
@@ -18,19 +26,9 @@ from app.prediction import (
     SingleRowPredictionRequest,
 )
 from app.security.masking import safe_error_message
-from app.pages.workflow_guide import render_workflow_banner
-from app.pages.dataset_workspace import go_to_page, uploaded_file_to_input_spec
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
 from app.tracking.mlflow_query import is_mlflow_available
-
-
-from app.pages.ui_labels import (
-    PREDICTION_TASK_TYPE_LABELS,
-    SOURCE_TYPE_LABELS,
-    format_enum_value,
-    make_format_func,
-)
 
 
 def render_prediction_page(*, _show_header: bool = True) -> None:

@@ -294,7 +294,7 @@ def render_dashboard_page() -> None:
             st.caption("Train and save models via Train & Tune or Quick Benchmark.")
 
     # ── Environment details (collapsed, bottom of page) ────────────────
-    from app.pages.ui_labels import PROVIDER_LABELS, BACKEND_LABELS, MODE_LABELS
+    from app.pages.ui_labels import BACKEND_LABELS, MODE_LABELS, PROVIDER_LABELS
     with st.expander("⚙️ Environment", expanded=False):
         env_col1, env_col2, env_col3 = st.columns(3)
         env_col1.caption(f"**AI Provider:** {PROVIDER_LABELS.get(state.provider.value, state.provider.value)}")

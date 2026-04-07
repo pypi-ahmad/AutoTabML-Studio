@@ -6,7 +6,13 @@ import streamlit as st
 
 from app.logging_config import configure_logging
 from app.pages.dataset_workspace import render_sidebar_dataset_status
-from app.pages.registry import default_page_label, get_page_by_label, get_page_registry, get_nav_sections, render_registered_page
+from app.pages.registry import (
+    default_page_label,
+    get_nav_sections,
+    get_page_by_label,
+    get_page_registry,
+    render_registered_page,
+)
 from app.security.masking import safe_error_message
 from app.startup import format_startup_issues, initialize_local_runtime
 from app.state.session import get_or_init_state
@@ -75,6 +81,7 @@ if startup_status.issues:
 render_sidebar_dataset_status()
 # ── Sidebar glossary ──────────────────────────────────────────────────
 from app.pages.glossary import render_glossary_sidebar
+
 render_glossary_sidebar()
 # ── Sidebar privacy badge ───────────────────────────────────────────────────
 st.sidebar.divider()
