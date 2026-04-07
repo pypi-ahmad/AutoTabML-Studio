@@ -81,6 +81,32 @@ class AnthropicProvider(BaseProvider):
             )
         return sorted(items, key=lambda x: x.id)
 
+    async def generate_text(
+        self,
+        prompt: str,
+        *,
+        model_id: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.3,
+    ) -> str:
+        chosen_model = model_id or self.get_default_model() or "claude-sonnet-4-6"
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{_BASE_URL}/v1/messages",
+                headers=self._auth_headers(),
+                json={
+                    "model": chosen_model,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            blocks = data.get("content", [])
+            return "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
+
     def _auth_headers(self) -> dict[str, str]:
         return {
             "x-api-key": self._api_key,

@@ -48,6 +48,6 @@ def test_require_pycaret_wraps_runtime_import_failures_with_guidance(monkeypatch
         setup_runner.require_pycaret()
 
     message = str(exc_info.value)
-    assert "pycaret is not available in the current environment" in message
+    assert "training engine is not available" in message
     assert "PyCaret only supports python 3.9, 3.10, 3.11." in message
     assert "Please DOWNGRADE your Python version." in message

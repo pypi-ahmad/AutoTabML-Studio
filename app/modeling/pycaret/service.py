@@ -35,7 +35,7 @@ from app.modeling.pycaret.schemas import (
 )
 from app.modeling.pycaret.selectors import metric_sort_direction, resolve_model_id, resolve_task_type
 from app.modeling.pycaret.summary import extract_mean_metrics, normalize_compare_grid
-from app.path_utils import safe_artifact_stem
+from app.path_utils import model_save_name, safe_artifact_stem
 from app.storage import AppMetadataStore, record_experiment_job
 
 
@@ -486,10 +486,11 @@ class PyCaretExperimentService(BaseExperimentService):
             task_type=bundle.task_type,
             target_column=bundle.config.target_column,
             model_id=resolved_model_id,
-            model_name=model_name,
+            model_name=save_name,
             save_name=save_name,
             models_dir=self._resolve_models_dir(),
             snapshots_dir=self._resolve_snapshots_dir(),
+            dataset_name=bundle.dataset_name,
             dataset_fingerprint=bundle.dataset_fingerprint,
             feature_columns=bundle.feature_columns,
             feature_dtypes=bundle.feature_dtypes,
@@ -516,16 +517,7 @@ class PyCaretExperimentService(BaseExperimentService):
         *,
         save_name_prefix: str | None = None,
     ) -> str:
-        timestamp_token = bundle.summary.run_timestamp.strftime("%Y%m%dT%H%M%S")
-        dataset_stem = safe_artifact_stem(bundle.dataset_name, default="dataset")
-        target_stem = safe_artifact_stem(bundle.config.target_column, default="target")
-        rank_token = f"r{selection.rank}" if selection.rank is not None else "rNA"
-        model_stem = safe_artifact_stem(
-            selection.model_id or selection.model_name,
-            default="model",
-        )
-        prefix = safe_artifact_stem(save_name_prefix, default="all_models") if save_name_prefix else "all_models"
-        return f"{prefix}_{dataset_stem}_{target_stem}_{rank_token}_{model_stem}_{timestamp_token}"
+        return model_save_name(bundle.dataset_name, selection.model_name or selection.model_id)
 
     def _upsert_saved_model_artifact(
         self,

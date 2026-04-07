@@ -151,5 +151,5 @@ def test_pycaret_unavailable_runtime_has_clean_guidance_on_python_313_plus():
     if sys.version_info < (3, 13):
         pytest.skip("Current interpreter may support a real PyCaret runtime.")
 
-    with pytest.raises(PyCaretDependencyError, match="pycaret is not available in the current environment"):
+    with pytest.raises(PyCaretDependencyError, match="training engine is not available"):
         require_pycaret()

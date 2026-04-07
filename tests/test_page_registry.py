@@ -12,7 +12,7 @@ from app.pages.registry import default_page_label, get_page_by_label, get_page_r
 
 class TestPageRegistry:
     def test_default_page_label_matches_workspace_mode(self):
-        assert default_page_label(WorkspaceMode.DASHBOARD) == "Dashboard"
+        assert default_page_label(WorkspaceMode.DASHBOARD) == "Home"
         assert default_page_label(WorkspaceMode.NOTEBOOK) == "Notebook"
 
     def test_get_page_by_label_raises_for_unknown_page(self):
@@ -30,7 +30,7 @@ class TestPageRegistry:
             lambda module_path: SimpleNamespace(render_dashboard_page=_render_dashboard_page),
         )
 
-        render_registered_page("Dashboard")
+        render_registered_page("Home")
 
         assert called["rendered"] is True
 
@@ -42,4 +42,4 @@ class TestPageRegistry:
     def test_dataset_intake_page_is_registered(self):
         labels = [page.label for page in get_page_registry()]
 
-        assert "Dataset Intake" in labels
+        assert "Load Data" in labels

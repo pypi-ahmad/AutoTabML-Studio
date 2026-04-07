@@ -66,6 +66,37 @@ class OllamaProvider(BaseProvider):
             )
         return sorted(items, key=lambda x: x.id)
 
+    async def generate_text(
+        self,
+        prompt: str,
+        *,
+        model_id: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.3,
+    ) -> str:
+        chosen_model = model_id or self.get_default_model()
+        if not chosen_model:
+            models = await self.list_models()
+            if not models:
+                raise RuntimeError("No Ollama models available. Pull a model first.")
+            chosen_model = models[0].id
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self._base_url}/api/generate",
+                json={
+                    "model": chosen_model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "num_predict": max_tokens,
+                        "temperature": temperature,
+                    },
+                },
+                timeout=120,
+            )
+            resp.raise_for_status()
+            return resp.json().get("response", "")
+
 
 def _safe_http_error_detail(exc: httpx.HTTPError) -> str:
     if isinstance(exc, httpx.HTTPStatusError):

@@ -13,6 +13,7 @@ from app.ingestion import DatasetInputSpec, IngestionSourceType, LoadedDataset, 
 from app.ingestion.types import DELIMITED_FILE_SUFFIXES, EXCEL_FILE_SUFFIXES
 from app.ingestion.uci_loader import list_available_uci_datasets
 from app.security.masking import safe_error_message
+from app.pages.ui_labels import render_metadata_table
 from app.state.session import get_or_init_state
 from app.storage import ProjectRecord, build_metadata_store, ensure_dataset_record
 
@@ -147,7 +148,7 @@ def set_active_dataset(
 def go_to_page(page_label: str) -> None:
     """Navigate to another registered page within the Streamlit app."""
 
-    st.session_state["nav"] = page_label
+    st.session_state["_pending_nav"] = page_label
     st.rerun()
 
 
@@ -204,8 +205,8 @@ def _render_dataset_info_bar(
     col_info.caption(
         f"📋 **{active_name}**  ·  {len(df):,} rows × {len(df.columns)} cols  ·  {source}{extra}"
     )
-    if col_action.button("📂", key=f"{key_prefix}_open_intake", help="Open full Dataset Intake"):
-        go_to_page("Dataset Intake")
+    if col_action.button("📂", key=f"{key_prefix}_open_intake", help="Open full Load Data page"):
+        go_to_page("Load Data")
 
 
 def _render_inline_dataset_loader(
@@ -240,7 +241,8 @@ def _render_inline_dataset_loader(
         local = st.text_input(
             "File path",
             key=f"{key_prefix}_gw_path",
-            placeholder=r"datasets/sklearn/Diabetes/diabetes.csv",
+            placeholder="e.g. C:/Data/sales.csv",
+            help="Full path to a CSV or Excel file on your computer.",
         )
         if st.button("Load", key=f"{key_prefix}_gw_path_btn"):
             if local.strip():
@@ -259,9 +261,9 @@ def _render_inline_dataset_loader(
             else:
                 st.error("Enter a file path.")
 
-    st.caption("For URL, UCI Repository, or advanced options:")
-    if st.button("Open Dataset Intake", key=f"{key_prefix}_gw_intake"):
-        go_to_page("Dataset Intake")
+    st.caption("For web links, the UCI dataset library, or advanced options:")
+    if st.button("Open Load Data", key=f"{key_prefix}_gw_intake"):
+        go_to_page("Load Data")
 
 
 def render_sidebar_dataset_status() -> None:
@@ -282,7 +284,7 @@ def render_sidebar_dataset_status() -> None:
         options = list(loaded.keys())
         idx = options.index(active_name) if active_name in options else 0
         new_name = st.sidebar.selectbox(
-            "📋 Active dataset",
+            "📋 Current dataset",
             options=options,
             index=idx,
             key="sidebar_ds_pick",
@@ -357,10 +359,11 @@ def render_dataset_workspace(
 
     if title:
         st.subheader(title)
-    st.caption(caption or "Load a local file, workspace path, or URL into the current Streamlit session.")
+    st.caption(caption or "Load a file from your computer, a web link, or a public dataset library into this session.")
+    st.caption("🔒 All data stays on your machine — nothing is uploaded to external servers.")
 
     metric_col1, metric_col2, metric_col3 = st.columns(3)
-    metric_col1.metric("Session datasets", len(loaded))
+    metric_col1.metric("Datasets loaded", len(loaded))
     if loaded:
         latest_name = next(reversed(loaded))
         latest_dataset = loaded[latest_name]
@@ -370,7 +373,7 @@ def render_dataset_workspace(
         metric_col2.metric("Latest rows", 0)
         metric_col3.metric("Latest columns", 0)
 
-    upload_tab, path_tab, url_tab, uci_tab, loaded_tab = st.tabs(["Upload", "Local Path", "URL", "UCI Repository", "Loaded"])
+    upload_tab, path_tab, url_tab, uci_tab, loaded_tab = st.tabs(["📁 Upload", "📂 Local Path", "🌐 Web URL", "🏛️ UCI Dataset Library", "✅ Loaded"])
 
     with upload_tab:
         uploaded_file = st.file_uploader(
@@ -379,12 +382,12 @@ def render_dataset_workspace(
             key=f"{key_prefix}_upload_file",
         )
         upload_name = st.text_input(
-            "Session dataset name (optional)",
+            "Give this dataset a name (optional)",
             key=f"{key_prefix}_upload_name",
-            help="Leave blank to use the file name.",
+            help="A short label to identify this dataset in the session. Leave blank to use the file name.",
         ).strip()
         if st.button(
-            "Load Uploaded Dataset",
+            "Load Dataset",
             key=f"{key_prefix}_upload_button",
             disabled=uploaded_file is None,
         ):
@@ -403,11 +406,13 @@ def render_dataset_workspace(
         local_path = st.text_input(
             "Local dataset path",
             key=f"{key_prefix}_path_value",
-            placeholder=r"artifacts\e2e\real_flow_20260404\iris_train.csv",
+            placeholder=r"e.g. C:\Data\sales_data.csv",
+            help="Full path to a CSV or Excel file on your computer.",
         ).strip()
         path_name = st.text_input(
-            "Session dataset name (optional)",
+            "Give this dataset a name (optional)",
             key=f"{key_prefix}_path_name",
+            help="A short, friendly label so you can tell datasets apart.",
         ).strip()
         if st.button("Load Local Path", key=f"{key_prefix}_path_button"):
             try:
@@ -425,11 +430,13 @@ def render_dataset_workspace(
         url_value = st.text_input(
             "Dataset URL",
             key=f"{key_prefix}_url_value",
-            placeholder="https://example.com/data.csv",
+            placeholder="e.g. https://data.example.org/dataset.csv",
+            help="Web address pointing to a CSV file you want to load.",
         ).strip()
         url_name = st.text_input(
-            "Session dataset name (optional)",
+            "Give this dataset a name (optional)",
             key=f"{key_prefix}_url_name",
+            help="A short, friendly label so you can tell datasets apart.",
         ).strip()
         if st.button("Load URL", key=f"{key_prefix}_url_button"):
             try:
@@ -447,28 +454,29 @@ def render_dataset_workspace(
 
     with uci_tab:
         st.caption(
-            "Load datasets directly from the [UCI Machine Learning Repository](https://archive.ics.uci.edu). "
-            "Provide either a dataset ID or a dataset name."
+            "Browse and load free, public datasets from the "
+            "[UCI Machine Learning Repository](https://archive.ics.uci.edu) — "
+            "one of the most popular collections of datasets for learning and benchmarking."
         )
         catalog_results_key = _UCI_CATALOG_RESULTS_KEY_TEMPLATE.format(key_prefix=key_prefix)
         browse_col1, browse_col2, browse_col3 = st.columns(3)
         catalog_search = browse_col1.text_input(
-            "Catalog search (optional)",
+            "Search by name",
             key=f"{key_prefix}_uci_catalog_search",
             placeholder="e.g. iris, heart, wine",
-            help="Uses ucimlrepo.list_available_datasets(search=...).",
+            help="Type a keyword to search the UCI catalogue.",
         ).strip()
         catalog_area = browse_col2.text_input(
-            "Catalog area (optional)",
+            "Subject area (optional)",
             key=f"{key_prefix}_uci_catalog_area",
             placeholder="e.g. life science",
-            help="Optional UCI area filter.",
+            help="Narrow results to a specific subject area.",
         ).strip()
         catalog_filter = browse_col3.text_input(
-            "Catalog filter (optional)",
+            "Extra filter (optional)",
             key=f"{key_prefix}_uci_catalog_filter",
             placeholder="e.g. aim-ahead",
-            help="Optional ucimlrepo filter value.",
+            help="An optional filter identifier from the UCI catalogue.",
         ).strip()
         if st.button("Search UCI Catalog", key=f"{key_prefix}_uci_catalog_button"):
             try:
@@ -478,7 +486,10 @@ def render_dataset_workspace(
                     filter=catalog_filter or None,
                 )
             except Exception as exc:
-                st.error(f"UCI catalog search failed: {safe_error_message(exc)}")
+                st.error(
+                    f"UCI catalog search failed: {safe_error_message(exc)}\n\n"
+                    "**What to try:** Check your internet connection, or search by dataset ID instead."
+                )
             else:
                 st.session_state[catalog_results_key] = results
                 if not results:
@@ -495,6 +506,7 @@ def render_dataset_workspace(
                 "Catalog result",
                 options=list(option_map.keys()),
                 key=f"{key_prefix}_uci_catalog_pick",
+                help="Pick a dataset from the search results below to load it.",
             )
             if st.button("Use Selected Dataset", key=f"{key_prefix}_uci_catalog_use"):
                 selected_row = option_map[selected_catalog_item]
@@ -523,8 +535,9 @@ def render_dataset_workspace(
                 help="Full or partial dataset name. Only used when ID is not provided.",
             ).strip()
         uci_display_name = st.text_input(
-            "Session dataset name (optional)",
+            "Give this dataset a name (optional)",
             key=f"{key_prefix}_uci_display_name",
+            help="A short, friendly label so you can tell datasets apart.",
         ).strip()
         if st.button("Load UCI Dataset", key=f"{key_prefix}_uci_button"):
             resolved_id = int(uci_id_value) if uci_id_value is not None else None
@@ -553,7 +566,7 @@ def render_dataset_workspace(
 
     with loaded_tab:
         if not loaded:
-            st.caption("No datasets are loaded in the current Streamlit session.")
+            st.caption("No datasets loaded yet.")
         else:
             active_name = get_active_dataset_name(metadata_store=metadata_store)
             options = list(loaded.keys())
@@ -562,24 +575,26 @@ def render_dataset_workspace(
                 options=options,
                 index=options.index(active_name) if active_name in options else 0,
                 key=f"{key_prefix}_loaded_dataset",
+                help="Switch between datasets you have loaded in this session.",
             )
             if selected_name != active_name:
                 set_active_dataset(selected_name, metadata_store=metadata_store)
             selected_dataset = loaded[selected_name]
             st.caption(
-                f"Active dataset: **{selected_name}** · Rows: **{len(selected_dataset.dataframe):,}** · Columns: **{len(selected_dataset.dataframe.columns):,}**"
+                f"Current dataset: **{selected_name}** · Rows: **{len(selected_dataset.dataframe):,}** · Columns: **{len(selected_dataset.dataframe.columns):,}**"
             )
             st.dataframe(selected_dataset.preview(20), width="stretch")
-            with st.expander("Dataset metadata"):
-                st.json(selected_dataset.metadata.model_dump(mode="json"))
+            with st.expander("Dataset details"):
+                _md = selected_dataset.metadata.model_dump(mode="json")
+                render_metadata_table(_md)
 
             action_col1, action_col2 = st.columns(2)
             if action_col1.button("Remove Selected Dataset", key=f"{key_prefix}_remove_button"):
                 remove_loaded_dataset(selected_name, metadata_store=metadata_store)
                 st.success(f"Removed '{selected_name}' from this session.")
-            if action_col2.button("Clear Session Datasets", key=f"{key_prefix}_clear_button"):
+            if action_col2.button("Clear All Datasets", key=f"{key_prefix}_clear_button"):
                 clear_loaded_datasets(metadata_store=metadata_store)
-                st.success("Cleared all session datasets.")
+                st.success("Cleared all datasets.")
 
     return get_loaded_datasets()
 
@@ -615,7 +630,10 @@ def _load_into_session(
     try:
         loaded_dataset = load_dataset(input_spec)
     except Exception as exc:
-        st.error(f"Dataset load failed: {safe_error_message(exc)}")
+        st.error(
+            f"Dataset load failed: {safe_error_message(exc)}\n\n"
+            "**What to try:** Check the file path or URL, and make sure the format is supported (CSV, Excel, TSV)."
+        )
         return None
 
     loaded = st.session_state.setdefault(_LOADED_DATASETS_KEY, {})

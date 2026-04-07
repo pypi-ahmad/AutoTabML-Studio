@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from app.ingestion.schemas import LoadedDataset
 from app.storage.models import AppJobStatus, AppJobType, JobRecord
@@ -15,6 +16,30 @@ if TYPE_CHECKING:
     from app.prediction.schemas import PredictionHistoryEntry
     from app.profiling.schemas import ProfilingArtifactBundle, ProfilingResultSummary
     from app.validation.schemas import ValidationArtifactBundle, ValidationResultSummary
+
+logger = logging.getLogger(__name__)
+
+
+def _enrich_metadata_with_description(
+    metadata: dict[str, Any],
+    job_type: AppJobType,
+    *,
+    dataset_name: str | None = None,
+    mlflow_run_id: str | None = None,
+) -> dict[str, Any]:
+    """Add a template MLflow description to the metadata dict."""
+    try:
+        from app.tracking.description_generator import generate_template_description
+
+        metadata["mlflow_description"] = generate_template_description(
+            job_type,
+            dataset_name=dataset_name,
+            metadata=metadata,
+            mlflow_run_id=mlflow_run_id,
+        )
+    except Exception:
+        logger.debug("Could not generate template description", exc_info=True)
+    return metadata
 
 
 def ensure_dataset_record(
@@ -36,6 +61,14 @@ def record_validation_job(
     loaded_dataset: LoadedDataset | None = None,
 ) -> str:
     dataset_key = ensure_dataset_record(store, loaded_dataset, dataset_name=summary.dataset_name)
+    metadata = {
+        "row_count": summary.row_count,
+        "column_count": summary.column_count,
+        "passed_count": summary.passed_count,
+        "warning_count": summary.warning_count,
+        "failed_count": summary.failed_count,
+    }
+    _enrich_metadata_with_description(metadata, AppJobType.VALIDATION, dataset_name=summary.dataset_name)
     return store.record_job(
         JobRecord(
             job_id=f"validation::{summary.dataset_name or 'dataset'}::{summary.run_timestamp.strftime('%Y%m%dT%H%M%S')}",
@@ -46,13 +79,7 @@ def record_validation_job(
             title=f"Validation · {summary.dataset_name or 'dataset'}",
             primary_artifact_path=(artifacts.summary_json_path if artifacts is not None else None),
             summary_path=(artifacts.summary_json_path if artifacts is not None else None),
-            metadata={
-                "row_count": summary.row_count,
-                "column_count": summary.column_count,
-                "passed_count": summary.passed_count,
-                "warning_count": summary.warning_count,
-                "failed_count": summary.failed_count,
-            },
+            metadata=metadata,
             created_at=summary.run_timestamp,
             updated_at=summary.run_timestamp,
         )
@@ -67,6 +94,14 @@ def record_profiling_job(
     loaded_dataset: LoadedDataset | None = None,
 ) -> str:
     dataset_key = ensure_dataset_record(store, loaded_dataset, dataset_name=summary.dataset_name)
+    metadata = {
+        "row_count": summary.row_count,
+        "column_count": summary.column_count,
+        "report_mode": summary.report_mode.value,
+        "sampling_applied": summary.sampling_applied,
+        "sample_size_used": summary.sample_size_used,
+    }
+    _enrich_metadata_with_description(metadata, AppJobType.PROFILING, dataset_name=summary.dataset_name)
     return store.record_job(
         JobRecord(
             job_id=f"profiling::{summary.dataset_name or 'dataset'}::{summary.run_timestamp.strftime('%Y%m%dT%H%M%S')}",
@@ -77,13 +112,7 @@ def record_profiling_job(
             title=f"Profiling · {summary.dataset_name or 'dataset'}",
             primary_artifact_path=(artifacts.html_report_path if artifacts is not None else None),
             summary_path=(artifacts.summary_json_path if artifacts is not None else None),
-            metadata={
-                "row_count": summary.row_count,
-                "column_count": summary.column_count,
-                "report_mode": summary.report_mode.value,
-                "sampling_applied": summary.sampling_applied,
-                "sample_size_used": summary.sample_size_used,
-            },
+            metadata=metadata,
             created_at=summary.run_timestamp,
             updated_at=summary.run_timestamp,
         )
@@ -98,6 +127,17 @@ def record_benchmark_job(
 ) -> str:
     summary = bundle.summary
     dataset_key = ensure_dataset_record(store, loaded_dataset, dataset_name=bundle.dataset_name)
+    metadata = {
+        "task_type": bundle.task_type.value,
+        "ranking_metric": summary.ranking_metric,
+        "best_model_name": summary.best_model_name,
+        "best_score": summary.best_score,
+        "warnings": list(bundle.warnings),
+    }
+    _enrich_metadata_with_description(
+        metadata, AppJobType.BENCHMARK,
+        dataset_name=bundle.dataset_name, mlflow_run_id=bundle.mlflow_run_id,
+    )
     return store.record_job(
         JobRecord(
             job_id=f"benchmark::{bundle.dataset_name or 'dataset'}::{summary.run_timestamp.strftime('%Y%m%dT%H%M%S')}",
@@ -109,13 +149,7 @@ def record_benchmark_job(
             mlflow_run_id=bundle.mlflow_run_id,
             primary_artifact_path=(bundle.artifacts.leaderboard_csv_path if bundle.artifacts is not None else None),
             summary_path=(bundle.artifacts.summary_json_path if bundle.artifacts is not None else None),
-            metadata={
-                "task_type": bundle.task_type.value,
-                "ranking_metric": summary.ranking_metric,
-                "best_model_name": summary.best_model_name,
-                "best_score": summary.best_score,
-                "warnings": list(bundle.warnings),
-            },
+            metadata=metadata,
             created_at=summary.run_timestamp,
             updated_at=summary.run_timestamp,
         )
@@ -152,14 +186,19 @@ def record_experiment_job(
             mlflow_run_id=bundle.mlflow_run_id,
             primary_artifact_path=primary_saved_model_path,
             summary_path=(bundle.artifacts.summary_json_path if bundle.artifacts is not None else None),
-            metadata={
-                "task_type": bundle.task_type.value,
-                "best_baseline_model_name": summary.best_baseline_model_name,
-                "tuned_model_name": summary.tuned_model_name,
-                "selected_model_name": summary.selected_model_name,
-                "saved_model_name": summary.saved_model_name,
-                "warnings": list(bundle.warnings),
-            },
+            metadata=_enrich_metadata_with_description(
+                {
+                    "task_type": bundle.task_type.value,
+                    "best_baseline_model_name": summary.best_baseline_model_name,
+                    "tuned_model_name": summary.tuned_model_name,
+                    "selected_model_name": summary.selected_model_name,
+                    "saved_model_name": summary.saved_model_name,
+                    "warnings": list(bundle.warnings),
+                },
+                AppJobType.EXPERIMENT,
+                dataset_name=bundle.dataset_name,
+                mlflow_run_id=bundle.mlflow_run_id,
+            ),
             created_at=summary.run_timestamp,
             updated_at=datetime.now(timezone.utc),
         )
@@ -182,6 +221,15 @@ def record_prediction_history_entry(
     store: AppMetadataStore,
     entry: PredictionHistoryEntry,
 ) -> str:
+    metadata = {
+        "mode": entry.mode.value,
+        "model_source": entry.model_source.value,
+        "model_identifier": entry.model_identifier,
+        "task_type": entry.task_type.value,
+        "row_count": entry.row_count,
+        "metadata_json_path": str(entry.metadata_json_path) if entry.metadata_json_path is not None else None,
+    }
+    _enrich_metadata_with_description(metadata, AppJobType.PREDICTION, dataset_name=entry.input_source)
     return store.record_job(
         JobRecord(
             job_id=entry.job_id,
@@ -191,14 +239,7 @@ def record_prediction_history_entry(
             title=f"Prediction · {entry.model_identifier}",
             primary_artifact_path=entry.output_artifact_path,
             summary_path=entry.summary_json_path,
-            metadata={
-                "mode": entry.mode.value,
-                "model_source": entry.model_source.value,
-                "model_identifier": entry.model_identifier,
-                "task_type": entry.task_type.value,
-                "row_count": entry.row_count,
-                "metadata_json_path": str(entry.metadata_json_path) if entry.metadata_json_path is not None else None,
-            },
+            metadata=metadata,
             created_at=entry.timestamp,
             updated_at=entry.timestamp,
         )
