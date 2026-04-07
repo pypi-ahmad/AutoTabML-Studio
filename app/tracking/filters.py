@@ -32,6 +32,7 @@ class RunHistoryFilter(BaseModel):
     experiment_names: list[str] = Field(default_factory=list)
     run_type: RunType | None = None
     task_type: str | None = None
+    dataset_name: str | None = None
     dataset_fingerprint: str | None = None
     target_column: str | None = None
     model_name: str | None = None
@@ -61,6 +62,9 @@ def build_mlflow_filter_string(history_filter: RunHistoryFilter | None) -> str:
 
     if history_filter.task_type:
         clauses.append(f"params.task_type = '{history_filter.task_type}'")
+
+    if history_filter.dataset_name:
+        clauses.append(f"params.dataset_name = '{history_filter.dataset_name}'")
 
     if history_filter.dataset_fingerprint:
         clauses.append(f"params.dataset_fingerprint = '{history_filter.dataset_fingerprint}'")

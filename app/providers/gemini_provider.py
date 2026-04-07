@@ -89,6 +89,37 @@ class GeminiProvider(BaseProvider):
             )
         return sorted(items, key=lambda x: x.id)
 
+    async def generate_text(
+        self,
+        prompt: str,
+        *,
+        model_id: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.3,
+    ) -> str:
+        chosen_model = model_id or self.get_default_model() or "gemini-2.5-flash"
+        url = f"{_BASE_URL}/models/{chosen_model}:generateContent"
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                url,
+                headers=self._auth_headers(),
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "maxOutputTokens": max_tokens,
+                        "temperature": temperature,
+                    },
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            candidates = data.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                return "".join(p.get("text", "") for p in parts)
+            return ""
+
     def _auth_headers(self) -> dict[str, str]:
         return {"x-goog-api-key": self._api_key}
 

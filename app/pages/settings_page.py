@@ -55,21 +55,42 @@ def render_settings_page() -> None:
     st.title("⚙️ Settings")
     state: RuntimeState = get_or_init_state()
 
-    _section_workspace(state)
-    _section_execution(state)
-    _section_accelerators(state)
-    _section_provider(state)
-    _section_credentials(state)
-    _section_models(state)
-    _section_save(state)
+    essentials_tab, advanced_tab = st.tabs(["Essentials", "Advanced"])
+
+    with essentials_tab:
+        _section_privacy_summary()
+        _section_workspace(state)
+        _section_accelerators_summary(state)
+        _section_descriptions_toggle(state)
+        _section_save(state, key_suffix="_essentials")
+
+    with advanced_tab:
+        _section_execution(state)
+        _section_accelerators(state)
+        _section_provider(state)
+        _section_credentials(state)
+        _section_models(state)
+        _section_mlflow_descriptions(state)
+        _section_save(state, key_suffix="_advanced")
 
 
 # ---------------------------------------------------------------------------
 # Sections
 # ---------------------------------------------------------------------------
 
+def _section_privacy_summary() -> None:
+    """Always-visible privacy reminder at the top of Essentials."""
+    st.header("🔒 Privacy")
+    st.info(
+        "**Your data stays on your machine.** AutoTabML Studio is local-first — "
+        "datasets, models, and results are stored in a local folder on your computer. "
+        "Nothing is uploaded to external servers unless you explicitly configure a cloud backend."
+    )
+
+
 def _section_workspace(state: RuntimeState) -> None:
     st.header("Workspace")
+    from app.pages.ui_labels import MODE_LABELS, make_format_func
     modes = [m.value for m in WorkspaceMode]
     current_idx = modes.index(state.workspace_mode.value)
     selected = st.selectbox(
@@ -77,24 +98,59 @@ def _section_workspace(state: RuntimeState) -> None:
         options=modes,
         index=current_idx,
         key="ws_mode",
-        help="**Dashboard** – interactive Streamlit UI.  **Notebook** – placeholder entry point for a future notebook workflow.",
+        format_func=make_format_func(MODE_LABELS),
+        help="**Dashboard** – interactive Streamlit UI.  **Notebook** – Jupyter-based workflow for advanced users.",
     )
     state.workspace_mode = WorkspaceMode(selected)
 
 
+def _section_accelerators_summary(state: RuntimeState) -> None:
+    """Lightweight GPU status for the Essentials tab — no controls."""
+    st.header("GPU Status")
+    gpu_info = cuda_summary()
+    if gpu_info["cuda_available"]:
+        st.success(
+            f"⚡ GPU detected: **{gpu_info['device_name'] or 'available'}** "
+            f"({gpu_info['device_count']} device(s)). Training will be faster."
+        )
+    else:
+        st.info(
+            "💻 No GPU detected — training runs on CPU. "
+            "For GPU options, see the **Advanced** tab."
+        )
+
+
+def _section_descriptions_toggle(state: RuntimeState) -> None:
+    """Simple on/off for run descriptions on the Essentials tab."""
+    st.header("Run Summaries")
+    desc_enabled = st.checkbox(
+        "Auto-generate a plain-English summary for every workflow run",
+        value=state.settings.mlflow_descriptions_enabled,
+        key="essentials_desc_toggle",
+        help=(
+            "After each benchmark, experiment, or prediction, the app writes a short summary "
+            "explaining what happened and what to do next. Fine-tune AI options in the **Advanced** tab."
+        ),
+    )
+    state.settings.mlflow_descriptions_enabled = desc_enabled
+    if not desc_enabled:
+        state.settings.llm_descriptions_enabled = False
+
+
 def _section_execution(state: RuntimeState) -> None:
-    st.header("Execution")
+    st.header("Where to Run")
+    from app.pages.ui_labels import BACKEND_LABELS, make_format_func
     backends = [b.value for b in ExecutionBackend]
     current_idx = backends.index(state.execution_backend.value)
     selected = st.selectbox(
-        "Execution backend",
+        "Execution environment",
         options=backends,
         index=current_idx,
+        format_func=make_format_func(BACKEND_LABELS, fallback_title=False),
         key="exec_backend",
         help=(
-            "**colab_mcp** (default) – execute notebooks and jobs on Google Colab "
-            "via the Model Context Protocol.  "
-            "**local** – run everything on your machine."
+            "**Cloud (Google Colab)** — run heavy computations on Google’s free cloud GPUs.  "
+            "**Local** — run everything on your own machine."
         ),
     )
     state.execution_backend = ExecutionBackend(selected)
@@ -110,60 +166,60 @@ def _section_execution(state: RuntimeState) -> None:
             mcp_ok = False
 
         if uvx_ok and mcp_ok:
-            st.success("Colab MCP prerequisites OK (`uvx` + `mcp` SDK detected)")
+            st.success("Cloud connection ready \u2714")
         else:
-            missing = []
-            if not uvx_ok:
-                missing.append("`uv` (`pip install uv`)")
-            if not mcp_ok:
-                missing.append("`mcp` (`pip install 'mcp>=1.0'`)")
-            st.warning(f"Colab MCP prerequisites missing: {', '.join(missing)}")
+            st.warning(
+                "Cloud connection not ready — some required packages are missing. "
+                "Ask your administrator to install the cloud connection prerequisites."
+            )
 
     elif state.execution_backend == ExecutionBackend.LOCAL:
         st.info(
             "Local backend selected — all compute runs on this machine. "
-            "Switch to **colab_mcp** to offload to Google Colab."
+            "Switch to **Cloud (Google Colab)** to offload heavy tasks."
         )
 
 
 def _section_accelerators(state: RuntimeState) -> None:
-    st.header("Accelerators")
+    st.header("GPU Acceleration")
 
     gpu_info = cuda_summary()
     if gpu_info["cuda_available"]:
         st.success(
-            f"CUDA detected: {gpu_info['device_name'] or 'GPU available'}"
-            f" (devices: {gpu_info['device_count']})"
+            f"⚡ GPU detected: {gpu_info['device_name'] or 'available'}"
+            f" ({gpu_info['device_count']} device(s)). Training will be faster."
         )
     else:
-        st.caption("CUDA not detected in the current runtime. GPU-preferred experiment settings will fall back to CPU unless forced.")
+        st.caption("💻 No GPU detected. The app will use your CPU — training may be slower for large datasets.")
 
     gpu_options: list[bool | str] = [True, False, "force"]
     selected = st.selectbox(
-        "Default PyCaret GPU mode",
+        "GPU mode for experiments",
         options=gpu_options,
         index=gpu_options.index(state.settings.pycaret.default_use_gpu if state.settings.pycaret.default_use_gpu in gpu_options else True),
         format_func=lambda value: {
-            True: "Prefer GPU when available",
+            True: "Use GPU when available (recommended)",
             False: "CPU only",
-            "force": "Require GPU and fail otherwise",
+            "force": "Require GPU (stop if unavailable)",
         }[value],
         key="pycaret_default_use_gpu",
-        help="Applies to PyCaret experiment workflows in the UI and CLI.",
+        help="Controls whether model training uses GPU acceleration when a compatible GPU is detected.",
     )
     state.settings.pycaret.default_use_gpu = selected
 
     benchmark_prefer_gpu = st.checkbox(
-        "Default benchmark GPU preference",
+        "Use GPU for benchmarks when available",
         value=bool(state.settings.benchmark.prefer_gpu),
         key="benchmark_prefer_gpu",
-        help="Applies to LazyPredict benchmark workflows when CUDA and supported model libraries are available.",
+        help="Speeds up algorithm comparison by using GPU-accelerated libraries when possible.",
     )
     state.settings.benchmark.prefer_gpu = benchmark_prefer_gpu
 
 
 def _section_provider(state: RuntimeState) -> None:
-    st.header("Provider")
+    st.header("AI Provider")
+    st.caption("Choose which AI service powers descriptions and optional smart features.")
+    from app.pages.ui_labels import PROVIDER_LABELS, make_format_func
     allowed = get_allowed_providers(state.execution_backend)
     allowed_values = [p.value for p in allowed]
 
@@ -173,10 +229,12 @@ def _section_provider(state: RuntimeState) -> None:
 
     current_idx = allowed_values.index(state.provider.value)
     selected = st.selectbox(
-        "LLM provider",
+        "AI service",
         options=allowed_values,
         index=current_idx,
         key="llm_provider",
+        format_func=make_format_func(PROVIDER_LABELS),
+        help="Select which AI service to use for generating descriptions and smart features.",
     )
     state.provider = LLMProvider(selected)
 
@@ -184,22 +242,27 @@ def _section_provider(state: RuntimeState) -> None:
         state.execution_backend == ExecutionBackend.COLAB_MCP
         and LLMProvider.OLLAMA not in allowed
     ):
-        st.caption("ℹ️ Ollama is disabled for the Colab MCP backend (local-only provider).")
+        st.caption("ℹ️ Ollama is not available when running in the cloud (it requires a local server).")
 
 
 def _section_credentials(state: RuntimeState) -> None:
-    st.header("Credentials")
+    st.header("API Keys")
+    st.caption(
+        "🔒 Keys are stored in memory only — they are never saved to disk "
+        "and disappear when you close the app."
+    )
     provider = state.provider
 
     if provider in (LLMProvider.OPENAI, LLMProvider.ANTHROPIC, LLMProvider.GEMINI):
-        label = f"{provider.value.capitalize()} API Key"
+        from app.pages.ui_labels import PROVIDER_LABELS
+        provider_name = PROVIDER_LABELS.get(provider.value, provider.value.title())
         current_raw = state.get_provider_api_key(provider) or ""
         masked_hint = mask_secret(current_raw) if current_raw else ""
         key_input = st.text_input(
-            label,
+            f"{provider_name} API Key",
             type="password",
             key=f"cred_{provider.value}",
-            help=f"Your {provider.value} API key. Stored in-memory only – never written to disk.",
+            help=f"Your {provider_name} API key. Needed for AI-powered summaries.",
             placeholder=masked_hint or "Enter API key…",
         )
         if key_input:
@@ -207,23 +270,21 @@ def _section_credentials(state: RuntimeState) -> None:
 
     elif provider == LLMProvider.OLLAMA:
         url = st.text_input(
-            "Ollama base URL",
+            "Ollama server address",
             value=state.settings.ollama_base_url,
             key="ollama_url",
-            help="URL of your local Ollama server.",
+            help="URL of your local Ollama server (e.g. http://localhost:11434).",
         )
         state.settings.ollama_base_url = url
 
 
 def _section_models(state: RuntimeState) -> None:
-    st.header("Models")
+    st.header("AI Model")
+    st.caption("Which AI model to use for generating run summaries and smart features.")
 
     fallback_default = state.settings.default_model_for_provider(state.provider)
     if fallback_default:
-        st.caption(
-            f"Verified fallback default for **{state.provider.value}**: `{fallback_default}`. "
-            "This is only used when the live provider model catalog is unavailable."
-        )
+        st.caption(f"Default: **{fallback_default}**")
 
     if st.button("🔄 Refresh models", key="refresh_models"):
         _fetch_models(state)
@@ -256,14 +317,66 @@ def _section_models(state: RuntimeState) -> None:
         key="model_select",
     )
     state.selected_model_id = selected_id
-    st.caption(f"Model ID: `{selected_id}`")
 
 
-def _section_save(state: RuntimeState) -> None:
+def _section_mlflow_descriptions(state: RuntimeState) -> None:
     st.divider()
-    if st.button("💾 Save settings", key="save_settings"):
+    st.subheader("📝 Run Summaries")
+    st.caption(
+        "Automatically write a plain-English summary after every workflow run — "
+        "covering what happened, key results, and suggested next steps."
+    )
+
+    desc_enabled = st.checkbox(
+        "Generate a summary for every run",
+        value=state.settings.mlflow_descriptions_enabled,
+        key="mlflow_desc_enabled",
+        help="A human-readable summary is created for each job run "
+        "and shown in the History page.",
+    )
+    state.settings.mlflow_descriptions_enabled = desc_enabled
+
+    if desc_enabled:
+        llm_enabled = st.checkbox(
+            "Use AI for richer summaries (requires provider + API key above)",
+            value=state.settings.llm_descriptions_enabled,
+            key="llm_desc_enabled",
+            help="When enabled, the AI service writes more insightful, "
+            "narrative-style summaries. When off, built-in templates are used.",
+        )
+        state.settings.llm_descriptions_enabled = llm_enabled
+
+        if llm_enabled:
+            from app.pages.ui_labels import PROVIDER_LABELS
+            provider_name = PROVIDER_LABELS.get(state.provider.value, state.provider.value.title())
+            api_key = state.get_provider_api_key(state.provider)
+            has_key = bool(api_key)
+            model_id = state.selected_model_id
+
+            if has_key and model_id:
+                st.success(
+                    f"AI summaries will use **{provider_name}** "
+                    f"(model: **{model_id}**)."
+                )
+            elif has_key:
+                st.warning(
+                    f"**{provider_name}** API key is set but no model selected. "
+                    "Click **Refresh models** above to pick one."
+                )
+            else:
+                st.warning(
+                    f"**{provider_name}** API key is needed for AI summaries. "
+                    "Enter it in the **API Keys** section above."
+                )
+    else:
+        state.settings.llm_descriptions_enabled = False
+
+
+def _section_save(state: RuntimeState, *, key_suffix: str = "") -> None:
+    st.divider()
+    if st.button("💾 Save settings", key=f"save_settings{key_suffix}"):
         state.persist()
-        st.success("Settings saved (secrets are NOT written to disk).")
+        st.success("Settings saved. API keys are kept in memory only and never written to disk.")
 
 
 # ---------------------------------------------------------------------------

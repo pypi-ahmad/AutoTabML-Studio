@@ -46,3 +46,20 @@ class BaseProvider(abc.ABC):
         Subclasses override to handle provider-specific payloads.
         """
         raise NotImplementedError
+
+    async def generate_text(
+        self,
+        prompt: str,
+        *,
+        model_id: str | None = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.3,
+    ) -> str:
+        """Generate text from the LLM. Override in subclasses.
+
+        Returns the generated text string.  Raises ``NotImplementedError``
+        for providers that have not implemented generation yet.
+        """
+        raise NotImplementedError(
+            f"{self.provider.value} provider does not support text generation."
+        )

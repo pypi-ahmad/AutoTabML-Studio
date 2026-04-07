@@ -370,7 +370,7 @@ class TestExperimentCommandsHappyPath:
 
         assert "Experiment Tune: data" in output
         assert "Model: lr" in output
-        assert "Tune metric: Accuracy" in output
+        assert "Optimization score: Accuracy" in output
         assert "Baseline score: 0.8" in output
         assert "Tuned score: 0.88" in output
 

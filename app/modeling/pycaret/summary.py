@@ -53,9 +53,9 @@ def leaderboard_to_dataframe(rows: list[ExperimentLeaderboardRow]) -> pd.DataFra
     for row in rows:
         record: dict[str, Any] = {
             "Rank": row.rank,
-            "Model ID": row.model_id,
+            "ID": row.model_id,
             "Model": row.model_name,
-            "Primary Score": row.primary_score,
+            "Score": row.primary_score,
             "Stage": row.stage,
             "Warnings": "; ".join(row.warnings),
         }

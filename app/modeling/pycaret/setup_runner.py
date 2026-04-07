@@ -120,12 +120,15 @@ def require_pycaret() -> None:
 
 
 def pycaret_install_guidance() -> str:
-    """Return one truthful install hint for environments without PyCaret."""
+    """Return a user-facing installation hint for environments without PyCaret."""
 
-    message = 'pycaret is not available in the current environment. Install it with: pip install -e ".[experiment]"'
+    message = (
+        "The model training engine is not available in this environment. "
+        "Please ask your administrator to install the required training packages."
+    )
     if sys.version_info >= (3, 13):
         message += (
-            " PyCaret-backed experiment/save workflows did not validate in this repository on Python 3.13; "
-            "use a PyCaret-compatible interpreter for those workflows until upstream support is available."
+            "\n\n**Note:** The training engine may not be compatible with your current Python version. "
+            "Your administrator may need to use a different Python version."
         )
     return message

@@ -244,7 +244,9 @@ class SavedModelMetadata(BaseModel):
     model_id: str | None = None
     model_name: str
     model_path: Path
+    dataset_name: str | None = None
     dataset_fingerprint: str | None = None
+    trained_at: str | None = None
     feature_columns: list[str] = Field(default_factory=list)
     feature_dtypes: dict[str, str] = Field(default_factory=dict)
     target_dtype: str | None = None

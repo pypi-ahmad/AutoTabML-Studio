@@ -61,11 +61,11 @@ def leaderboard_to_dataframe(rows: list[BenchmarkResultRow]) -> pd.DataFrame:
         record: dict[str, object] = {
             "Rank": row.rank,
             "Model": row.model_name,
-            "Task Type": row.task_type.value,
-            "Primary Score": row.primary_score,
-            "Training Time Seconds": row.training_time_seconds,
-            "Benchmark Backend": row.benchmark_backend.value,
-            "Run Timestamp": row.run_timestamp.isoformat(),
+            "Task": row.task_type.value.replace("_", " ").title(),
+            "Score": row.primary_score,
+            "Training Time (s)": row.training_time_seconds,
+            "Backend": row.benchmark_backend.value.title(),
+            "Run Time": row.run_timestamp.isoformat(),
             "Warnings": "; ".join(row.warnings),
         }
         for key, value in row.raw_metrics.items():

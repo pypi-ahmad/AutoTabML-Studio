@@ -85,8 +85,8 @@ Ingest -> Validate -> Profile -> Benchmark -> Experiment -> Save -> Predict -> C
 - Run baseline model benchmarks to quickly rank candidate estimators.
 - Move promising candidates into PyCaret experiments for deeper iteration.
 - Finalize and save one model or save all compared models locally.
-- Score single rows or batches through the Prediction Center.
-- Review MLflow history, compare prior runs, and optionally register or promote models.
+- Score single rows or batches through the Predictions page.
+- Review run history, compare prior runs, and optionally register or promote models.
 
 See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 
@@ -118,9 +118,9 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 			Target-aware validation summaries and artifact generation.
 		</td>
 		<td width="50%">
-			<img src="docs/assets/screenshots/prediction-center.png" alt="Prediction center">
+			<img src="docs/assets/screenshots/prediction-center.png" alt="Predictions page">
 			<br>
-			<strong>Prediction Center</strong>
+			<strong>Predictions</strong>
 			<br>
 			Discover saved models, validate schema compatibility, and score rows or files.
 		</td>
