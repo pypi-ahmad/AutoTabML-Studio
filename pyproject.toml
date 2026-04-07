@@ -122,5 +122,23 @@ select = ["F", "E4", "E7", "E9", "I", "UP"]
 ignore = ["E741", "E402"]
 per-file-ignores = {"app/pages/*" = ["F821"], "app/cli.py" = ["F841"]}
 
+[tool.coverage.run]
+omit = [
+    "app/main.py",
+    "app/pages/*_page.py",
+    "app/pages/predictions_page.py",
+    "app/pages/glossary.py",
+    "app/pages/workflow_guide.py",
+    "app/pages/shared_history.py",
+    "app/notebooks/generator.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+    "raise NotImplementedError",
+]
+
 
 
