@@ -422,7 +422,6 @@ See [docs/limitations.md](docs/limitations.md) for additional detail.
 
 - [USAGE.md](USAGE.md) — Complete usage guide with step-by-step instructions for every feature.
 - [docs/user-flow.md](docs/user-flow.md) — End-to-end product flow.
-- [docs/user-guide.md](docs/user-guide.md) — User-facing feature reference.
 - [docs/architecture.md](docs/architecture.md) — Module boundaries and responsibilities.
 - [docs/developer-guide.md](docs/developer-guide.md) — Implementation notes and development workflow.
 - [docs/demo-guide.md](docs/demo-guide.md) — Concise demo walkthrough script.
