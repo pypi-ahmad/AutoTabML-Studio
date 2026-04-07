@@ -14,7 +14,6 @@ from app.prediction import (
     ModelSourceType,
     PredictionRequest,
     PredictionService,
-    PredictionTaskType,
     SchemaValidationMode,
 )
 from app.security.masking import safe_error_message
@@ -28,7 +27,6 @@ from app.pages.ui_labels import (
 )
 from app.state.session import get_or_init_state
 from app.storage import build_metadata_store
-from app.tracking.mlflow_query import is_mlflow_available
 
 logger = logging.getLogger(__name__)
 

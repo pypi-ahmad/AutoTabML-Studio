@@ -5,11 +5,11 @@
 </p>
 
 <p align="center">
-	<strong>Local-first tabular ML workbench for dataset intake, validation, profiling, baseline benchmarking, PyCaret experiments, MLflow tracking, and local prediction.</strong>
+	<strong>Local-first automated machine learning workbench for tabular data — from raw dataset to trained, evaluated, and deployable model.</strong>
 </p>
 
 <p align="center">
-	Built for the messy middle of practical machine learning: the part between "I have a dataset" and "I have a model I can trust, compare, save, and score locally."
+	Built for the practical middle of machine learning: the part between "I have a dataset" and "I have a model I can trust, compare, save, and score locally."
 </p>
 
 <p align="center">
@@ -38,38 +38,43 @@
 	<a href="#-screens">Screens</a> •
 	<a href="#-tech-stack">Tech stack</a> •
 	<a href="#-quickstart">Quickstart</a> •
+	<a href="#-usage-guide">Usage guide</a> •
+	<a href="#-cli-examples">CLI</a> •
 	<a href="#-documentation">Documentation</a>
 </p>
 
 ## ✨ What You Get
 
-AutoTabML Studio brings tabular ML workflows into one local-first workspace instead of scattering them across notebooks, scripts, ad hoc experiment folders, and standalone MLflow utilities.
+AutoTabML Studio brings tabular ML workflows into one local-first workspace instead of scattering them across notebooks, scripts, ad hoc experiment folders, and standalone tracking utilities.
 
-### Core value
+### Core design
 
-- One repo, two product surfaces: a Streamlit workspace for interactive use and a CLI for repeatable runs.
-- Shared service-layer architecture so the UI and CLI use the same ingestion, validation, profiling, benchmarking, experiment, prediction, and tracking modules.
-- Local-first artifact flow under `artifacts/` with SQLite-backed workspace metadata and MLflow-backed run history.
-- Honest product boundaries: this is a practical experimentation workbench, not a deployment platform or remote orchestration system.
+- **Two surfaces, one service layer.** A Streamlit UI for interactive use and a CLI for repeatable/scripted runs, backed by the same ingestion, validation, profiling, benchmarking, experiment, prediction, and tracking modules.
+- **Local-first storage.** All artifacts live under `artifacts/`, workspace metadata in SQLite, run history in MLflow.
+- **Privacy by default.** Your data stays on your machine. No telemetry, no external uploads.
+- **Guided workflow.** A five-step guided path from data loading to predictions, with optional validation and profiling steps.
 
-### Implemented today
+### Features
 
-- Dataset intake from local files, URLs, HTML tables, pandas DataFrames, optional Kaggle inputs, and the UCI ML Repository.
-- Data validation with app-native checks and optional Great Expectations-backed validation.
-- Profiling with optional `ydata-profiling`, large-dataset safeguards, and artifact output.
-- Baseline model benchmarking with LazyPredict for classification and regression.
-- PyCaret experiment workflows for compare, tune, evaluate, finalize, save, and save-all candidate models.
-- Prediction flows for saved local models and MLflow-backed model references.
-- MLflow-backed run history, run comparison, and model registry workflows.
-- Local SQLite metadata for datasets, jobs, and saved local model records.
+- **Data loading** from local files (CSV, Excel, TSV, TXT), URLs, HTML tables, and the UCI ML Repository.
+- **Data validation** with app-native quality checks and optional Great Expectations integration.
+- **Data profiling** with optional ydata-profiling (EDA reports, large-dataset safeguards, sampling).
+- **Quick benchmarking** with LazyPredict to screen dozens of classification and regression algorithms.
+- **Model training** with PyCaret — compare, tune, evaluate, and save production-ready models.
+- **Predictions** — batch scoring and single-row prediction with form-based or JSON input.
+- **Model testing** — evaluate models against held-out data with ground-truth labels.
+- **Run history, comparison, and model registry** backed by MLflow.
+- **Auto-generated notebooks** for every workflow run, downloadable or openable in Google Colab.
+- **AI-generated run summaries** via OpenAI, Anthropic, Gemini, or local Ollama.
 
-### Deliberately not claimed
+### Scope boundaries
 
-- Production serving or deployment endpoints.
-- Background job orchestration or worker infrastructure.
-- Full notebook execution.
-- Production-ready remote execution through `colab_mcp` (transport layer validated; browser-connected execution pending).
-- Monitoring, drift detection, fairness reporting, or observability pipelines.
+This is a local experimentation workbench. It does not provide:
+
+- Production model serving or deployment endpoints
+- Background job orchestration or worker infrastructure
+- Monitoring, drift detection, or observability pipelines
+- Full notebook execution (auto-generated notebooks are for export only)
 
 ## 🧭 Workflow
 
@@ -77,18 +82,17 @@ AutoTabML Studio brings tabular ML workflows into one local-first workspace inst
 Ingest -> Validate -> Profile -> Benchmark -> Experiment -> Save -> Predict -> Compare -> Register
 ```
 
-### Typical operator flow
+### Typical flow
 
-- Load a dataset from the Dataset Intake page or the CLI.
-- Validate structural quality and target readiness.
-- Generate profiling artifacts to inspect missingness, schema shape, and EDA summaries.
-- Run baseline model benchmarks to quickly rank candidate estimators.
-- Move promising candidates into PyCaret experiments for deeper iteration.
-- Finalize and save one model or save all compared models locally.
-- Score single rows or batches through the Predictions page.
-- Review run history, compare prior runs, and optionally register or promote models.
+1. **Load Data** — upload a file, paste a URL, or pick a UCI dataset.
+2. **Validate** *(optional)* — check for missing values, schema issues, and data leakage.
+3. **Profile** *(optional)* — generate a visual EDA summary.
+4. **Quick Benchmark** — screen dozens of algorithms and get a ranked leaderboard.
+5. **Train & Tune** — fine-tune the best algorithm, evaluate with charts, and save a production model.
+6. **Predict** — score new data (single row or batch file) with your saved model.
+7. **Compare & Register** — review run history, compare algorithms, and promote models.
 
-See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
+See [docs/user-flow.md](docs/user-flow.md) for the detailed product flow and [USAGE.md](USAGE.md) for the full usage guide.
 
 ## 🖼️ Screens
 
@@ -99,14 +103,14 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 			<br>
 			<strong>Dashboard</strong>
 			<br>
-			Workspace status, recent jobs, tracked datasets, and saved models.
+			Workflow progress, recommended next steps, and recent activity.
 		</td>
 		<td width="50%">
-			<img src="docs/assets/screenshots/dataset-intake.png" alt="Dataset intake">
+			<img src="docs/assets/screenshots/dataset-intake.png" alt="Load Data">
 			<br>
-			<strong>Dataset Intake</strong>
+			<strong>Load Data</strong>
 			<br>
-			Load local files, URLs, HTML tables, UCI datasets, and session-ready DataFrames.
+			Upload files, paste URLs, or load datasets from the UCI repository.
 		</td>
 	</tr>
 	<tr>
@@ -115,14 +119,14 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 			<br>
 			<strong>Validation</strong>
 			<br>
-			Target-aware validation summaries and artifact generation.
+			Target-aware quality checks with pass/fail summaries.
 		</td>
 		<td width="50%">
-			<img src="docs/assets/screenshots/prediction-center.png" alt="Predictions page">
+			<img src="docs/assets/screenshots/prediction-center.png" alt="Predictions">
 			<br>
 			<strong>Predictions</strong>
 			<br>
-			Discover saved models, validate schema compatibility, and score rows or files.
+			Select a saved model, upload data, and score individual rows or full files.
 		</td>
 	</tr>
 	<tr>
@@ -131,14 +135,14 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 			<br>
 			<strong>Profiling</strong>
 			<br>
-			Run real local profiling and inspect summary cards plus generated artifacts.
+			Visual EDA reports with distributions, correlations, and missing-value analysis.
 		</td>
 		<td width="50%">
-			<img src="docs/assets/screenshots/history-view.png" alt="History view">
+			<img src="docs/assets/screenshots/history-view.png" alt="History">
 			<br>
 			<strong>History</strong>
 			<br>
-			Inspect MLflow-backed run history for benchmarks and experiments.
+			Browse and filter past runs across all workflow types.
 		</td>
 	</tr>
 	<tr>
@@ -147,14 +151,14 @@ See [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
 			<br>
 			<strong>Registry</strong>
 			<br>
-			Review registered models and promote versions with alias-driven semantics.
+			Version, promote, and manage your best models (Champion / Candidate / Archived).
 		</td>
 		<td width="50%">
-			<img src="docs/assets/screenshots/settings-view.png" alt="Settings view">
+			<img src="docs/assets/screenshots/settings-view.png" alt="Settings">
 			<br>
 			<strong>Settings</strong>
 			<br>
-			Inspect execution defaults, local runtime choices, and hardware detection.
+			Essentials and Advanced tabs for workspace, GPU, provider, and tracking configuration.
 		</td>
 	</tr>
 </table>
@@ -165,16 +169,17 @@ All screenshots above were captured from a real local Streamlit session. The cap
 
 | Layer | Stack |
 | --- | --- |
-| UI | Streamlit |
+| UI | Streamlit (custom sidebar navigation, sectioned pages) |
 | CLI | `argparse`-based `autotabml` command |
-| Core data model | pandas, pydantic, pydantic-settings |
-| Ingestion | local files, URLs, HTML tables, `ucimlrepo`, optional Kaggle |
-| Validation | app-native validation rules, optional Great Expectations |
-| Profiling | `ydata-profiling` with sampling and large-dataset guards |
-| Benchmarking | LazyPredict, scikit-learn, optional XGBoost, LightGBM, CatBoost |
-| Experimentation | PyCaret |
-| Tracking | MLflow |
-| Workspace metadata | SQLite |
+| Data | pandas, pydantic, pydantic-settings |
+| Ingestion | Local files, URLs, HTML tables, `ucimlrepo`, optional Kaggle |
+| Validation | App-native quality rules, optional Great Expectations |
+| Profiling | `ydata-profiling` with sampling and large-dataset safeguards |
+| Benchmarking | LazyPredict, scikit-learn, XGBoost, LightGBM, CatBoost |
+| Training | PyCaret (compare, tune, evaluate, finalize, save) |
+| Tracking | MLflow (local SQLite backend by default) |
+| Metadata | SQLite |
+| AI Summaries | OpenAI, Anthropic, Gemini, Ollama (all optional) |
 | Testing | pytest, pytest-cov, pytest-asyncio, respx |
 
 ### Supported task types
@@ -186,42 +191,48 @@ All screenshots above were captured from a real local Streamlit session. The cap
 
 | Surface | Purpose |
 | --- | --- |
-| Streamlit app | Primary interactive workspace for operators and demos |
-| CLI | Repeatable workflows, diagnostics, history queries, and automation-friendly operations |
+| Streamlit app | Interactive workspace for data exploration, model training, and predictions |
+| CLI | Repeatable workflows, diagnostics, history queries, and scripted automation |
 
-### Supported input types
+### Supported input formats
 
-- Local CSV, TSV, delimiter-based text, and Excel files.
-- URL-based CSV, TSV, delimiter-based text, and Excel files.
-- HTML pages with real table markup.
-- In-memory pandas DataFrames.
-- UCI ML Repository datasets via `ucimlrepo`.
-- Optional Kaggle dataset loading with explicit file selection.
+| Format | Extensions |
+| --- | --- |
+| CSV | `.csv` |
+| Delimited text | `.tsv`, `.txt`, `.data` |
+| Excel | `.xlsx`, `.xls`, `.xlsm`, `.xlsb` |
+| Web URL | HTTP/HTTPS links to data files |
+| HTML tables | Pages with `<table>` markup |
+| UCI ML Repository | Search by name or ID via `ucimlrepo` |
+| Kaggle | Optional, CLI-only (`pip install -e ".[kaggle]"`) |
 
-## 🏗️ Architecture At A Glance
+## 🏗️ Project Structure
 
-The repo is intentionally split so Streamlit pages stay thin and the service layer owns business logic.
+Streamlit pages are thin entry points. Business logic lives in the service layer.
 
 | Module | Responsibility |
 | --- | --- |
-| `app/ingestion/` | source routing, loaders, normalization, metadata hashing |
-| `app/validation/` | rules, optional GX checks, validation artifacts |
-| `app/profiling/` | profiling orchestration, selectors, summaries, artifacts |
-| `app/modeling/benchmark/` | baseline benchmark orchestration, ranking, MLflow logging |
-| `app/modeling/pycaret/` | compare, tune, evaluate, finalize, save, snapshot workflows |
-| `app/prediction/` | model discovery, loading, schema checks, scoring, prediction artifacts |
+| `app/ingestion/` | Source routing, loaders, normalization, metadata hashing |
+| `app/validation/` | Quality rules, optional GX checks, validation artifacts |
+| `app/profiling/` | Profiling orchestration, selectors, summaries, artifacts |
+| `app/modeling/benchmark/` | Baseline benchmark orchestration, ranking, MLflow logging |
+| `app/modeling/pycaret/` | Compare, tune, evaluate, finalize, save, snapshot workflows |
+| `app/prediction/` | Model discovery, loading, schema checks, scoring |
 | `app/tracking/` | MLflow queries, history inspection, run comparison |
 | `app/registry/` | MLflow model registration and promotion |
-| `app/storage/` | SQLite metadata store for local workspace activity |
-| `app/artifacts/` | canonical artifact path management |
-| `app/pages/` | Streamlit page entrypoints only |
-| `app/cli.py` | CLI entrypoint and command wiring |
+| `app/storage/` | SQLite metadata store for workspace activity |
+| `app/artifacts/` | Canonical artifact path management |
+| `app/providers/` | LLM provider integrations (OpenAI, Anthropic, Gemini, Ollama) |
+| `app/notebooks/` | Jupyter notebook generation for completed runs |
+| `app/config/` | Pydantic settings, enums, environment variable binding |
+| `app/pages/` | Streamlit page entry points and shared UI components |
+| `app/cli.py` | CLI entry point and command wiring |
 
-### Storage model
+### Storage
 
-- MLflow is the source of truth for benchmark runs, experiment runs, comparison inputs, and registry state.
-- SQLite stores local workspace metadata only: loaded datasets, local jobs, and saved local-model records.
-- Artifacts are written locally under `artifacts/` through a centralized artifact manager.
+- **MLflow** is the source of truth for benchmark runs, experiment runs, comparison data, and registry state.
+- **SQLite** stores local workspace metadata: loaded datasets, job records, and saved model records.
+- **`artifacts/`** holds all generated output: reports, models, predictions, and tracking databases.
 
 For more detail, see [docs/architecture.md](docs/architecture.md) and [docs/developer-guide.md](docs/developer-guide.md).
 
@@ -286,9 +297,26 @@ autotabml doctor
 streamlit run app/main.py
 ```
 
-After launch, start with Dataset Intake, load a dataset into session state, then drive validation, profiling, benchmarking, experiments, or prediction from the UI.
+After launch, start with **Load Data**, then follow the guided workflow through validation, profiling, benchmarking, training, and prediction.
 
-## 💻 CLI Examples
+## � Usage Guide
+
+For detailed, step-by-step instructions on every feature, see **[USAGE.md](USAGE.md)**.
+
+| Section | What it covers |
+| --- | --- |
+| [Who This Is For](USAGE.md#who-this-is-for) | Target audience and use cases |
+| [Before You Start](USAGE.md#before-you-start) | Prerequisites, install options, first-time setup |
+| [Starting the App](USAGE.md#starting-the-app) | Streamlit UI and CLI entry points |
+| [Core Workflow](USAGE.md#core-workflow) | The five-step guided path from data to predictions |
+| [Pages Reference](USAGE.md#pages-reference) | Every page explained — Dashboard, Load Data, Validation, Profiling, Benchmark, Train & Tune, Predictions, Test & Evaluate, Models, History, Comparison, Registry, Notebooks, Settings |
+| [CLI Reference](USAGE.md#cli-reference) | All commands: system, data prep, benchmark, experiment, predict, history, registry |
+| [Configuration](USAGE.md#configuration) | Environment variables and optional dependency groups |
+| [Input & Output](USAGE.md#input--output) | Supported file formats and the `artifacts/` directory layout |
+| [Troubleshooting](USAGE.md#troubleshooting) | Common issues with causes and fixes |
+| [Limitations](USAGE.md#limitations) | Known constraints and scope boundaries |
+
+## �💻 CLI Examples
 
 Top-level help:
 
@@ -314,11 +342,11 @@ For a rehearsed product walkthrough, use [docs/demo-guide.md](docs/demo-guide.md
 
 ## 🔐 Configuration
 
-- Non-secret settings persist to `~/.autotabml/settings.json`.
-- Provider API keys are expected from environment variables or session-only UI input.
-- Secrets are not written to the persisted settings file.
-- Startup logging redacts obvious secret-like substrings.
-- Environment variable layout is documented in [.env.example](.env.example).
+Settings are managed through three layers:
+
+1. **Defaults** — Pydantic-defined defaults in `app/config/models.py`.
+2. **Persisted settings** — Saved to `~/.autotabml/settings.json` (secrets are excluded).
+3. **Environment overrides** — `AUTOTABML_*` prefixed variables (see [.env.example](.env.example)).
 
 Example overrides:
 
@@ -339,16 +367,18 @@ ANTHROPIC_API_KEY=...
 GEMINI_API_KEY=...
 ```
 
-### Provider settings supported in the UI
+### LLM providers supported in Settings
 
-- OpenAI
-- Anthropic
-- Gemini
-- Ollama
+| Provider | Key variable |
+| --- | --- |
+| OpenAI | `OPENAI_API_KEY` |
+| Anthropic | `ANTHROPIC_API_KEY` |
+| Gemini | `GEMINI_API_KEY` |
+| Ollama | `AUTOTABML_OLLAMA_BASE_URL` (local, no API key) |
 
-## 🧪 Quality And Release Checks
+## 🧪 Testing
 
-Local test commands:
+Unit tests:
 
 ```bash
 pytest
@@ -366,33 +396,40 @@ Optional integration suite:
 pytest -m integration
 ```
 
-### Automation in `.github/workflows/`
+### CI / CD
 
-- CI runs lint (`ruff`), unit tests on Python 3.11 and 3.13, a coverage gate, and an E2E smoke test with real optional dependencies on Python 3.11.
-- Security workflows run `detect-secrets` and `gitleaks`.
-- Release-readiness checks validate build metadata and `twine` compatibility for tagged releases.
-- Dependabot is configured for GitHub Actions and pip dependency updates.
+| Workflow | What it does |
+| --- | --- |
+| **CI** ([ci.yml](.github/workflows/ci.yml)) | Lint (`ruff`), unit tests (Python 3.11 + 3.13), coverage gate (≥65%), E2E smoke test |
+| **Security** ([security.yml](.github/workflows/security.yml)) | `detect-secrets` + `gitleaks` scanning on every push and PR |
+| **Release readiness** ([release-readiness.yml](.github/workflows/release-readiness.yml)) | Build validation and `twine check` for tagged releases |
 
-## ⚠️ Current Limitations
+Dependabot is configured for weekly pip and GitHub Actions dependency updates.
 
-- Notebook mode exists as a workspace concept, but it is currently a placeholder rather than a full notebook runner.
-- The `colab_mcp` backend MCP transport is validated (server spawns, handshake works, tools listed), but full remote execution requires a browser-connected Colab notebook.
-- Optional dependencies must be installed explicitly for validation, profiling, benchmarking, MLflow, and PyCaret workflows.
-- PyCaret-backed experiment, finalize/save, and local saved-model prediction flows are not currently validated on Python 3.13 in this environment.
-- The project is local-first and does not implement deployment, serving, background job orchestration, or monitoring pipelines.
-- Very large datasets may still require sampling because profiling and experiment flows operate on pandas DataFrames.
+## ⚠️ Limitations
 
-Detailed caveats live in [docs/limitations.md](docs/limitations.md).
+- **PyCaret requires Python < 3.13.** All other features work on 3.10–3.13.
+- **GPU training** requires NVIDIA hardware with CUDA drivers. Falls back to CPU automatically.
+- **Large datasets** (100K+ rows) trigger automatic sampling in benchmark and profiling.
+- **Kaggle integration** is CLI-only; not exposed in the Streamlit UI.
+- **Local-first only.** No deployment endpoints, remote orchestration, or monitoring pipelines.
+- **Single-user.** Designed for individual use on a local machine, not concurrent multi-user access.
+- **AI summaries** require an API key (OpenAI/Anthropic/Gemini) or a local Ollama instance.
+
+See [docs/limitations.md](docs/limitations.md) for additional detail.
 
 ## 📚 Documentation
 
-- [docs/user-flow.md](docs/user-flow.md) for the end-to-end product flow.
-- [docs/architecture.md](docs/architecture.md) for module boundaries and responsibilities.
-- [docs/developer-guide.md](docs/developer-guide.md) for implementation notes and operational details.
-- [docs/demo-guide.md](docs/demo-guide.md) for a concise demo script.
-- [CHANGELOG.md](CHANGELOG.md) for release notes.
-- [CONTRIBUTING.md](CONTRIBUTING.md) for local maintainer workflow guidance.
-- [docs/repo-presentation.md](docs/repo-presentation.md) for public-facing repo presentation notes.
+- [USAGE.md](USAGE.md) — Complete usage guide with step-by-step instructions for every feature.
+- [docs/user-flow.md](docs/user-flow.md) — End-to-end product flow.
+- [docs/user-guide.md](docs/user-guide.md) — User-facing feature reference.
+- [docs/architecture.md](docs/architecture.md) — Module boundaries and responsibilities.
+- [docs/developer-guide.md](docs/developer-guide.md) — Implementation notes and development workflow.
+- [docs/demo-guide.md](docs/demo-guide.md) — Concise demo walkthrough script.
+- [docs/limitations.md](docs/limitations.md) — Known limitations and caveats.
+- [CHANGELOG.md](CHANGELOG.md) — Release notes.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — Contribution guidelines.
+- [SECURITY.md](SECURITY.md) — Security policy.
 
 ## 📄 License
 

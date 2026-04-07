@@ -7,7 +7,6 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from app.security.masking import safe_error_message
 from app.pages.ui_labels import render_metadata_table, format_enum_value, PREDICTION_TASK_TYPE_LABELS
 from app.storage.models import AppJobType
 
