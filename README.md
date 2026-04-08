@@ -258,6 +258,8 @@ autotabml profile data/train.csv --artifacts-dir artifacts/profiling
 # Modeling
 autotabml benchmark data/train.csv --target target --task-type auto
 autotabml experiment-run data/train.csv --target target --task-type classification --n-select 3
+autotabml flaml-run data/train.csv --target target --task-type auto --time-budget 120
+autotabml flaml-save data/train.csv --target target --save-name best_model
 
 # Operations
 autotabml predict-history --limit 10

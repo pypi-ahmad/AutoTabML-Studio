@@ -33,6 +33,13 @@ class PredictionScorer:
                 prediction_column_name=prediction_column_name,
                 prediction_score_column_name=prediction_score_column_name,
             )
+        if loaded_model.scorer_kind == "flaml":
+            return _score_with_predict_api(
+                loaded_model,
+                dataframe,
+                prediction_column_name=prediction_column_name,
+                prediction_score_column_name=prediction_score_column_name,
+            )
         return _score_with_predict_api(
             loaded_model,
             dataframe,

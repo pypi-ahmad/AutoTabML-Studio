@@ -40,6 +40,9 @@ WORKFLOW_STEPS: list[dict[str, str]] = [
         "icon": "🧪",
         "short": "Fine-tune the best algorithm and save a production-ready model.",
         "what_happens": "The system compares, tunes, and saves the winning model ready for predictions.",
+        "alternatives": [
+            {"label": "FLAML AutoML", "page": "FLAML AutoML", "icon": "🔥", "short": "Or use Microsoft FLAML for fast, automated model selection."},
+        ],
     },
     {
         "number": "5",
