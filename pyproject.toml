@@ -103,7 +103,6 @@ Homepage = "https://github.com/pypi-ahmad/AutoTabML-Studio"
 Repository = "https://github.com/pypi-ahmad/AutoTabML-Studio"
 Documentation = "https://github.com/pypi-ahmad/AutoTabML-Studio/tree/main/docs"
 Issues = "https://github.com/pypi-ahmad/AutoTabML-Studio/issues"
-Changelog = "https://github.com/pypi-ahmad/AutoTabML-Studio/blob/main/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
 version = {attr = "app.__version__"}
