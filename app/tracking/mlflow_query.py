@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # Well-known experiment names used by existing trackers.
 _BENCHMARK_EXPERIMENT_PREFIX = "autotabml-benchmark"
 _EXPERIMENT_EXPERIMENT_PREFIX = "autotabml-experiment"
+_FLAML_EXPERIMENT_PREFIX = "autotabml-flaml"
 
 
 def is_mlflow_available() -> bool:
@@ -469,11 +470,17 @@ def _infer_run_type(
             return RunType.BENCHMARK
         if _EXPERIMENT_EXPERIMENT_PREFIX in low:
             return RunType.EXPERIMENT
+        if _FLAML_EXPERIMENT_PREFIX in low:
+            return RunType.FLAML
     effective_run_name = (run_name or tags.get("mlflow.runName", "")).strip()
     if effective_run_name.startswith("benchmark-"):
         return RunType.BENCHMARK
     if effective_run_name.startswith("experiment-"):
         return RunType.EXPERIMENT
+    if effective_run_name.startswith("flaml-"):
+        return RunType.FLAML
+    if tags.get("framework") == "flaml":
+        return RunType.FLAML
     return RunType.UNKNOWN
 
 

@@ -23,7 +23,7 @@ def _detect_completed_steps() -> int:
         return 0                                       # nothing loaded → step 0
     if not st.session_state.get("benchmark_bundles"):
         return 2                                       # data loaded → skip optional step 2, benchmark next
-    if not st.session_state.get("experiment_bundles"):
+    if not st.session_state.get("experiment_bundles") and not st.session_state.get("flaml_bundles"):
         return 3                                       # benchmarked, no experiment yet
     return 4                                           # trained → predict is next
 
@@ -144,6 +144,8 @@ def render_dashboard_page() -> None:
             else:
                 st.markdown(f"{icon} **Step {num} · {label}**{opt_tag}")
             st.caption(f"  {short}")
+            for alt in step.get("alternatives", []):
+                st.caption(f"  {alt['icon']} *Alternative:* {alt['label']} — {alt['short']}")
     else:
         # ── Dataset loaded — show stats + sequential recommended step ──
         st.subheader(f"📂 Current Dataset: {active_name}")

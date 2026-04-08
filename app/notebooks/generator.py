@@ -64,6 +64,14 @@ def generate_job_notebook(
             metadata=metadata or {},
             artifact_path=artifact_path,
         ))
+    elif job_type == "flaml":
+        cells.extend(_flaml_cells(
+            dataset_name=dataset_name,
+            target_column=target_column,
+            task_type=task_type,
+            metadata=metadata or {},
+            artifact_path=artifact_path,
+        ))
     elif job_type == "profiling":
         cells.extend(_profiling_cells(
             dataset_name=dataset_name,
@@ -190,6 +198,60 @@ def _experiment_cells(
         ))
     else:
         cells.append(_code_cell("print('No saved model artifact path recorded.')"))
+
+    return cells
+
+
+def _flaml_cells(
+    dataset_name: str,
+    target_column: str | None,
+    task_type: str | None,
+    metadata: dict,
+    artifact_path: str | None,
+) -> list[dict]:
+    cells = []
+    cells.append(_md_cell(
+        "## FLAML AutoML Summary\n\n"
+        f"- **Best estimator:** {metadata.get('best_estimator', 'N/A')}\n"
+        f"- **Best loss:** {metadata.get('best_loss', 'N/A')}\n"
+        f"- **Metric:** {metadata.get('metric', 'N/A')}\n"
+        f"- **Search duration:** {metadata.get('search_duration_seconds', 'N/A')}s"
+    ))
+
+    cells.append(_md_cell("## Reproduce FLAML Search"))
+    cells.append(_code_cell(
+        f"# Load dataset and run FLAML AutoML\n"
+        f"# Dataset: {dataset_name}\n"
+        f"# Target: {target_column or 'TODO: set target column'}\n\n"
+        f"from flaml import AutoML\n"
+        f"import pandas as pd\n\n"
+        f"# df = pd.read_csv('path/to/your/data.csv')\n"
+        f"# automl = AutoML()\n"
+        f"# automl.fit(\n"
+        f"#     X_train=df.drop(columns=['{target_column or 'target'}']),\n"
+        f"#     y_train=df['{target_column or 'target'}'],\n"
+        f"#     task='{task_type or 'classification'}',\n"
+        f"#     time_budget=120,\n"
+        f"# )\n"
+        f"# print(f'Best estimator: {{automl.best_estimator}}')\n"
+        f"# print(f'Best config: {{automl.best_config}}')\n"
+        f"print('Uncomment above to reproduce')"
+    ))
+
+    if artifact_path:
+        cells.append(_md_cell("## Load Saved FLAML Model"))
+        cells.append(_code_cell(
+            f"import pickle\n"
+            f"from pathlib import Path\n\n"
+            f"model_path = Path(r'{artifact_path}')\n"
+            "if model_path.exists():\n"
+            "    with model_path.open('rb') as f:\n"
+            "        automl = pickle.load(f)\n"
+            "    print(f'Model loaded: {type(automl).__name__}')\n"
+            "    print(f'Best estimator: {automl.best_estimator}')\n"
+            "else:\n"
+            "    print(f'Model not found: {model_path}')"
+        ))
 
     return cells
 

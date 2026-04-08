@@ -20,8 +20,10 @@ from app.prediction.selectors import (
     build_mlflow_registered_model_uri,
     build_mlflow_run_model_uri,
     coerce_prediction_task_type,
+    discover_flaml_saved_models,
     discover_local_saved_models,
     extract_run_id_from_model_uri,
+    load_flaml_saved_model_metadata_file,
     load_saved_model_metadata_file,
     resolve_local_model_reference,
     to_experiment_task_type,
@@ -112,6 +114,87 @@ class LocalPyCaretModelLoader(ModelLoader):
             supported_prediction_modes=[PredictionMode.SINGLE_ROW, PredictionMode.BATCH],
             feature_columns=list(metadata.feature_columns) if metadata is not None else list(resolved.feature_columns),
             target_column=metadata.target_column if metadata is not None else resolved.metadata.get("target_column"),
+            metadata=metadata_payload,
+            native_model=native_model,
+        )
+
+
+class LocalFlamlModelLoader(ModelLoader):
+    """Load local saved FLAML model artifacts."""
+
+    def __init__(self, *, model_dirs: list[Path], metadata_dirs: list[Path]) -> None:
+        self._model_dirs = model_dirs
+        self._metadata_dirs = metadata_dirs
+
+    def supports(self, source_type: ModelSourceType) -> bool:
+        return source_type == ModelSourceType.LOCAL_SAVED_MODEL
+
+    def discover(self) -> list[AvailableModelReference]:
+        return discover_flaml_saved_models(self._model_dirs, self._metadata_dirs)
+
+    def load(self, request: PredictionRequest) -> LoadedModel:
+        references = self.discover()
+        identifier = request.model_identifier or request.model_path
+        resolved = resolve_local_model_reference(identifier, references)
+
+        flaml_metadata = None
+        if request.metadata_path is not None:
+            flaml_metadata = load_flaml_saved_model_metadata_file(request.metadata_path)
+        elif resolved.metadata_path is not None:
+            flaml_metadata = load_flaml_saved_model_metadata_file(resolved.metadata_path)
+
+        task_type = request.task_type_hint or resolved.task_type
+        if task_type in {None, PredictionTaskType.UNKNOWN} and flaml_metadata is not None:
+            raw_task = (
+                flaml_metadata.task_type.value
+                if hasattr(flaml_metadata.task_type, "value")
+                else str(flaml_metadata.task_type)
+            )
+            task_type = coerce_prediction_task_type(raw_task)
+
+        if task_type in {None, PredictionTaskType.UNKNOWN}:
+            raise ModelLoadError(
+                "FLAML models require saved metadata or an explicit task_type_hint."
+            )
+
+        import pickle
+
+        model_path = resolved.model_path or Path(resolved.load_reference)
+        try:
+            with model_path.open("rb") as f:
+                native_model = pickle.load(f)  # noqa: S301
+        except Exception as exc:
+            raise ModelLoadError(f"Could not load FLAML model: {exc}") from exc
+
+        metadata_payload = dict(resolved.metadata)
+        if flaml_metadata is not None:
+            metadata_payload.update({
+                "framework": "flaml",
+                "target_column": flaml_metadata.target_column,
+                "dataset_fingerprint": flaml_metadata.dataset_fingerprint,
+                "feature_dtypes": dict(flaml_metadata.feature_dtypes),
+                "target_dtype": flaml_metadata.target_dtype,
+                "best_estimator": flaml_metadata.best_estimator,
+            })
+
+        return LoadedModel(
+            source_type=ModelSourceType.LOCAL_SAVED_MODEL,
+            task_type=task_type,
+            model_identifier=resolved.display_name,
+            load_reference=resolved.load_reference,
+            loader_name=self.__class__.__name__,
+            scorer_kind="flaml",
+            supported_prediction_modes=[PredictionMode.SINGLE_ROW, PredictionMode.BATCH],
+            feature_columns=(
+                list(flaml_metadata.feature_columns)
+                if flaml_metadata is not None
+                else list(resolved.feature_columns)
+            ),
+            target_column=(
+                flaml_metadata.target_column
+                if flaml_metadata is not None
+                else resolved.metadata.get("target_column")
+            ),
             metadata=metadata_payload,
             native_model=native_model,
         )

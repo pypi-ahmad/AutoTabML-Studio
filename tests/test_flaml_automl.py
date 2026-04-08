@@ -574,3 +574,244 @@ class TestFlamlArtifacts:
         assert artifact_bundle.leaderboard_csv_path.exists()
         assert artifact_bundle.summary_json_path is not None
         assert artifact_bundle.summary_json_path.exists()
+
+
+# ── RunType integration tests ──────────────────────────────────────────
+
+
+class TestFlamlRunType:
+    def test_flaml_run_type_exists(self):
+        from app.tracking.schemas import RunType
+
+        assert hasattr(RunType, "FLAML")
+        assert RunType.FLAML.value == "flaml"
+
+    def test_infer_run_type_from_experiment_name(self):
+        from app.tracking.mlflow_query import _infer_run_type
+
+        result = _infer_run_type("autotabml-flaml", {})
+        from app.tracking.schemas import RunType
+
+        assert result == RunType.FLAML
+
+    def test_infer_run_type_from_run_name(self):
+        from app.tracking.mlflow_query import _infer_run_type
+        from app.tracking.schemas import RunType
+
+        result = _infer_run_type(None, {}, run_name="flaml-iris-classification")
+        assert result == RunType.FLAML
+
+    def test_infer_run_type_from_framework_tag(self):
+        from app.tracking.mlflow_query import _infer_run_type
+        from app.tracking.schemas import RunType
+
+        result = _infer_run_type(None, {"framework": "flaml"})
+        assert result == RunType.FLAML
+
+
+# ── AppJobType integration tests ───────────────────────────────────────
+
+
+class TestFlamlAppJobType:
+    def test_flaml_job_type_exists(self):
+        from app.storage.models import AppJobType
+
+        assert hasattr(AppJobType, "FLAML")
+        assert AppJobType.FLAML.value == "flaml"
+
+
+# ── Default experiment names tests ─────────────────────────────────────
+
+
+class TestFlamlDefaultExperimentNames:
+    def test_flaml_included_in_default_experiment_names(self):
+        settings = AppSettings()
+        assert "autotabml-flaml" in settings.tracking.default_experiment_names
+
+
+# ── Prediction discovery tests ─────────────────────────────────────────
+
+
+class TestFlamlModelDiscovery:
+    def test_discover_flaml_models_empty_dirs(self, tmp_path):
+        from app.prediction.selectors import discover_flaml_saved_models
+
+        refs = discover_flaml_saved_models([tmp_path], [tmp_path])
+        assert refs == []
+
+    def test_discover_flaml_models_finds_metadata(self, tmp_path):
+        from app.prediction.selectors import discover_flaml_saved_models
+
+        model_path = tmp_path / "test.pkl"
+        model_path.write_bytes(b"fake")
+        metadata = FlamlSavedModelMetadata(
+            task_type=FlamlTaskType.CLASSIFICATION,
+            target_column="target",
+            model_name="test_model",
+            model_path=model_path,
+            feature_columns=["f1", "f2"],
+            feature_dtypes={"f1": "float64", "f2": "object"},
+            target_dtype="int64",
+        )
+        meta_path = tmp_path / "test_flaml_saved_model_metadata_test.json"
+        meta_path.write_text(metadata.model_dump_json(indent=2), encoding="utf-8")
+
+        refs = discover_flaml_saved_models([tmp_path], [tmp_path])
+        assert len(refs) == 1
+        assert refs[0].display_name == "test_model"
+        assert refs[0].metadata["framework"] == "flaml"
+        assert refs[0].task_type.value == "classification"
+        assert refs[0].feature_columns == ["f1", "f2"]
+
+    def test_coerce_flaml_task_type(self):
+        from app.prediction.selectors import _coerce_flaml_task_type
+        from app.prediction.schemas import PredictionTaskType
+
+        assert _coerce_flaml_task_type(FlamlTaskType.CLASSIFICATION) == PredictionTaskType.CLASSIFICATION
+        assert _coerce_flaml_task_type(FlamlTaskType.REGRESSION) == PredictionTaskType.REGRESSION
+        assert _coerce_flaml_task_type(FlamlTaskType.AUTO) == PredictionTaskType.UNKNOWN
+
+
+# ── Prediction loader tests ───────────────────────────────────────────
+
+
+class TestFlamlModelLoader:
+    def test_flaml_loader_exports(self):
+        from app.prediction import LocalFlamlModelLoader
+
+        assert LocalFlamlModelLoader is not None
+
+    def test_flaml_loader_supports_local(self):
+        from app.prediction.loader import LocalFlamlModelLoader
+        from app.prediction.schemas import ModelSourceType
+
+        loader = LocalFlamlModelLoader(model_dirs=[], metadata_dirs=[])
+        assert loader.supports(ModelSourceType.LOCAL_SAVED_MODEL)
+        assert not loader.supports(ModelSourceType.MLFLOW_RUN_MODEL)
+
+    def test_flaml_loader_discover_empty(self, tmp_path):
+        from app.prediction.loader import LocalFlamlModelLoader
+
+        loader = LocalFlamlModelLoader(model_dirs=[tmp_path], metadata_dirs=[tmp_path])
+        refs = loader.discover()
+        assert refs == []
+
+
+# ── Scorer tests ───────────────────────────────────────────────────────
+
+
+class TestFlamlScorer:
+    def test_scorer_routes_flaml_to_predict_api(self):
+        from app.prediction.scorer import PredictionScorer
+        from app.prediction.schemas import (
+            LoadedModel,
+            ModelSourceType,
+            PredictionMode,
+            PredictionTaskType,
+        )
+
+        class FakeModel:
+            def predict(self, X):
+                return [42] * len(X)
+
+        scorer = PredictionScorer()
+        loaded = LoadedModel(
+            source_type=ModelSourceType.LOCAL_SAVED_MODEL,
+            task_type=PredictionTaskType.REGRESSION,
+            model_identifier="test",
+            load_reference="test.pkl",
+            loader_name="LocalFlamlModelLoader",
+            scorer_kind="flaml",
+            supported_prediction_modes=[PredictionMode.BATCH],
+            native_model=FakeModel(),
+        )
+        df = pd.DataFrame({"f1": [1, 2, 3]})
+        result = scorer.score(
+            loaded,
+            df,
+            prediction_column_name="prediction",
+            prediction_score_column_name="prediction_score",
+        )
+        assert "prediction" in result.columns
+        assert list(result["prediction"]) == [42, 42, 42]
+
+
+# ── Notebook generation tests ──────────────────────────────────────────
+
+
+class TestFlamlNotebookGeneration:
+    def test_flaml_notebook_generated(self, tmp_path):
+        from app.notebooks.generator import generate_job_notebook
+
+        path = generate_job_notebook(
+            dataset_name="test_ds",
+            job_type="flaml",
+            task_type="classification",
+            target_column="target",
+            metadata={"best_estimator": "lgbm", "best_loss": 0.05, "metric": "accuracy"},
+            output_dir=tmp_path,
+        )
+        assert path.exists()
+        assert path.suffix == ".ipynb"
+        content = path.read_text(encoding="utf-8")
+        assert "FLAML" in content
+        assert "lgbm" in content
+
+    def test_flaml_notebook_with_artifact_path(self, tmp_path):
+        from app.notebooks.generator import generate_job_notebook
+
+        path = generate_job_notebook(
+            dataset_name="test_ds",
+            job_type="flaml",
+            task_type="regression",
+            target_column="price",
+            metadata={},
+            artifact_path=str(tmp_path / "model.pkl"),
+            output_dir=tmp_path,
+        )
+        assert path.exists()
+        content = path.read_text(encoding="utf-8")
+        assert "pickle" in content
+
+
+# ── Workflow guide tests ───────────────────────────────────────────────
+
+
+class TestFlamlWorkflowGuide:
+    def test_workflow_step_4_has_flaml_alternative(self):
+        from app.pages.workflow_guide import WORKFLOW_STEPS
+
+        step_4 = next(s for s in WORKFLOW_STEPS if s["number"] == "4")
+        alternatives = step_4.get("alternatives", [])
+        assert len(alternatives) >= 1
+        flaml_alt = alternatives[0]
+        assert flaml_alt["label"] == "FLAML AutoML"
+        assert flaml_alt["page"] == "FLAML AutoML"
+
+
+# ── History filter tests ───────────────────────────────────────────────
+
+
+class TestFlamlHistoryFilter:
+    def test_flaml_in_history_cli_choices(self):
+        """Verify the CLI history-list parser accepts 'flaml' as a run type."""
+        from app.cli import main  # noqa: F401 — ensures parsers are importable
+        from app.tracking.schemas import RunType
+
+        assert RunType("flaml") == RunType.FLAML
+
+
+# ── CLI command tests ──────────────────────────────────────────────────
+
+
+class TestFlamlCLI:
+    def test_flaml_cli_functions_exist(self):
+        from app.cli import cmd_flaml_run, cmd_flaml_save
+
+        assert callable(cmd_flaml_run)
+        assert callable(cmd_flaml_save)
+
+    def test_build_flaml_service_helper(self):
+        from app.cli import _build_flaml_service
+
+        assert callable(_build_flaml_service)

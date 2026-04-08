@@ -1,7 +1,7 @@
 """Prediction / inference package exports."""
 
 from app.prediction.base import BasePredictionService, PredictionService
-from app.prediction.loader import LocalPyCaretModelLoader, MLflowModelLoader, ModelLoader
+from app.prediction.loader import LocalFlamlModelLoader, LocalPyCaretModelLoader, MLflowModelLoader, ModelLoader
 from app.prediction.schemas import (
     AvailableModelReference,
     BatchPredictionRequest,
@@ -28,6 +28,7 @@ __all__ = [
     "BatchPredictionRequest",
     "BatchPredictionResult",
     "LoadedModel",
+    "LocalFlamlModelLoader",
     "LocalPyCaretModelLoader",
     "MLflowModelLoader",
     "ModelLoader",

@@ -206,7 +206,7 @@ class MLflowSettings(BaseModel):
     tracking_uri: str | None = None
     registry_uri: str | None = None
     default_experiment_names: list[str] = Field(
-        default_factory=lambda: ["autotabml-benchmarks", "autotabml-experiments"]
+        default_factory=lambda: ["autotabml-benchmarks", "autotabml-experiments", "autotabml-flaml"]
     )
     history_page_default_limit: int = Field(default=50, gt=0)
     champion_alias: str = "champion"

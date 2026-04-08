@@ -17,6 +17,7 @@ class AppJobType(str, Enum):
     PROFILING = "profiling"
     BENCHMARK = "benchmark"
     EXPERIMENT = "experiment"
+    FLAML = "flaml"
     PREDICTION = "prediction"
 
 
