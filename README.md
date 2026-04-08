@@ -1,425 +1,333 @@
+<div align="center">
+
 # AutoTabML Studio
 
-<p align="center">
-	<img src="docs/assets/social-preview/autotabml-social-preview.png" alt="AutoTabML Studio social preview" width="100%">
-</p>
+<img src="docs/assets/social-preview/autotabml-social-preview.png" alt="AutoTabML Studio" width="100%">
 
-<p align="center">
-	<strong>Local-first automated machine learning workbench for tabular data — from raw dataset to trained, evaluated, and deployable model.</strong>
-</p>
+**Local-first automated machine learning workbench for tabular data.**\
+Go from raw CSV to trained, evaluated, and deployable model — entirely on your machine.
 
-<p align="center">
-	Built for the practical middle of machine learning: the part between "I have a dataset" and "I have a model I can trust, compare, save, and score locally."
-</p>
+<br>
 
-<p align="center">
-	<a href="https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"></a>
-	<a href="https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/security.yml"><img src="https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/security.yml?branch=main&style=for-the-badge&logo=shieldsdotio&logoColor=white&label=Security" alt="Security"></a>
-	<a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-0F172A?style=for-the-badge&logo=apache&logoColor=white" alt="License: Apache 2.0"></a>
-	<img src="https://img.shields.io/badge/Python-3.10%20to%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10 to 3.13">
-	<img src="https://img.shields.io/badge/Interface-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit UI">
-	<img src="https://img.shields.io/badge/Tracking-MLflow-0194E2?style=for-the-badge&logo=mlflow&logoColor=white" alt="MLflow tracking">
-	<img src="https://img.shields.io/badge/Metadata-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite metadata">
-</p>
+[![CI](https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/ci.yml)
+[![Security](https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/security.yml?branch=main&style=for-the-badge&logo=shieldsdotio&logoColor=white&label=Security)](https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/security.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-0F172A?style=for-the-badge&logo=apache&logoColor=white)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.10%E2%80%933.13-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-<p align="center">
-	<img src="https://img.shields.io/badge/Pandas-DataFrames-150458?style=flat-square&logo=pandas&logoColor=white" alt="pandas">
-	<img src="https://img.shields.io/badge/Pydantic-Config%20%26%20Schemas-E92063?style=flat-square&logo=pydantic&logoColor=white" alt="pydantic">
-	<img src="https://img.shields.io/badge/scikit--learn-Baselines-F7931E?style=flat-square&logo=scikitlearn&logoColor=white" alt="scikit-learn">
-	<img src="https://img.shields.io/badge/LazyPredict-Benchmarking-2563EB?style=flat-square" alt="LazyPredict">
-	<img src="https://img.shields.io/badge/PyCaret-Experiments-1D4ED8?style=flat-square" alt="PyCaret">
-	<img src="https://img.shields.io/badge/Great%20Expectations-Validation-6D28D9?style=flat-square" alt="Great Expectations">
-	<img src="https://img.shields.io/badge/ydata--profiling-Profiling-0F766E?style=flat-square" alt="ydata profiling">
-</p>
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2?style=flat-square&logo=mlflow&logoColor=white)
+![pandas](https://img.shields.io/badge/pandas-DataFrames-150458?style=flat-square&logo=pandas&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-Schemas-E92063?style=flat-square&logo=pydantic&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![PyCaret](https://img.shields.io/badge/PyCaret-AutoML-1D4ED8?style=flat-square)
+![FLAML](https://img.shields.io/badge/FLAML-AutoML-00A4EF?style=flat-square&logo=microsoft&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-Metadata-003B57?style=flat-square&logo=sqlite&logoColor=white)
 
-<p align="center">
-	<a href="#-what-you-get">What you get</a> •
-	<a href="#-workflow">Workflow</a> •
-	<a href="#-screens">Screens</a> •
-	<a href="#-tech-stack">Tech stack</a> •
-	<a href="#-quickstart">Quickstart</a> •
-	<a href="#-usage-guide">Usage guide</a> •
-	<a href="#-cli-examples">CLI</a> •
-	<a href="#-documentation">Documentation</a>
-</p>
+[Features](#-features) · [Quick Start](#-quick-start) · [Screenshots](#-screenshots) · [Architecture](#-architecture) · [Docs](#-documentation)
 
-## ✨ What You Get
+</div>
 
-AutoTabML Studio brings tabular ML workflows into one local-first workspace instead of scattering them across notebooks, scripts, ad hoc experiment folders, and standalone tracking utilities.
+---
 
-### Core design
+## Why AutoTabML Studio?
 
-- **Two surfaces, one service layer.** A Streamlit UI for interactive use and a CLI for repeatable/scripted runs, backed by the same ingestion, validation, profiling, benchmarking, experiment, prediction, and tracking modules.
-- **Local-first storage.** All artifacts live under `artifacts/`, workspace metadata in SQLite, run history in MLflow.
-- **Privacy by default.** Your data stays on your machine. No telemetry, no external uploads.
-- **Guided workflow.** A five-step guided path from data loading to predictions, with optional validation and profiling steps.
+Most tabular ML work is scattered across notebooks, throwaway scripts, and manual model-file management. AutoTabML Studio consolidates the entire lifecycle into a single local workspace with a **Streamlit UI** and a **CLI** — backed by the same service layer so results are always reproducible.
 
-### Features
+- **Zero cloud dependency.** Data never leaves your machine. No telemetry, no external uploads.
+- **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
+- **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
+- **485+ unit tests** with a CI-enforced coverage gate. Security scanning on every push.
 
-- **Data loading** from local files (CSV, Excel, TSV, TXT), URLs, HTML tables, and the UCI ML Repository.
-- **Data validation** with app-native quality checks and optional Great Expectations integration.
-- **Data profiling** with optional ydata-profiling (EDA reports, large-dataset safeguards, sampling).
-- **Quick benchmarking** with LazyPredict to screen dozens of classification and regression algorithms.
-- **Model training** with PyCaret — compare, tune, evaluate, and save production-ready models.
-- **Predictions** — batch scoring and single-row prediction with form-based or JSON input.
-- **Model testing** — evaluate models against held-out data with ground-truth labels.
-- **Run history, comparison, and model registry** backed by MLflow.
-- **Auto-generated notebooks** for every workflow run, downloadable or openable in Google Colab.
-- **AI-generated run summaries** via OpenAI, Anthropic, Gemini, or local Ollama.
+---
 
-### Scope boundaries
+## ✨ Features
 
-This is a local experimentation workbench. It does not provide:
+<table>
+<tr>
+<td width="50%">
 
-- Production model serving or deployment endpoints
-- Background job orchestration or worker infrastructure
-- Monitoring, drift detection, or observability pipelines
-- Full notebook execution (auto-generated notebooks are for export only)
+### Data Preparation
+- **Multi-source ingestion** — CSV, Excel, TSV, URLs, HTML tables, UCI ML Repository, optional Kaggle
+- **Quality validation** — app-native checks + optional Great Expectations integration
+- **EDA profiling** — `ydata-profiling` reports with sampling safeguards for large datasets
+
+</td>
+<td width="50%">
+
+### Modeling
+- **Quick Benchmark** — screen 30+ algorithms via LazyPredict in seconds
+- **Train & Tune** — full PyCaret pipeline (compare → tune → evaluate → finalize → save)
+- **FLAML AutoML** — Microsoft's fast, lightweight AutoML with time-budget control
+- **Classification & Regression** task types
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### Predictions & Evaluation
+- **Batch & single-row scoring** with form-based or JSON input
+- **Model testing** against held-out data with ground-truth labels
+- **Downloadable notebooks** auto-generated for every run (Colab-compatible)
+
+</td>
+<td width="50%">
+
+### Operations
+- **MLflow model registry** — Champion / Candidate / Archived lifecycle
+- **Run history & comparison** — side-by-side algorithm evaluation
+- **AI-generated summaries** — OpenAI, Anthropic, Gemini, or local Ollama
+- **CLI** for scripted, repeatable workflows
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+| Requirement | Version |
+| --- | --- |
+| Python | 3.10 – 3.13 (use 3.11 or 3.12 for PyCaret support) |
+| OS | Windows, macOS, Linux |
+
+### Install
+
+```bash
+# 1. Create environment
+python -m venv .venv && source .venv/bin/activate   # Linux / macOS
+python -m venv .venv; .\.venv\Scripts\Activate.ps1   # Windows PowerShell
+
+# 2. Base install
+pip install -e ".[dev]"
+
+# 3. Add optional extras as needed
+pip install -e ".[benchmark]"     # LazyPredict + boosted baselines
+pip install -e ".[experiment]"    # PyCaret full pipeline
+pip install -e ".[flaml]"         # Microsoft FLAML AutoML
+pip install -e ".[validation]"    # Great Expectations
+pip install -e ".[profiling]"     # ydata-profiling EDA reports
+
+# Or install everything:
+pip install -e ".[dev,validation,profiling,benchmark,experiment,flaml,gpu,kaggle]"
+```
+
+### Run
+
+```bash
+autotabml init-local-storage   # Initialize SQLite + artifact dirs
+autotabml doctor               # Verify runtime dependencies
+streamlit run app/main.py      # Launch the UI
+```
+
+---
 
 ## 🧭 Workflow
 
-```text
-Ingest -> Validate -> Profile -> Benchmark -> Experiment -> Save -> Predict -> Compare -> Register
+```
+Load Data → Validate → Profile → Benchmark → Train / FLAML → Predict → Compare → Register
 ```
 
-### Typical flow
+| Step | What happens |
+| --- | --- |
+| **Load Data** | Upload a file, paste a URL, or pick a UCI dataset |
+| **Validate** *(optional)* | Check for missing values, schema issues, and data leakage |
+| **Profile** *(optional)* | Generate a visual EDA summary |
+| **Quick Benchmark** | Screen 30+ algorithms — ranked leaderboard in seconds |
+| **Train & Tune** | Fine-tune the best algorithm with PyCaret and save a production model |
+| **FLAML AutoML** | Run Microsoft FLAML with time-budget or iteration-budget constraints |
+| **Predict** | Score new data (single row or batch file) with any saved model |
+| **Compare & Register** | Review run history, compare results, promote models |
 
-1. **Load Data** — upload a file, paste a URL, or pick a UCI dataset.
-2. **Validate** *(optional)* — check for missing values, schema issues, and data leakage.
-3. **Profile** *(optional)* — generate a visual EDA summary.
-4. **Quick Benchmark** — screen dozens of algorithms and get a ranked leaderboard.
-5. **Train & Tune** — fine-tune the best algorithm, evaluate with charts, and save a production model.
-6. **Predict** — score new data (single row or batch file) with your saved model.
-7. **Compare & Register** — review run history, compare algorithms, and promote models.
+See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
 
-See [USAGE.md](USAGE.md) for the full usage guide.
+---
 
-## 🖼️ Screens
+## 🖼️ Screenshots
 
 <table>
-	<tr>
-		<td width="50%">
-			<img src="docs/assets/screenshots/dashboard-overview.png" alt="Dashboard overview">
-			<br>
-			<strong>Dashboard</strong>
-			<br>
-			Workflow progress, recommended next steps, and recent activity.
-		</td>
-		<td width="50%">
-			<img src="docs/assets/screenshots/dataset-intake.png" alt="Load Data">
-			<br>
-			<strong>Load Data</strong>
-			<br>
-			Upload files, paste URLs, or load datasets from the UCI repository.
-		</td>
-	</tr>
-	<tr>
-		<td width="50%">
-			<img src="docs/assets/screenshots/validation-summary.png" alt="Validation summary">
-			<br>
-			<strong>Validation</strong>
-			<br>
-			Target-aware quality checks with pass/fail summaries.
-		</td>
-		<td width="50%">
-			<img src="docs/assets/screenshots/prediction-center.png" alt="Predictions">
-			<br>
-			<strong>Predictions</strong>
-			<br>
-			Select a saved model, upload data, and score individual rows or full files.
-		</td>
-	</tr>
-	<tr>
-		<td width="50%">
-			<img src="docs/assets/screenshots/profiling-report.png" alt="Profiling report">
-			<br>
-			<strong>Profiling</strong>
-			<br>
-			Visual EDA reports with distributions, correlations, and missing-value analysis.
-		</td>
-		<td width="50%">
-			<img src="docs/assets/screenshots/history-view.png" alt="History">
-			<br>
-			<strong>History</strong>
-			<br>
-			Browse and filter past runs across all workflow types.
-		</td>
-	</tr>
-	<tr>
-		<td width="50%">
-			<img src="docs/assets/screenshots/registry-view.png" alt="Registry view">
-			<br>
-			<strong>Registry</strong>
-			<br>
-			Version, promote, and manage your best models (Champion / Candidate / Archived).
-		</td>
-		<td width="50%">
-			<img src="docs/assets/screenshots/settings-view.png" alt="Settings">
-			<br>
-			<strong>Settings</strong>
-			<br>
-			Essentials and Advanced tabs for workspace, GPU, provider, and tracking configuration.
-		</td>
-	</tr>
+<tr>
+<td width="50%"><img src="docs/assets/screenshots/dashboard-overview.png" alt="Dashboard"><br><strong>Dashboard</strong> — Workflow progress and recent activity</td>
+<td width="50%"><img src="docs/assets/screenshots/dataset-intake.png" alt="Load Data"><br><strong>Load Data</strong> — Files, URLs, or UCI repository</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/screenshots/validation-summary.png" alt="Validation"><br><strong>Validation</strong> — Target-aware quality checks</td>
+<td width="50%"><img src="docs/assets/screenshots/benchmark-leaderboard.png" alt="Benchmark"><br><strong>Benchmark</strong> — Algorithm ranking leaderboard</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/screenshots/experiment-lab.png" alt="Experiment"><br><strong>Train & Tune</strong> — PyCaret experiment pipeline</td>
+<td width="50%"><img src="docs/assets/screenshots/prediction-center.png" alt="Predictions"><br><strong>Predictions</strong> — Batch and single-row scoring</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/screenshots/registry-view.png" alt="Registry"><br><strong>Registry</strong> — Model versioning and promotion</td>
+<td width="50%"><img src="docs/assets/screenshots/settings-view.png" alt="Settings"><br><strong>Settings</strong> — Workspace and provider configuration</td>
+</tr>
 </table>
 
-All screenshots above were captured from a real local Streamlit session. The repeatable capture script is [scripts/capture_screenshots.py](scripts/capture_screenshots.py).
+<details>
+<summary>More screenshots</summary>
 
-## 🧱 Tech Stack
+| | |
+|---|---|
+| <img src="docs/assets/screenshots/profiling-report.png" alt="Profiling"> **Profiling** | <img src="docs/assets/screenshots/history-view.png" alt="History"> **History** |
+| <img src="docs/assets/screenshots/compare-view.png" alt="Compare"> **Compare** | |
 
-| Layer | Stack |
-| --- | --- |
-| UI | Streamlit (custom sidebar navigation, sectioned pages) |
-| CLI | `argparse`-based `autotabml` command |
-| Data | pandas, pydantic, pydantic-settings |
-| Ingestion | Local files, URLs, HTML tables, `ucimlrepo`, optional Kaggle |
-| Validation | App-native quality rules, optional Great Expectations |
-| Profiling | `ydata-profiling` with sampling and large-dataset safeguards |
-| Benchmarking | LazyPredict, scikit-learn, XGBoost, LightGBM, CatBoost |
-| Training | PyCaret (compare, tune, evaluate, finalize, save) |
-| Tracking | MLflow (local SQLite backend by default) |
-| Metadata | SQLite |
-| AI Summaries | OpenAI, Anthropic, Gemini, Ollama (all optional) |
-| Testing | pytest, pytest-cov, pytest-asyncio, respx |
+</details>
 
-### Supported task types
+---
 
-- Classification
-- Regression
+## 🏗️ Architecture
 
-### Execution surfaces
+```
+┌─────────────────────────────────────────────────────┐
+│                   Streamlit UI                      │
+│  Dashboard · Load · Validate · Profile · Benchmark  │
+│  Train & Tune · FLAML · Predict · Models · History  │
+│  Compare · Notebook · Registry · Settings           │
+├─────────────────────────────────────────────────────┤
+│                   CLI (argparse)                    │
+├──────────────┬──────────────┬───────────────────────┤
+│  Ingestion   │  Validation  │     Profiling         │
+├──────────────┼──────────────┼───────────────────────┤
+│  LazyPredict │   PyCaret    │      FLAML            │
+│  (Benchmark) │ (Experiment) │    (AutoML)           │
+├──────────────┴──────────────┴───────────────────────┤
+│  Prediction · Tracking · Registry · Storage         │
+├─────────────────────────────────────────────────────┤
+│  MLflow (SQLite) · SQLite Metadata · artifacts/     │
+└─────────────────────────────────────────────────────┘
+```
 
-| Surface | Purpose |
-| --- | --- |
-| Streamlit app | Interactive workspace for data exploration, model training, and predictions |
-| CLI | Repeatable workflows, diagnostics, history queries, and scripted automation |
+Streamlit pages are **thin entry points**. All business logic lives in the service layer.
 
-### Supported input formats
-
-| Format | Extensions |
-| --- | --- |
-| CSV | `.csv` |
-| Delimited text | `.tsv`, `.txt`, `.data` |
-| Excel | `.xlsx`, `.xls`, `.xlsm`, `.xlsb` |
-| Web URL | HTTP/HTTPS links to data files |
-| HTML tables | Pages with `<table>` markup |
-| UCI ML Repository | Search by name or ID via `ucimlrepo` |
-| Kaggle | Optional, CLI-only (`pip install -e ".[kaggle]"`) |
-
-## 🏗️ Project Structure
-
-Streamlit pages are thin entry points. Business logic lives in the service layer.
+<details>
+<summary>Module map</summary>
 
 | Module | Responsibility |
 | --- | --- |
 | `app/ingestion/` | Source routing, loaders, normalization, metadata hashing |
-| `app/validation/` | Quality rules, optional GX checks, validation artifacts |
-| `app/profiling/` | Profiling orchestration, selectors, summaries, artifacts |
-| `app/modeling/benchmark/` | Baseline benchmark orchestration, ranking, MLflow logging |
-| `app/modeling/pycaret/` | Compare, tune, evaluate, finalize, save, snapshot workflows |
+| `app/validation/` | Quality rules, optional Great Expectations checks |
+| `app/profiling/` | Profiling orchestration, selectors, summaries |
+| `app/modeling/benchmark/` | LazyPredict orchestration, ranking, MLflow logging |
+| `app/modeling/pycaret/` | PyCaret compare, tune, evaluate, finalize, save |
+| `app/modeling/flaml/` | Microsoft FLAML AutoML service, artifacts, tracking |
 | `app/prediction/` | Model discovery, loading, schema checks, scoring |
-| `app/tracking/` | MLflow queries, history inspection, run comparison |
+| `app/tracking/` | MLflow queries, history, run comparison |
 | `app/registry/` | MLflow model registration and promotion |
-| `app/storage/` | SQLite metadata store for workspace activity |
-| `app/artifacts/` | Canonical artifact path management |
-| `app/providers/` | LLM provider integrations (OpenAI, Anthropic, Gemini, Ollama) |
-| `app/notebooks/` | Jupyter notebook generation for completed runs |
-| `app/config/` | Pydantic settings, enums, environment variable binding |
-| `app/pages/` | Streamlit page entry points and shared UI components |
-| `app/cli.py` | CLI entry point and command wiring |
+| `app/storage/` | SQLite metadata store |
+| `app/providers/` | LLM integrations (OpenAI, Anthropic, Gemini, Ollama) |
+| `app/notebooks/` | Jupyter notebook generation |
+| `app/config/` | Pydantic settings, enums, environment binding |
+| `app/pages/` | Streamlit page entry points |
+| `app/cli.py` | CLI entry point |
 
-### Storage
+</details>
 
-- **MLflow** is the source of truth for benchmark runs, experiment runs, comparison data, and registry state.
-- **SQLite** stores local workspace metadata: loaded datasets, job records, and saved model records.
-- **`artifacts/`** holds all generated output: reports, models, predictions, and tracking databases.
+### Tech Stack
 
-For more detail, see [docs/developer-guide.md](docs/developer-guide.md).
-
-## ⚙️ Quickstart
-
-### Python version guidance
-
-Python 3.10 through 3.13 is supported for the base project. Use Python 3.11 or 3.12 when you want the full local workflow including PyCaret experiments. PyCaret is not currently validated on Python 3.13 in this environment.
-
-### 1. Create and activate a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-### 2. Install the project
-
-Base install:
-
-```bash
-pip install -e ".[dev]"
-```
-
-Optional workflow packs:
-
-| Install profile | Command | Use when |
-| --- | --- | --- |
-| Validation | `pip install -e ".[validation]"` | You want Great Expectations-backed validation |
-| Profiling | `pip install -e ".[profiling]"` | You want `ydata-profiling` reports |
-| Benchmarking | `pip install -e ".[benchmark]"` | You want LazyPredict, MLflow, and boosted model baselines |
-| Experiments | `pip install -e ".[experiment]"` | You want PyCaret compare, tune, evaluate, and save flows |
-| Kaggle | `pip install -e ".[kaggle]"` | You want optional Kaggle dataset ingestion |
-| GPU add-on | `pip install -e ".[gpu]"` | You want GPU-capable boosting libraries without the full workflow stack |
-
-Full maintainer or demo install:
-
-```bash
-pip install -e ".[dev,validation,profiling,benchmark,experiment,gpu,kaggle]"
-```
-
-Notes:
-
-- The profiling extra currently needs `setuptools < 82`; that compatibility pin is already encoded in `pyproject.toml`.
-- Benchmark and experiment stacks prefer CUDA when the installed libraries support it and fall back to CPU otherwise.
-
-### 3. Initialize local storage and validate the runtime
-
-```bash
-autotabml init-local-storage
-autotabml doctor
-```
-
-### 4. Launch the app
-
-```bash
-streamlit run app/main.py
-```
-
-After launch, start with **Load Data**, then follow the guided workflow through validation, profiling, benchmarking, training, and prediction.
-
-## � Usage Guide
-
-For detailed, step-by-step instructions on every feature, see **[USAGE.md](USAGE.md)**.
-
-| Section | What it covers |
+| Layer | Technology |
 | --- | --- |
-| [Who This Is For](USAGE.md#who-this-is-for) | Target audience and use cases |
-| [Before You Start](USAGE.md#before-you-start) | Prerequisites, install options, first-time setup |
-| [Starting the App](USAGE.md#starting-the-app) | Streamlit UI and CLI entry points |
-| [Core Workflow](USAGE.md#core-workflow) | The five-step guided path from data to predictions |
-| [Pages Reference](USAGE.md#pages-reference) | Every page explained — Dashboard, Load Data, Validation, Profiling, Benchmark, Train & Tune, Predictions, Test & Evaluate, Models, History, Comparison, Registry, Notebooks, Settings |
-| [CLI Reference](USAGE.md#cli-reference) | All commands: system, data prep, benchmark, experiment, predict, history, registry |
-| [Configuration](USAGE.md#configuration) | Environment variables and optional dependency groups |
-| [Input & Output](USAGE.md#input--output) | Supported file formats and the `artifacts/` directory layout |
-| [Troubleshooting](USAGE.md#troubleshooting) | Common issues with causes and fixes |
-| [Limitations](USAGE.md#limitations) | Known constraints and scope boundaries |
+| **UI** | Streamlit |
+| **CLI** | argparse |
+| **Data** | pandas, Pydantic, pydantic-settings |
+| **Benchmarking** | LazyPredict, scikit-learn, XGBoost, LightGBM, CatBoost |
+| **Training** | PyCaret, Microsoft FLAML |
+| **Tracking** | MLflow (local SQLite backend) |
+| **Metadata** | SQLite |
+| **AI Summaries** | OpenAI · Anthropic · Gemini · Ollama |
+| **Testing** | pytest (485+ tests), pytest-cov, pytest-asyncio |
 
-## �💻 CLI Examples
+---
 
-Top-level help:
+## 💻 CLI
 
 ```bash
 autotabml --version
 autotabml info
-autotabml --help
+autotabml doctor
 ```
 
-Representative workflows:
-
 ```bash
+# Data preparation
 autotabml validate data/train.csv --target price --artifacts-dir artifacts/validation
 autotabml profile data/train.csv --artifacts-dir artifacts/profiling
-autotabml benchmark data/train.csv --target target --task-type auto --artifacts-dir artifacts/benchmark
+
+# Modeling
+autotabml benchmark data/train.csv --target target --task-type auto
 autotabml experiment-run data/train.csv --target target --task-type classification --n-select 3
+
+# Operations
 autotabml predict-history --limit 10
 autotabml history-list --run-type experiment --limit 10
 autotabml registry-list
 ```
 
-## 🔐 Configuration
+---
 
-Settings are managed through three layers:
+## ⚙️ Configuration
 
-1. **Defaults** — Pydantic-defined defaults in `app/config/models.py`.
-2. **Persisted settings** — Saved to `~/.autotabml/settings.json` (secrets are excluded).
-3. **Environment overrides** — `AUTOTABML_*` prefixed variables (see [.env.example](.env.example)).
-
-Example overrides:
+Settings are resolved in order: **Pydantic defaults → persisted `settings.json` → environment variables**.
 
 ```bash
+# Core settings (AUTOTABML_ prefix)
 AUTOTABML_WORKSPACE_MODE=dashboard
 AUTOTABML_EXECUTION__BACKEND=local
 AUTOTABML_MLFLOW__TRACKING_URI=sqlite:///artifacts/mlflow/mlflow.db
-AUTOTABML_DATABASE__PATH=artifacts/app/app_metadata.sqlite3
-AUTOTABML_OLLAMA_BASE_URL=http://localhost:11434
-AUTOTABML_PROVIDER__BASE_URL=https://api.example.com/v1
-```
 
-Provider credentials remain unprefixed, for example:
-
-```bash
-OPENAI_API_KEY=...
-ANTHROPIC_API_KEY=...
+# LLM provider keys (no prefix)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
 GEMINI_API_KEY=...
 ```
 
-### LLM providers supported in Settings
+See [.env.example](.env.example) for the full list.
 
-| Provider | Key variable |
+---
+
+## 🧪 Testing & CI
+
+```bash
+pytest                                     # Unit tests
+pytest -m integration                      # Integration suite
+pytest --cov=app --cov-fail-under=65       # Coverage gate
+```
+
+| Workflow | Purpose |
 | --- | --- |
-| OpenAI | `OPENAI_API_KEY` |
-| Anthropic | `ANTHROPIC_API_KEY` |
-| Gemini | `GEMINI_API_KEY` |
-| Ollama | `AUTOTABML_OLLAMA_BASE_URL` (local, no API key) |
+| [CI](.github/workflows/ci.yml) | Lint (ruff) · Unit tests (Python 3.11 + 3.13) · Coverage ≥ 65% · E2E smoke |
+| [Security](.github/workflows/security.yml) | `detect-secrets` + `gitleaks` on every push and PR |
+| [Release](.github/workflows/release-readiness.yml) | Build validation + `twine check` for tagged releases |
 
-## 🧪 Testing
+Dependabot is configured for weekly dependency updates.
 
-Unit tests:
+---
 
-```bash
-pytest
-```
+## ⚠️ Known Limitations
 
-Coverage gate used in CI:
-
-```bash
-pytest tests/ --cov=app --cov-report=term --cov-fail-under=65
-```
-
-Optional integration suite:
-
-```bash
-pytest -m integration
-```
-
-### CI / CD
-
-| Workflow | What it does |
+| Constraint | Detail |
 | --- | --- |
-| **CI** ([ci.yml](.github/workflows/ci.yml)) | Lint (`ruff`), unit tests (Python 3.11 + 3.13), coverage gate (≥65%), E2E smoke test |
-| **Security** ([security.yml](.github/workflows/security.yml)) | `detect-secrets` + `gitleaks` scanning on every push and PR |
-| **Release readiness** ([release-readiness.yml](.github/workflows/release-readiness.yml)) | Build validation and `twine check` for tagged releases |
+| PyCaret requires Python < 3.13 | All other features work on 3.10 – 3.13 |
+| GPU training | Requires NVIDIA + CUDA; falls back to CPU automatically |
+| Large datasets | 100K+ rows trigger automatic sampling |
+| Kaggle | CLI-only; not exposed in the UI |
+| Single-user | Designed for individual local use |
+| AI summaries | Require an API key or local Ollama |
 
-Dependabot is configured for weekly pip and GitHub Actions dependency updates.
-
-## ⚠️ Limitations
-
-- **PyCaret requires Python < 3.13.** All other features work on 3.10–3.13.
-- **GPU training** requires NVIDIA hardware with CUDA drivers. Falls back to CPU automatically.
-- **Large datasets** (100K+ rows) trigger automatic sampling in benchmark and profiling.
-- **Kaggle integration** is CLI-only; not exposed in the Streamlit UI.
-- **Local-first only.** No deployment endpoints, remote orchestration, or monitoring pipelines.
-- **Single-user.** Designed for individual use on a local machine, not concurrent multi-user access.
-- **AI summaries** require an API key (OpenAI/Anthropic/Gemini) or a local Ollama instance.
+---
 
 ## 📚 Documentation
 
-- [USAGE.md](USAGE.md) — Complete usage guide with step-by-step instructions for every feature.
-- [docs/developer-guide.md](docs/developer-guide.md) — Implementation notes and development workflow.
-- [CONTRIBUTING.md](CONTRIBUTING.md) — Contribution guidelines.
+| Resource | Description |
+| --- | --- |
+| [USAGE.md](USAGE.md) | Complete usage guide with step-by-step instructions |
+| [Developer Guide](docs/developer-guide.md) | Implementation notes and development workflow |
+| [Contributing](CONTRIBUTING.md) | Contribution guidelines |
+
+---
 
 ## 📄 License
 
-AutoTabML Studio is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0 — see [LICENSE](LICENSE).
