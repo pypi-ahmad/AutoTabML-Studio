@@ -20,6 +20,7 @@ from app.config.models import (
     BenchmarkSettings,
     DatabaseSettings,
     ExecutionSettings,
+    FlamlSettings,
     MLflowSettings,
     PredictionSettings,
     ProfilingSettings,
@@ -56,6 +57,7 @@ class _EnvironmentSettings(BaseSettings):
     profiling: ProfilingSettings | None = None
     benchmark: BenchmarkSettings | None = None
     pycaret: PyCaretExperimentSettings | None = None
+    flaml: FlamlSettings | None = None
     mlflow: MLflowSettings | None = None
     prediction: PredictionSettings | None = None
     ollama_base_url: str | None = None
