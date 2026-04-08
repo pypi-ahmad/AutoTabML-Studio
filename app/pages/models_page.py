@@ -31,7 +31,8 @@ def render_models_page() -> None:
     st.caption(
         "All the models you’ve trained are listed here. "
         "🔬 = trained via Train & Tune, 🏁 = trained via Quick Benchmark, "
-        "📦 = registered in the model registry."
+        "� = trained via FLAML AutoML, "
+        "�📦 = registered in the model registry."
     )
 
     # ── Discover models from all sources ───────────────────────────────
@@ -40,6 +41,7 @@ def render_models_page() -> None:
         metadata_dirs=prediction_settings.local_model_metadata_dirs,
     )
     benchmark_models = _discover_benchmark_models(state.settings.pycaret.models_dir)
+    flaml_models = _discover_flaml_models(state.settings.flaml.models_dir)
 
     # DB-tracked models (may overlap with discovered ones)
     # MLflow registry models
@@ -63,14 +65,17 @@ def render_models_page() -> None:
         except Exception:
             pass
 
-    total = len(pycaret_refs) + len(benchmark_models) + len(registry_models)
+    total = len(pycaret_refs) + len(benchmark_models) + len(flaml_models) + len(registry_models)
     st.metric("Total Models", total)
 
     if total == 0:
         st.info(
             "**No saved models yet.**\n\n"
-            "Models appear here after you save one from **Quick Benchmark** (Step 3) or **Train & Tune** (Step 4).\n\n"
-            "**Recommended:** Load a dataset first, then run a benchmark to find the best algorithm."
+            "Models appear here after you save one from "
+            "**Quick Benchmark** (Step 3), **Train & Tune** (Step 4), "
+            "or **FLAML AutoML**.\n\n"
+            "**Recommended:** Load a dataset first, then run a "
+            "benchmark to find the best algorithm."
         )
         c1, c2, _ = st.columns([2, 2, 4])
         if c1.button("📥 Load Data", key="models_goto_load", type="primary", use_container_width=True):
@@ -90,6 +95,12 @@ def render_models_page() -> None:
         st.subheader(f"🏁 Benchmark Models ({len(benchmark_models)})")
         for meta in benchmark_models:
             _render_benchmark_model_card(meta)
+
+    # ── FLAML models ───────────────────────────────────────────────────
+    if flaml_models:
+        st.subheader(f"🔥 FLAML AutoML Models ({len(flaml_models)})")
+        for meta in flaml_models:
+            _render_flaml_model_card(meta)
 
     # ── MLflow Registry models ─────────────────────────────────────────
     if registry_models:
@@ -289,3 +300,82 @@ def _discover_benchmark_models(models_dir: Path) -> list[dict]:
             meta["_metadata_path"] = str(json_path)
             results.append(meta)
     return results
+
+
+def _discover_flaml_models(models_dir: Path) -> list[dict]:
+    """Discover FLAML models saved with JSON sidecar metadata."""
+
+    results = []
+    if not models_dir.exists():
+        return results
+    for json_path in models_dir.glob("*_flaml_saved_model_metadata_*.json"):
+        try:
+            meta = json.loads(json_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        pkl_path = Path(meta.get("model_path", ""))
+        if not pkl_path.exists():
+            pkl_name = json_path.stem.split("_flaml_saved_model_metadata_")[0] + ".pkl"
+            pkl_path = models_dir / pkl_name
+        if pkl_path.exists():
+            meta["_model_path"] = str(pkl_path)
+            meta["_metadata_path"] = str(json_path)
+            results.append(meta)
+    return results
+
+
+def _render_flaml_model_card(meta: dict) -> None:
+    """Render an expander card for a FLAML-saved model."""
+
+    model_name = meta.get("model_name", "Unknown")
+    dataset = meta.get("dataset_name", "—")
+    raw_task = meta.get("task_type", "unknown")
+    task = PREDICTION_TASK_TYPE_LABELS.get(raw_task, raw_task.title())
+    target = meta.get("target_column", "—")
+    features = meta.get("feature_columns", [])
+    trained_at = meta.get("trained_at")
+    best_estimator = meta.get("best_estimator", "—")
+    best_loss = meta.get("best_loss")
+    metric = meta.get("metric", "—")
+
+    _purpose_parts = []
+    if task and task != "Unknown":
+        _purpose_parts.append(task.lower())
+    if target and target != "—":
+        _purpose_parts.append(f"predicting **{target}**")
+    if dataset and dataset != "—":
+        _purpose_parts.append(f"trained on **{dataset}**")
+    _purpose = ", ".join(_purpose_parts).capitalize() if _purpose_parts else ""
+
+    with st.expander(f"**{model_name}** — {dataset} ({task})", expanded=False):
+        render_model_trust_card(
+            trained_at=trained_at,
+            dataset_name=dataset,
+            task_type=task,
+            target_column=target,
+            feature_count=len(features),
+            source_label="FLAML AutoML",
+        )
+        if _purpose:
+            st.caption(f"🎯 {_purpose}.")
+        st.caption(
+            f"Best algorithm: **{best_estimator}** · Metric: **{metric}** "
+            f"· Loss: **{best_loss:.4f}**"
+            if best_loss is not None
+            else f"Best algorithm: **{best_estimator}** · Metric: **{metric}**"
+        )
+
+        if features:
+            with st.expander("Input columns", expanded=False):
+                st.code(", ".join(features), language="text")
+
+        dtypes = meta.get("feature_dtypes", {})
+        if dtypes:
+            with st.expander("Column types", expanded=False):
+                st.dataframe(
+                    pd.DataFrame(
+                        [{"Feature": k, "Type": v} for k, v in dtypes.items()]
+                    ),
+                    width="stretch",
+                    hide_index=True,
+                )

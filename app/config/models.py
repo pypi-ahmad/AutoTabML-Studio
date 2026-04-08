@@ -24,6 +24,7 @@ _MODELS_DIR = _ARTIFACT_ROOT / "models"
 _SNAPSHOTS_DIR = _EXPERIMENTS_DIR / "snapshots"
 _COMPARISONS_DIR = _ARTIFACT_ROOT / "comparisons"
 _PREDICTIONS_DIR = _ARTIFACT_ROOT / "predictions"
+_FLAML_DIR = _ARTIFACT_ROOT / "flaml"
 _TEMP_DIR = _ARTIFACT_ROOT / "tmp"
 _APP_DB_PATH = _ARTIFACT_ROOT / "app" / "app_metadata.sqlite3"
 _PREDICTION_HISTORY_PATH = _PREDICTIONS_DIR / "history.jsonl"
@@ -41,6 +42,7 @@ class ArtifactSettings(BaseModel):
     snapshots_dir: Path = Field(default=_SNAPSHOTS_DIR)
     comparisons_dir: Path = Field(default=_COMPARISONS_DIR)
     predictions_dir: Path = Field(default=_PREDICTIONS_DIR)
+    flaml_dir: Path = Field(default=_FLAML_DIR)
     temp_dir: Path = Field(default=_TEMP_DIR)
     temp_retention_hours: int = Field(default=24, ge=1)
     failed_partial_retention_hours: int = Field(default=48, ge=1)
@@ -173,6 +175,31 @@ class PyCaretExperimentSettings(BaseModel):
     mlflow_experiment_name: str = "autotabml-experiments"
 
 
+class FlamlSettings(BaseModel):
+    """Configuration for FLAML AutoML workflows."""
+
+    artifacts_dir: Path = Field(default=_FLAML_DIR)
+    models_dir: Path = Field(default=_MODELS_DIR)
+    default_time_budget: int = Field(default=120, gt=0)
+    default_n_splits: int = Field(default=5, ge=2)
+    default_seed: int = 0
+    default_classification_metric: str = "accuracy"
+    default_regression_metric: str = "r2"
+    default_estimator_list: list[str] = Field(
+        default_factory=lambda: [
+            "lgbm",
+            "xgboost",
+            "xgb_limitdepth",
+            "rf",
+            "extra_tree",
+            "lrl1",
+            "lrl2",
+            "kneighbor",
+        ]
+    )
+    mlflow_experiment_name: str = "autotabml-flaml"
+
+
 class MLflowSettings(BaseModel):
     """Configuration for MLflow-backed tracking, comparison, and registry access."""
 
@@ -228,6 +255,7 @@ class AppSettings(BaseModel):
     profiling: ProfilingSettings = Field(default_factory=ProfilingSettings)
     benchmark: BenchmarkSettings = Field(default_factory=BenchmarkSettings)
     pycaret: PyCaretExperimentSettings = Field(default_factory=PyCaretExperimentSettings)
+    flaml: FlamlSettings = Field(default_factory=FlamlSettings)
     mlflow: MLflowSettings = Field(default_factory=MLflowSettings)
     prediction: PredictionSettings = Field(default_factory=PredictionSettings)
 
@@ -259,6 +287,7 @@ class AppSettings(BaseModel):
             ("snapshots_dir", _SNAPSHOTS_DIR),
             ("comparisons_dir", _COMPARISONS_DIR),
             ("predictions_dir", _PREDICTIONS_DIR),
+            ("flaml_dir", _FLAML_DIR),
             ("temp_dir", _TEMP_DIR),
         ]
         if self.artifacts.root_dir != _ARTIFACT_ROOT:
@@ -292,6 +321,8 @@ class AppSettings(BaseModel):
         self.pycaret.snapshots_dir = self.artifacts.snapshots_dir
         self.mlflow.comparison_artifacts_dir = self.artifacts.comparisons_dir
         self.prediction.artifacts_dir = self.artifacts.predictions_dir
+        self.flaml.artifacts_dir = self.artifacts.flaml_dir
+        self.flaml.models_dir = self.artifacts.models_dir
 
         if self.database.path == _APP_DB_PATH and self.artifacts.root_dir != _ARTIFACT_ROOT:
             self.database.path = self.artifacts.root_dir / "app" / _APP_DB_PATH.name

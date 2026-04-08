@@ -39,6 +39,7 @@ _PAGES = [
     # ── Build ──────────────────────────────────────────────────────────
     PageSpec("Quick Benchmark", "Quickly test dozens of algorithms to find a shortlist — no tuning, just a fast baseline.", "app.pages.benchmark_page", "render_benchmark_page", section="build"),
     PageSpec("Train & Tune", "Train, fine-tune, and save a production-ready model.", "app.pages.experiment_page", "render_experiment_page", section="build"),
+    PageSpec("FLAML AutoML", "Automatic model selection and tuning powered by Microsoft FLAML.", "app.pages.flaml_automl_page", "render_flaml_automl_page", section="build"),
     # ── Use ────────────────────────────────────────────────────────────
     PageSpec("Predictions", "Make predictions on new data, or test a model against ground truth.", "app.pages.predictions_page", "render_predictions_page", section="use"),
     # ── Review ─────────────────────────────────────────────────────────
