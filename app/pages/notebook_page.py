@@ -1,6 +1,6 @@
 """Notebook page – browse auto-generated notebooks per dataset / job.
 
-Each completed job (benchmark, experiment, profiling, validation) gets a
+Each completed job (benchmark, experiment, flaml, profiling, validation) gets a
 reproducible Jupyter notebook generated on demand.  The Colab MCP execution
 backend is available in a collapsible section at the bottom.
 """

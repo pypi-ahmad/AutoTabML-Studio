@@ -71,10 +71,11 @@ pip install -e ".[validation]"     # Great Expectations data checks
 pip install -e ".[profiling]"      # ydata-profiling EDA reports
 pip install -e ".[benchmark]"      # LazyPredict algorithm screening
 pip install -e ".[experiment]"     # PyCaret model training (Python < 3.13)
+pip install -e ".[flaml]"          # Microsoft FLAML AutoML
 pip install -e ".[gpu]"            # GPU-accelerated training (XGBoost, LightGBM, CatBoost)
 
 # Everything at once
-pip install -e ".[validation,profiling,benchmark,experiment,gpu]"
+pip install -e ".[validation,profiling,benchmark,experiment,flaml,gpu]"
 ```
 
 > **Note:** The `experiment` group requires Python < 3.13 due to a PyCaret dependency
@@ -257,6 +258,42 @@ After training, you can:
 
 > Requires the `experiment` optional dependency (`pycaret`). Python < 3.13 only.
 
+### FLAML AutoML
+
+**Title:** 🔥 FLAML AutoML
+
+An alternative to Train & Tune powered by Microsoft FLAML — a fast, lightweight AutoML
+framework that searches for the best model within a time or iteration budget.
+
+**When to use FLAML instead of Train & Tune:**
+
+- You want automated model selection without manual tuning steps
+- You prefer time-budgeted search (e.g. "find the best model in 2 minutes")
+- You want to try multiple estimators (LightGBM, XGBoost, Random Forest, CatBoost, etc.) simultaneously
+
+**Configuration:**
+
+1. **Target column** — the column to predict
+2. **Task type** — Classification, Regression, or Auto-detect
+3. **Time budget** — Quick (60s), Standard (120s), Deep (300s), or Custom
+4. **Advanced options** — estimator selection, metric, CV folds, ensemble, early stopping, random seed
+
+**After search:**
+
+- View the search summary (best estimator, best loss, duration)
+- Browse the leaderboard of all estimators tried
+- Save the best model for use in Predictions
+- Download artifacts (leaderboard CSV, summary JSON)
+
+**CLI support:**
+
+```bash
+autotabml flaml-run data/train.csv --target target --task-type auto --time-budget 120
+autotabml flaml-save data/train.csv --target target --task-type classification --save-name my_model
+```
+
+> Requires the `flaml` optional dependency: `pip install -e ".[flaml]"`
+
 ### Predictions
 
 **Title:** 🔮 Predictions
@@ -274,7 +311,7 @@ Score new data using a saved model. Two tabs:
 - JSON input is also available behind an expander for power users
 
 **Model sources:**
-- Saved models from Train & Tune or Quick Benchmark (auto-discovered)
+- Saved models from Train & Tune, FLAML AutoML, or Quick Benchmark (auto-discovered)
 - Manual file path
 - MLflow registry (if configured)
 
@@ -439,6 +476,23 @@ autotabml experiment-evaluate data.csv --target Churn --model-id lr \
 autotabml experiment-save data.csv --target Churn --model-id lr \
   --task-type classification --save-name my_model
 ```
+
+### FLAML AutoML
+
+```bash
+# Run FLAML search
+autotabml flaml-run data.csv --target Churn --task-type classification --time-budget 120
+
+# Run FLAML search and save the best model
+autotabml flaml-save data.csv --target Churn --task-type auto --save-name flaml_best
+
+# Customize estimators and metric
+autotabml flaml-run data.csv --target price --task-type regression \
+  --estimator lgbm --estimator xgboost --metric r2 --n-splits 10
+```
+
+Key flags: `--time-budget`, `--max-iter`, `--metric`, `--n-splits`, `--seed`,
+`--ensemble`, `--early-stop`, `--estimator`.
 
 ### Prediction
 

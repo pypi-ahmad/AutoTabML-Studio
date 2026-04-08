@@ -14,6 +14,7 @@ class RunType(str, Enum):
 
     BENCHMARK = "benchmark"
     EXPERIMENT = "experiment"
+    FLAML = "flaml"
     UNKNOWN = "unknown"
 
 

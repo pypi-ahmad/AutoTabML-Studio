@@ -11,6 +11,9 @@ Usage:
     python -m app.cli benchmark <dataset> --target <col> [--task-type <type>] [--artifacts-dir <dir>]
     python -m app.cli experiment-run <dataset> --target <col> [--task-type <type>]
 
+    python -m app.cli flaml-run <dataset> --target <col> [--task-type <type>] [--time-budget <secs>]
+    python -m app.cli flaml-save <dataset> --target <col> [--task-type <type>] [--save-name <name>]
+
     Dataset locators:
         path/to/file.csv          Local file
         https://example.com/d.csv Remote URL
@@ -1512,6 +1515,67 @@ def main() -> None:
     save_parser.add_argument("--save-snapshot", action="store_true", help="Also save a PyCaret experiment snapshot")
     save_parser.add_argument("--use-gpu", choices=["false", "true", "force"], default=None, help="GPU acceleration (false/true/force); defaults to settings")
 
+    # flaml-run
+    flaml_run_parser = subparsers.add_parser("flaml-run", help="Run FLAML AutoML search")
+    flaml_run_parser.add_argument("dataset", help="Dataset path or supported URL")
+    flaml_run_parser.add_argument("--target", required=True, help="Target column name")
+    flaml_run_parser.add_argument(
+        "--task-type",
+        choices=["auto", "classification", "regression"],
+        default="auto",
+        help="Task type",
+    )
+    flaml_run_parser.add_argument(
+        "--source-type",
+        choices=[source_type.value for source_type in IngestionSourceType],
+        default=None,
+        help="Optional explicit ingestion source type",
+    )
+    flaml_run_parser.add_argument("--time-budget", type=int, default=None, help="Time budget in seconds")
+    flaml_run_parser.add_argument("--max-iter", type=int, default=None, help="Maximum iterations")
+    flaml_run_parser.add_argument("--metric", default=None, help="Optimization metric (auto resolves per task)")
+    flaml_run_parser.add_argument("--n-splits", type=int, default=None, help="Number of CV folds")
+    flaml_run_parser.add_argument("--seed", type=int, default=None, help="Random seed")
+    flaml_run_parser.add_argument("--ensemble", action="store_true", help="Enable ensemble")
+    flaml_run_parser.add_argument("--early-stop", action="store_true", help="Enable early stopping")
+    flaml_run_parser.add_argument(
+        "--estimator",
+        action="append",
+        default=[],
+        help="Estimator to include; repeat for multiple (e.g. --estimator lgbm --estimator xgboost)",
+    )
+
+    # flaml-save
+    flaml_save_parser = subparsers.add_parser("flaml-save", help="Run FLAML search and save the best model")
+    flaml_save_parser.add_argument("dataset", help="Dataset path or supported URL")
+    flaml_save_parser.add_argument("--target", required=True, help="Target column name")
+    flaml_save_parser.add_argument(
+        "--task-type",
+        choices=["auto", "classification", "regression"],
+        default="auto",
+        help="Task type",
+    )
+    flaml_save_parser.add_argument(
+        "--source-type",
+        choices=[source_type.value for source_type in IngestionSourceType],
+        default=None,
+        help="Optional explicit ingestion source type",
+    )
+    flaml_save_parser.add_argument("--time-budget", type=int, default=None, help="Time budget in seconds")
+    flaml_save_parser.add_argument("--max-iter", type=int, default=None, help="Maximum iterations")
+    flaml_save_parser.add_argument("--metric", default=None, help="Optimization metric")
+    flaml_save_parser.add_argument("--n-splits", type=int, default=None, help="Number of CV folds")
+    flaml_save_parser.add_argument("--seed", type=int, default=None, help="Random seed")
+    flaml_save_parser.add_argument("--ensemble", action="store_true", help="Enable ensemble")
+    flaml_save_parser.add_argument("--early-stop", action="store_true", help="Enable early stopping")
+    flaml_save_parser.add_argument(
+        "--estimator",
+        action="append",
+        default=[],
+        help="Estimator to include; repeat for multiple",
+    )
+    flaml_save_parser.add_argument("--save-name", default="flaml_best_model", help="Base name for saved model")
+
     predict_single_parser = subparsers.add_parser("predict-single", help="Run single-row prediction")
     _add_prediction_model_source_args(predict_single_parser)
     predict_single_parser.add_argument("--row-json", default=None, help="Single-row JSON object payload")
@@ -1547,7 +1611,7 @@ def main() -> None:
     hist_list_parser = subparsers.add_parser("history-list", help="List MLflow runs")
     hist_list_parser.add_argument(
         "--run-type",
-        choices=["all", "benchmark", "experiment", "unknown"],
+        choices=["all", "benchmark", "experiment", "flaml", "unknown"],
         default="all",
         help="Filter by run type",
     )
@@ -1629,6 +1693,10 @@ def main() -> None:
         cmd_experiment_evaluate(args)
     elif args.command == "experiment-save":
         cmd_experiment_save(args)
+    elif args.command == "flaml-run":
+        cmd_flaml_run(args)
+    elif args.command == "flaml-save":
+        cmd_flaml_save(args)
     elif args.command == "predict-single":
         cmd_predict_single(args)
     elif args.command == "predict-batch":
@@ -1699,6 +1767,163 @@ def _default_experiment_tracking_mode(settings):
         return MLflowTrackingMode(settings.pycaret.default_tracking_mode)
     except ValueError:
         return MLflowTrackingMode.MANUAL
+
+
+# ---------------------------------------------------------------------------
+# FLAML AutoML CLI commands
+# ---------------------------------------------------------------------------
+
+
+def _build_flaml_service(settings, *, metadata_store=None):  # noqa: ANN001, ANN201
+    from app.modeling.flaml.service import FlamlAutoMLService
+
+    return FlamlAutoMLService(
+        artifacts_dir=settings.flaml.artifacts_dir,
+        models_dir=settings.flaml.models_dir,
+        default_classification_metric=settings.flaml.default_classification_metric,
+        default_regression_metric=settings.flaml.default_regression_metric,
+        mlflow_experiment_name=settings.flaml.mlflow_experiment_name,
+        tracking_uri=settings.tracking.tracking_uri,
+        registry_uri=settings.tracking.registry_uri,
+        metadata_store=metadata_store,
+    )
+
+
+def cmd_flaml_run(args: argparse.Namespace) -> None:
+    """Run FLAML AutoML search from CLI."""
+
+    from app.modeling.flaml.schemas import FlamlConfig, FlamlSearchConfig, FlamlTaskType
+
+    settings = _load_runtime_settings()
+    metadata_store = build_metadata_store(settings)
+
+    try:
+        loaded, name = _load_cli_dataset(args.dataset, source_type=args.source_type)
+        _record_loaded_cli_dataset(metadata_store, loaded, name)
+    except (FileNotFoundError, ValueError, IngestionError) as exc:
+        _cli_error(exc)
+
+    estimator_list = args.estimator if args.estimator else None
+    search_config = FlamlSearchConfig(
+        time_budget=args.time_budget or settings.flaml.default_time_budget,
+        max_iter=args.max_iter,
+        metric=args.metric or "auto",
+        n_splits=args.n_splits or settings.flaml.default_n_splits,
+        seed=args.seed if args.seed is not None else settings.flaml.default_seed,
+        ensemble=args.ensemble,
+        early_stop=args.early_stop,
+    )
+    if estimator_list:
+        search_config.estimator_list = estimator_list
+
+    config = FlamlConfig(
+        target_column=args.target,
+        task_type=FlamlTaskType(args.task_type),
+        search=search_config,
+    )
+
+    service = _build_flaml_service(settings, metadata_store=metadata_store)
+
+    try:
+        bundle = service.run_automl(
+            loaded.dataframe,
+            config,
+            dataset_name=name,
+            dataset_fingerprint=loaded.metadata.content_hash or loaded.metadata.schema_hash,
+            execution_backend=settings.execution.backend,
+            workspace_mode=settings.workspace_mode,
+        )
+    except Exception as exc:
+        _cli_error(exc)
+
+    print(f"\n=== FLAML AutoML: {name} ===")
+    print(f"Task: {bundle.task_type.value}  Target: {bundle.config.target_column}")
+    print(f"Metric: {bundle.summary.metric}")
+    if bundle.search_result:
+        print(f"Best estimator: {bundle.search_result.best_estimator}")
+        print(f"Best loss: {bundle.search_result.best_loss}")
+    print(f"Duration: {bundle.summary.search_duration_seconds:.2f}s")
+
+    if bundle.search_result and bundle.search_result.leaderboard:
+        print("\nLeaderboard:")
+        for row in bundle.search_result.leaderboard:
+            print(f"  #{row.rank} {row.estimator_name}: loss={row.best_loss}")
+
+    if bundle.warnings:
+        print("\nWarnings:")
+        for warning in bundle.warnings:
+            print(f"  - {warning}")
+
+    if bundle.artifacts:
+        print("\nArtifacts:")
+        if bundle.artifacts.summary_json_path:
+            print(f"  Summary: {bundle.artifacts.summary_json_path}")
+        if bundle.artifacts.leaderboard_csv_path:
+            print(f"  Leaderboard: {bundle.artifacts.leaderboard_csv_path}")
+
+    if bundle.mlflow_run_id:
+        print(f"\nMLflow run id: {bundle.mlflow_run_id}")
+
+    # Stash bundle in session state for follow-up save
+    import builtins
+
+    builtins._autotabml_flaml_bundle = bundle  # type: ignore[attr-defined]
+
+
+def cmd_flaml_save(args: argparse.Namespace) -> None:
+    """Run FLAML search and save the best model from CLI."""
+
+    from app.modeling.flaml.schemas import FlamlConfig, FlamlSearchConfig, FlamlTaskType
+
+    settings = _load_runtime_settings()
+    metadata_store = build_metadata_store(settings)
+
+    try:
+        loaded, name = _load_cli_dataset(args.dataset, source_type=args.source_type)
+        _record_loaded_cli_dataset(metadata_store, loaded, name)
+    except (FileNotFoundError, ValueError, IngestionError) as exc:
+        _cli_error(exc)
+
+    estimator_list = args.estimator if args.estimator else None
+    search_config = FlamlSearchConfig(
+        time_budget=args.time_budget or settings.flaml.default_time_budget,
+        max_iter=args.max_iter,
+        metric=args.metric or "auto",
+        n_splits=args.n_splits or settings.flaml.default_n_splits,
+        seed=args.seed if args.seed is not None else settings.flaml.default_seed,
+        ensemble=args.ensemble,
+        early_stop=args.early_stop,
+    )
+    if estimator_list:
+        search_config.estimator_list = estimator_list
+
+    config = FlamlConfig(
+        target_column=args.target,
+        task_type=FlamlTaskType(args.task_type),
+        search=search_config,
+    )
+
+    service = _build_flaml_service(settings, metadata_store=metadata_store)
+
+    try:
+        bundle = service.run_automl(
+            loaded.dataframe,
+            config,
+            dataset_name=name,
+            dataset_fingerprint=loaded.metadata.content_hash or loaded.metadata.schema_hash,
+            execution_backend=settings.execution.backend,
+            workspace_mode=settings.workspace_mode,
+        )
+        bundle = service.save_best_model(bundle, save_name=args.save_name)
+    except Exception as exc:
+        _cli_error(exc)
+
+    print(f"\n=== FLAML Save: {name} ===")
+    if bundle.saved_model_metadata is not None:
+        print(f"Model path: {bundle.saved_model_metadata.model_path}")
+        print(f"Best estimator: {bundle.saved_model_metadata.best_estimator}")
+    if bundle.mlflow_run_id:
+        print(f"MLflow run id: {bundle.mlflow_run_id}")
 
 
 if __name__ == "__main__":

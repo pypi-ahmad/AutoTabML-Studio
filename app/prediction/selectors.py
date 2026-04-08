@@ -9,6 +9,7 @@ from app.prediction.errors import ModelDiscoveryError
 from app.prediction.schemas import AvailableModelReference, ModelSourceType, PredictionTaskType
 
 _SAVED_MODEL_METADATA_GLOB = "*_saved_model_metadata_*.json"
+_FLAML_METADATA_GLOB = "*_flaml_saved_model_metadata_*.json"
 
 
 def discover_local_saved_models(
@@ -218,3 +219,80 @@ def _path_key(path: Path) -> str:
         return str(path.resolve())
     except FileNotFoundError:
         return str(path)
+
+
+# ── FLAML model discovery ────────────────────────────────────────────
+
+def discover_flaml_saved_models(
+    model_dirs: list[Path],
+    metadata_dirs: list[Path],
+) -> list[AvailableModelReference]:
+    """Discover locally saved FLAML models using metadata sidecars."""
+
+    from app.modeling.flaml.schemas import FlamlSavedModelMetadata
+
+    references_by_path: dict[str, tuple[FlamlSavedModelMetadata, Path]] = {}
+
+    search_dirs = list(dict.fromkeys(metadata_dirs + model_dirs))
+    for search_dir in search_dirs:
+        if not search_dir.exists():
+            continue
+        for metadata_path in search_dir.rglob(_FLAML_METADATA_GLOB):
+            metadata = load_flaml_saved_model_metadata_file(metadata_path)
+            if metadata is None:
+                continue
+            model_path = Path(metadata.model_path)
+            key = _path_key(model_path)
+            current = references_by_path.get(key)
+            if current is None or metadata_path.stat().st_mtime > current[1].stat().st_mtime:
+                references_by_path[key] = (metadata, metadata_path)
+
+    references: list[AvailableModelReference] = []
+    for metadata, metadata_path in references_by_path.values():
+        model_path = Path(metadata.model_path)
+        task_type = _coerce_flaml_task_type(metadata.task_type)
+        references.append(
+            AvailableModelReference(
+                source_type=ModelSourceType.LOCAL_SAVED_MODEL,
+                display_name=metadata.model_name,
+                model_identifier=metadata.model_name,
+                load_reference=str(model_path),
+                task_type=task_type,
+                description="Local saved FLAML model with saved metadata.",
+                model_path=model_path,
+                metadata_path=metadata_path,
+                feature_columns=list(metadata.feature_columns),
+                metadata={
+                    "framework": "flaml",
+                    "target_column": metadata.target_column,
+                    "dataset_fingerprint": metadata.dataset_fingerprint,
+                    "feature_dtypes": dict(metadata.feature_dtypes),
+                    "target_dtype": metadata.target_dtype,
+                    "best_estimator": metadata.best_estimator,
+                },
+            )
+        )
+
+    return sorted(references, key=lambda r: (r.display_name.lower(), r.load_reference.lower()))
+
+
+def load_flaml_saved_model_metadata_file(path: Path):  # noqa: ANN201
+    """Parse a FLAML saved-model metadata file, returning None when invalid."""
+
+    try:
+        from app.modeling.flaml.schemas import FlamlSavedModelMetadata
+
+        return FlamlSavedModelMetadata.model_validate_json(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _coerce_flaml_task_type(value) -> PredictionTaskType:  # noqa: ANN001
+    """Convert a FLAML task type to PredictionTaskType."""
+
+    normalized = str(value.value if hasattr(value, "value") else value).strip().lower()
+    if normalized == "classification":
+        return PredictionTaskType.CLASSIFICATION
+    if normalized == "regression":
+        return PredictionTaskType.REGRESSION
+    return PredictionTaskType.UNKNOWN

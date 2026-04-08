@@ -215,6 +215,30 @@ def _section_accelerators(state: RuntimeState) -> None:
     )
     state.settings.benchmark.prefer_gpu = benchmark_prefer_gpu
 
+    # ── FLAML defaults ─────────────────────────────────────────────────
+    st.subheader("FLAML AutoML Defaults")
+    flaml_time_budget = int(st.number_input(
+        "Default time budget (seconds)",
+        min_value=10,
+        max_value=3600,
+        value=int(state.settings.flaml.default_time_budget),
+        step=10,
+        key="flaml_default_time_budget",
+        help="How long FLAML searches for the best model by default.",
+    ))
+    state.settings.flaml.default_time_budget = flaml_time_budget
+
+    flaml_n_splits = int(st.number_input(
+        "Default cross-validation folds",
+        min_value=2,
+        max_value=20,
+        value=int(state.settings.flaml.default_n_splits),
+        step=1,
+        key="flaml_default_n_splits",
+        help="Number of CV folds for FLAML evaluation.",
+    ))
+    state.settings.flaml.default_n_splits = flaml_n_splits
+
 
 def _section_provider(state: RuntimeState) -> None:
     st.header("AI Provider")
