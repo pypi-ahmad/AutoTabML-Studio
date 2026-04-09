@@ -243,6 +243,8 @@ class TestMetricSortDirection:
 
 # ── Service tests ──────────────────────────────────────────────────────
 
+flaml = pytest.importorskip("flaml", reason="flaml not installed")
+
 
 class TestFlamlService:
     def test_run_automl_classification(self, classification_df, monkeypatch):
