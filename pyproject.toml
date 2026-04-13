@@ -53,7 +53,7 @@ validation = [
 ]
 profiling = [
     "setuptools>=68,<82",
-    "ydata-profiling>=4.6",
+    "ydata-profiling>=4.18.1",
 ]
 benchmark = [
     "lazypredict>=0.3.0",
