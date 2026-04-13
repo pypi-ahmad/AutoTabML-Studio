@@ -62,7 +62,7 @@ benchmark = [
     "matplotlib>=3.8",
     "xgboost>=2.0",
     "lightgbm>=4.0",
-    "catboost>=1.2",
+    "catboost>=1.2.10",
 ]
 experiment = [
     "pycaret>=3.0.4; python_version < '3.13'",
@@ -70,7 +70,7 @@ experiment = [
     "matplotlib>=3.8",
     "xgboost>=2.0",
     "lightgbm>=4.0",
-    "catboost>=1.2",
+    "catboost>=1.2.10",
 ]
 flaml = [
     "flaml[automl]>=2.1",
@@ -81,7 +81,7 @@ flaml = [
 gpu = [
     "xgboost>=2.0",
     "lightgbm>=4.0",
-    "catboost>=1.2",
+    "catboost>=1.2.10",
 ]
 colab = [
     "mcp>=1.0",
