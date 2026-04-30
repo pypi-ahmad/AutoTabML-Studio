@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -39,13 +40,16 @@ class TestLocalArtifactManager:
         )
 
         manager.write_json(json_path, {"ok": 1})
-        manager.write_dataframe_csv(csv_path, pd.DataFrame({"prediction": ["yes"]}))
+        manager.write_dataframe_csv(csv_path, pd.DataFrame({"=prediction": ["=yes"]}))
 
         assert all(path.exists() for path in created_paths)
         assert json_path.exists()
         assert csv_path.exists()
         assert "unsafe_name" in json_path.name
-        assert csv_path.read_text(encoding="utf-8").startswith("prediction")
+        with csv_path.open("r", encoding="utf-8", newline="") as fh:
+            rows = list(csv.reader(fh))
+        assert rows[0][0] == "'=prediction"
+        assert rows[1][0] == "'=yes"
 
     def test_build_artifact_path_can_opt_into_uniqueness(self, tmp_path: Path):
         artifact_settings = _artifact_settings_for(tmp_path / "artifacts")

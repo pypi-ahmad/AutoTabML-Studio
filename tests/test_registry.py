@@ -7,6 +7,16 @@ from types import SimpleNamespace
 import pytest
 
 from app.config.models import TrackingSettings
+from app.tracking import mlflow_query as _mlflow_query_module
+
+
+@pytest.fixture(autouse=True)
+def _clear_registry_cache():
+    """Drop the in-process registry cache before and after every test."""
+
+    _mlflow_query_module.invalidate_registry_cache()
+    yield
+    _mlflow_query_module.invalidate_registry_cache()
 from app.registry.errors import ModelNotFoundError, PromotionError
 from app.registry.registry_service import RegistryService
 from app.registry.schemas import (
