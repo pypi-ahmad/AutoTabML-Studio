@@ -9,12 +9,7 @@ import streamlit as st
 
 from app.modeling.pycaret.errors import PyCaretExperimentError
 from app.modeling.pycaret.schemas import (
-    ExperimentCompareConfig,
-    ExperimentConfig,
-    ExperimentEvaluationConfig,
-    ExperimentSetupConfig,
     ExperimentTaskType,
-    ExperimentTuneConfig,
     MLflowTrackingMode,
     ModelSelectionSpec,
 )
@@ -25,11 +20,21 @@ from app.pages.dataset_workspace import (
     go_to_page,
     render_dataset_header,
 )
+from app.pages.services.experiment_workflow import (
+    ExperimentFormValues,
+    ExperimentWorkflowService,
+)
+from app.pages.ui_cache import (
+    get_experiment_workflow_service,
+    get_metadata_store,
+    get_pycaret_experiment_service,
+)
+from app.pages.ui_errors import log_ui_exception
 from app.pages.workflow_guide import render_next_step_hint, render_workflow_banner
 from app.path_utils import model_save_name
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store, ensure_dataset_record
+from app.storage import ensure_dataset_record
 
 
 def build_experiment_run_key(
@@ -39,52 +44,37 @@ def build_experiment_run_key(
 ) -> str:
     """Return a stable session-state key for experiment results."""
 
-    return f"{dataset_name}::{target_column}::{requested_task_type.value}"
+    return ExperimentWorkflowService().build_run_key(dataset_name, target_column, requested_task_type)
 
 
 def default_compare_metric_for_task(task_type: ExperimentTaskType, settings) -> str:
     """Return the UI default compare metric for the chosen task."""
 
-    if task_type == ExperimentTaskType.CLASSIFICATION:
-        return settings.default_compare_metric_classification
-    if task_type == ExperimentTaskType.REGRESSION:
-        return settings.default_compare_metric_regression
-    return ""
+    return ExperimentWorkflowService().default_compare_metric(task_type, settings)
 
 
 def default_tune_metric_for_task(task_type: ExperimentTaskType, settings) -> str:
     """Return the UI default tune metric for the chosen task."""
 
-    if task_type == ExperimentTaskType.CLASSIFICATION:
-        return settings.default_tune_metric_classification
-    if task_type == ExperimentTaskType.REGRESSION:
-        return settings.default_tune_metric_regression
-    return ""
+    return ExperimentWorkflowService().default_tune_metric(task_type, settings)
 
 
 def default_plot_ids_for_task(task_type: ExperimentTaskType, settings) -> list[str]:
     """Return safe default plot ids for the chosen task."""
 
-    if task_type == ExperimentTaskType.CLASSIFICATION:
-        return list(settings.default_plot_ids_classification)
-    if task_type == ExperimentTaskType.REGRESSION:
-        return list(settings.default_plot_ids_regression)
-    return []
+    return ExperimentWorkflowService().default_plot_ids(task_type, settings)
 
 
 def default_tracking_mode(settings) -> MLflowTrackingMode:
     """Return the configured default tracking mode with a safe fallback."""
 
-    try:
-        return MLflowTrackingMode(settings.default_tracking_mode)
-    except ValueError:
-        return MLflowTrackingMode.MANUAL
+    return ExperimentWorkflowService().default_tracking_mode(settings)
 
 
 def render_experiment_page() -> None:
     state = get_or_init_state()
     settings = state.settings.pycaret
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("🧪 Train & Tune")
     render_workflow_banner(current_step=4)
     st.caption(
@@ -316,49 +306,42 @@ def render_experiment_page() -> None:
 
     if st.button("Start Training", key="exp_run_compare"):
         service = _build_service(state.settings, metadata_store=metadata_store)
-        ignore_features = [item.strip() for item in ignore_features_raw.split(",") if item.strip()]
-        config = ExperimentConfig(
+        workflow = get_experiment_workflow_service()
+        form_values = ExperimentFormValues(
             target_column=target_column,
             task_type=task_type,
-            mlflow_tracking_mode=tracking_mode,
-            setup=ExperimentSetupConfig(
-                session_id=session_id,
-                train_size=train_size,
-                fold=fold,
-                fold_strategy=(
-                    settings.default_classification_fold_strategy
-                    if task_type == ExperimentTaskType.CLASSIFICATION
-                    else settings.default_regression_fold_strategy
-                    if task_type == ExperimentTaskType.REGRESSION
-                    else None
-                ),
-                ignore_features=ignore_features,
-                preprocess=preprocess,
-                use_gpu=use_gpu,
-                log_experiment=tracking_mode == MLflowTrackingMode.PYCARET_NATIVE,
-                log_plots=(selected_plots if enable_log_plots else False),
-                log_profile=(enable_log_profile if tracking_mode == MLflowTrackingMode.PYCARET_NATIVE else False),
-                log_data=(enable_log_data if tracking_mode == MLflowTrackingMode.PYCARET_NATIVE else False),
-            ),
-            compare=ExperimentCompareConfig(
-                optimize=compare_metric or None,
-                n_select=n_select,
-            ),
-            tune=ExperimentTuneConfig(optimize=tune_metric or None),
-            evaluation=ExperimentEvaluationConfig(plots=selected_plots),
+            session_id=session_id,
+            train_size=train_size,
+            fold=fold,
+            preprocess=preprocess,
+            ignore_features_raw=ignore_features_raw,
+            use_gpu=use_gpu,
+            compare_metric=compare_metric,
+            tune_metric=tune_metric,
+            n_select=n_select,
+            selected_plots=selected_plots,
+            tracking_mode=tracking_mode,
+            enable_log_plots=enable_log_plots,
+            enable_log_profile=enable_log_profile,
+            enable_log_data=enable_log_data,
         )
+        config = workflow.build_experiment_config(form_values, settings)
         dataset_fingerprint = metadata.content_hash or metadata.schema_hash
         with st.spinner("Training and comparing models — this may take several minutes for large datasets…"):
             try:
-                bundle = service.run_compare_pipeline(
-                    df,
-                    config,
+                pipeline_result = workflow.run_training_pipeline(
+                    service=service,
+                    dataframe=df,
+                    config=config,
                     dataset_name=selected_name,
                     dataset_fingerprint=dataset_fingerprint,
                     execution_backend=state.execution_backend,
                     workspace_mode=state.workspace_mode,
+                    auto_save=auto_save_compared_models,
+                    auto_save_with_snapshots=auto_save_with_snapshots,
                 )
             except PyCaretExperimentError as exc:
+                log_ui_exception(exc, operation="experiment_page.run_compare_pipeline")
                 st.error(
                     f"Experiment stopped: {safe_error_message(exc)}\n\n"
                     "**What to try:** Check your target column and task type, "
@@ -366,6 +349,7 @@ def render_experiment_page() -> None:
                 )
                 return
             except Exception as exc:  # pragma: no cover - UI fallback
+                log_ui_exception(exc, operation="experiment_page.run_compare_pipeline_unexpected")
                 st.error(
                     f"Experiment failed unexpectedly: {safe_error_message(exc)}\n\n"
                     "**What to try:** Verify your data has no formatting issues, "
@@ -373,26 +357,17 @@ def render_experiment_page() -> None:
                 )
                 return
 
-        saved_count = 0
-        if auto_save_compared_models:
-            try:
-                bundle = service.finalize_and_save_all_models(
-                    bundle,
-                    save_name_prefix="auto",
-                    include_experiment_snapshots=auto_save_with_snapshots,
-                )
-                saved_count = len(bundle.saved_model_artifacts)
-            except PyCaretExperimentError as exc:
-                st.warning(
-                    "Training completed, but automatic model save failed: "
-                    f"{safe_error_message(exc)}\n\n"
-                    "You can still save models manually using the **Save Model** button below."
-                )
+        if pipeline_result.autosave_warning:
+            st.warning(
+                "Training completed, but automatic model save failed: "
+                f"{pipeline_result.autosave_warning}\n\n"
+                "You can still save models manually using the **Save Model** button below."
+            )
 
-        bundles[requested_result_key] = bundle
-        if saved_count > 0:
+        bundles[requested_result_key] = pipeline_result.bundle
+        if pipeline_result.saved_count > 0:
             st.success(
-                f"Training complete. Saved {saved_count} model(s) for Predictions."
+                f"Training complete. Saved {pipeline_result.saved_count} model(s) for Predictions."
             )
         else:
             st.success("Training complete.")
@@ -501,7 +476,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
             rank=selected_row.rank,
         )
 
-        service = _build_service(get_or_init_state().settings, metadata_store=build_metadata_store(get_or_init_state().settings))
+        service = _build_service(get_or_init_state().settings)
         tune_col, eval_col, save_col, save_all_col = st.columns(4)
         if tune_col.button("🎯 Tune", key="exp_tune_button", help="Fine-tune the selected model's settings for better accuracy. Results appear in the Tuning Summary below."):
             try:
@@ -516,6 +491,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                 st.success("Model tuning complete.")
                 bundle = updated
             except PyCaretExperimentError as exc:
+                log_ui_exception(exc, operation="experiment_page.tune_model")
                 st.error(
                     f"Tuning failed: {safe_error_message(exc)}\n\n"
                     "**What to try:** Try a different model, or re-run the experiment with adjusted settings."
@@ -534,6 +510,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                 st.success("Performance charts generated.")
                 bundle = updated
             except PyCaretExperimentError as exc:
+                log_ui_exception(exc, operation="experiment_page.evaluate_model")
                 st.error(
                     f"Plot generation failed: {safe_error_message(exc)}\n\n"
                     "**What to try:** Some plot types may not be available for this model type. Try a different model."
@@ -553,6 +530,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                 st.success("Model saved.")
                 bundle = updated
             except PyCaretExperimentError as exc:
+                log_ui_exception(exc, operation="experiment_page.save_model")
                 st.error(
                     f"Save failed: {safe_error_message(exc)}\n\n"
                     "**What to try:** Check that the models folder is writable in **Settings**, or try saving a different model."
@@ -573,6 +551,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                 )
                 bundle = updated
             except PyCaretExperimentError as exc:
+                log_ui_exception(exc, operation="experiment_page.save_all_models")
                 st.error(
                     f"Batch save failed: {safe_error_message(exc)}\n\n"
                     "**What to try:** Check disk space and folder permissions, or save models individually instead."
@@ -589,20 +568,13 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
         )
         st.dataframe(tune_df, width="stretch")
         # Quick interpretation
-        _base_vals = list(bundle.tuned_result.baseline_metrics.values())
-        _tuned_vals = list(bundle.tuned_result.tuned_metrics.values())
-        if _base_vals and _tuned_vals:
-            try:
-                _first_base = float(_base_vals[0])
-                _first_tuned = float(_tuned_vals[0])
-                if _first_tuned > _first_base:
-                    st.success("Tuning improved the model. Consider saving the tuned version.")
-                elif _first_tuned == _first_base:
-                    st.info("Tuning produced the same score. The baseline may already be well-optimised.")
-                else:
-                    st.warning("Tuning did not improve the primary score. The baseline version may be the better choice.")
-            except (ValueError, TypeError):
-                pass
+        interpretation = get_experiment_workflow_service().interpret_tuning_result(bundle.tuned_result)
+        if interpretation.status == "improved":
+            st.success(interpretation.message)
+        elif interpretation.status == "same":
+            st.info(interpretation.message)
+        elif interpretation.status == "worse":
+            st.warning(interpretation.message)
 
     if bundle.evaluation_plots:
         st.subheader("Performance Charts")
@@ -672,17 +644,4 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
 
 
 def _build_service(app_settings, *, metadata_store=None) -> PyCaretExperimentService:  # noqa: ANN001
-    settings = app_settings.pycaret
-    return PyCaretExperimentService(
-        artifacts_dir=settings.artifacts_dir,
-        models_dir=settings.models_dir,
-        snapshots_dir=settings.snapshots_dir,
-        classification_compare_metric=settings.default_compare_metric_classification,
-        regression_compare_metric=settings.default_compare_metric_regression,
-        classification_tune_metric=settings.default_tune_metric_classification,
-        regression_tune_metric=settings.default_tune_metric_regression,
-        mlflow_experiment_name=settings.mlflow_experiment_name,
-        tracking_uri=app_settings.tracking.tracking_uri,
-        registry_uri=app_settings.tracking.registry_uri,
-        metadata_store=metadata_store,
-    )
+    return get_pycaret_experiment_service(app_settings)

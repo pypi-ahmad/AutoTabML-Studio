@@ -9,6 +9,13 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page, uploaded_file_to_input_spec
+from app.pages.ui_cache import (
+    get_prediction_service,
+    get_prediction_workflow_service,
+    list_cached_model_versions,
+    list_cached_registered_models,
+)
+from app.pages.ui_errors import log_ui_exception
 from app.pages.ui_labels import (
     PREDICTION_TASK_TYPE_LABELS,
     SOURCE_TYPE_LABELS,
@@ -19,15 +26,12 @@ from app.pages.workflow_guide import render_workflow_banner
 from app.prediction import (
     BatchPredictionRequest,
     ModelSourceType,
-    PredictionRequest,
     PredictionService,
     PredictionTaskType,
-    SchemaValidationMode,
     SingleRowPredictionRequest,
 )
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.tracking.mlflow_query import is_mlflow_available
 
 
@@ -35,7 +39,6 @@ def render_prediction_page(*, _show_header: bool = True) -> None:
     state = get_or_init_state()
     prediction_settings = state.settings.prediction
     tracking_settings = state.settings.tracking
-    metadata_store = build_metadata_store(state.settings)
     if _show_header:
         st.title("🔮 Predictions")
         render_workflow_banner(current_step=5)
@@ -43,19 +46,8 @@ def render_prediction_page(*, _show_header: bool = True) -> None:
             "Choose a saved model, provide data, and get predictions."
         )
 
-    service = PredictionService(
-        artifacts_dir=prediction_settings.artifacts_dir,
-        history_path=prediction_settings.history_path,
-        schema_validation_mode=SchemaValidationMode(prediction_settings.schema_validation_mode),
-        prediction_column_name=prediction_settings.prediction_column_name,
-        prediction_score_column_name=prediction_settings.prediction_score_column_name,
-        local_model_dirs=prediction_settings.supported_local_model_dirs,
-        local_metadata_dirs=prediction_settings.local_model_metadata_dirs,
-        tracking_uri=tracking_settings.tracking_uri,
-        registry_uri=tracking_settings.registry_uri,
-        registry_enabled=tracking_settings.registry_enabled,
-        metadata_store=metadata_store,
-    )
+    service = get_prediction_service(state.settings)
+    workflow = get_prediction_workflow_service()
 
     # ── Step 1: Pick a saved model ─────────────────────────────────────
     st.subheader("1. Pick a model")
@@ -72,23 +64,23 @@ def render_prediction_page(*, _show_header: bool = True) -> None:
         request_kwargs = adv_kwargs
 
     if request_kwargs is None:
-        _clear_loaded_model_if_needed(None)
+        workflow.reset_prediction_session_state(st.session_state, None)
         _render_prediction_history(service)
         return
 
-    request_signature = _request_signature(request_kwargs)
-    _clear_loaded_model_if_needed(request_signature)
+    request_signature = workflow.build_request_signature(request_kwargs)
+    workflow.reset_prediction_session_state(st.session_state, request_signature)
 
     if st.button("Load Model", key="pred_load_model", type="primary"):
         try:
-            request = PredictionRequest(**request_kwargs)
-            loaded_model = service.load_model(request)
+            loaded_model = workflow.load_prediction_model(service, request_kwargs)
             st.session_state["prediction_loaded_model"] = loaded_model
             st.session_state["prediction_loaded_signature"] = request_signature
             st.session_state.pop("prediction_single_result", None)
             st.session_state.pop("prediction_batch_result", None)
             st.success("Model loaded.")
         except Exception as exc:
+            log_ui_exception(exc, operation="prediction_page.load_model")
             st.error(
                 f"**Could not load model:** {safe_error_message(exc)}\n\n"
                 "**Likely cause:** The model file may be missing, moved, or incompatible with this environment.\n\n"
@@ -115,7 +107,7 @@ def render_prediction_page(*, _show_header: bool = True) -> None:
         _render_batch_panel(service, request_kwargs, loaded_model)
 
     with single_tab:
-        _render_single_row_panel(service, request_kwargs, loaded_model)
+        _render_single_row_panel(service, request_kwargs, loaded_model, workflow)
 
     _render_prediction_history(service)
 
@@ -224,8 +216,20 @@ def _render_advanced_model_sources(
         if adv_choice == "manual_path":
             base_kwargs["source_type"] = ModelSourceType.LOCAL_SAVED_MODEL
             task_type_hint = _prediction_task_type_input("pred_manual_task_type_hint")
-            model_path_value = st.text_input("Saved model path", key="pred_local_model_path", help="Full path to your saved model file on disk.").strip()
-            metadata_path_value = st.text_input("Model metadata file (optional)", key="pred_local_metadata_path", help="Path to a metadata file with model details (features, target column, etc.). Leave blank if unavailable.").strip()
+            st.caption(
+                "Local model loading only accepts AutoTabML-saved artifacts with checksum sidecars and trusted metadata inside the configured model directories. "
+                "Legacy orphan files and arbitrary paths are rejected."
+            )
+            model_path_value = st.text_input(
+                "Saved model path",
+                key="pred_local_model_path",
+                help="Path to a trusted AutoTabML-saved model artifact inside the configured local model directories.",
+            ).strip()
+            metadata_path_value = st.text_input(
+                "Model metadata file (optional)",
+                key="pred_local_metadata_path",
+                help="Optional explicit path to the checksum-backed metadata sidecar for the same trusted model.",
+            ).strip()
             if not model_path_value:
                 return None
             base_kwargs.update(
@@ -292,8 +296,9 @@ def _render_advanced_model_sources(
                 st.warning("Model registry is disabled in settings.")
                 return None
             try:
-                models = service.list_registered_models()
+                models = list_cached_registered_models(get_or_init_state().settings)
             except Exception as exc:
+                log_ui_exception(exc, operation="prediction_page.list_registered_models")
                 st.warning(f"Model registry is unavailable for the current MLflow configuration: {safe_error_message(exc)}")
                 return None
             if not models:
@@ -302,7 +307,7 @@ def _render_advanced_model_sources(
 
             model_lookup = {model.name: model for model in models}
             selected_model_name = st.selectbox("Registered model", options=list(model_lookup.keys()), key="pred_registry_model", help="Pick a model from the registry to use for predictions.")
-            versions = service.list_registered_model_versions(selected_model_name)
+            versions = list_cached_model_versions(get_or_init_state().settings, selected_model_name)
             if not versions:
                 st.info("The selected registered model has no versions.")
                 return None
@@ -367,7 +372,7 @@ def _render_loaded_model_metadata(loaded_model) -> None:  # noqa: ANN001
             render_metadata_table(_meta)
 
 
-def _render_single_row_panel(service: PredictionService, request_kwargs: dict, loaded_model) -> None:  # noqa: ANN001
+def _render_single_row_panel(service: PredictionService, request_kwargs: dict, loaded_model, workflow) -> None:  # noqa: ANN001
     st.caption("Fill in values for a single record and get an instant prediction.")
 
     feature_columns = loaded_model.feature_columns or []
@@ -402,13 +407,11 @@ def _render_single_row_panel(service: PredictionService, request_kwargs: dict, l
 
     if st.button("Run Prediction", key="pred_run_single", type="primary"):
         try:
-            if use_form:
-                # Always use the form values — the JSON text area is for
-                # viewing/copying only (its value goes stale when Streamlit
-                # rerenders because the widget keeps its session-state value).
-                final_payload = row_payload
-            else:
-                final_payload = json.loads(row_json_text)
+            final_payload = workflow.resolve_single_row_payload(
+                use_form=use_form,
+                row_payload=row_payload,
+                row_json_text=row_json_text,
+            )
 
             result = service.predict_single(
                 SingleRowPredictionRequest(
@@ -419,13 +422,14 @@ def _render_single_row_panel(service: PredictionService, request_kwargs: dict, l
             )
             st.session_state["prediction_single_result"] = result
             st.success("Prediction complete.")
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, ValueError):
             st.error(
                 "**Invalid JSON format.**\n\n"
                 "**Likely cause:** The JSON text has a syntax error (missing quote, comma, or bracket).\n\n"
                 "**What to try:** Use the column form above instead, or fix the JSON syntax."
             )
         except Exception as exc:
+            log_ui_exception(exc, operation="prediction_page.predict_single")
             st.error(
                 f"**Prediction failed:** {safe_error_message(exc)}\n\n"
                 "**Likely cause:** The input data may not match what the model expects.\n\n"
@@ -555,6 +559,7 @@ def _render_batch_panel(service: PredictionService, request_kwargs: dict, loaded
                     st.session_state["prediction_batch_result"] = result
                     st.success("Batch prediction complete.")
                 except Exception as exc:
+                    log_ui_exception(exc, operation="prediction_page.predict_batch")
                     st.error(
                         f"**Prediction failed:** {safe_error_message(exc)}\n\n"
                         "**Likely cause:** Your data columns may not match what the model expects, "
@@ -646,6 +651,7 @@ def _render_prediction_history(service: PredictionService) -> None:
         try:
             entries = service.list_history(limit=15)
         except Exception as exc:
+            log_ui_exception(exc, operation="prediction_page.list_history")
             st.warning(f"Prediction history could not be loaded: {safe_error_message(exc)}")
             return
         if not entries:
@@ -685,19 +691,3 @@ def _prediction_task_type_input(key: str):  # noqa: ANN201
     if task_type_value == PredictionTaskType.UNKNOWN.value:
         return None
     return PredictionTaskType(task_type_value)
-
-
-def _request_signature(request_kwargs: dict) -> str:
-    normalized = json.dumps(request_kwargs, default=str, sort_keys=True)
-    return normalized
-
-
-def _clear_loaded_model_if_needed(current_signature: str | None) -> None:
-    previous_signature = st.session_state.get("prediction_loaded_signature")
-    if previous_signature == current_signature:
-        return
-    st.session_state.pop("prediction_loaded_model", None)
-    st.session_state.pop("prediction_single_result", None)
-    st.session_state.pop("prediction_batch_result", None)
-    if current_signature is None:
-        st.session_state.pop("prediction_loaded_signature", None)
