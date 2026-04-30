@@ -154,6 +154,117 @@ class TestRunSummary:
 
 
 # ---------------------------------------------------------------------------
+# History service sorting
+# ---------------------------------------------------------------------------
+
+
+class TestHistoryServiceSorting:
+    """Validates that history sorting is correct and not partial-dataset."""
+
+    def _service_with_runs(self, monkeypatch, runs, *, captured: dict):
+        from app.tracking import history_service as service_module
+
+        def fake_search_runs(**kwargs):
+            captured.update(kwargs)
+            max_results = kwargs.get("max_results", len(runs))
+            # Mimic MLflow's start_time DESC default ordering.
+            ordered = sorted(runs, key=lambda r: r.start_time or 0, reverse=True)
+            return ordered[:max_results]
+
+        monkeypatch.setattr(service_module.mlflow_query, "search_runs", fake_search_runs)
+        monkeypatch.setattr(
+            service_module.HistoryService,
+            "_resolve_experiment_ids",
+            lambda self, history_filter: (["1"], {"1": "exp"}),
+        )
+        return HistoryService(default_limit=5)
+
+    def test_start_time_sort_pushed_to_mlflow(self, monkeypatch):
+        captured: dict = {}
+        runs = [
+            _make_run(run_id=f"r{i}", duration_seconds=float(i))
+            for i in range(3)
+        ]
+        service = self._service_with_runs(monkeypatch, runs, captured=captured)
+
+        service.list_runs(
+            sort=RunHistorySort(field=RunSortField.START_TIME, direction=SortDirection.ASCENDING),
+            limit=2,
+        )
+
+        assert captured["order_by"] == ["attributes.start_time ASC"]
+        assert captured["max_results"] == 2
+
+    def test_duration_sort_widens_pool_and_orders_full_dataset(self, monkeypatch):
+        captured: dict = {}
+        # Build 12 runs where duration is *anti-correlated* with start_time, so a
+        # naive "fetch top-N by start_time then re-sort" yields the wrong winner.
+        runs = []
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(12):
+            run = _make_run(
+                run_id=f"r{i:02d}",
+                duration_seconds=float(12 - i),
+            )
+            run = run.model_copy(
+                update={
+                    "start_time": base.replace(hour=i),
+                    "end_time": base.replace(hour=i, minute=int(12 - i)),
+                }
+            )
+            runs.append(run)
+
+        service = self._service_with_runs(monkeypatch, runs, captured=captured)
+
+        result = service.list_runs(
+            sort=RunHistorySort(field=RunSortField.DURATION, direction=SortDirection.DESCENDING),
+            limit=3,
+        )
+
+        # The widened pool must be requested so client-side sort sees the full set.
+        assert captured["max_results"] >= len(runs)
+        # Top-3 by duration should be 12.0, 11.0, 10.0 — never a recent-but-short run.
+        assert [r.duration_seconds for r in result] == [12.0, 11.0, 10.0]
+        assert [r.run_id for r in result] == ["r00", "r01", "r02"]
+
+    def test_primary_score_sort_is_not_partial(self, monkeypatch):
+        captured: dict = {}
+        runs = [
+            _make_run(run_id=f"r{i:02d}", primary_metric_value=float(i) / 10)
+            for i in range(8)
+        ]
+        service = self._service_with_runs(monkeypatch, runs, captured=captured)
+
+        result = service.list_runs(
+            sort=RunHistorySort(
+                field=RunSortField.PRIMARY_SCORE, direction=SortDirection.DESCENDING
+            ),
+            limit=2,
+        )
+
+        assert captured["max_results"] >= len(runs)
+        assert [r.primary_metric_value for r in result] == [0.7, 0.6]
+
+    def test_duration_sort_uses_zero_for_missing_values(self, monkeypatch):
+        captured: dict = {}
+        runs = [
+            _make_run(run_id="present", duration_seconds=4.0),
+            _make_run(run_id="missing", duration_seconds=None),
+            _make_run(run_id="longest", duration_seconds=9.5),
+        ]
+        service = self._service_with_runs(monkeypatch, runs, captured=captured)
+
+        result = service.list_runs(
+            sort=RunHistorySort(
+                field=RunSortField.DURATION, direction=SortDirection.ASCENDING
+            ),
+            limit=3,
+        )
+
+        assert [r.run_id for r in result] == ["missing", "present", "longest"]
+
+
+# ---------------------------------------------------------------------------
 # Comparison service
 # ---------------------------------------------------------------------------
 
