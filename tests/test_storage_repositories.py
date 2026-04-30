@@ -16,7 +16,6 @@ from app.storage.models import (
     BatchRunStatus,
     DatasetRecord,
     JobRecord,
-    ProjectRecord,
     SavedLocalModelRecord,
 )
 from app.storage.repositories import (

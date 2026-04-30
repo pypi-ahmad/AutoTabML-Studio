@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import abc
 import logging
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Generic, Iterable, TypeVar
+from typing import Any, Generic, TypeVar
 
 from app.artifacts import ArtifactKind, LocalArtifactManager
 from app.errors import log_exception

@@ -24,9 +24,9 @@ from __future__ import annotations
 import ipaddress
 import logging
 import socket
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Mapping
 from urllib.parse import urlparse, urlsplit
 
 import httpx

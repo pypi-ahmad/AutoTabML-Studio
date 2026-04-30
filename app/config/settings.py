@@ -12,6 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from dotenv import load_dotenv
+from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.config.models import (
@@ -30,7 +31,6 @@ from app.config.models import (
     ValidationSettings,
 )
 from app.errors import log_exception
-from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 

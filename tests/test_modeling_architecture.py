@@ -39,7 +39,6 @@ from app.modeling.pycaret.schemas import (
     ExperimentSummary,
     ExperimentTaskType,
     ExperimentTuneConfig,
-    MLflowTrackingMode,
 )
 
 

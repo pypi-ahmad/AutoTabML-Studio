@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import logging
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -32,7 +32,7 @@ from app.prediction import (
     SingleRowPredictionRequest,
 )
 from app.prediction.artifacts import write_prediction_artifacts
-from app.prediction.errors import ModelDiscoveryError, ModelLoadError, PredictionValidationError
+from app.prediction.errors import ModelDiscoveryError, PredictionValidationError
 from app.prediction.history import PredictionHistoryStore
 from app.prediction.schemas import PredictionArtifactBundle, PredictionValidationSeverity
 from app.prediction.selectors import (
@@ -42,9 +42,9 @@ from app.prediction.selectors import (
     load_saved_model_metadata_file,
     resolve_local_model_reference,
 )
+from app.prediction.validators import normalize_single_row_input, validate_prediction_dataframe
 from app.security.errors import TrustedArtifactError
 from app.security.trusted_artifacts import TRUSTED_MODEL_SOURCE, compute_sha256, write_checksum_file
-from app.prediction.validators import normalize_single_row_input, validate_prediction_dataframe
 
 
 class _FakeClassifier:

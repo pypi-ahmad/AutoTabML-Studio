@@ -84,21 +84,6 @@ class _FakeAutoML:
     def fit(self, **kwargs):
         self.fit_kwargs = kwargs
 
-
-def _write_trusted_flaml_metadata(metadata: FlamlSavedModelMetadata, metadata_path: Path) -> FlamlSavedModelMetadata:
-    model_sha256 = compute_sha256(metadata.model_path)
-    write_checksum_file(metadata.model_path, checksum=model_sha256)
-    trusted_metadata = metadata.model_copy(
-        update={
-            "artifact_format": "flaml_pickle",
-            "trusted_source": TRUSTED_MODEL_SOURCE,
-            "model_sha256": model_sha256,
-        }
-    )
-    metadata_path.write_text(trusted_metadata.model_dump_json(indent=2), encoding="utf-8")
-    write_checksum_file(metadata_path)
-    return trusted_metadata
-
     @property
     def best_estimator(self):
         return self._best_estimator
@@ -129,6 +114,21 @@ def _write_trusted_flaml_metadata(metadata: FlamlSavedModelMetadata, metadata_pa
 
     def predict(self, X):
         return [0] * len(X)
+
+
+def _write_trusted_flaml_metadata(metadata: FlamlSavedModelMetadata, metadata_path: Path) -> FlamlSavedModelMetadata:
+    model_sha256 = compute_sha256(metadata.model_path)
+    write_checksum_file(metadata.model_path, checksum=model_sha256)
+    trusted_metadata = metadata.model_copy(
+        update={
+            "artifact_format": "flaml_pickle",
+            "trusted_source": TRUSTED_MODEL_SOURCE,
+            "model_sha256": model_sha256,
+        }
+    )
+    metadata_path.write_text(trusted_metadata.model_dump_json(indent=2), encoding="utf-8")
+    write_checksum_file(metadata_path)
+    return trusted_metadata
 
 
 def _make_service(monkeypatch):
@@ -693,8 +693,8 @@ class TestFlamlModelDiscovery:
         assert refs[0].feature_columns == ["f1", "f2"]
 
     def test_coerce_flaml_task_type(self):
-        from app.prediction.selectors import _coerce_flaml_task_type
         from app.prediction.schemas import PredictionTaskType
+        from app.prediction.selectors import _coerce_flaml_task_type
 
         assert _coerce_flaml_task_type(FlamlTaskType.CLASSIFICATION) == PredictionTaskType.CLASSIFICATION
         assert _coerce_flaml_task_type(FlamlTaskType.REGRESSION) == PredictionTaskType.REGRESSION
@@ -731,13 +731,13 @@ class TestFlamlModelLoader:
 
 class TestFlamlScorer:
     def test_scorer_routes_flaml_to_predict_api(self):
-        from app.prediction.scorer import PredictionScorer
         from app.prediction.schemas import (
             LoadedModel,
             ModelSourceType,
             PredictionMode,
             PredictionTaskType,
         )
+        from app.prediction.scorer import PredictionScorer
 
         class FakeModel:
             def predict(self, X):

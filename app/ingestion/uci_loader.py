@@ -148,7 +148,7 @@ class UCIRepoLoader(BaseLoader):
                 dataset = ucimlrepo.fetch_ucirepo(id=uci_id)
             else:
                 dataset = ucimlrepo.fetch_ucirepo(name=uci_name)
-        except (OSError, RuntimeError, ValueError) as exc:
+        except Exception as exc:  # noqa: BLE001 - external library may raise arbitrary errors
             identifier = f"id={uci_id}" if uci_id is not None else f"name='{uci_name}'"
             log_and_wrap(
                 logger,

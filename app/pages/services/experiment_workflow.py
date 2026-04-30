@@ -62,7 +62,7 @@ class ExperimentFormValues:
 class TrainingPipelineResult:
     """Outcome from the training+autosave pipeline."""
 
-    bundle: "ExperimentResultBundle"
+    bundle: ExperimentResultBundle
     saved_count: int
     autosave_warning: str | None = None
 
@@ -157,8 +157,8 @@ class ExperimentWorkflowService:
     def run_training_pipeline(
         self,
         *,
-        service: "PyCaretExperimentService",
-        dataframe: "pd.DataFrame",
+        service: PyCaretExperimentService,
+        dataframe: pd.DataFrame,
         config: ExperimentConfig,
         dataset_name: str,
         dataset_fingerprint: str | None,

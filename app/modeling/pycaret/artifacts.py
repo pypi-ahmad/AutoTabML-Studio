@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from app.artifacts import ArtifactKind, LocalArtifactManager
+from app.artifacts import ArtifactKind
 from app.modeling.base import BaseArtifacts
 from app.modeling.pycaret.schemas import ExperimentArtifactBundle, ExperimentResultBundle
 from app.modeling.pycaret.summary import leaderboard_to_dataframe

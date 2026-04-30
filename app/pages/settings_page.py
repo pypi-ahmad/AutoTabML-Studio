@@ -13,12 +13,6 @@ from app.config.enums import (
     WorkspaceMode,
 )
 from app.gpu import cuda_summary
-from app.providers.base import ModelItem
-from app.providers.catalog_service import (
-    build_provider,
-    get_allowed_providers,
-    resolve_default_model,
-)
 from app.pages.ui_cache import (
     DATASET_LOAD_TTL_SECONDS,
     MLFLOW_QUERY_TTL_SECONDS,
@@ -26,6 +20,12 @@ from app.pages.ui_cache import (
     invalidate_dataset_cache,
     invalidate_mlflow_query_cache,
     invalidate_service_cache,
+)
+from app.providers.base import ModelItem
+from app.providers.catalog_service import (
+    build_provider,
+    get_allowed_providers,
+    resolve_default_model,
 )
 from app.security.masking import (
     MSG_DEFAULT_MODEL_UNAVAILABLE,
