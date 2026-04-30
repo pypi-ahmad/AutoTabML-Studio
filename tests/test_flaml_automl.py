@@ -30,6 +30,12 @@ from app.modeling.flaml.schemas import (
 )
 from app.modeling.flaml.service import FlamlAutoMLService, metric_sort_direction
 from app.modeling.flaml.setup_runner import resolve_task_type
+from app.security.trusted_artifacts import (
+    TRUSTED_MODEL_SOURCE,
+    checksum_file_path,
+    compute_sha256,
+    write_checksum_file,
+)
 
 
 @pytest.fixture
@@ -77,6 +83,21 @@ class _FakeAutoML:
 
     def fit(self, **kwargs):
         self.fit_kwargs = kwargs
+
+
+def _write_trusted_flaml_metadata(metadata: FlamlSavedModelMetadata, metadata_path: Path) -> FlamlSavedModelMetadata:
+    model_sha256 = compute_sha256(metadata.model_path)
+    write_checksum_file(metadata.model_path, checksum=model_sha256)
+    trusted_metadata = metadata.model_copy(
+        update={
+            "artifact_format": "flaml_pickle",
+            "trusted_source": TRUSTED_MODEL_SOURCE,
+            "model_sha256": model_sha256,
+        }
+    )
+    metadata_path.write_text(trusted_metadata.model_dump_json(indent=2), encoding="utf-8")
+    write_checksum_file(metadata_path)
+    return trusted_metadata
 
     @property
     def best_estimator(self):
@@ -394,8 +415,14 @@ class TestFlamlService:
         assert updated.saved_model_metadata is not None
         assert updated.saved_model_metadata.model_name == "TestModel"
         assert updated.saved_model_metadata.framework == "flaml"
+        assert updated.saved_model_metadata.trusted_source == TRUSTED_MODEL_SOURCE
+        assert updated.saved_model_metadata.model_sha256 == compute_sha256(Path(updated.saved_model_metadata.model_path))
         assert updated.summary.saved_model_name == "TestModel"
         assert Path(updated.saved_model_metadata.model_path).exists()
+        assert checksum_file_path(Path(updated.saved_model_metadata.model_path)).exists()
+        assert updated.artifacts is not None
+        assert updated.artifacts.saved_model_metadata_path is not None
+        assert checksum_file_path(updated.artifacts.saved_model_metadata_path).exists()
 
     def test_save_best_model_no_runtime_raises(self, monkeypatch):
         service = _make_service(monkeypatch)
@@ -656,7 +683,7 @@ class TestFlamlModelDiscovery:
             target_dtype="int64",
         )
         meta_path = tmp_path / "test_flaml_saved_model_metadata_test.json"
-        meta_path.write_text(metadata.model_dump_json(indent=2), encoding="utf-8")
+        _write_trusted_flaml_metadata(metadata, meta_path)
 
         refs = discover_flaml_saved_models([tmp_path], [tmp_path])
         assert len(refs) == 1

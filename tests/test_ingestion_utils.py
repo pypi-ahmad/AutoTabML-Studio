@@ -83,6 +83,11 @@ class TestParseFailures:
             with pytest.MonkeyPatch.context() as monkeypatch:
                 monkeypatch.setattr(Path, "exists", lambda self: True)
                 monkeypatch.setattr(
+                    Path,
+                    "stat",
+                    lambda self: type("StatResult", (), {"st_size": 32})(),
+                )
+                monkeypatch.setattr(
                     pd,
                     "read_csv",
                     lambda *args, **kwargs: (_ for _ in ()).throw(pd.errors.ParserError("bad csv")),

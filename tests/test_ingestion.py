@@ -10,6 +10,8 @@ import pytest
 import respx
 
 from app.ingestion.errors import EmptyDatasetError, ParseFailureError, RemoteAccessError, UnsupportedSourceError
+from app.ingestion.excel_loader import ExcelLoader
+from app.ingestion.csv_loader import CSVLoader
 from app.ingestion.factory import load_dataset, preview_dataset
 from app.ingestion.schemas import DatasetInputSpec
 from app.ingestion.types import IngestionSourceType
@@ -55,6 +57,43 @@ class TestLocalFileLoaders:
         assert loaded.metadata.sheet_name == "first"
         assert loaded.metadata.source_details["available_sheet_names"] == ["first", "second"]
 
+    def test_local_csv_respects_file_size_guard(self, tmp_path: Path):
+        csv_path = tmp_path / "sample.csv"
+        csv_path.write_text("feature,target\n1,0\n2,1\n", encoding="utf-8")
+
+        with pytest.raises(UnsupportedSourceError, match="safe read cap"):
+            load_dataset(
+                DatasetInputSpec(
+                    source_type=IngestionSourceType.CSV,
+                    path=csv_path,
+                    local_max_file_bytes=8,
+                )
+            )
+
+    def test_excel_loader_uses_openpyxl_read_only_mode(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+        excel_path = tmp_path / "workbook.xlsx"
+        with pd.ExcelWriter(excel_path) as writer:
+            pd.DataFrame({"a": [1, 2], "b": [3, 4]}).to_excel(writer, index=False)
+
+        import openpyxl
+
+        real_load_workbook = openpyxl.load_workbook
+        captured: dict[str, Any] = {}
+
+        def wrapped_load_workbook(*args, **kwargs):
+            captured.update(kwargs)
+            return real_load_workbook(*args, **kwargs)
+
+        monkeypatch.setattr(openpyxl, "load_workbook", wrapped_load_workbook)
+
+        loaded = ExcelLoader().load_raw_dataframe(
+            DatasetInputSpec(source_type=IngestionSourceType.EXCEL, path=excel_path)
+        )
+
+        assert loaded[0].shape == (2, 2)
+        assert captured["read_only"] is True
+        assert captured["data_only"] is True
+
 
 class TestRemoteLoaders:
     @respx.mock
@@ -77,6 +116,62 @@ class TestRemoteLoaders:
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["detected_table_count"] == 1
         assert loaded.metadata.source_type == IngestionSourceType.HTML_TABLE
+        assert loaded.metadata.source_details["load_strategy"] == "streamed_temp_file_bounded_html_parse"
+
+    @respx.mock
+    def test_load_html_table_from_url_respects_row_limit(self):
+        url = "https://example.com/table-limited"
+        html = """
+        <html><body>
+        <table>
+            <thead><tr><th>name</th><th>score</th></tr></thead>
+            <tbody>
+                <tr><td>a</td><td>10</td></tr>
+                <tr><td>b</td><td>20</td></tr>
+                <tr><td>c</td><td>30</td></tr>
+            </tbody>
+        </table>
+        </body></html>
+        """
+        respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/html"}))
+
+        loaded = load_dataset(
+            DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url, row_limit=1)
+        )
+
+        assert loaded.dataframe.shape == (1, 2)
+        assert loaded.dataframe.iloc[0].to_dict() == {"name": "a", "score": 10}
+        assert loaded.metadata.applied_row_limit == 1
+
+    @respx.mock
+    def test_load_html_table_match_text_filters_tables(self):
+        url = "https://example.com/table-match"
+        html = """
+        <html><body>
+        <table>
+            <tr><th>name</th></tr>
+            <tr><td>alpha</td></tr>
+        </table>
+        <table>
+            <caption>scores</caption>
+            <tr><th>name</th><th>score</th></tr>
+            <tr><td>beta</td><td>20</td></tr>
+        </table>
+        </body></html>
+        """
+        respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/html"}))
+
+        loaded = load_dataset(
+            DatasetInputSpec(
+                source_type=IngestionSourceType.HTML_TABLE,
+                url=url,
+                html_match_text="scores",
+            )
+        )
+
+        assert loaded.dataframe.shape == (1, 2)
+        assert loaded.metadata.source_details["detected_table_count"] == 1
+        assert loaded.dataframe.iloc[0].to_dict() == {"name": "beta", "score": 20}
 
     @respx.mock
     def test_url_file_routes_to_csv_loader(self):
@@ -133,6 +228,22 @@ class TestRemoteLoaders:
         assert loaded.metadata.source_details["routed_source_type"] == "html_table"
         assert loaded.metadata.source_details["probe_method"] == "get-sniff"
 
+    @respx.mock
+    def test_url_file_respects_configured_download_cap(self):
+        url = "https://example.com/large.csv"
+        csv_body = b"x,y\n1,2\n3,4\n"
+        respx.head(url).mock(return_value=httpx.Response(200, headers={"content-type": "text/csv"}))
+        respx.get(url).mock(return_value=httpx.Response(200, content=csv_body, headers={"content-type": "text/csv"}))
+
+        with pytest.raises(RemoteAccessError, match="cap"):
+            load_dataset(
+                DatasetInputSpec(
+                    source_type=IngestionSourceType.URL_FILE,
+                    url=url,
+                    url_max_download_bytes=8,
+                )
+            )
+
 
 class TestDataFrameLoaderAndPreview:
     def test_dataframe_input_is_copied_and_normalized(self):
@@ -163,6 +274,53 @@ class TestDataFrameLoaderAndPreview:
         assert loaded.metadata.is_preview is True
         assert loaded.metadata.applied_row_limit == 2
         assert loaded.preview(1).shape == (1, 2)
+
+
+class TestChunkedCSVReading:
+    def test_csv_loader_reads_in_chunks_and_stops_after_row_limit(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        csv_path = tmp_path / "chunked.csv"
+        csv_path.write_text("feature,target\n1,0\n2,1\n3,0\n4,1\n5,0\n", encoding="utf-8")
+
+        seen_kwargs: dict[str, Any] = {}
+        consumed_chunks: list[int] = []
+
+        class FakeReader:
+            def __init__(self) -> None:
+                self._chunks = iter(
+                    [
+                        pd.DataFrame({"feature": [1, 2], "target": [0, 1]}),
+                        pd.DataFrame({"feature": [3, 4], "target": [0, 1]}),
+                        pd.DataFrame({"feature": [5], "target": [0]}),
+                    ]
+                )
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                chunk = next(self._chunks)
+                consumed_chunks.append(len(chunk))
+                return chunk
+
+        def fake_read_csv(*args, **kwargs):
+            seen_kwargs.update(kwargs)
+            return FakeReader()
+
+        monkeypatch.setattr(pd, "read_csv", fake_read_csv)
+
+        dataframe, source_details = CSVLoader().load_raw_dataframe(
+            DatasetInputSpec(source_type=IngestionSourceType.CSV, path=csv_path),
+            row_limit=3,
+        )
+
+        assert dataframe.shape == (3, 2)
+        assert consumed_chunks == [2, 2]
+        assert seen_kwargs["chunksize"] == 3
+        assert source_details["load_strategy"] == "chunked_read_csv"
 
 
 class TestFailures:
