@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import importlib
+import json
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
+from app.errors import log_exception
+from app.modeling.pycaret.schemas import SavedModelMetadata
 from app.prediction.errors import ModelLoadError
 from app.prediction.schemas import (
     AvailableModelReference,
@@ -28,10 +34,15 @@ from app.prediction.selectors import (
     resolve_local_model_reference,
     to_experiment_task_type,
 )
-from app.registry.errors import RegistryUnavailableError
+from app.registry.errors import RegistryError, RegistryUnavailableError
 from app.registry.registry_service import RegistryService
+from app.security.errors import TrustedArtifactError
+from app.security.trusted_artifacts import load_verified_pickle_artifact, require_metadata_checksum, verify_local_artifact
+from app.tracking.errors import TrackingError
 from app.tracking.history_service import HistoryService
 from app.tracking.mlflow_query import is_mlflow_available
+
+logger = logging.getLogger(__name__)
 
 
 class ModelLoader(ABC):
@@ -59,6 +70,9 @@ class LocalPyCaretModelLoader(ModelLoader):
     def discover(self) -> list[AvailableModelReference]:
         return discover_local_saved_models(self._model_dirs, self._metadata_dirs)
 
+    def _trusted_metadata_dirs(self) -> list[Path]:
+        return list(dict.fromkeys(self._metadata_dirs + self._model_dirs))
+
     def load(self, request: PredictionRequest) -> LoadedModel:
         references = self.discover()
         identifier = request.model_identifier or request.model_path
@@ -66,13 +80,28 @@ class LocalPyCaretModelLoader(ModelLoader):
 
         metadata = None
         if request.metadata_path is not None:
-            metadata = load_saved_model_metadata_file(request.metadata_path)
+            metadata = load_saved_model_metadata_file(
+                request.metadata_path,
+                metadata_roots=self._trusted_metadata_dirs(),
+                model_roots=self._model_dirs,
+                raise_on_error=True,
+            )
         elif resolved.metadata_path is not None:
-            metadata = load_saved_model_metadata_file(resolved.metadata_path)
+            metadata = load_saved_model_metadata_file(
+                resolved.metadata_path,
+                metadata_roots=self._trusted_metadata_dirs(),
+                model_roots=self._model_dirs,
+                raise_on_error=True,
+            )
+
+        if metadata is None:
+            raise ModelLoadError(
+                "Local saved PyCaret models require trusted checksum-backed metadata. "
+                "Re-save the model from within AutoTabML Studio before loading it."
+            )
 
         task_type = request.task_type_hint or resolved.task_type
-        if metadata is not None:
-            task_type = coerce_prediction_task_type(metadata.task_type)
+        task_type = coerce_prediction_task_type(metadata.task_type)
 
         if task_type in {None, PredictionTaskType.UNKNOWN}:
             raise ModelLoadError(
@@ -82,27 +111,50 @@ class LocalPyCaretModelLoader(ModelLoader):
         try:
             from app.modeling.pycaret.persistence import load_model_artifact
 
+            model_path = verify_local_artifact(
+                metadata.model_path,
+                trusted_roots=self._model_dirs,
+                expected_sha256=require_metadata_checksum(metadata.model_dump(mode="json")),
+                label="model artifact",
+            ).path
             native_model = load_model_artifact(
                 to_experiment_task_type(task_type),
-                resolved.model_path or Path(resolved.load_reference),
+                model_path,
             )
-        except Exception as exc:
+        except TrustedArtifactError as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.load_local_pycaret",
+                context={"model_path": str(metadata.model_path)},
+            )
+            raise ModelLoadError(f"Could not load local saved PyCaret model: {exc}") from exc
+        except (ImportError, OSError, ValueError, RuntimeError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.load_local_pycaret",
+                context={"model_path": str(metadata.model_path)},
+            )
             raise ModelLoadError(f"Could not load local saved PyCaret model: {exc}") from exc
 
         metadata_payload = dict(resolved.metadata)
-        if metadata is not None:
-            metadata_payload.update(
-                {
-                    "target_column": metadata.target_column,
-                    "dataset_fingerprint": metadata.dataset_fingerprint,
-                    "feature_dtypes": dict(metadata.feature_dtypes),
-                    "target_dtype": metadata.target_dtype,
-                    "model_only": metadata.model_only,
-                    "experiment_snapshot_path": str(metadata.experiment_snapshot_path)
-                    if metadata.experiment_snapshot_path is not None
-                    else None,
-                }
-            )
+        metadata_payload.update(
+            {
+                "target_column": metadata.target_column,
+                "dataset_fingerprint": metadata.dataset_fingerprint,
+                "dataset_name": metadata.dataset_name,
+                "feature_dtypes": dict(metadata.feature_dtypes),
+                "target_dtype": metadata.target_dtype,
+                "model_only": metadata.model_only,
+                "trained_at": metadata.trained_at,
+                "artifact_format": metadata.artifact_format,
+                "trusted_source": metadata.trusted_source,
+                "experiment_snapshot_path": str(metadata.experiment_snapshot_path)
+                if metadata.experiment_snapshot_path is not None
+                else None,
+            }
+        )
 
         return LoadedModel(
             source_type=ModelSourceType.LOCAL_SAVED_MODEL,
@@ -112,8 +164,8 @@ class LocalPyCaretModelLoader(ModelLoader):
             loader_name=self.__class__.__name__,
             scorer_kind="pycaret",
             supported_prediction_modes=[PredictionMode.SINGLE_ROW, PredictionMode.BATCH],
-            feature_columns=list(metadata.feature_columns) if metadata is not None else list(resolved.feature_columns),
-            target_column=metadata.target_column if metadata is not None else resolved.metadata.get("target_column"),
+            feature_columns=list(metadata.feature_columns),
+            target_column=metadata.target_column,
             metadata=metadata_payload,
             native_model=native_model,
         )
@@ -132,6 +184,9 @@ class LocalFlamlModelLoader(ModelLoader):
     def discover(self) -> list[AvailableModelReference]:
         return discover_flaml_saved_models(self._model_dirs, self._metadata_dirs)
 
+    def _trusted_metadata_dirs(self) -> list[Path]:
+        return list(dict.fromkeys(self._metadata_dirs + self._model_dirs))
+
     def load(self, request: PredictionRequest) -> LoadedModel:
         references = self.discover()
         identifier = request.model_identifier or request.model_path
@@ -139,12 +194,28 @@ class LocalFlamlModelLoader(ModelLoader):
 
         flaml_metadata = None
         if request.metadata_path is not None:
-            flaml_metadata = load_flaml_saved_model_metadata_file(request.metadata_path)
+            flaml_metadata = load_flaml_saved_model_metadata_file(
+                request.metadata_path,
+                metadata_roots=self._trusted_metadata_dirs(),
+                model_roots=self._model_dirs,
+                raise_on_error=True,
+            )
         elif resolved.metadata_path is not None:
-            flaml_metadata = load_flaml_saved_model_metadata_file(resolved.metadata_path)
+            flaml_metadata = load_flaml_saved_model_metadata_file(
+                resolved.metadata_path,
+                metadata_roots=self._trusted_metadata_dirs(),
+                model_roots=self._model_dirs,
+                raise_on_error=True,
+            )
+
+        if flaml_metadata is None:
+            raise ModelLoadError(
+                "FLAML models require trusted checksum-backed metadata. "
+                "Re-save the model from within AutoTabML Studio before loading it."
+            )
 
         task_type = request.task_type_hint or resolved.task_type
-        if task_type in {None, PredictionTaskType.UNKNOWN} and flaml_metadata is not None:
+        if task_type in {None, PredictionTaskType.UNKNOWN}:
             raw_task = (
                 flaml_metadata.task_type.value
                 if hasattr(flaml_metadata.task_type, "value")
@@ -157,25 +228,44 @@ class LocalFlamlModelLoader(ModelLoader):
                 "FLAML models require saved metadata or an explicit task_type_hint."
             )
 
-        import pickle
-
-        model_path = resolved.model_path or Path(resolved.load_reference)
         try:
-            with model_path.open("rb") as f:
-                native_model = pickle.load(f)  # noqa: S301
-        except Exception as exc:
+            native_model = load_verified_pickle_artifact(
+                flaml_metadata.model_path,
+                trusted_roots=self._model_dirs,
+                expected_sha256=require_metadata_checksum(flaml_metadata.model_dump(mode="json")),
+            )
+        except TrustedArtifactError as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.load_flaml",
+                context={"model_path": str(flaml_metadata.model_path)},
+            )
+            raise ModelLoadError(f"Could not load FLAML model: {exc}") from exc
+        except (OSError, ValueError, RuntimeError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.load_flaml",
+                context={"model_path": str(flaml_metadata.model_path)},
+            )
             raise ModelLoadError(f"Could not load FLAML model: {exc}") from exc
 
         metadata_payload = dict(resolved.metadata)
-        if flaml_metadata is not None:
-            metadata_payload.update({
+        metadata_payload.update(
+            {
                 "framework": "flaml",
                 "target_column": flaml_metadata.target_column,
+                "dataset_name": flaml_metadata.dataset_name,
                 "dataset_fingerprint": flaml_metadata.dataset_fingerprint,
                 "feature_dtypes": dict(flaml_metadata.feature_dtypes),
                 "target_dtype": flaml_metadata.target_dtype,
                 "best_estimator": flaml_metadata.best_estimator,
-            })
+                "trained_at": flaml_metadata.trained_at,
+                "artifact_format": flaml_metadata.artifact_format,
+                "trusted_source": flaml_metadata.trusted_source,
+            }
+        )
 
         return LoadedModel(
             source_type=ModelSourceType.LOCAL_SAVED_MODEL,
@@ -185,16 +275,8 @@ class LocalFlamlModelLoader(ModelLoader):
             loader_name=self.__class__.__name__,
             scorer_kind="flaml",
             supported_prediction_modes=[PredictionMode.SINGLE_ROW, PredictionMode.BATCH],
-            feature_columns=(
-                list(flaml_metadata.feature_columns)
-                if flaml_metadata is not None
-                else list(resolved.feature_columns)
-            ),
-            target_column=(
-                flaml_metadata.target_column
-                if flaml_metadata is not None
-                else resolved.metadata.get("target_column")
-            ),
+            feature_columns=list(flaml_metadata.feature_columns),
+            target_column=flaml_metadata.target_column,
             metadata=metadata_payload,
             native_model=native_model,
         )
@@ -225,12 +307,22 @@ class MLflowModelLoader(ModelLoader):
         resolved_load_reference = model_uri
         metadata_payload: dict[str, Any] = {"metadata_available": False, "model_uri": model_uri}
         task_type = request.task_type_hint or PredictionTaskType.UNKNOWN
+        return source_type in {
+            ModelSourceType.MLFLOW_RUN_MODEL,
+            ModelSourceType.MLFLOW_REGISTERED_MODEL,
+        }
+
+    def load(self, request: PredictionRequest) -> LoadedModel:
+        model_uri = self._resolve_model_uri(request)
+        resolved_load_reference = model_uri
+        metadata_payload: dict[str, Any] = {"metadata_available": False, "model_uri": model_uri}
+        task_type = request.task_type_hint or PredictionTaskType.UNKNOWN
         feature_columns: list[str] = []
         target_column: str | None = None
         run_id = request.run_id or extract_run_id_from_model_uri(model_uri)
 
         if request.metadata_path is not None:
-            metadata = load_saved_model_metadata_file(request.metadata_path)
+            metadata = self._load_optional_metadata(request.metadata_path)
             if metadata is not None:
                 task_type = coerce_prediction_task_type(metadata.task_type)
                 feature_columns = list(metadata.feature_columns)
@@ -282,6 +374,19 @@ class MLflowModelLoader(ModelLoader):
             native_model=native_model,
         )
 
+    def _load_optional_metadata(self, path: Path) -> SavedModelMetadata | None:
+        try:
+            return SavedModelMetadata.model_validate_json(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, ValidationError, json.JSONDecodeError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.load_optional_metadata",
+                level=logging.DEBUG,
+                context={"metadata_path": str(path)},
+            )
+            return None
+
     def _resolve_model_uri(self, request: PredictionRequest) -> str:
         if request.model_uri:
             return request.model_uri
@@ -309,13 +414,26 @@ class MLflowModelLoader(ModelLoader):
                 model_uri,
                 dst_path=None,
             )
-        except Exception as exc:
+        except (ImportError, OSError, ValueError, RuntimeError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.load_mlflow_pyfunc",
+                context={"model_uri": model_uri},
+            )
             raise ModelLoadError(f"Could not load MLflow model '{model_uri}': {exc}") from exc
 
     def _history_metadata(self, run_id: str) -> dict[str, Any]:
         try:
             detail = HistoryService(tracking_uri=self._tracking_uri).get_run_detail(run_id)
-        except Exception:
+        except TrackingError as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.history_metadata",
+                level=logging.DEBUG,
+                context={"run_id": run_id},
+            )
             return {"run_id": run_id}
         return {
             "run_id": detail.run_id,
@@ -352,5 +470,11 @@ class MLflowModelLoader(ModelLoader):
             }
         except RegistryUnavailableError as exc:
             raise ModelLoadError(str(exc)) from exc
-        except Exception as exc:
+        except (RegistryError, TrackingError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.registry_metadata",
+                context={"model_name": request.registry_model_name},
+            )
             raise ModelLoadError(f"Could not resolve registered model metadata: {exc}") from exc

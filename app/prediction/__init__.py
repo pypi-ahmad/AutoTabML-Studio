@@ -1,7 +1,7 @@
 """Prediction / inference package exports."""
 
-from app.prediction.base import BasePredictionService, PredictionService
-from app.prediction.loader import LocalFlamlModelLoader, LocalPyCaretModelLoader, MLflowModelLoader, ModelLoader
+import importlib
+
 from app.prediction.schemas import (
     AvailableModelReference,
     BatchPredictionRequest,
@@ -47,3 +47,25 @@ __all__ = [
     "SchemaValidationMode",
     "SingleRowPredictionRequest",
 ]
+
+
+def __getattr__(name: str):
+    if name in {"BasePredictionService", "PredictionService"}:
+        module = importlib.import_module("app.prediction.base")
+
+        return {
+            "BasePredictionService": module.BasePredictionService,
+            "PredictionService": module.PredictionService,
+        }[name]
+
+    if name in {"LocalFlamlModelLoader", "LocalPyCaretModelLoader", "MLflowModelLoader", "ModelLoader"}:
+        module = importlib.import_module("app.prediction.loader")
+
+        return {
+            "LocalFlamlModelLoader": module.LocalFlamlModelLoader,
+            "LocalPyCaretModelLoader": module.LocalPyCaretModelLoader,
+            "MLflowModelLoader": module.MLflowModelLoader,
+            "ModelLoader": module.ModelLoader,
+        }[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

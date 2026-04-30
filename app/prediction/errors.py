@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.security.errors import TrustedArtifactError as BaseTrustedArtifactError
+
 
 class PredictionError(Exception):
     """Base class for prediction-layer failures."""
@@ -13,6 +15,10 @@ class ModelDiscoveryError(PredictionError):
 
 class ModelLoadError(PredictionError):
     """Raised when a prediction model cannot be loaded."""
+
+
+class TrustedArtifactError(BaseTrustedArtifactError, ModelLoadError):
+    """Raised when a model artifact fails trust-boundary validation."""
 
 
 class PredictionValidationError(PredictionError):

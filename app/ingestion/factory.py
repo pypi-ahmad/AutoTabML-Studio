@@ -57,7 +57,19 @@ def load_dataset(input_spec: DatasetInputSpec) -> LoadedDataset:
     return get_loader(input_spec).load(input_spec)
 
 
+async def load_dataset_async(input_spec: DatasetInputSpec) -> LoadedDataset:
+    """Async public entry point for full dataset loading."""
+
+    return await get_loader(input_spec).load_async(input_spec)
+
+
 def preview_dataset(input_spec: DatasetInputSpec, rows: int = 5) -> LoadedDataset:
     """Public entry point for lightweight preview loading."""
 
     return get_loader(input_spec).preview(input_spec, rows=rows)
+
+
+async def preview_dataset_async(input_spec: DatasetInputSpec, rows: int = 5) -> LoadedDataset:
+    """Async public entry point for lightweight preview loading."""
+
+    return await get_loader(input_spec).preview_async(input_spec, rows=rows)
