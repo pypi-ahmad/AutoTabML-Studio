@@ -29,8 +29,9 @@ from __future__ import annotations
 
 import contextlib
 import uuid
+from collections.abc import Iterator, Mapping
 from contextvars import ContextVar, Token
-from typing import Any, Iterator, Mapping
+from typing import Any
 
 # Single ContextVar holding an immutable mapping. Using a single var (rather
 # than one per key) keeps copy-on-write semantics cheap and means a single

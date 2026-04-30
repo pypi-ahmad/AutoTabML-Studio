@@ -9,7 +9,6 @@ within the TTL window do not hit MLflow at all.
 from __future__ import annotations
 
 import time
-from types import SimpleNamespace
 
 import pytest
 

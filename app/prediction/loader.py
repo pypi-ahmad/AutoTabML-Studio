@@ -37,7 +37,11 @@ from app.prediction.selectors import (
 from app.registry.errors import RegistryError, RegistryUnavailableError
 from app.registry.registry_service import RegistryService
 from app.security.errors import TrustedArtifactError
-from app.security.trusted_artifacts import load_verified_pickle_artifact, require_metadata_checksum, verify_local_artifact
+from app.security.trusted_artifacts import (
+    load_verified_pickle_artifact,
+    require_metadata_checksum,
+    verify_local_artifact,
+)
 from app.tracking.errors import TrackingError
 from app.tracking.history_service import HistoryService
 from app.tracking.mlflow_query import is_mlflow_available
@@ -297,16 +301,6 @@ class MLflowModelLoader(ModelLoader):
         self._registry_enabled = registry_enabled
 
     def supports(self, source_type: ModelSourceType) -> bool:
-        return source_type in {
-            ModelSourceType.MLFLOW_RUN_MODEL,
-            ModelSourceType.MLFLOW_REGISTERED_MODEL,
-        }
-
-    def load(self, request: PredictionRequest) -> LoadedModel:
-        model_uri = self._resolve_model_uri(request)
-        resolved_load_reference = model_uri
-        metadata_payload: dict[str, Any] = {"metadata_available": False, "model_uri": model_uri}
-        task_type = request.task_type_hint or PredictionTaskType.UNKNOWN
         return source_type in {
             ModelSourceType.MLFLOW_RUN_MODEL,
             ModelSourceType.MLFLOW_REGISTERED_MODEL,

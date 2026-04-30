@@ -6,8 +6,8 @@ import asyncio
 import re
 from typing import Any
 
-from lxml import etree
 import pandas as pd
+from lxml import etree
 
 from app.ingestion.base import BaseLoader
 from app.ingestion.errors import ParseFailureError, UnsupportedSourceError

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import tempfile
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-import tempfile
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
@@ -22,9 +22,9 @@ from app.ingestion.types import (
     IngestionSourceType,
 )
 from app.security.safe_http import (
+    TABULAR_CONTENT_TYPES,
     ResponseTooLargeError,
     SafeFetchPolicy,
-    TABULAR_CONTENT_TYPES,
     UnsafeContentTypeError,
     UnsafeURLError,
     safe_download_to_path,
