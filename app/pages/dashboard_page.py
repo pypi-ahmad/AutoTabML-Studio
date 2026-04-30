@@ -6,10 +6,10 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import get_active_loaded_dataset, get_loaded_datasets, go_to_page
+from app.pages.ui_cache import get_metadata_store
 from app.pages.ui_labels import format_enum_value
 from app.pages.workflow_guide import WORKFLOW_STEPS
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 
 
 def _detect_completed_steps() -> int:
@@ -64,7 +64,7 @@ def _load_example_dataset(example: dict) -> None:
         display_name=str(example["name"]),
     )
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     result = _load_into_session(spec, preferred_name=str(example["name"]), metadata_store=metadata_store)
     if result:
         go_to_page("Load Data")
@@ -72,7 +72,7 @@ def _load_example_dataset(example: dict) -> None:
 
 def render_dashboard_page() -> None:
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     startup_status = st.session_state.get("startup_status")
 
     # ── Hero header ────────────────────────────────────────────────────

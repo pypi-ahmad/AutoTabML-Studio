@@ -5,12 +5,13 @@ from __future__ import annotations
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page, render_dataset_header
+from app.pages.ui_cache import get_metadata_store
+from app.pages.ui_errors import log_ui_exception
 from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_labels import format_enum_value
 from app.pages.workflow_guide import render_workflow_banner
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.storage.models import AppJobType
 
 
@@ -23,7 +24,7 @@ def render_profiling_page() -> None:
         "to get familiar with your dataset before modeling. You can skip this."
     )
     prof_settings = state.settings.profiling
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
 
     selected_name, loaded_dataset = render_dataset_header("Profiling", key_prefix="profiling", metadata_store=metadata_store)
     if selected_name is None or loaded_dataset is None:
@@ -72,6 +73,7 @@ def render_profiling_page() -> None:
                 bundles[selected_name] = bundle
                 st.success("Profiling complete.")
             except Exception as exc:
+                log_ui_exception(exc, operation="profiling.run")
                 st.error(f"Profiling failed: {safe_error_message(exc)}")
                 return
 

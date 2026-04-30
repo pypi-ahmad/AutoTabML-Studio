@@ -67,7 +67,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         issues = check_public_release_metadata(args.pyproject)
-    except Exception as exc:
+    except (OSError, ValueError, tomllib.TOMLDecodeError) as exc:
         print(f"Release metadata check failed to run: {exc}", file=sys.stderr)
         return 1
 

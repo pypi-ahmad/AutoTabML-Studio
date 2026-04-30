@@ -29,6 +29,8 @@ from app.config.models import (
     UISettings,
     ValidationSettings,
 )
+from app.errors import log_exception
+from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -71,13 +73,19 @@ def load_settings() -> AppSettings:
     if _SETTINGS_FILE.exists():
         try:
             raw = json.loads(_SETTINGS_FILE.read_text(encoding="utf-8"))
-        except Exception as exc:
-            logger.warning("Corrupted settings file - using defaults: %s", exc)
+        except (OSError, json.JSONDecodeError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="settings.load_file",
+                context={"settings_path": str(_SETTINGS_FILE)},
+            )
             raw = {}
 
     try:
         env_overrides = _EnvironmentSettings().model_dump(exclude_none=True, mode="json")
-    except Exception as exc:  # pragma: no cover - depends on environment misuse
+    except ValidationError as exc:  # pragma: no cover - depends on environment misuse
+        log_exception(logger, exc, operation="settings.parse_env_overrides")
         raise ValueError(f"Invalid AUTOTABML_* environment configuration: {exc}") from exc
 
     merged = _deep_merge(raw, env_overrides)

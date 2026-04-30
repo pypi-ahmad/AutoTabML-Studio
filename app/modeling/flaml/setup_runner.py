@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 
 import pandas as pd
 
+from app.errors import log_exception
 from app.modeling.benchmark.schemas import BenchmarkTaskType
 from app.modeling.benchmark.selectors import infer_task_type as benchmark_infer_task_type
 from app.modeling.benchmark.selectors import validate_target as benchmark_validate_target
 from app.modeling.flaml.errors import FlamlDependencyError
 from app.modeling.flaml.schemas import FlamlTaskType
+
+logger = logging.getLogger(__name__)
 
 
 def _probe_flaml_import_error() -> Exception | None:
@@ -21,6 +25,7 @@ def _probe_flaml_import_error() -> Exception | None:
 
         return None
     except Exception as exc:
+        log_exception(logger, exc, operation="flaml.probe_import", level=logging.DEBUG)
         return exc
 
 

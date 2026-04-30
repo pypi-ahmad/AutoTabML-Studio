@@ -6,6 +6,12 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from app.modeling.base import (
+    BaseTracker,
+    get_mlflow_module as _base_get_mlflow_module,
+    is_mlflow_available as _base_is_mlflow_available,
+    mlflow_exception_types as _base_mlflow_exception_types,
+)
 from app.modeling.benchmark.schemas import BenchmarkArtifactBundle, BenchmarkResultBundle
 
 logger = logging.getLogger(__name__)
@@ -14,58 +20,56 @@ logger = logging.getLogger(__name__)
 def is_mlflow_available() -> bool:
     """Return True if mlflow is importable."""
 
-    try:
-        import mlflow  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    return _base_is_mlflow_available()
 
 
 def _get_mlflow_module() -> Any:
-    import mlflow
-
-    return mlflow
+    return _base_get_mlflow_module()
 
 
-class MLflowBenchmarkTracker:
+def _mlflow_exception_types(mlflow_module: Any) -> tuple[type[BaseException], ...]:
+    return _base_mlflow_exception_types(mlflow_module)
+
+
+class MLflowBenchmarkTracker(BaseTracker[BenchmarkResultBundle]):
     """Lightweight MLflow tracking wrapper for benchmark runs."""
 
-    def __init__(
-        self,
-        experiment_name: str,
-        *,
-        tracking_uri: str | None = None,
-        registry_uri: str | None = None,
-    ) -> None:
-        self._experiment_name = experiment_name
-        self._tracking_uri = tracking_uri
-        self._registry_uri = registry_uri
-
     def log_benchmark_run(self, bundle: BenchmarkResultBundle) -> tuple[str | None, list[str]]:
-        """Log benchmark params, metrics, and artifacts to MLflow."""
+        """Backward-compatible benchmark tracker entrypoint."""
 
-        warnings: list[str] = []
-        if not is_mlflow_available():
-            warnings.append("MLflow tracking skipped because mlflow is not installed.")
-            return None, warnings
+        return self.log_bundle(bundle)
 
-        mlflow = _get_mlflow_module()
+    def _is_mlflow_available(self) -> bool:
+        return is_mlflow_available()
 
-        try:
-            if self._tracking_uri:
-                mlflow.set_tracking_uri(self._tracking_uri)
-            if self._registry_uri:
-                mlflow.set_registry_uri(self._registry_uri)
-            mlflow.set_experiment(self._experiment_name)
-            with mlflow.start_run(run_name=_build_run_name(bundle)) as run:
-                mlflow.log_params(_build_params(bundle))
-                mlflow.log_metrics(_build_metrics(bundle))
-                _log_artifacts(mlflow, bundle.artifacts)
-                return run.info.run_id, warnings
-        except Exception as exc:
-            logger.warning("MLflow benchmark tracking failed: %s", exc)
-            warnings.append(f"MLflow tracking failed: {exc}")
-            return None, warnings
+    def _get_mlflow_module(self) -> Any:
+        return _get_mlflow_module()
+
+    def _operation_name(self) -> str:
+        return "benchmark.mlflow_tracking"
+
+    def _build_run_name(self, bundle: BenchmarkResultBundle) -> str:
+        return _build_run_name(bundle)
+
+    def _build_params(self, bundle: BenchmarkResultBundle) -> dict[str, Any]:
+        return _build_params(bundle)
+
+    def _build_metrics(self, bundle: BenchmarkResultBundle) -> dict[str, float]:
+        return _build_metrics(bundle)
+
+    def _artifact_paths(self, bundle: BenchmarkResultBundle) -> list[Path | None]:
+        artifacts = bundle.artifacts
+        if artifacts is None:
+            return []
+        return [
+            artifacts.raw_results_csv_path,
+            artifacts.leaderboard_csv_path,
+            artifacts.leaderboard_json_path,
+            artifacts.summary_json_path,
+            artifacts.markdown_summary_path,
+            artifacts.score_chart_path,
+            artifacts.training_time_chart_path,
+        ]
 
 
 def _build_run_name(bundle: BenchmarkResultBundle) -> str:

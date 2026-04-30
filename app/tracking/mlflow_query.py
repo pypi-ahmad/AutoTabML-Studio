@@ -8,9 +8,12 @@ schemas and raises app-level exceptions.
 from __future__ import annotations
 
 import logging
+import threading
+import time
 from datetime import datetime, timezone
 from typing import Any
 
+from app.errors import log_exception
 from app.registry.errors import ModelNotFoundError, RegistryUnavailableError, VersionNotFoundError
 from app.registry.schemas import RegistryModelSummary, RegistryVersionSummary
 from app.tracking.errors import ExperimentNotFoundError, RunNotFoundError, TrackingUnavailableError
@@ -22,6 +25,37 @@ logger = logging.getLogger(__name__)
 _BENCHMARK_EXPERIMENT_PREFIX = "autotabml-benchmark"
 _EXPERIMENT_EXPERIMENT_PREFIX = "autotabml-experiment"
 _FLAML_EXPERIMENT_PREFIX = "autotabml-flaml"
+
+# Default TTL for the in-process registry list cache. Short enough that
+# staleness stays bounded but long enough to collapse bursts of UI re-renders
+# into one set of MLflow round trips.
+_REGISTRY_LIST_TTL_SECONDS = 5.0
+_REGISTRY_LIST_PAGE_SIZE = 1000
+
+_registry_cache_lock = threading.Lock()
+_registry_cache: dict[
+    tuple[str | None, str | None],
+    tuple[float, list["RegistryModelSummary"]],
+] = {}
+
+
+def _mlflow_exception_types() -> tuple[type[BaseException], ...]:
+    exception_types: list[type[BaseException]] = [AttributeError, OSError, RuntimeError, TypeError, ValueError]
+    if is_mlflow_available():
+        try:
+            from mlflow.exceptions import MlflowException
+        except ImportError:
+            pass
+        else:
+            exception_types.insert(0, MlflowException)
+    return tuple(exception_types)
+
+
+def invalidate_registry_cache() -> None:
+    """Drop every cached :func:`list_registered_models` entry."""
+
+    with _registry_cache_lock:
+        _registry_cache.clear()
 
 
 def is_mlflow_available() -> bool:
@@ -129,9 +163,10 @@ def get_run(
     """Fetch a single run by id and return an extended detail view."""
 
     client = _get_client(tracking_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw_run = client.get_run(run_id)
-    except Exception as exc:
+    except handled_errors as exc:
         raise RunNotFoundError(f"Run '{run_id}' not found: {exc}") from exc
 
     name_map = experiment_name_map or {}
@@ -140,8 +175,14 @@ def get_run(
     artifacts: list[str] = []
     try:
         artifacts = _list_artifact_paths(client, run_id)
-    except Exception:  # pragma: no cover
-        pass
+    except handled_errors as exc:  # pragma: no cover - MLflow boundary surface is broad
+        log_exception(
+            logger,
+            exc,
+            operation="tracking.list_artifact_paths",
+            level=logging.DEBUG,
+            context={"run_id": run_id},
+        )
 
     return RunDetailView(
         **item.model_dump(),
@@ -158,24 +199,42 @@ def list_registered_models(
     *,
     tracking_uri: str | None = None,
     registry_uri: str | None = None,
+    use_cache: bool = True,
 ) -> list[RegistryModelSummary]:
-    """Return all registered models from the MLflow model registry."""
+    """Return all registered models from the MLflow model registry.
+
+    Uses paginated registry search plus a single batched ``search_model_versions``
+    scan to enumerate the full registry without the historic N+1 per-model
+    version requests. Results are cached in process for
+    :data:`_REGISTRY_LIST_TTL_SECONDS` seconds, keyed by tracking and registry
+    URI; pass ``use_cache=False`` to bypass.
+    """
+
+    cache_key = (tracking_uri, registry_uri)
+    if use_cache:
+        cached = _read_registry_cache(cache_key)
+        if cached is not None:
+            return cached
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
-        raw_models = client.search_registered_models()
-    except Exception as exc:
+        raw_models = _list_all_registered_models(client)
+    except handled_errors as exc:
         raise RegistryUnavailableError(
             f"Model registry is not available. This MLflow backend may not expose "
             f"registry APIs. Error: {exc}"
         ) from exc
-    return [
-        _normalize_registered_model(
-            m,
-            versions=_try_list_model_versions(client, m.name),
-        )
+
+    versions_by_name = _list_all_model_versions_grouped(client)
+    summaries = [
+        _normalize_registered_model(m, versions=versions_by_name.get(m.name))
         for m in raw_models
     ]
+
+    if use_cache:
+        _write_registry_cache(cache_key, summaries)
+    return summaries
 
 
 def get_registered_model(
@@ -187,9 +246,10 @@ def get_registered_model(
     """Return a single registered model by name."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw = client.get_registered_model(name)
-    except Exception as exc:
+    except handled_errors as exc:
         raise ModelNotFoundError(f"Registered model '{name}' not found: {exc}") from exc
     return _normalize_registered_model(raw, versions=_try_list_model_versions(client, name))
 
@@ -203,9 +263,10 @@ def list_model_versions(
     """Return all versions for a registered model."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw_versions = client.search_model_versions(f"name='{name}'")
-    except Exception as exc:
+    except handled_errors as exc:
         raise ModelNotFoundError(
             f"Could not list versions for model '{name}': {exc}"
         ) from exc
@@ -222,9 +283,10 @@ def get_model_version(
     """Return a single model version."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw = client.get_model_version(name, version)
-    except Exception as exc:
+    except handled_errors as exc:
         raise VersionNotFoundError(
             f"Version '{version}' of model '{name}' not found: {exc}"
         ) from exc
@@ -241,9 +303,10 @@ def get_model_version_by_alias(
     """Return the model version currently assigned to an alias."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw = client.get_model_version_by_alias(name, alias)
-    except Exception as exc:
+    except handled_errors as exc:
         raise VersionNotFoundError(
             f"Alias '{alias}' of model '{name}' not found: {exc}"
         ) from exc
@@ -266,16 +329,18 @@ def create_registered_model(
     """Create a new registered model."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw = client.create_registered_model(
             name,
             description=description,
             tags=tags or {},
         )
-    except Exception as exc:
+    except handled_errors as exc:
         raise RegistryUnavailableError(
             f"Could not create registered model '{name}': {exc}"
         ) from exc
+    invalidate_registry_cache()
     return _normalize_registered_model(raw)
 
 
@@ -292,6 +357,7 @@ def create_model_version(
     """Create a new model version under a registered model."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         raw = client.create_model_version(
             name,
@@ -300,10 +366,11 @@ def create_model_version(
             description=description,
             tags=tags or {},
         )
-    except Exception as exc:
+    except handled_errors as exc:
         raise RegistryUnavailableError(
             f"Could not create version for model '{name}': {exc}"
         ) from exc
+    invalidate_registry_cache()
     return _normalize_model_version(raw)
 
 
@@ -319,6 +386,7 @@ def set_model_alias(
 
     client = _get_client(tracking_uri, registry_uri)
     client.set_registered_model_alias(name, alias, version)
+    invalidate_registry_cache()
 
 
 def delete_model_alias(
@@ -331,10 +399,18 @@ def delete_model_alias(
     """Remove an alias from a registered model."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         client.delete_registered_model_alias(name, alias)
-    except Exception:
-        pass  # Alias may not exist; treat as idempotent.
+    except handled_errors as exc:  # MLflow raises a wide set of error types; treat as idempotent
+        log_exception(
+            logger,
+            exc,
+            operation="registry.delete_alias",
+            level=logging.DEBUG,
+            context={"model": name, "alias": alias},
+        )
+    invalidate_registry_cache()
 
 
 def delete_model_version_tag(
@@ -348,10 +424,18 @@ def delete_model_version_tag(
     """Remove a tag from a specific model version."""
 
     client = _get_client(tracking_uri, registry_uri)
+    handled_errors = _mlflow_exception_types()
     try:
         client.delete_model_version_tag(name, version, key)
-    except Exception:
-        pass  # Missing tags should be treated as idempotent cleanup.
+    except handled_errors as exc:  # Missing tags should be treated as idempotent cleanup.
+        log_exception(
+            logger,
+            exc,
+            operation="registry.delete_version_tag",
+            level=logging.DEBUG,
+            context={"model": name, "version": version, "tag": key},
+        )
+    invalidate_registry_cache()
 
 
 def set_model_tag(
@@ -366,6 +450,7 @@ def set_model_tag(
 
     client = _get_client(tracking_uri, registry_uri)
     client.set_registered_model_tag(name, key, value)
+    invalidate_registry_cache()
 
 
 def set_model_version_tag(
@@ -381,6 +466,7 @@ def set_model_version_tag(
 
     client = _get_client(tracking_uri, registry_uri)
     client.set_model_version_tag(name, version, key, value)
+    invalidate_registry_cache()
 
 
 # ---------------------------------------------------------------------------
@@ -626,10 +712,110 @@ def _extract_dataset_name(
 
 
 def _try_list_model_versions(client, name: str) -> list[Any] | None:
+    handled_errors = _mlflow_exception_types()
     try:
         return list(client.search_model_versions(f"name='{name}'"))
-    except Exception:
+    except handled_errors as exc:  # MLflow boundary; treat as best-effort enrichment
+        log_exception(
+            logger,
+            exc,
+            operation="registry.try_list_model_versions",
+            level=logging.DEBUG,
+            context={"model": name},
+        )
         return None
+
+
+def _list_all_registered_models(client) -> list[Any]:
+    """Return every registered model, paginating when the backend supports it."""
+
+    models: list[Any] = []
+    page_token: str | None = None
+    while True:
+        try:
+            page = client.search_registered_models(
+                max_results=_REGISTRY_LIST_PAGE_SIZE,
+                page_token=page_token,
+            )
+        except TypeError:
+            return list(client.search_registered_models())
+
+        models.extend(page)
+        next_token = getattr(page, "token", None) or getattr(page, "next_page_token", None)
+        if not next_token:
+            break
+        page_token = next_token
+
+    return models
+
+
+def _list_all_model_versions_grouped(client) -> dict[str, list[Any]]:
+    """Return every registered model version grouped by model name in one pass.
+
+    Implemented with a single unfiltered ``search_model_versions`` call so the
+    cost is O(1) MLflow round trips per page rather than O(N) per registered
+    model. Falls back gracefully when the backend does not support unfiltered
+    listing or pagination tokens.
+    """
+
+    grouped: dict[str, list[Any]] = {}
+    page_token: str | None = None
+    handled_errors = _mlflow_exception_types()
+    while True:
+        try:
+            try:
+                page = client.search_model_versions(
+                    max_results=_REGISTRY_LIST_PAGE_SIZE,
+                    page_token=page_token,
+                )
+            except TypeError:
+                # Older MLflow clients only accept the filter string positionally.
+                page = client.search_model_versions("")
+        except handled_errors as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="registry.list_all_model_versions_grouped",
+                level=logging.DEBUG,
+            )
+            return grouped
+
+        for version in page:
+            name = getattr(version, "name", None)
+            if not name:
+                continue
+            grouped.setdefault(name, []).append(version)
+
+        next_token = getattr(page, "token", None) or getattr(page, "next_page_token", None)
+        if not next_token:
+            break
+        page_token = next_token
+
+    return grouped
+
+
+def _read_registry_cache(
+    key: tuple[str | None, str | None],
+) -> list[RegistryModelSummary] | None:
+    now = time.monotonic()
+    with _registry_cache_lock:
+        entry = _registry_cache.get(key)
+        if entry is None:
+            return None
+        expires_at, summaries = entry
+        if expires_at < now:
+            _registry_cache.pop(key, None)
+            return None
+        return list(summaries)
+
+
+def _write_registry_cache(
+    key: tuple[str | None, str | None],
+    summaries: list[RegistryModelSummary],
+) -> None:
+    expires_at = time.monotonic() + _REGISTRY_LIST_TTL_SECONDS
+    with _registry_cache_lock:
+        _registry_cache[key] = (expires_at, list(summaries))
 
 
 def _safe_version_number(version: Any) -> int:
@@ -637,3 +823,5 @@ def _safe_version_number(version: Any) -> int:
         return int(str(version))
     except (TypeError, ValueError):
         return 0
+
+

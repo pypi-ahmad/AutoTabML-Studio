@@ -14,6 +14,7 @@ import concurrent.futures
 import logging
 from typing import Any
 
+from app.errors import log_exception
 from app.storage.models import AppJobType
 
 logger = logging.getLogger(__name__)
@@ -292,8 +293,13 @@ def generate_llm_description(
             metadata=metadata,
             mlflow_run_id=mlflow_run_id,
         )
-    except Exception as exc:
-        logger.warning("LLM description generation failed: %s — falling back to template", exc)
+    except (AttributeError, OSError, RuntimeError, TypeError, ValueError, TimeoutError, concurrent.futures.TimeoutError) as exc:
+        log_exception(
+            logger,
+            exc,
+            operation="tracking.generate_llm_description",
+            context={"job_type": job_type.value, "model_id": model_id},
+        )
         return generate_template_description(
             job_type,
             dataset_name=dataset_name,

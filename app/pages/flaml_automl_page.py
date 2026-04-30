@@ -20,11 +20,13 @@ from app.pages.dataset_workspace import (
     go_to_page,
     render_dataset_header,
 )
+from app.pages.ui_cache import get_flaml_automl_service, get_metadata_store
+from app.pages.ui_errors import log_ui_exception
 from app.pages.workflow_guide import render_next_step_hint, render_workflow_banner
 from app.path_utils import model_save_name
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store, ensure_dataset_record
+from app.storage import ensure_dataset_record
 
 
 # ── Estimator display names ───────────────────────────────────────────
@@ -78,7 +80,7 @@ def _build_flaml_run_key(
 def render_flaml_automl_page() -> None:
     state = get_or_init_state()
     settings = state.settings.flaml
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("🔥 FLAML AutoML")
     render_workflow_banner(current_step=4)
     st.caption(
@@ -279,6 +281,7 @@ def render_flaml_automl_page() -> None:
                     workspace_mode=state.workspace_mode,
                 )
             except FlamlAutoMLError as exc:
+                log_ui_exception(exc, operation="flaml_page.run_automl")
                 st.error(
                     f"FLAML search stopped: {safe_error_message(exc)}\n\n"
                     "**What to try:** Check your target column and task type, "
@@ -286,6 +289,7 @@ def render_flaml_automl_page() -> None:
                 )
                 return
             except Exception as exc:
+                log_ui_exception(exc, operation="flaml_page.run_automl_unexpected")
                 st.error(
                     f"FLAML search failed unexpectedly: {safe_error_message(exc)}\n\n"
                     "**What to try:** Verify your data has no formatting issues, "
@@ -371,6 +375,7 @@ def _render_flaml_results(bundle, app_settings, metadata_store) -> None:  # noqa
             st.success(f"Model saved as **{_save_name}**.")
             bundle = updated
         except FlamlAutoMLError as exc:
+            log_ui_exception(exc, operation="flaml_page.save_best_model")
             st.error(f"Save failed: {safe_error_message(exc)}")
 
     if predict_col.button("🔮 Go to Predictions", key="flaml_goto_predict"):
@@ -407,14 +412,4 @@ def _render_flaml_results(bundle, app_settings, metadata_store) -> None:  # noqa
 
 
 def _build_service(app_settings, *, metadata_store=None) -> FlamlAutoMLService:  # noqa: ANN001
-    settings = app_settings.flaml
-    return FlamlAutoMLService(
-        artifacts_dir=settings.artifacts_dir,
-        models_dir=settings.models_dir,
-        default_classification_metric=settings.default_classification_metric,
-        default_regression_metric=settings.default_regression_metric,
-        mlflow_experiment_name=settings.mlflow_experiment_name,
-        tracking_uri=app_settings.tracking.tracking_uri,
-        registry_uri=app_settings.tracking.registry_uri,
-        metadata_store=metadata_store,
-    )
+    return get_flaml_automl_service(app_settings)

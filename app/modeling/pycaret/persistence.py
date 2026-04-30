@@ -9,6 +9,7 @@ from app.artifacts import ArtifactKind, LocalArtifactManager
 from app.modeling.pycaret.schemas import ExperimentTaskType, SavedModelMetadata
 from app.modeling.pycaret.setup_runner import build_pycaret_experiment
 from app.path_utils import safe_artifact_stem
+from app.security.trusted_artifacts import TRUSTED_MODEL_SOURCE, compute_sha256, write_checksum_file
 
 
 def build_saved_model_metadata(
@@ -25,6 +26,10 @@ def build_saved_model_metadata(
     target_dtype: str | None,
     experiment_snapshot_path: Path | None,
     model_only: bool = False,
+    artifact_format: str | None = None,
+    trusted_source: str | None = None,
+    model_sha256: str | None = None,
+    experiment_snapshot_sha256: str | None = None,
 ) -> SavedModelMetadata:
     """Create stable metadata for a saved PyCaret model artifact."""
 
@@ -43,6 +48,10 @@ def build_saved_model_metadata(
         experiment_snapshot_path=experiment_snapshot_path,
         experiment_snapshot_includes_data=False,
         model_only=model_only,
+        artifact_format=artifact_format,
+        trusted_source=trusted_source,
+        model_sha256=model_sha256,
+        experiment_snapshot_sha256=experiment_snapshot_sha256,
     )
 
 
@@ -78,18 +87,24 @@ def save_finalized_model(
         model_only=model_only,
         verbose=False,
     )
+    saved_model_path = Path(saved_path)
+    model_sha256 = compute_sha256(saved_model_path)
+    write_checksum_file(saved_model_path, checksum=model_sha256)
 
     snapshot_path: Path | None = None
+    snapshot_sha256: str | None = None
     if save_experiment_snapshot:
         snapshot_path = snapshots_dir / f"{base_name}_experiment.pkl"
         experiment_handle.save_experiment(snapshot_path)
+        snapshot_sha256 = compute_sha256(snapshot_path)
+        write_checksum_file(snapshot_path, checksum=snapshot_sha256)
 
     return build_saved_model_metadata(
         task_type=task_type,
         target_column=target_column,
         model_id=model_id,
         model_name=model_name,
-        model_path=Path(saved_path),
+        model_path=saved_model_path,
         dataset_name=dataset_name,
         dataset_fingerprint=dataset_fingerprint,
         feature_columns=feature_columns,
@@ -97,6 +112,10 @@ def save_finalized_model(
         target_dtype=target_dtype,
         experiment_snapshot_path=snapshot_path,
         model_only=model_only,
+        artifact_format="pycaret_pickle",
+        trusted_source=TRUSTED_MODEL_SOURCE,
+        model_sha256=model_sha256,
+        experiment_snapshot_sha256=snapshot_sha256,
     )
 
 
@@ -120,6 +139,7 @@ def write_saved_model_metadata_sidecar(
         ensure_unique=True,
     )
     manager.write_text(metadata_path, metadata.model_dump_json(indent=2))
+    write_checksum_file(metadata_path)
     return metadata_path
 
 

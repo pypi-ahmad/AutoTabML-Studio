@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from app.pages.ui_errors import log_ui_debug_exception
 from app.pages.ui_labels import PREDICTION_TASK_TYPE_LABELS, format_enum_value, render_metadata_table
 from app.storage.models import AppJobType
 
@@ -25,7 +26,12 @@ def render_past_runs_section(
 
     try:
         jobs = metadata_store.list_recent_jobs(limit=limit, job_type=job_type)
-    except Exception:
+    except Exception as exc:
+        log_ui_debug_exception(
+            exc,
+            operation="shared_history.list_recent_jobs",
+            context={"job_type": job_type.value},
+        )
         return
 
     if not jobs:

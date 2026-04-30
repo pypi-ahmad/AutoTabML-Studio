@@ -9,10 +9,12 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_cache import get_metadata_store, list_cached_mlflow_runs
+from app.pages.ui_errors import log_ui_debug_exception, log_ui_exception
 from app.pages.ui_labels import format_enum_value, render_metadata_table
 from app.security.masking import safe_error_message
+from app.security.safe_csv import dataframe_to_safe_csv
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.storage.models import AppJobType
 from app.tracking.description_generator import generate_llm_description, generate_template_description
 
@@ -21,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def render_history_page() -> None:
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("📋 History")
     st.caption(
         "Every time you run a workflow (validation, profiling, benchmark, experiment, or prediction), "
@@ -60,6 +62,7 @@ def render_history_page() -> None:
     try:
         jobs = metadata_store.list_recent_jobs(limit=limit, job_type=job_type_filter)
     except Exception as exc:
+        log_ui_exception(exc, operation="history.list_recent_jobs")
         st.error(f"Failed to load history: {safe_error_message(exc)}")
         return
 
@@ -112,7 +115,7 @@ def render_history_page() -> None:
     # ── Export ─────────────────────────────────────────────────────────
     st.download_button(
         "📤 Download History CSV",
-        data=_history_df.to_csv(index=False).encode("utf-8"),
+        data=dataframe_to_safe_csv(_history_df, index=False).encode("utf-8"),
         file_name="autotabml_history.csv",
         mime="text/csv",
         key="hist_dl_csv",
@@ -168,7 +171,7 @@ def render_history_page() -> None:
         _render_job_description(selected_job, state)
 
     # ── MLflow runs (optional advanced section) ────────────────────────
-    _render_mlflow_section(state.settings.tracking)
+    _render_mlflow_section(state.settings)
 
 
 def _render_job_description(job, state) -> None:  # noqa: ANN001
@@ -228,7 +231,11 @@ def _render_job_description(job, state) -> None:  # noqa: ANN001
                             model_id=model_id,
                         )
                     except Exception as exc:
-                        logger.warning("LLM generation failed: %s", exc)
+                        log_ui_exception(
+                            exc,
+                            operation="history.generate_llm_description",
+                            context={"job_id": job.job_id},
+                        )
                         desc = generate_template_description(
                             job.job_type,
                             dataset_name=job.dataset_name,
@@ -261,18 +268,22 @@ def _render_job_description(job, state) -> None:  # noqa: ANN001
 def _save_description_to_job(job, description: str, state) -> None:  # noqa: ANN001
     """Persist the generated description into job metadata."""
     try:
-        metadata_store = build_metadata_store(state.settings)
+        metadata_store = get_metadata_store(state.settings)
         if metadata_store is None:
             return
         meta = dict(job.metadata or {})
         meta["mlflow_description"] = description
         job.metadata = meta
         metadata_store.record_job(job)
-    except Exception:
-        logger.debug("Could not save description to job metadata", exc_info=True)
+    except Exception as exc:
+        log_ui_debug_exception(
+            exc,
+            operation="history.save_description_to_job",
+            context={"job_id": job.job_id},
+        )
 
 
-def _render_mlflow_section(tracking_settings) -> None:  # noqa: ANN001
+def _render_mlflow_section(app_settings) -> None:  # noqa: ANN001
     """Optional collapsible section to browse raw MLflow runs."""
 
     from app.tracking.mlflow_query import is_mlflow_available
@@ -281,21 +292,56 @@ def _render_mlflow_section(tracking_settings) -> None:  # noqa: ANN001
         return
 
     with st.expander("Experiment Tracking Runs (Advanced)", expanded=False):
-        from app.tracking.history_service import HistoryService
-
-        service = HistoryService(
-            tracking_uri=tracking_settings.tracking_uri,
-            default_experiment_names=tracking_settings.default_experiment_names,
-            default_limit=tracking_settings.history_page_default_limit,
-        )
-
-        mlflow_limit = int(
-            st.number_input("MLflow max results", min_value=1, max_value=200, value=20, step=10, key="hist_mlflow_limit", help="How many MLflow runs to fetch.")
-        )
+        controls_l, controls_m, controls_r = st.columns(3)
+        with controls_l:
+            mlflow_limit = int(
+                st.number_input(
+                    "MLflow max results",
+                    min_value=1,
+                    max_value=200,
+                    value=20,
+                    step=10,
+                    key="hist_mlflow_limit",
+                    help="How many MLflow runs to fetch.",
+                )
+            )
+        sort_options = {
+            "Start time": "start_time",
+            "Duration": "duration",
+            "Primary score": "primary_score",
+            "Model name": "model_name",
+        }
+        with controls_m:
+            sort_label = st.selectbox(
+                "Sort by",
+                options=list(sort_options.keys()),
+                index=0,
+                key="hist_mlflow_sort_field",
+                help=(
+                    "Sort applied before the result limit. Non-time fields fetch a "
+                    "wider pool from MLflow so the ranking reflects the full dataset, "
+                    "not just the most recent runs."
+                ),
+            )
+        with controls_r:
+            direction_label = st.selectbox(
+                "Direction",
+                options=["Descending", "Ascending"],
+                index=0,
+                key="hist_mlflow_sort_dir",
+            )
+        sort_field = sort_options[sort_label]
+        sort_direction = "descending" if direction_label == "Descending" else "ascending"
 
         try:
-            runs = service.list_runs(limit=mlflow_limit)
+            runs = list_cached_mlflow_runs(
+                app_settings,
+                limit=mlflow_limit,
+                sort_field=sort_field,
+                sort_direction=sort_direction,
+            )
         except Exception as exc:
+            log_ui_exception(exc, operation="history.list_mlflow_runs")
             st.error(f"Failed to query MLflow: {safe_error_message(exc)}")
             return
 
@@ -310,11 +356,19 @@ def _render_mlflow_section(tracking_settings) -> None:  # noqa: ANN001
                 "Type": format_enum_value(run.run_type.value),
                 "Status": format_enum_value(run.status.value),
                 "Model": run.model_name or "",
-                "Score": f"{run.primary_metric_value:.4f}" if run.primary_metric_value is not None else "",
+                "Score": run.primary_metric_value,
                 "Metric": run.primary_metric_name or "",
-                "Duration": f"{run.duration_seconds:.1f}s" if run.duration_seconds else "",
+                "Duration (s)": run.duration_seconds,
             })
-        st.dataframe(pd.DataFrame(ml_rows), width="stretch", hide_index=True)
+        st.dataframe(
+            pd.DataFrame(ml_rows),
+            width="stretch",
+            hide_index=True,
+            column_config={
+                "Score": st.column_config.NumberColumn("Score", format="%.4f"),
+                "Duration (s)": st.column_config.NumberColumn("Duration (s)", format="%.1f"),
+            },
+        )
 
 
 def _status_badge(status: str) -> str:

@@ -12,6 +12,8 @@ from typing import Any
 import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
+from app.errors import log_and_wrap, log_exception
+from app.modeling.base import BaseService
 from app.modeling.flaml.artifacts import write_flaml_artifacts
 from app.modeling.flaml.errors import (
     FlamlDependencyError,
@@ -35,6 +37,7 @@ from app.modeling.flaml.schemas import (
 )
 from app.modeling.flaml.setup_runner import require_flaml, resolve_task_type
 from app.path_utils import safe_artifact_stem
+from app.security.trusted_artifacts import TRUSTED_MODEL_SOURCE, compute_sha256, write_checksum_file
 from app.storage import AppMetadataStore
 
 logger = logging.getLogger(__name__)
@@ -51,7 +54,7 @@ def metric_sort_direction(metric_name: str) -> FlamlSortDirection:
     return FlamlSortDirection.DESCENDING
 
 
-class FlamlAutoMLService:
+class FlamlAutoMLService(BaseService):
     """FLAML-backed AutoML service."""
 
     def __init__(
@@ -66,14 +69,16 @@ class FlamlAutoMLService:
         registry_uri: str | None = None,
         metadata_store: AppMetadataStore | None = None,
     ) -> None:
-        self._artifacts_dir = artifacts_dir
+        super().__init__(
+            artifacts_dir=artifacts_dir,
+            mlflow_experiment_name=mlflow_experiment_name,
+            tracking_uri=tracking_uri,
+            registry_uri=registry_uri,
+            metadata_store=metadata_store,
+        )
         self._models_dir = models_dir
         self._default_classification_metric = default_classification_metric
         self._default_regression_metric = default_regression_metric
-        self._mlflow_experiment_name = mlflow_experiment_name
-        self._tracking_uri = tracking_uri
-        self._registry_uri = registry_uri
-        self._metadata_store = metadata_store
 
     def run_automl(
         self,
@@ -170,9 +175,23 @@ class FlamlAutoMLService:
         try:
             automl.fit(**fit_kwargs)
         except ImportError as exc:
-            raise FlamlDependencyError(str(exc)) from exc
-        except Exception as exc:
-            raise FlamlExecutionError(f"FLAML search failed: {exc}") from exc
+            log_and_wrap(
+                logger,
+                exc,
+                operation="flaml.run_automl",
+                wrap_with=FlamlDependencyError,
+                message=str(exc),
+                context={"task_type": task_type.value},
+            )
+        except (AttributeError, RuntimeError, TypeError, ValueError) as exc:
+            log_and_wrap(
+                logger,
+                exc,
+                operation="flaml.run_automl",
+                wrap_with=FlamlExecutionError,
+                message=f"FLAML search failed: {exc}",
+                context={"task_type": task_type.value},
+            )
 
         search_duration = round(perf_counter() - started_at, 4)
 
@@ -249,6 +268,8 @@ class FlamlAutoMLService:
         model_path = models_dir / f"{base_name}.pkl"
         with model_path.open("wb") as f:
             pickle.dump(bundle.runtime.automl_instance, f)
+        model_sha256 = compute_sha256(model_path)
+        write_checksum_file(model_path, checksum=model_sha256)
 
         metadata = FlamlSavedModelMetadata(
             task_type=bundle.task_type,
@@ -266,11 +287,15 @@ class FlamlAutoMLService:
             best_loss=bundle.search_result.best_loss if bundle.search_result else None,
             metric=bundle.search_result.metric if bundle.search_result else None,
             search_duration_seconds=bundle.summary.search_duration_seconds,
+            artifact_format="flaml_pickle",
+            trusted_source=TRUSTED_MODEL_SOURCE,
+            model_sha256=model_sha256,
         )
 
         # Write metadata sidecar
         metadata_path = models_dir / f"{base_name}_flaml_saved_model_metadata_{base_name}.json"
         metadata_path.write_text(metadata.model_dump_json(indent=2), encoding="utf-8")
+        write_checksum_file(metadata_path)
 
         bundle.saved_model_metadata = metadata
         if bundle.artifacts is None:
@@ -289,7 +314,8 @@ class FlamlAutoMLService:
         try:
             best_loss_per = automl.best_loss_per_estimator
             best_config_per = automl.best_config_per_estimator
-        except Exception:
+        except (AttributeError, TypeError, ValueError) as exc:
+            log_exception(logger, exc, operation="flaml.build_leaderboard", level=logging.DEBUG)
             return rows
 
         if not best_loss_per:
@@ -314,28 +340,20 @@ class FlamlAutoMLService:
             return
         try:
             bundle.artifacts = write_flaml_artifacts(bundle, artifacts_dir)
-        except Exception as exc:
-            logger.warning("FLAML artifact writing failed: %s", exc)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            log_exception(logger, exc, operation="flaml.write_artifacts")
             bundle.warnings.append(f"Artifact writing failed: {exc}")
 
     def _track_bundle(self, bundle: FlamlResultBundle) -> None:
-        if not self._mlflow_experiment_name:
+        tracker = self._build_tracker(MLflowFlamlTracker)
+        if tracker is None:
             return
-        try:
-            tracker = MLflowFlamlTracker(
-                self._mlflow_experiment_name,
-                tracking_uri=self._tracking_uri,
-                registry_uri=self._registry_uri,
-            )
-            run_id, warnings = tracker.log_flaml_bundle(
-                bundle,
-                existing_run_id=bundle.mlflow_run_id,
-            )
-            bundle.mlflow_run_id = run_id
-            bundle.warnings.extend(warnings)
-        except Exception as exc:
-            logger.warning("FLAML MLflow tracking failed: %s", exc)
-            bundle.warnings.append(f"MLflow tracking failed: {exc}")
+        run_id, warnings = tracker.log_bundle(
+            bundle,
+            existing_run_id=bundle.mlflow_run_id,
+        )
+        bundle.mlflow_run_id = run_id
+        self._append_bundle_warnings(bundle, warnings)
 
     def _resolve_artifacts_dir(self) -> Path | None:
         return self._artifacts_dir

@@ -18,6 +18,7 @@ import pandas as pd
 
 from app.artifacts import ArtifactKind, LocalArtifactManager
 from app.config.models import ProfilingMode
+from app.errors import log_and_wrap, log_exception
 from app.profiling.base import BaseProfilingService
 from app.profiling.errors import ProfilingError, ProfilingSetupError
 from app.profiling.schemas import ProfilingArtifactBundle, ProfilingConfig, ProfilingResultSummary
@@ -37,7 +38,7 @@ def _suppress_profiling_runtime_noise():
     with warnings.catch_warnings(), contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
         try:
             from pyparsing.warnings import PyparsingDeprecationWarning
-        except Exception:  # pragma: no cover - optional dependency surface
+        except ImportError:  # pragma: no cover - optional dependency surface
             PyparsingDeprecationWarning = None
 
         if PyparsingDeprecationWarning is not None:
@@ -137,8 +138,15 @@ class YDataProfilingService(BaseProfilingService):
             with _suppress_profiling_runtime_noise():
                 from ydata_profiling import ProfileReport  # noqa: WPS433
                 return ProfileReport(df, **kwargs)
-        except Exception as exc:
-            raise ProfilingError(f"ydata-profiling report generation failed: {exc}") from exc
+        except (AttributeError, ImportError, RuntimeError, TypeError, ValueError) as exc:
+            log_and_wrap(
+                logger,
+                exc,
+                operation="profiling.generate_report",
+                wrap_with=ProfilingError,
+                message=f"ydata-profiling report generation failed: {exc}",
+                context={"mode": mode.value, "title": title},
+            )
 
     def _write_artifacts(
         self,
@@ -167,8 +175,13 @@ class YDataProfilingService(BaseProfilingService):
             shutil.move(str(temporary_html_path), str(html_path))
             bundle.html_report_path = html_path
             logger.info("Profiling HTML report written to %s", html_path)
-        except Exception as exc:
-            logger.warning("Failed to write profiling HTML report: %s", exc)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="profiling.write_html_report",
+                context={"html_path": str(html_path)},
+            )
 
         json_path = manager.build_artifact_path(
             kind=ArtifactKind.PROFILING,

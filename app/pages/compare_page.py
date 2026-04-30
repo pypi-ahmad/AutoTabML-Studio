@@ -9,16 +9,18 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_cache import get_metadata_store, list_cached_mlflow_runs
+from app.pages.ui_errors import log_ui_debug_exception, log_ui_exception
 from app.pages.ui_labels import format_enum_value
 from app.security.masking import safe_error_message
+from app.security.safe_csv import dataframe_to_safe_csv
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.storage.models import AppJobType
 
 
 def render_compare_page() -> None:
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("⚖️ Algorithm Comparison")
     st.caption(
         "See how different algorithms performed on the same dataset. "
@@ -135,7 +137,7 @@ def render_compare_page() -> None:
         dl_col1, dl_col2, _ = st.columns([2, 2, 4])
         dl_col1.download_button(
             "Download Leaderboard CSV",
-            data=leaderboard_df.to_csv(index=False).encode("utf-8"),
+            data=dataframe_to_safe_csv(leaderboard_df, index=False).encode("utf-8"),
             file_name=f"comparison_{(selected_job.dataset_name or 'results').replace(' ', '_')}.csv",
             mime="text/csv",
             key="cmp_dl_csv",
@@ -154,7 +156,7 @@ def render_compare_page() -> None:
         )
 
     # ── Side-by-side MLflow comparison (optional) ──────────────────────
-    _render_mlflow_comparison(state.settings.tracking)
+    _render_mlflow_comparison(state.settings)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────
@@ -169,8 +171,12 @@ def _load_leaderboard(job) -> pd.DataFrame | None:  # noqa: ANN001
         if csv_path.exists() and csv_path.suffix == ".csv":
             try:
                 return pd.read_csv(csv_path)
-            except Exception:
-                pass
+            except Exception as exc:
+                log_ui_debug_exception(
+                    exc,
+                    operation="compare.load_primary_leaderboard",
+                    context={"path": str(csv_path)},
+                )
 
     # 2. Try to find a leaderboard JSON sibling of the summary
     if job.summary_path:
@@ -181,7 +187,12 @@ def _load_leaderboard(job) -> pd.DataFrame | None:  # noqa: ANN001
                 data = json.loads(json_path.read_text(encoding="utf-8"))
                 if isinstance(data, list) and data:
                     return _leaderboard_rows_to_df(data)
-            except Exception:
+            except Exception as exc:
+                log_ui_debug_exception(
+                    exc,
+                    operation="compare.load_leaderboard_json",
+                    context={"path": str(json_path)},
+                )
                 continue
         # Experiment compare JSONs
         for json_path in sorted(summary_dir.glob("*compare*.json"), reverse=True):
@@ -189,13 +200,23 @@ def _load_leaderboard(job) -> pd.DataFrame | None:  # noqa: ANN001
                 data = json.loads(json_path.read_text(encoding="utf-8"))
                 if isinstance(data, list) and data:
                     return _leaderboard_rows_to_df(data)
-            except Exception:
+            except Exception as exc:
+                log_ui_debug_exception(
+                    exc,
+                    operation="compare.load_compare_json",
+                    context={"path": str(json_path)},
+                )
                 continue
         # Leaderboard CSVs
         for csv_path in sorted(summary_dir.glob("*leaderboard*.csv"), reverse=True):
             try:
                 return pd.read_csv(csv_path)
-            except Exception:
+            except Exception as exc:
+                log_ui_debug_exception(
+                    exc,
+                    operation="compare.load_leaderboard_csv",
+                    context={"path": str(csv_path)},
+                )
                 continue
 
     # 3. Scan the default benchmark artifacts dir
@@ -207,7 +228,12 @@ def _load_leaderboard(job) -> pd.DataFrame | None:  # noqa: ANN001
                 data = json.loads(json_path.read_text(encoding="utf-8"))
                 if isinstance(data, list) and data:
                     return _leaderboard_rows_to_df(data)
-            except Exception:
+            except Exception as exc:
+                log_ui_debug_exception(
+                    exc,
+                    operation="compare.scan_benchmark_leaderboard",
+                    context={"path": str(json_path)},
+                )
                 continue
 
     return None
@@ -268,7 +294,7 @@ def _find_model_column(df: pd.DataFrame) -> str | None:
     return None
 
 
-def _render_mlflow_comparison(tracking_settings) -> None:  # noqa: ANN001
+def _render_mlflow_comparison(app_settings) -> None:  # noqa: ANN001
     """Optional MLflow side-by-side run comparison."""
 
     from app.tracking.mlflow_query import is_mlflow_available
@@ -278,17 +304,11 @@ def _render_mlflow_comparison(tracking_settings) -> None:  # noqa: ANN001
 
     with st.expander("Side-by-Side Run Comparison (Advanced)", expanded=False):
         from app.tracking.compare_service import ComparisonService
-        from app.tracking.history_service import HistoryService
-
-        history = HistoryService(
-            tracking_uri=tracking_settings.tracking_uri,
-            default_experiment_names=tracking_settings.default_experiment_names,
-            default_limit=tracking_settings.history_page_default_limit,
-        )
 
         try:
-            runs = history.list_runs(limit=50)
+            runs = list_cached_mlflow_runs(app_settings, limit=50)
         except Exception as exc:
+            log_ui_exception(exc, operation="compare.list_mlflow_runs")
             st.error(
                 f"Failed to query MLflow: {safe_error_message(exc)}\n\n"
                 "**What to try:** Check that MLflow tracking is configured in **Settings** and the tracking server is running."
@@ -346,6 +366,7 @@ def _render_mlflow_comparison(tracking_settings) -> None:  # noqa: ANN001
                 for label, path in paths.items():
                     st.caption(f"{label}: {Path(str(path)).name}")
         except Exception as exc:
+            log_ui_exception(exc, operation="compare.save_comparison_results")
             st.error(
                 f"Failed to save comparison results: {safe_error_message(exc)}\n\n"
                 "**What to try:** Check that the output folder is writable, or try saving to a different location in **Settings**."
