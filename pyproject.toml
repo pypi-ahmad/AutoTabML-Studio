@@ -54,7 +54,7 @@ validation = [
     "great_expectations>=1.0",
 ]
 profiling = [
-    "setuptools>=68,<82",
+    "setuptools>=68,<83",
     "ydata-profiling>=4.6",
 ]
 benchmark = [
