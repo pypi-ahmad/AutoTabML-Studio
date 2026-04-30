@@ -37,8 +37,12 @@ def _enrich_metadata_with_description(
             metadata=metadata,
             mlflow_run_id=mlflow_run_id,
         )
-    except Exception:
-        logger.debug("Could not generate template description", exc_info=True)
+    except (ImportError, ValueError, RuntimeError):
+        logger.debug(
+            "Could not generate template description for %s job",
+            getattr(job_type, "value", job_type),
+            exc_info=True,
+        )
     return metadata
 
 
