@@ -21,6 +21,12 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Force uv to use the interpreter provisioned by actions/setup-python
+  # rather than downloading its own / honoring .python-version (3.12).
+  UV_PYTHON_PREFERENCE: only-system
+  UV_PYTHON_DOWNLOADS: never
+
 jobs:
   lint:
     name: Lint
@@ -60,13 +66,19 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark,uci,flaml]"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml
 
       - name: Run unit test suite
-        run: python -m pytest tests/ -q --tb=short
+        run: uv run --no-sync python -m pytest tests/ -q --tb=short
 
   coverage:
     name: Coverage Gate
@@ -80,13 +92,19 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark,uci,flaml]"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml
 
       - name: Run coverage gate
-        run: python -m pytest tests/ --cov=app --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=65 -q
+        run: uv run --no-sync python -m pytest tests/ --cov=app --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=65 -q
 
       - name: Upload coverage XML
         if: always()
@@ -107,13 +125,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark,uci,flaml]"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml
 
       - name: Run e2e smoke test with real dependencies
-        run: python -m pytest tests/test_e2e_local_smoke.py -v --tb=short
+        run: uv run --no-sync python -m pytest tests/test_e2e_local_smoke.py -v --tb=short
 
   integration-tests:
     name: Optional Integration Tests
@@ -128,16 +152,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install heavy optional dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,validation,profiling,benchmark,experiment,uci]"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install heavy optional dependencies (locked)
+        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra experiment --extra uci
 
       - name: Run integration-marked tests
         shell: bash
         run: |
           set +e
-          pytest tests/ -m integration -q --tb=short
+          uv run --no-sync pytest tests/ -m integration -q --tb=short
           code=$?
           if [ "$code" -eq 5 ]; then
             echo "No integration-marked tests were collected."
