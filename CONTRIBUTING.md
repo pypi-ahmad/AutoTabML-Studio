@@ -4,18 +4,19 @@ AutoTabML Studio is currently maintained as a local-first Python project. Keep c
 
 ## Local Setup
 
-Create and activate a virtual environment, then install the editable development environment:
+Use the repo lockfile for local setup. Python 3.12 is the recommended interpreter because it covers the broadest workflow support, including PyCaret.
 
 ```bash
-python -m venv .venv
-pip install -e ".[dev]"
+uv sync --locked --extra dev
 ```
 
 If you want the full local workflow available during development, install the workflow extras too:
 
 ```bash
-pip install -e ".[dev,validation,profiling,benchmark,experiment,kaggle]"
+uv sync --locked --all-extras
 ```
+
+When dependency metadata changes, refresh the lockfile with `uv lock --python 3.12` and commit the resulting `uv.lock`.
 
 ## Canonical Local Commands
 
@@ -42,6 +43,7 @@ pytest -q
 After installing the dev environment, you can build local distribution artifacts with:
 
 ```bash
+uv sync --locked --extra dev
 python -m build
 ```
 
