@@ -21,6 +21,7 @@ from typing import Any
 
 from app.backends.base import BaseExecutionBackend
 from app.config.enums import ExecutionBackend
+from app.errors import log_exception
 
 logger = logging.getLogger(__name__)
 
@@ -118,8 +119,8 @@ class ColabMCPExecutionBackend(BaseExecutionBackend):
                 "status": "ready",
                 "tools": self._available_tools,
             }
-        except Exception as exc:
-            logger.error("Failed to start Colab MCP session: %s", exc)
+        except (AttributeError, OSError, RuntimeError, TypeError, ValueError) as exc:
+            log_exception(logger, exc, operation="backend.colab.prepare_session")
             await self.cleanup()
             return {
                 "backend": "colab_mcp",
@@ -181,8 +182,13 @@ class ColabMCPExecutionBackend(BaseExecutionBackend):
         if self._exit_stack:
             try:
                 await self._exit_stack.aclose()
-            except Exception as exc:
-                logger.debug("Colab MCP cleanup error (ignored): %s", exc)
+            except (AttributeError, OSError, RuntimeError, TypeError, ValueError) as exc:
+                log_exception(
+                    logger,
+                    exc,
+                    operation="backend.colab.cleanup",
+                    level=logging.DEBUG,
+                )
             self._exit_stack = None
         self._session = None
         self._connected = False

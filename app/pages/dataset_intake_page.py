@@ -6,15 +6,15 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import get_active_loaded_dataset, go_to_page, render_dataset_workspace
+from app.pages.ui_cache import get_metadata_store
 from app.pages.ui_labels import render_metadata_table
 from app.pages.workflow_guide import render_next_step_hint, render_workflow_banner
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 
 
 def render_dataset_intake_page() -> None:
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
 
     st.title("📥 Load Data")
     render_workflow_banner(current_step=1)

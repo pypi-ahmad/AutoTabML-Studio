@@ -3,8 +3,15 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
+from app.modeling.base import (
+    BaseTracker,
+    get_mlflow_module as _base_get_mlflow_module,
+    is_mlflow_available as _base_is_mlflow_available,
+    mlflow_exception_types as _base_mlflow_exception_types,
+)
 from app.modeling.flaml.schemas import FlamlResultBundle
 
 logger = logging.getLogger(__name__)
@@ -13,27 +20,19 @@ logger = logging.getLogger(__name__)
 def is_mlflow_available() -> bool:
     """Return True when mlflow is importable."""
 
-    try:
-        import mlflow  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
+    return _base_is_mlflow_available()
 
 
-class MLflowFlamlTracker:
+def _get_mlflow_module() -> Any:
+    return _base_get_mlflow_module()
+
+
+def _mlflow_exception_types(mlflow_module: Any) -> tuple[type[BaseException], ...]:
+    return _base_mlflow_exception_types(mlflow_module)
+
+
+class MLflowFlamlTracker(BaseTracker[FlamlResultBundle]):
     """Lightweight explicit MLflow tracker for FLAML runs."""
-
-    def __init__(
-        self,
-        experiment_name: str,
-        *,
-        tracking_uri: str | None = None,
-        registry_uri: str | None = None,
-    ) -> None:
-        self._experiment_name = experiment_name
-        self._tracking_uri = tracking_uri
-        self._registry_uri = registry_uri
 
     def log_flaml_bundle(
         self,
@@ -41,33 +40,39 @@ class MLflowFlamlTracker:
         *,
         existing_run_id: str | None = None,
     ) -> tuple[str | None, list[str]]:
-        """Log FLAML params, metrics, and artifacts to MLflow."""
+        """Backward-compatible FLAML tracker entrypoint."""
 
-        warnings: list[str] = []
-        if not is_mlflow_available():
-            warnings.append("MLflow tracking skipped because mlflow is not installed.")
-            return None, warnings
+        return self.log_bundle(bundle, existing_run_id=existing_run_id)
 
-        import mlflow
+    def _is_mlflow_available(self) -> bool:
+        return is_mlflow_available()
 
-        try:
-            if self._tracking_uri:
-                mlflow.set_tracking_uri(self._tracking_uri)
-            if self._registry_uri:
-                mlflow.set_registry_uri(self._registry_uri)
-            mlflow.set_experiment(self._experiment_name)
-            with mlflow.start_run(
-                run_name=_build_run_name(bundle),
-                run_id=existing_run_id,
-            ) as run:
-                mlflow.log_params(_build_params(bundle))
-                mlflow.log_metrics(_build_metrics(bundle))
-                _log_artifacts(mlflow, bundle)
-                return run.info.run_id, warnings
-        except Exception as exc:
-            logger.warning("MLflow FLAML tracking failed: %s", exc)
-            warnings.append(f"MLflow tracking failed: {exc}")
-            return existing_run_id, warnings
+    def _get_mlflow_module(self) -> Any:
+        return _get_mlflow_module()
+
+    def _operation_name(self) -> str:
+        return "flaml.mlflow_tracking"
+
+    def _build_run_name(self, bundle: FlamlResultBundle) -> str:
+        return _build_run_name(bundle)
+
+    def _build_params(self, bundle: FlamlResultBundle) -> dict[str, Any]:
+        return _build_params(bundle)
+
+    def _build_metrics(self, bundle: FlamlResultBundle) -> dict[str, float]:
+        return _build_metrics(bundle)
+
+    def _artifact_paths(self, bundle: FlamlResultBundle) -> list[Path | None]:
+        artifacts = bundle.artifacts
+        if artifacts is None:
+            return []
+        return [
+            artifacts.search_result_json_path,
+            artifacts.leaderboard_csv_path,
+            artifacts.leaderboard_json_path,
+            artifacts.summary_json_path,
+            artifacts.saved_model_metadata_path,
+        ]
 
 
 def _build_run_name(bundle: FlamlResultBundle) -> str:

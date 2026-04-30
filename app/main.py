@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import logging
+
 import streamlit as st
 
+from app.errors import log_exception
 from app.logging_config import configure_logging
 from app.pages.dataset_workspace import render_sidebar_dataset_status
 from app.pages.registry import (
@@ -18,6 +21,8 @@ from app.startup import format_startup_issues, initialize_local_runtime
 from app.state.session import get_or_init_state
 
 configure_logging()
+
+logger = logging.getLogger(__name__)
 
 st.set_page_config(page_title="AutoTabML Studio", page_icon="🔬", layout="wide")
 
@@ -90,4 +95,10 @@ st.sidebar.caption("🔒 **Private by default** — your data stays on this mach
 try:
     render_registered_page(page)
 except Exception as exc:  # pragma: no cover - Streamlit fallback
+    log_exception(
+        logger,
+        exc,
+        operation="streamlit.render_page",
+        context={"page": page},
+    )
     st.error(f"Failed to render page '{page}': {safe_error_message(exc)}")

@@ -12,6 +12,7 @@ from typing import Any
 import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
+from app.errors import log_and_wrap
 from app.gpu import is_cuda_available
 from app.modeling.benchmark.artifacts import write_benchmark_artifacts
 from app.modeling.benchmark.base import BaseBenchmarkService
@@ -64,7 +65,7 @@ def _lazypredict_gpu_usable() -> bool:
     try:
         import torch  # noqa: F811
         return torch.cuda.is_available()
-    except Exception:
+    except (ImportError, AttributeError, RuntimeError):
         return False
 
 
@@ -93,14 +94,16 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
         tracking_uri: str | None = None,
         registry_uri: str | None = None,
     ) -> None:
-        self._artifacts_dir = artifacts_dir
+        super().__init__(
+            artifacts_dir=artifacts_dir,
+            mlflow_experiment_name=mlflow_experiment_name,
+            tracking_uri=tracking_uri,
+            registry_uri=registry_uri,
+        )
         self._classification_default_metric = classification_default_metric
         self._regression_default_metric = regression_default_metric
         self._sampling_row_threshold = sampling_row_threshold
         self._suggested_sample_rows = suggested_sample_rows
-        self._mlflow_experiment_name = mlflow_experiment_name
-        self._tracking_uri = tracking_uri
-        self._registry_uri = registry_uri
 
     def run(
         self,
@@ -190,8 +193,15 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
                 random_state=config.split.random_state,
                 stratify=stratify_target,
             )
-        except Exception as exc:
-            raise BenchmarkExecutionError(f"Failed to create the train/test split: {exc}") from exc
+        except (TypeError, ValueError) as exc:
+            log_and_wrap(
+                logger,
+                exc,
+                operation="benchmark.train_test_split",
+                wrap_with=BenchmarkExecutionError,
+                message=f"Failed to create the train/test split: {exc}",
+                context={"task_type": task_type.value},
+            )
 
         raw_results = self._run_lazypredict(
             X_train,
@@ -268,17 +278,11 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
         if self._artifacts_dir is not None:
             bundle.artifacts = write_benchmark_artifacts(bundle, self._artifacts_dir)
 
-        if self._mlflow_experiment_name is not None:
-            tracker = MLflowBenchmarkTracker(
-                self._mlflow_experiment_name,
-                tracking_uri=self._tracking_uri,
-                registry_uri=self._registry_uri,
-            )
-            run_id, tracking_warnings = tracker.log_benchmark_run(bundle)
+        tracker = self._build_tracker(MLflowBenchmarkTracker)
+        if tracker is not None:
+            run_id, tracking_warnings = tracker.log_bundle(bundle)
             bundle.mlflow_run_id = run_id
-            if tracking_warnings:
-                bundle.warnings.extend(tracking_warnings)
-                bundle.summary.warnings.extend(tracking_warnings)
+            self._append_bundle_warnings(bundle, tracking_warnings)
 
         return bundle
 
@@ -393,8 +397,15 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
 
         try:
             results = runner.fit(X_train, X_test, y_train, y_test)
-        except Exception as exc:
-            raise BenchmarkExecutionError(f"LazyPredict benchmark execution failed: {exc}") from exc
+        except (AttributeError, OSError, RuntimeError, TypeError, ValueError) as exc:
+            log_and_wrap(
+                logger,
+                exc,
+                operation="benchmark.run_lazypredict",
+                wrap_with=BenchmarkExecutionError,
+                message=f"LazyPredict benchmark execution failed: {exc}",
+                context={"task_type": task_type.value},
+            )
 
         scores = results[0] if isinstance(results, tuple) else results
         if not isinstance(scores, pd.DataFrame):

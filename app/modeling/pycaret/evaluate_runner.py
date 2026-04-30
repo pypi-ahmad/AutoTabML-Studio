@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from contextlib import contextmanager
 from pathlib import Path
 
+from app.errors import log_exception
 from app.modeling.pycaret.schemas import ExperimentEvaluationConfig, ExperimentPlotArtifact, ExperimentTaskType
 from app.modeling.pycaret.selectors import supported_plots_for_task
 from app.path_utils import safe_artifact_stem
+
+logger = logging.getLogger(__name__)
 
 
 def generate_evaluation_plots(
@@ -44,7 +48,14 @@ def generate_evaluation_plots(
                     plot_kwargs=evaluation.plot_kwargs or None,
                     verbose=False,
                 )
-        except Exception as exc:  # pragma: no cover - exercised through tests
+        except (AttributeError, KeyError, OSError, RuntimeError, TypeError, ValueError) as exc:  # pragma: no cover - exercised through tests
+            log_exception(
+                logger,
+                exc,
+                operation="pycaret.generate_plot",
+                level=logging.DEBUG,
+                context={"plot_id": plot_id, "model_name": model_name},
+            )
             warnings.append(f"Plot '{plot_id}' could not be generated for {model_name}: {exc}")
             continue
 
@@ -73,7 +84,14 @@ def generate_evaluation_plots(
     if evaluation.interactive:
         try:
             experiment_handle.evaluate_model(estimator, plot_kwargs=evaluation.plot_kwargs or None)
-        except Exception as exc:  # pragma: no cover - exercised through tests
+        except (AttributeError, OSError, RuntimeError, TypeError, ValueError) as exc:  # pragma: no cover - exercised through tests
+            log_exception(
+                logger,
+                exc,
+                operation="pycaret.evaluate_model",
+                level=logging.DEBUG,
+                context={"model_name": model_name},
+            )
             warnings.append(f"Interactive evaluate_model could not be launched: {exc}")
 
     return plot_artifacts, warnings

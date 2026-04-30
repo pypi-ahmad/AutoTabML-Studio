@@ -23,7 +23,7 @@ Go from raw CSV to trained, evaluated, and deployable model — entirely on your
 ![FLAML](https://img.shields.io/badge/FLAML-AutoML-00A4EF?style=flat-square&logo=microsoft&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-Metadata-003B57?style=flat-square&logo=sqlite&logoColor=white)
 
-[Features](#-features) · [Quick Start](#-quick-start) · [Screenshots](#-screenshots) · [Architecture](#-architecture) · [Docs](#-documentation)
+[Features](#-features) · [Quick Start](#-quick-start) · [Screenshots](#-screenshots) · [Architecture](#-architecture) · [Observability](#-observability) · [Docs](#-documentation)
 
 </div>
 
@@ -33,10 +33,10 @@ Go from raw CSV to trained, evaluated, and deployable model — entirely on your
 
 Most tabular ML work is scattered across notebooks, throwaway scripts, and manual model-file management. AutoTabML Studio consolidates the entire lifecycle into a single local workspace with a **Streamlit UI** and a **CLI** — backed by the same service layer so results are always reproducible.
 
-- **Zero cloud dependency.** Data never leaves your machine. No telemetry, no external uploads.
+- **Zero cloud dependency.** Data never leaves your machine. No default outbound telemetry or external uploads.
 - **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
 - **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
-- **485+ unit tests** with a CI-enforced coverage gate. Security scanning on every push.
+- **530+ unit tests** with a CI-enforced coverage gate. Security scanning on every push.
 
 ---
 
@@ -76,6 +76,7 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 ### Operations
 - **MLflow model registry** — Champion / Candidate / Archived lifecycle
 - **Run history & comparison** — side-by-side algorithm evaluation
+- **Structured observability** — JSON logs, metrics hooks, optional tracing, run correlation
 - **AI-generated summaries** — OpenAI, Anthropic, Gemini, or local Ollama
 - **CLI** for scripted, repeatable workflows
 
@@ -91,36 +92,36 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 
 | Requirement | Version |
 | --- | --- |
-| Python | 3.10 – 3.13 (use 3.11 or 3.12 for PyCaret support) |
+| Python | 3.10 – 3.13 (`uv` defaults to 3.12 via `.python-version`; use 3.11 or 3.12 for PyCaret support) |
 | OS | Windows, macOS, Linux |
 
 ### Install
 
 ```bash
-# 1. Create environment
-python -m venv .venv && source .venv/bin/activate   # Linux / macOS
-python -m venv .venv; .\.venv\Scripts\Activate.ps1   # Windows PowerShell
+# 1. Sync the lockfile into a local environment
+uv sync --locked --extra dev
 
-# 2. Base install
-pip install -e ".[dev]"
+# 2. Add optional extras as needed
+uv sync --locked --extra dev --extra benchmark   # LazyPredict + boosted baselines
+uv sync --locked --extra dev --extra experiment  # PyCaret full pipeline (Python 3.11/3.12)
+uv sync --locked --extra dev --extra flaml       # Microsoft FLAML AutoML
+uv sync --locked --extra dev --extra validation  # Great Expectations
+uv sync --locked --extra dev --extra profiling   # ydata-profiling EDA reports
 
-# 3. Add optional extras as needed
-pip install -e ".[benchmark]"     # LazyPredict + boosted baselines
-pip install -e ".[experiment]"    # PyCaret full pipeline
-pip install -e ".[flaml]"         # Microsoft FLAML AutoML
-pip install -e ".[validation]"    # Great Expectations
-pip install -e ".[profiling]"     # ydata-profiling EDA reports
-
-# Or install everything:
-pip install -e ".[dev,validation,profiling,benchmark,experiment,flaml,gpu,kaggle]"
+# Or sync everything in the lockfile:
+uv sync --locked --all-extras
 ```
+
+`uv` uses the committed lockfile and the repo's `.python-version` (`3.12`) by default. CI enforces `uv lock --check` and `uv sync --locked` so local installs and GitHub Actions resolve the same environment.
+
+If dependency metadata changes, refresh pinned versions with `uv lock --python 3.12` and commit the updated `uv.lock`.
 
 ### Run
 
 ```bash
-autotabml init-local-storage   # Initialize SQLite + artifact dirs
-autotabml doctor               # Verify runtime dependencies
-streamlit run app/main.py      # Launch the UI
+uv run autotabml init-local-storage   # Initialize SQLite + artifact dirs
+uv run autotabml doctor               # Verify runtime dependencies
+uv run streamlit run app/main.py      # Launch the UI
 ```
 
 ---
@@ -195,7 +196,8 @@ See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
 │  LazyPredict │   PyCaret    │      FLAML            │
 │  (Benchmark) │ (Experiment) │    (AutoML)           │
 ├──────────────┴──────────────┴───────────────────────┤
-│  Prediction · Tracking · Registry · Storage         │
+│  Prediction · Tracking · Registry · Observability   │
+│  Storage                                             │
 ├─────────────────────────────────────────────────────┤
 │  MLflow (SQLite) · SQLite Metadata · artifacts/     │
 └─────────────────────────────────────────────────────┘
@@ -217,6 +219,7 @@ Streamlit pages are **thin entry points**. All business logic lives in the servi
 | `app/prediction/` | Model discovery, loading, schema checks, scoring |
 | `app/tracking/` | MLflow queries, history, run comparison |
 | `app/registry/` | MLflow model registration and promotion |
+| `app/observability/` | Structured logging, correlation context, metrics hooks, optional tracing |
 | `app/storage/` | SQLite metadata store |
 | `app/providers/` | LLM integrations (OpenAI, Anthropic, Gemini, Ollama) |
 | `app/notebooks/` | Jupyter notebook generation |
@@ -236,13 +239,16 @@ Streamlit pages are **thin entry points**. All business logic lives in the servi
 | **Benchmarking** | LazyPredict, scikit-learn, XGBoost, LightGBM, CatBoost |
 | **Training** | PyCaret, Microsoft FLAML |
 | **Tracking** | MLflow (local SQLite backend) |
+| **Observability** | JSON logging, metrics hooks, optional OpenTelemetry tracing |
 | **Metadata** | SQLite |
 | **AI Summaries** | OpenAI · Anthropic · Gemini · Ollama |
-| **Testing** | pytest (485+ tests), pytest-cov, pytest-asyncio |
+| **Testing** | pytest (530+ tests), pytest-cov, pytest-asyncio |
 
 ---
 
 ## 💻 CLI
+
+Examples below assume the synced `.venv` is active. If you are not activating it, prefix commands with `uv run`.
 
 ```bash
 autotabml --version
@@ -289,12 +295,30 @@ See [.env.example](.env.example) for the full list.
 
 ---
 
+## 📈 Observability
+
+Runtime observability is **local-first**. Nothing is exported anywhere unless you explicitly wire an exporter.
+
+- Set `AUTOTABML_LOG_FORMAT=json` to emit one JSON document per log line to stderr. The default remains `text` for local development.
+- Training and prediction workflows automatically attach correlation fields such as `correlation_id`, `run_id`, `experiment_name`, `run_name`, and `task_type` when those values are available.
+- Metrics hooks live behind `app.observability`, so you can swap the default in-process backend for Prometheus, StatsD, or OTLP adapters at startup without changing workflow code.
+- Tracing is a no-op by default and upgrades automatically when `opentelemetry-api` is installed and configured.
+
+```bash
+# Structured JSON logs
+AUTOTABML_LOG_FORMAT=json
+AUTOTABML_LOG_LEVEL=INFO
+uv run streamlit run app/main.py
+```
+
+---
+
 ## 🧪 Testing & CI
 
 ```bash
-pytest                                     # Unit tests
-pytest -m integration                      # Integration suite
-pytest --cov=app --cov-fail-under=65       # Coverage gate
+uv run pytest                              # Unit tests
+uv run pytest -m integration               # Integration suite
+uv run pytest --cov=app --cov-fail-under=65  # Coverage gate
 ```
 
 | Workflow | Purpose |
@@ -302,6 +326,8 @@ pytest --cov=app --cov-fail-under=65       # Coverage gate
 | [CI](.github/workflows/ci.yml) | Lint (ruff) · Unit tests (Python 3.11 + 3.13) · Coverage ≥ 65% · E2E smoke |
 | [Security](.github/workflows/security.yml) | `detect-secrets` + `gitleaks` on every push and PR |
 | [Release](.github/workflows/release-readiness.yml) | Build validation + `twine check` for tagged releases |
+
+CI uses the committed `uv.lock` for deterministic installs before linting, testing, coverage, and release validation.
 
 Dependabot is configured for weekly dependency updates.
 

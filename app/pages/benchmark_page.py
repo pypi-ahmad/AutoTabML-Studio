@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime, timezone
 
@@ -11,16 +10,23 @@ import streamlit as st
 from app.gpu import cuda_summary
 from app.modeling.benchmark.errors import BenchmarkError
 from app.modeling.benchmark.lazypredict_runner import is_lazypredict_available
-from app.modeling.benchmark.schemas import BenchmarkConfig, BenchmarkSplitConfig, BenchmarkTaskType
+from app.modeling.benchmark.schemas import (
+    BenchmarkConfig,
+    BenchmarkSavedModelMetadata,
+    BenchmarkSplitConfig,
+    BenchmarkTaskType,
+)
 from app.modeling.benchmark.service import benchmark_dataset
 from app.modeling.benchmark.summary import leaderboard_to_dataframe
 from app.pages.dataset_workspace import render_dataset_header
+from app.pages.ui_cache import get_metadata_store
+from app.pages.ui_errors import log_ui_debug_exception, log_ui_exception
 from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.workflow_guide import render_next_step_hint, render_workflow_banner
 from app.path_utils import model_save_name
+from app.security.trusted_artifacts import TRUSTED_MODEL_SOURCE, compute_sha256, write_checksum_file
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.storage.models import AppJobType
 
 logger = logging.getLogger(__name__)
@@ -52,7 +58,7 @@ def default_ranking_metric_for_task(
 def render_benchmark_page() -> None:
     state = get_or_init_state()
     settings = state.settings.benchmark
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("🏁 Quick Benchmark")
     render_workflow_banner(current_step=3)
     st.caption(
@@ -265,6 +271,7 @@ def render_benchmark_page() -> None:
                     registry_uri=state.settings.tracking.registry_uri,
                 )
             except BenchmarkError as exc:
+                log_ui_exception(exc, operation="benchmark.run")
                 st.error(
                     f"Benchmark stopped: {safe_error_message(exc)}\n\n"
                     "**What to try:** Check that your target column and task type are correct, "
@@ -272,6 +279,7 @@ def render_benchmark_page() -> None:
                 )
                 return
             except Exception as exc:
+                log_ui_exception(exc, operation="benchmark.run_unexpected")
                 st.error(
                     f"Benchmark failed unexpectedly: {safe_error_message(exc)}\n\n"
                     "**What to try:** Try a smaller sample size in **Advanced options**, "
@@ -409,8 +417,12 @@ def _resolve_estimator_class(model_name: str, task_type: BenchmarkTaskType):
             for name, cls in pairs:
                 if name == model_name:
                     return cls
-    except ImportError:
-        pass
+    except ImportError as exc:
+        log_ui_debug_exception(
+            exc,
+            operation="benchmark.resolve_estimator_lazypredict_import",
+            context={"model_name": model_name, "task_type": task_type.value},
+        )
 
     # Fallback: try sklearn's all_estimators
     try:
@@ -420,8 +432,12 @@ def _resolve_estimator_class(model_name: str, task_type: BenchmarkTaskType):
         for name, cls in all_estimators(type_filter=type_filter):
             if name == model_name:
                 return cls
-    except Exception:
-        pass
+    except Exception as exc:
+        log_ui_debug_exception(
+            exc,
+            operation="benchmark.resolve_estimator_sklearn_fallback",
+            context={"model_name": model_name, "task_type": task_type.value},
+        )
 
     return None
 
@@ -460,6 +476,8 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
         config = bundle.config
 
         try:
+            from skops.io import dump as skops_dump
+            from skops.io import get_untrusted_types
             from sklearn.model_selection import train_test_split
 
             target = df[config.target_column]
@@ -484,25 +502,31 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
             models_dir = state.settings.pycaret.models_dir
             models_dir.mkdir(parents=True, exist_ok=True)
             save_stem = model_save_name(bundle.dataset_name, selected_model)
-            model_path = models_dir / f"{save_stem}.pkl"
-            joblib.dump(model, model_path)
+            model_path = models_dir / f"{save_stem}.skops"
+            skops_dump(model, model_path)
+            trusted_types = sorted(get_untrusted_types(file=model_path))
+            model_sha256 = compute_sha256(model_path)
+            write_checksum_file(model_path, checksum=model_sha256)
 
-            # Write metadata sidecar
-            metadata = {
-                "source": "benchmark",
-                "model_name": save_stem,
-                "task_type": bundle.task_type.value,
-                "target_column": config.target_column,
-                "dataset_name": bundle.dataset_name,
-                "dataset_fingerprint": bundle.dataset_fingerprint,
-                "trained_at": datetime.now(timezone.utc).isoformat(),
-                "feature_columns": list(X_train.columns),
-                "split_test_size": config.split.test_size,
-                "split_random_state": config.split.random_state,
-                "model_path": str(model_path),
-            }
+            metadata = BenchmarkSavedModelMetadata(
+                model_name=save_stem,
+                task_type=bundle.task_type,
+                target_column=config.target_column,
+                dataset_name=bundle.dataset_name,
+                dataset_fingerprint=bundle.dataset_fingerprint,
+                trained_at=datetime.now(timezone.utc).isoformat(),
+                feature_columns=list(X_train.columns),
+                split_test_size=config.split.test_size,
+                split_random_state=config.split.random_state,
+                model_path=model_path,
+                artifact_format="skops",
+                trusted_source=TRUSTED_MODEL_SOURCE,
+                model_sha256=model_sha256,
+                trusted_types=trusted_types,
+            )
             metadata_path = model_path.with_suffix(".json")
-            metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+            metadata_path.write_text(metadata.model_dump_json(indent=2), encoding="utf-8")
+            write_checksum_file(metadata_path)
 
             st.success(f"Model **{save_stem}** saved successfully.")
             with st.expander("Saved files", expanded=False):
@@ -510,6 +534,11 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
                 st.caption(f"Metadata file: **{metadata_path.name}**")
 
         except Exception as exc:
+            log_ui_exception(
+                exc,
+                operation="benchmark.save_model",
+                context={"model_name": selected_model},
+            )
             st.error(
                 f"Failed to retrain and save model: {safe_error_message(exc)}\n\n"
                 "**What to try:** Check that the models folder exists and is writable, "

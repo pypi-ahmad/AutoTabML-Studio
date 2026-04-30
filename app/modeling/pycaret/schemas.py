@@ -253,6 +253,10 @@ class SavedModelMetadata(BaseModel):
     experiment_snapshot_path: Path | None = None
     experiment_snapshot_includes_data: bool = False
     model_only: bool = False
+    artifact_format: str | None = None
+    trusted_source: str | None = None
+    model_sha256: str | None = None
+    experiment_snapshot_sha256: str | None = None
 
 
 class SavedModelArtifact(BaseModel):

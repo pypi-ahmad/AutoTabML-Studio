@@ -9,13 +9,15 @@ from urllib.parse import urlparse
 import streamlit as st
 
 from app.artifacts import LocalArtifactManager
-from app.ingestion import DatasetInputSpec, IngestionSourceType, LoadedDataset, load_dataset
+from app.ingestion import DatasetInputSpec, IngestionSourceType, LoadedDataset
 from app.ingestion.types import DELIMITED_FILE_SUFFIXES, EXCEL_FILE_SUFFIXES
 from app.ingestion.uci_loader import list_available_uci_datasets
+from app.pages.ui_cache import get_metadata_store, load_dataset_for_ui
+from app.pages.ui_errors import log_ui_exception
 from app.pages.ui_labels import render_metadata_table
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import ProjectRecord, build_metadata_store, ensure_dataset_record
+from app.storage import ProjectRecord, ensure_dataset_record
 
 _LOADED_DATASETS_KEY = "loaded_datasets"
 _ACTIVE_DATASET_NAME_KEY = "active_dataset_name"
@@ -168,7 +170,7 @@ def render_dataset_header(
     """
 
     if metadata_store is None:
-        metadata_store = build_metadata_store(get_or_init_state().settings)
+        metadata_store = get_metadata_store(get_or_init_state().settings)
 
     loaded = get_loaded_datasets()
     active_name = get_active_dataset_name(metadata_store=metadata_store)
@@ -249,6 +251,7 @@ def _render_inline_dataset_loader(
                 try:
                     spec = build_local_path_input_spec(local)
                 except Exception as exc:
+                    log_ui_exception(exc, operation="dataset_workspace.build_gateway_local_path")
                     st.error(safe_error_message(exc))
                 else:
                     name = _load_into_session(
@@ -270,7 +273,7 @@ def render_sidebar_dataset_status() -> None:
     """Render compact dataset status and switcher in the Streamlit sidebar."""
 
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     loaded = get_loaded_datasets()
     active_name = get_active_dataset_name(metadata_store=metadata_store)
 
@@ -354,7 +357,7 @@ def render_dataset_workspace(
     """Render the shared dataset loading and selection UI."""
 
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     loaded = get_loaded_datasets()
 
     if title:
@@ -418,6 +421,7 @@ def render_dataset_workspace(
             try:
                 spec = build_local_path_input_spec(local_path, display_name=path_name or None)
             except Exception as exc:
+                log_ui_exception(exc, operation="dataset_workspace.build_local_path")
                 st.error(safe_error_message(exc))
             else:
                 _load_into_session(
@@ -442,6 +446,7 @@ def render_dataset_workspace(
             try:
                 spec = build_url_input_spec(url_value, display_name=url_name or None)
             except Exception as exc:
+                log_ui_exception(exc, operation="dataset_workspace.build_url")
                 st.error(safe_error_message(exc))
             else:
                 parsed = urlparse(url_value)
@@ -486,6 +491,7 @@ def render_dataset_workspace(
                     filter=catalog_filter or None,
                 )
             except Exception as exc:
+                log_ui_exception(exc, operation="dataset_workspace.search_uci_catalog")
                 st.error(
                     f"UCI catalog search failed: {safe_error_message(exc)}\n\n"
                     "**What to try:** Check your internet connection, or search by dataset ID instead."
@@ -555,6 +561,7 @@ def render_dataset_workspace(
                         display_name=uci_display_name or None,
                     )
                 except Exception as exc:
+                    log_ui_exception(exc, operation="dataset_workspace.build_uci_input_spec")
                     st.error(safe_error_message(exc))
                 else:
                     fallback = uci_display_name or (resolved_name if resolved_name else f"uci-{resolved_id}")
@@ -628,8 +635,9 @@ def _load_into_session(
     metadata_store,
 ) -> str | None:  # noqa: ANN001
     try:
-        loaded_dataset = load_dataset(input_spec)
+        loaded_dataset = load_dataset_for_ui(input_spec)
     except Exception as exc:
+        log_ui_exception(exc, operation="dataset_workspace.load_dataset")
         st.error(
             f"Dataset load failed: {safe_error_message(exc)}\n\n"
             "**What to try:** Check the file path or URL, and make sure the format is supported (CSV, Excel, TSV)."

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from time import perf_counter
 
 import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
+from app.errors import log_and_wrap, log_exception
 from app.modeling.pycaret import setup_runner
 from app.modeling.pycaret.artifacts import write_experiment_artifacts
 from app.modeling.pycaret.base import BaseExperimentService
@@ -38,6 +40,8 @@ from app.modeling.pycaret.summary import extract_mean_metrics, normalize_compare
 from app.path_utils import model_save_name
 from app.storage import AppMetadataStore, record_experiment_job
 
+logger = logging.getLogger(__name__)
+
 
 class PyCaretExperimentService(BaseExperimentService):
     """PyCaret-backed experiment service using the OOP API."""
@@ -57,17 +61,19 @@ class PyCaretExperimentService(BaseExperimentService):
         registry_uri: str | None = None,
         metadata_store: AppMetadataStore | None = None,
     ) -> None:
-        self._artifacts_dir = artifacts_dir
+        super().__init__(
+            artifacts_dir=artifacts_dir,
+            mlflow_experiment_name=mlflow_experiment_name,
+            tracking_uri=tracking_uri,
+            registry_uri=registry_uri,
+            metadata_store=metadata_store,
+        )
         self._models_dir = models_dir
         self._snapshots_dir = snapshots_dir
         self._classification_compare_metric = classification_compare_metric
         self._regression_compare_metric = regression_compare_metric
         self._classification_tune_metric = classification_tune_metric
         self._regression_tune_metric = regression_tune_metric
-        self._mlflow_experiment_name = mlflow_experiment_name
-        self._tracking_uri = tracking_uri
-        self._registry_uri = registry_uri
-        self._metadata_store = metadata_store
 
     def setup_experiment(
         self,
@@ -123,9 +129,23 @@ class PyCaretExperimentService(BaseExperimentService):
                 **setup_kwargs,
             )
         except ImportError as exc:
-            raise PyCaretDependencyError(str(exc)) from exc
-        except Exception as exc:  # pragma: no cover - exercised through tests
-            raise PyCaretExecutionError(f"PyCaret setup failed: {exc}") from exc
+            log_and_wrap(
+                logger,
+                exc,
+                operation="pycaret.setup_experiment",
+                wrap_with=PyCaretDependencyError,
+                message=str(exc),
+                context={"task_type": task_type.value},
+            )
+        except (AttributeError, KeyError, RuntimeError, TypeError, ValueError) as exc:  # pragma: no cover - exercised through tests
+            log_and_wrap(
+                logger,
+                exc,
+                operation="pycaret.setup_experiment",
+                wrap_with=PyCaretExecutionError,
+                message=f"PyCaret setup failed: {exc}",
+                context={"task_type": task_type.value},
+            )
 
         available_metrics = list_available_metrics(experiment_handle)
         model_catalog = experiment_handle.models(internal=False, raise_errors=False)
@@ -395,7 +415,13 @@ class PyCaretExperimentService(BaseExperimentService):
                     save_name=save_name,
                     save_experiment_snapshot=include_experiment_snapshots,
                 )
-            except Exception as exc:
+            except (PyCaretDependencyError, PyCaretExecutionError, OSError, RuntimeError, TypeError, ValueError) as exc:
+                log_exception(
+                    logger,
+                    exc,
+                    operation="pycaret.save_selection_model",
+                    context={"model_name": selection.model_name, "save_name": save_name},
+                )
                 warnings.append(f"Could not save model '{selection.model_name}': {exc}")
                 continue
 
@@ -530,18 +556,15 @@ class PyCaretExperimentService(BaseExperimentService):
         return retained
 
     def _track_bundle(self, bundle: ExperimentResultBundle) -> None:
-        if bundle.config.mlflow_tracking_mode == MLflowTrackingMode.MANUAL and self._mlflow_experiment_name is not None:
-            tracker = MLflowExperimentTracker(
-                self._mlflow_experiment_name,
-                tracking_uri=self._tracking_uri,
-                registry_uri=self._registry_uri,
-            )
-            run_id, tracking_warnings = tracker.log_experiment_bundle(
-                bundle,
-                existing_run_id=bundle.mlflow_run_id,
-            )
-            bundle.mlflow_run_id = run_id
-            self._append_warnings(bundle, tracking_warnings)
+        if bundle.config.mlflow_tracking_mode == MLflowTrackingMode.MANUAL:
+            tracker = self._build_tracker(MLflowExperimentTracker)
+            if tracker is not None:
+                run_id, tracking_warnings = tracker.log_bundle(
+                    bundle,
+                    existing_run_id=bundle.mlflow_run_id,
+                )
+                bundle.mlflow_run_id = run_id
+                self._append_warnings(bundle, tracking_warnings)
 
         if self._metadata_store is not None:
             record_experiment_job(self._metadata_store, bundle)
@@ -552,13 +575,7 @@ class PyCaretExperimentService(BaseExperimentService):
         bundle.artifacts = write_experiment_artifacts(bundle, self._artifacts_dir)
 
     def _append_warnings(self, bundle: ExperimentResultBundle, warnings: list[str]) -> None:
-        if not warnings:
-            return
-        for warning in warnings:
-            if warning not in bundle.warnings:
-                bundle.warnings.append(warning)
-            if warning not in bundle.summary.warnings:
-                bundle.summary.warnings.append(warning)
+        self._append_bundle_warnings(bundle, warnings)
 
     def _default_compare_metric(self, task_type: ExperimentTaskType) -> str:
         if task_type == ExperimentTaskType.CLASSIFICATION:

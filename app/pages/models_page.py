@@ -2,22 +2,21 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
+from app.modeling.benchmark.persistence import discover_saved_benchmark_models
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_cache import list_cached_registered_models
+from app.pages.ui_errors import log_ui_debug_exception
 from app.pages.ui_labels import PREDICTION_TASK_TYPE_LABELS, format_enum_value, render_model_trust_card
 from app.prediction import (
-    PredictionService,
     PredictionTaskType,
-    SchemaValidationMode,
 )
-from app.prediction.selectors import discover_local_saved_models
+from app.prediction.selectors import discover_flaml_saved_models, discover_local_saved_models
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.tracking.mlflow_query import is_mlflow_available
 
 
@@ -25,7 +24,6 @@ def render_models_page() -> None:
     state = get_or_init_state()
     prediction_settings = state.settings.prediction
     tracking_settings = state.settings.tracking
-    metadata_store = build_metadata_store(state.settings)
 
     st.title("🗂️ Models")
     st.caption(
@@ -40,30 +38,20 @@ def render_models_page() -> None:
         model_dirs=prediction_settings.supported_local_model_dirs,
         metadata_dirs=prediction_settings.local_model_metadata_dirs,
     )
-    benchmark_models = _discover_benchmark_models(state.settings.pycaret.models_dir)
-    flaml_models = _discover_flaml_models(state.settings.flaml.models_dir)
+    benchmark_models = discover_saved_benchmark_models(state.settings.pycaret.models_dir)
+    flaml_models = discover_flaml_saved_models(
+        model_dirs=[state.settings.flaml.models_dir],
+        metadata_dirs=[state.settings.flaml.models_dir],
+    )
 
     # DB-tracked models (may overlap with discovered ones)
     # MLflow registry models
     registry_models = []
     if is_mlflow_available() and tracking_settings.registry_enabled:
         try:
-            service = PredictionService(
-                artifacts_dir=prediction_settings.artifacts_dir,
-                history_path=prediction_settings.history_path,
-                schema_validation_mode=SchemaValidationMode(prediction_settings.schema_validation_mode),
-                prediction_column_name=prediction_settings.prediction_column_name,
-                prediction_score_column_name=prediction_settings.prediction_score_column_name,
-                local_model_dirs=prediction_settings.supported_local_model_dirs,
-                local_metadata_dirs=prediction_settings.local_model_metadata_dirs,
-                tracking_uri=tracking_settings.tracking_uri,
-                registry_uri=tracking_settings.registry_uri,
-                registry_enabled=tracking_settings.registry_enabled,
-                metadata_store=metadata_store,
-            )
-            registry_models = service.list_registered_models()
-        except Exception:
-            pass
+            registry_models = list_cached_registered_models(state.settings)
+        except Exception as exc:
+            log_ui_debug_exception(exc, operation="models.list_registered_models")
 
     total = len(pycaret_refs) + len(benchmark_models) + len(flaml_models) + len(registry_models)
     st.metric("Total Models", total)
@@ -99,8 +87,8 @@ def render_models_page() -> None:
     # ── FLAML models ───────────────────────────────────────────────────
     if flaml_models:
         st.subheader(f"🔥 FLAML AutoML Models ({len(flaml_models)})")
-        for meta in flaml_models:
-            _render_flaml_model_card(meta)
+        for ref in flaml_models:
+            _render_flaml_model_card(ref)
 
     # ── MLflow Registry models ─────────────────────────────────────────
     if registry_models:
@@ -278,61 +266,16 @@ def _render_registry_model_card(model) -> None:  # noqa: ANN001
             st.caption(f"Tags: {model.tags}")
 
 
-# ── Helpers ───────────────────────────────────────────────────────────
-
-
-def _discover_benchmark_models(models_dir: Path) -> list[dict]:
-    """Discover joblib models saved from benchmark with JSON sidecar metadata."""
-
-    results = []
-    if not models_dir.exists():
-        return results
-    for json_path in models_dir.glob("*.json"):
-        try:
-            meta = json.loads(json_path.read_text(encoding="utf-8"))
-        except Exception:
-            continue
-        if meta.get("source") != "benchmark":
-            continue
-        pkl_path = json_path.with_suffix(".pkl")
-        if pkl_path.exists():
-            meta["_model_path"] = str(pkl_path)
-            meta["_metadata_path"] = str(json_path)
-            results.append(meta)
-    return results
-
-
-def _discover_flaml_models(models_dir: Path) -> list[dict]:
-    """Discover FLAML models saved with JSON sidecar metadata."""
-
-    results = []
-    if not models_dir.exists():
-        return results
-    for json_path in models_dir.glob("*_flaml_saved_model_metadata_*.json"):
-        try:
-            meta = json.loads(json_path.read_text(encoding="utf-8"))
-        except Exception:
-            continue
-        pkl_path = Path(meta.get("model_path", ""))
-        if not pkl_path.exists():
-            pkl_name = json_path.stem.split("_flaml_saved_model_metadata_")[0] + ".pkl"
-            pkl_path = models_dir / pkl_name
-        if pkl_path.exists():
-            meta["_model_path"] = str(pkl_path)
-            meta["_metadata_path"] = str(json_path)
-            results.append(meta)
-    return results
-
-
-def _render_flaml_model_card(meta: dict) -> None:
+def _render_flaml_model_card(ref) -> None:  # noqa: ANN001
     """Render an expander card for a FLAML-saved model."""
 
-    model_name = meta.get("model_name", "Unknown")
+    meta = ref.metadata if isinstance(ref.metadata, dict) else {}
+    model_name = ref.display_name
     dataset = meta.get("dataset_name", "—")
-    raw_task = meta.get("task_type", "unknown")
+    raw_task = ref.task_type.value if hasattr(ref, "task_type") else meta.get("task_type", "unknown")
     task = PREDICTION_TASK_TYPE_LABELS.get(raw_task, raw_task.title())
     target = meta.get("target_column", "—")
-    features = meta.get("feature_columns", [])
+    features = list(getattr(ref, "feature_columns", []) or [])
     trained_at = meta.get("trained_at")
     best_estimator = meta.get("best_estimator", "—")
     best_loss = meta.get("best_loss")

@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlparse
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from app.artifacts import LocalArtifactManager
 from app.config.enums import ExecutionBackend, LLMProvider
 from app.config.models import AppSettings
+from app.errors import log_exception
 from app.storage import AppMetadataStore
+
+logger = logging.getLogger(__name__)
 
 
 class StartupIssue(BaseModel):
@@ -53,14 +57,16 @@ def initialize_local_runtime(
     manager = LocalArtifactManager(settings.artifacts)
     try:
         status.artifact_dirs = manager.ensure_directories()
-    except Exception as exc:
+    except OSError as exc:
+        log_exception(logger, exc, operation="startup.ensure_artifact_dirs")
         status.issues.append(StartupIssue(severity="error", message=f"Could not create artifact directories: {exc}"))
         return status
 
     try:
         status.temp_files_removed = len(manager.cleanup_stale_temp_artifacts())
         status.partial_files_removed = len(manager.cleanup_failed_partial_artifacts())
-    except Exception as exc:
+    except OSError as exc:
+        log_exception(logger, exc, operation="startup.cleanup_artifacts", level=logging.INFO)
         status.issues.append(StartupIssue(severity="warning", message=f"Artifact cleanup skipped: {exc}"))
 
     if settings.database.initialize_on_startup:
@@ -68,7 +74,13 @@ def initialize_local_runtime(
             store = AppMetadataStore(settings.database.path)
             store.initialize()
             status.database_path = store.db_path
-        except Exception as exc:
+        except (OSError, RuntimeError, ValidationError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="startup.initialize_database",
+                context={"db_path": str(settings.database.path)},
+            )
             status.issues.append(StartupIssue(severity="error", message=f"Could not initialize local app database: {exc}"))
 
     status.issues.extend(_validate_mlflow_settings(settings))

@@ -6,24 +6,41 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_cache import (
+    get_metadata_store,
+    get_registry_service,
+    invalidate_mlflow_query_cache,
+    list_cached_model_versions,
+    list_cached_registered_models,
+)
+from app.pages.ui_errors import log_ui_exception
 from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_labels import PROMOTION_LABELS, format_enum_value, make_format_func
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.storage.models import AppJobType
 from app.tracking.mlflow_query import is_mlflow_available
+
+_REGISTRY_FLASH_MESSAGE_KEY = "registry_flash_message"
+_REGISTRY_FLASH_WARNINGS_KEY = "registry_flash_warnings"
 
 
 def render_registry_page() -> None:
     state = get_or_init_state()
     settings = state.settings.tracking
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("🏷️ Model Registry")
     st.caption(
         "The registry keeps versioned copies of your best models. "
         "Promote a version to 'Champion' when it's ready for production use."
     )
+
+    flash_message = st.session_state.pop(_REGISTRY_FLASH_MESSAGE_KEY, None)
+    flash_warnings = st.session_state.pop(_REGISTRY_FLASH_WARNINGS_KEY, [])
+    if flash_message:
+        st.success(flash_message)
+    for warning in flash_warnings:
+        st.warning(warning)
 
     # ── Past runs & saved models (always visible) ─────────────────────
     render_past_runs_section(metadata_store, AppJobType.EXPERIMENT, key_prefix="reg")
@@ -45,16 +62,9 @@ def render_registry_page() -> None:
         return
 
     from app.registry.errors import RegistryUnavailableError
-    from app.registry.registry_service import RegistryService
     from app.registry.schemas import PromotionAction, PromotionRequest
 
-    service = RegistryService(
-        tracking_uri=settings.tracking_uri,
-        registry_uri=settings.registry_uri,
-        champion_alias=settings.champion_alias,
-        candidate_alias=settings.candidate_alias,
-        archived_tag_key=settings.archived_tag_key,
-    )
+    service = get_registry_service(state.settings)
     st.caption(
         f"Models can be promoted to **{settings.champion_alias}** (production-ready) "
         f"or **{settings.candidate_alias}** (testing). "
@@ -63,8 +73,9 @@ def render_registry_page() -> None:
 
     # --- List registered models ---
     try:
-        models = service.list_models()
+        models = list_cached_registered_models(state.settings)
     except RegistryUnavailableError as exc:
+        log_ui_exception(exc, operation="registry.list_models_unavailable")
         st.warning(
             "Model registry is not available for the current configuration. "
             "Check your tracking settings or ask your administrator."
@@ -73,6 +84,7 @@ def render_registry_page() -> None:
             st.caption(f"Error: {safe_error_message(exc)}")
         return
     except Exception as exc:
+        log_ui_exception(exc, operation="registry.list_models")
         st.error(f"Failed to query model registry: {safe_error_message(exc)}")
         return
 
@@ -109,8 +121,13 @@ def render_registry_page() -> None:
 
     if selected_model_name:
         try:
-            versions = service.list_versions(selected_model_name)
+            versions = list_cached_model_versions(state.settings, selected_model_name)
         except Exception as exc:
+            log_ui_exception(
+                exc,
+                operation="registry.list_versions",
+                context={"model_name": selected_model_name},
+            )
             st.error(f"Failed to list versions: {safe_error_message(exc)}")
             return
 
@@ -173,16 +190,16 @@ def render_registry_page() -> None:
                     result = service.promote(request)
                     if result.success:
                         _action_label = PROMOTION_LABELS.get(result.action.value, format_enum_value(result.action.value))
-                        st.success(
-                            f"Version {result.version}: {_action_label}."
-                        )
-                        if result.alias_changes or result.tag_changes:
-                            with st.expander("Details", expanded=False):
-                                for change in result.alias_changes + result.tag_changes:
-                                    st.caption(change)
-                    for warning in result.warnings:
-                        st.warning(warning)
+                        st.session_state[_REGISTRY_FLASH_MESSAGE_KEY] = f"Version {result.version}: {_action_label}."
+                        st.session_state[_REGISTRY_FLASH_WARNINGS_KEY] = list(result.warnings)
+                        invalidate_mlflow_query_cache()
+                        st.rerun()
                 except Exception as exc:
+                    log_ui_exception(
+                        exc,
+                        operation="registry.promote",
+                        context={"model_name": selected_model_name, "version": promote_version},
+                    )
                     st.error(f"Promotion failed: {safe_error_message(exc)}")
         else:
             st.info(f"No versions found for model `{selected_model_name}`.")
@@ -219,8 +236,16 @@ def _render_register_section(service) -> None:
                 run_id=reg_run_id or None,
                 description=reg_description,
             )
-            st.success(
+            st.session_state[_REGISTRY_FLASH_MESSAGE_KEY] = (
                 f"Registered model '{version.model_name}' version {version.version}."
             )
+            st.session_state[_REGISTRY_FLASH_WARNINGS_KEY] = []
+            invalidate_mlflow_query_cache()
+            st.rerun()
         except Exception as exc:
+            log_ui_exception(
+                exc,
+                operation="registry.register_model",
+                context={"model_name": reg_name},
+            )
             st.error(f"Registration failed: {safe_error_message(exc)}")

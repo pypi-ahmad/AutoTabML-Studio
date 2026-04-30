@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import logging
+
+from app.errors import log_exception
 from app.tracking import mlflow_query
+from app.tracking.errors import ExperimentNotFoundError, TrackingError
 from app.tracking.filters import (
     RunHistoryFilter,
     RunHistorySort,
@@ -11,6 +15,16 @@ from app.tracking.filters import (
     build_mlflow_filter_string,
 )
 from app.tracking.schemas import RunDetailView, RunHistoryItem
+
+logger = logging.getLogger(__name__)
+
+
+# Maximum number of runs to pull from MLflow when the requested sort field is
+# not natively supported by MLflow's ``order_by``. Sorting client-side over a
+# truncated server-side window produces incorrect rankings (a "top by
+# duration" listing would silently become "top by start_time, re-ordered"),
+# so we widen the fetch pool, sort fully, then trim to the requested limit.
+_CLIENT_SORT_POOL_SIZE = 1000
 
 
 class HistoryService:
@@ -38,21 +52,32 @@ class HistoryService:
 
         experiment_ids, name_map = self._resolve_experiment_ids(history_filter)
         filter_string = build_mlflow_filter_string(history_filter)
-        order_by = _build_order_by(sort)
+        effective_sort = sort or RunHistorySort()
+        order_by = _build_order_by(effective_sort)
+        effective_limit = limit or self._default_limit
+
+        # When the requested sort field is not natively supported by MLflow,
+        # widen the fetch pool so the client-side sort sees the full
+        # candidate set rather than a partial window.
+        needs_full_pool = _requires_client_sort(effective_sort.field)
+        fetch_size = (
+            max(effective_limit, _CLIENT_SORT_POOL_SIZE) if needs_full_pool else effective_limit
+        )
 
         runs = mlflow_query.search_runs(
             experiment_ids=experiment_ids or None,
             filter_string=filter_string,
             order_by=order_by,
-            max_results=limit or self._default_limit,
+            max_results=fetch_size,
             tracking_uri=self._tracking_uri,
             experiment_name_map=name_map,
         )
 
         runs = self._apply_client_side_filters(runs, history_filter)
-
-        effective_sort = sort or RunHistorySort()
         runs = _sort_runs(runs, effective_sort)
+
+        if needs_full_pool:
+            runs = runs[:effective_limit]
 
         return runs
 
@@ -113,7 +138,14 @@ class HistoryService:
                 )
                 ids.append(info.experiment_id)
                 name_map[info.experiment_id] = info.name
-            except Exception:
+            except (ExperimentNotFoundError, TrackingError) as exc:
+                log_exception(
+                    logger,
+                    exc,
+                    operation="tracking.resolve_experiment",
+                    level=logging.DEBUG,
+                    context={"experiment_name": name},
+                )
                 continue
         return ids if ids else None, name_map
 
@@ -121,7 +153,13 @@ class HistoryService:
         try:
             experiments = mlflow_query.list_experiments(tracking_uri=self._tracking_uri)
             return {exp.experiment_id: exp.name for exp in experiments}
-        except Exception:
+        except TrackingError as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="tracking.list_experiments",
+                level=logging.DEBUG,
+            )
             return {}
 
     def _apply_client_side_filters(
@@ -155,14 +193,28 @@ class HistoryService:
 
 
 def _build_order_by(sort: RunHistorySort | None) -> list[str]:
+    """Translate a :class:`RunHistorySort` into MLflow ``order_by`` clauses.
+
+    Only ``START_TIME`` is sorted server-side. All other fields require
+    Python-side comparison (duration is computed; model name / primary score
+    are parsed from params/metrics), so we ask MLflow for the most recent
+    rows and rely on the wider client-side pool for correctness.
+    """
+
     if sort is None:
         return ["attributes.start_time DESC"]
     direction = "ASC" if sort.direction == SortDirection.ASCENDING else "DESC"
     if sort.field == RunSortField.START_TIME:
         return [f"attributes.start_time {direction}"]
-    if sort.field == RunSortField.DURATION:
-        return [f"attributes.start_time {direction}"]
-    return [f"attributes.start_time {direction}"]
+    # Fallback: pull the most recent runs and let the client-side pass
+    # produce the correct ordering for the requested field.
+    return ["attributes.start_time DESC"]
+
+
+def _requires_client_sort(field: RunSortField) -> bool:
+    """Return True if MLflow cannot natively order by ``field``."""
+
+    return field != RunSortField.START_TIME
 
 
 def _sort_runs(runs: list[RunHistoryItem], sort: RunHistorySort) -> list[RunHistoryItem]:

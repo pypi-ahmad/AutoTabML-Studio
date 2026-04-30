@@ -19,9 +19,9 @@ from app.backends import build_backend
 from app.config.enums import ExecutionBackend
 from app.notebooks.generator import generate_job_notebook
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_cache import get_metadata_store
 from app.pages.ui_labels import format_enum_value
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 from app.storage.models import AppJobType
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ def _run_async(coro):  # noqa: ANN001
 
 def render_notebook_page() -> None:
     state = get_or_init_state()
-    metadata_store = build_metadata_store(state.settings)
+    metadata_store = get_metadata_store(state.settings)
     st.title("📓 Notebooks")
     st.caption("Auto-generated Jupyter notebooks for every job you’ve run — ready to download, share, or open in Google Colab.")
 
