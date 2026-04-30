@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import logging
+
 import pandas as pd
 
+from app.errors import log_exception
 from app.modeling.pycaret.setup_runner import build_pycaret_experiment
 from app.prediction.errors import PredictionScoringError
 from app.prediction.schemas import LoadedModel, PredictionTaskType
 from app.prediction.selectors import to_experiment_task_type
+
+logger = logging.getLogger(__name__)
 
 _PREDICTION_COLUMN_CANDIDATES = ["prediction_label", "prediction", "predictions", "label"]
 _SCORE_COLUMN_CANDIDATES = ["prediction_score", "score", "probability", "confidence"]
@@ -62,7 +67,13 @@ def _score_with_pycaret(
             data=dataframe.copy(),
             verbose=False,
         )
-    except Exception as exc:
+    except (ImportError, AttributeError, ValueError, RuntimeError) as exc:
+        log_exception(
+            logger,
+            exc,
+            operation="prediction.score_pycaret",
+            context={"task_type": loaded_model.task_type.value},
+        )
         raise PredictionScoringError(f"PyCaret prediction failed: {exc}") from exc
 
     if not isinstance(raw_scored, pd.DataFrame):
@@ -91,7 +102,13 @@ def _score_with_predict_api(
 
     try:
         raw_predictions = model.predict(dataframe.copy())
-    except Exception as exc:
+    except (AttributeError, ValueError, RuntimeError, TypeError) as exc:
+        log_exception(
+            logger,
+            exc,
+            operation="prediction.score_predict",
+            context={"scorer_kind": loaded_model.scorer_kind},
+        )
         raise PredictionScoringError(f"Prediction failed: {exc}") from exc
 
     prediction_series, score_series = _normalize_predict_output(
@@ -128,8 +145,15 @@ def _normalize_predict_output(
 
     try:
         prediction_series = pd.Series(raw_predictions, index=dataframe.index)
-    except Exception:
+    except (TypeError, ValueError) as exc:
         if len(dataframe.index) != 1:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.normalize_predict_output",
+                level=logging.DEBUG,
+                context={"row_count": len(dataframe.index)},
+            )
             raise PredictionScoringError(
                 "Model returned a scalar prediction for a multi-row batch, which cannot be normalized."
             )
@@ -175,7 +199,13 @@ def _extract_probability_scores(
 ) -> pd.Series | None:
     try:
         raw_scores = model.predict_proba(dataframe.copy())
-    except Exception:
+    except (AttributeError, ValueError, RuntimeError, TypeError) as exc:
+        log_exception(
+            logger,
+            exc,
+            operation="prediction.predict_proba",
+            level=logging.DEBUG,
+        )
         return None
 
     score_frame = pd.DataFrame(raw_scores, index=dataframe.index)

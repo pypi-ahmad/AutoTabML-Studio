@@ -12,6 +12,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from app.ingestion.types import IngestionSourceType
 
 
+DEFAULT_LOCAL_MAX_FILE_BYTES = 200 * 1024 * 1024
+
+
 class DatasetInputSpec(BaseModel):
     """Canonical input contract for all supported ingestion paths."""
 
@@ -23,6 +26,11 @@ class DatasetInputSpec(BaseModel):
     dataframe: pd.DataFrame | None = None
     delimiter: str | None = None
     encoding: str = "utf-8"
+    local_max_file_bytes: int | None = Field(default=DEFAULT_LOCAL_MAX_FILE_BYTES, gt=0)
+    url_timeout_seconds: float | None = Field(default=None, gt=0)
+    url_max_download_bytes: int | None = Field(default=None, gt=0)
+    url_max_redirects: int | None = Field(default=None, ge=0, le=3)
+    url_max_retries: int | None = Field(default=None, ge=0, le=3)
     excel_sheet: str | int | None = None
     html_table_index: int = 0
     html_match_text: str | None = None

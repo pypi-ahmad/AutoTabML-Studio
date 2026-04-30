@@ -89,7 +89,7 @@ def write_prediction_artifacts(
             metadata_json_path=metadata_json_path,
             markdown_summary_path=markdown_path,
         )
-    except Exception as exc:
+    except (OSError, ValueError, TypeError) as exc:
         raise PredictionArtifactError(f"Could not write prediction artifacts: {exc}") from exc
 
 

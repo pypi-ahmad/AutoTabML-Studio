@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import io
 import logging
@@ -10,6 +11,7 @@ from typing import Any
 
 import pandas as pd
 
+from app.errors import log_and_wrap
 from app.ingestion.base import BaseLoader
 from app.ingestion.errors import IngestionError, RemoteAccessError
 from app.ingestion.schemas import DatasetInputSpec
@@ -31,6 +33,22 @@ def list_available_uci_datasets(
     with contextlib.redirect_stdout(buffer):
         ucimlrepo.list_available_datasets(filter=filter, search=search, area=area)
     return _parse_catalog_output(buffer.getvalue())
+
+
+async def list_available_uci_datasets_async(
+    *,
+    filter: str | None = None,
+    search: str | None = None,
+    area: str | None = None,
+) -> list[dict[str, Any]]:
+    """Async counterpart of :func:`list_available_uci_datasets`."""
+
+    return await asyncio.to_thread(
+        list_available_uci_datasets,
+        filter=filter,
+        search=search,
+        area=area,
+    )
 
 
 def _import_ucimlrepo():
@@ -130,11 +148,16 @@ class UCIRepoLoader(BaseLoader):
                 dataset = ucimlrepo.fetch_ucirepo(id=uci_id)
             else:
                 dataset = ucimlrepo.fetch_ucirepo(name=uci_name)
-        except Exception as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             identifier = f"id={uci_id}" if uci_id is not None else f"name='{uci_name}'"
-            raise RemoteAccessError(
-                f"Failed to fetch UCI dataset ({identifier}): {exc}"
-            ) from exc
+            log_and_wrap(
+                logger,
+                exc,
+                operation="ingestion.fetch_uci_dataset",
+                wrap_with=RemoteAccessError,
+                message=f"Failed to fetch UCI dataset ({identifier}): {exc}",
+                context={"identifier": identifier},
+            )
 
         ids = _to_dataframe(getattr(dataset.data, "ids", None))
         features = _to_dataframe(getattr(dataset.data, "features", None))

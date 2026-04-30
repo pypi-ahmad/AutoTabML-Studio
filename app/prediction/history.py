@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from pydantic import ValidationError
+
 from app.prediction.errors import PredictionHistoryError
 from app.prediction.schemas import PredictionHistoryEntry
 
@@ -23,7 +25,7 @@ class PredictionHistoryStore:
             with self._history_path.open("a", encoding="utf-8") as handle:
                 handle.write(entry.model_dump_json())
                 handle.write("\n")
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             raise PredictionHistoryError(f"Could not write prediction history: {exc}") from exc
 
     def list_recent(self, limit: int = 20) -> list[PredictionHistoryEntry]:
@@ -42,7 +44,7 @@ class PredictionHistoryStore:
                 if not cleaned:
                     continue
                 entries.append(PredictionHistoryEntry.model_validate(json.loads(cleaned)))
-        except Exception as exc:
+        except (OSError, ValueError, json.JSONDecodeError, ValidationError) as exc:
             raise PredictionHistoryError(f"Could not read prediction history: {exc}") from exc
 
         entries.sort(key=lambda item: item.timestamp, reverse=True)
