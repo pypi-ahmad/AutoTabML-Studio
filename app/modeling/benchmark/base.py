@@ -7,10 +7,11 @@ import abc
 import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
+from app.modeling.base import BaseService
 from app.modeling.benchmark.schemas import BenchmarkConfig, BenchmarkResultBundle
 
 
-class BaseBenchmarkService(abc.ABC):
+class BaseBenchmarkService(BaseService, abc.ABC):
     """Interface implemented by all benchmark service backends."""
 
     @abc.abstractmethod

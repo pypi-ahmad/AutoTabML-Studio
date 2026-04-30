@@ -19,6 +19,8 @@ from typing import Any
 
 import pandas as pd
 
+from app.errors import log_exception
+from app.validation.errors import ValidationError as AppValidationError
 from app.validation.gx_builders import ExpectationSpec, build_expectations
 from app.validation.gx_context import get_ephemeral_context, is_gx_available
 from app.validation.schemas import CheckResult, CheckSeverity, ValidationRuleConfig
@@ -45,8 +47,13 @@ def run_gx_validation(
 
     try:
         return _execute_specs(df, specs)
-    except Exception as exc:
-        logger.warning("GX validation failed - falling back to app-only checks: %s", exc)
+    except (AppValidationError, AttributeError, KeyError, RuntimeError, TypeError, ValueError) as exc:
+        log_exception(
+            logger,
+            exc,
+            operation="validation.run_gx",
+            context={"column_count": len(column_names), "rule_count": len(specs)},
+        )
         return [
             CheckResult(
                 check_name="gx_execution",
@@ -138,8 +145,8 @@ def _convert_results(results: Any) -> list[CheckResult]:
                     source="gx",
                 )
             )
-    except Exception as exc:
-        logger.warning("Error converting GX results: %s", exc)
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        log_exception(logger, exc, operation="validation.convert_gx_results")
         checks.append(
             CheckResult(
                 check_name="gx_result_parse",

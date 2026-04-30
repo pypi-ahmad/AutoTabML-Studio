@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 from typing import Any
 
+from app.errors import log_exception
 from app.gpu import resolve_use_gpu
 from app.modeling.pycaret.errors import PyCaretDependencyError, UnsupportedExperimentTaskError
 from app.modeling.pycaret.schemas import ExperimentConfig, ExperimentTaskType, MLflowTrackingMode
+
+logger = logging.getLogger(__name__)
 
 
 def _probe_pycaret_import_error() -> Exception | None:
@@ -18,6 +22,7 @@ def _probe_pycaret_import_error() -> Exception | None:
         import pycaret.regression  # noqa: F401
         return None
     except Exception as exc:  # pragma: no cover - exercised through public helpers
+        log_exception(logger, exc, operation="pycaret.probe_import", level=logging.DEBUG)
         return exc
 
 

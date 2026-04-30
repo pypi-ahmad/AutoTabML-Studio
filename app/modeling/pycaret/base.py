@@ -7,10 +7,11 @@ import abc
 import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
+from app.modeling.base import BaseService
 from app.modeling.pycaret.schemas import ExperimentConfig, ExperimentResultBundle, ModelSelectionSpec
 
 
-class BaseExperimentService(abc.ABC):
+class BaseExperimentService(BaseService, abc.ABC):
     """Interface implemented by all experiment backends."""
 
     @abc.abstractmethod

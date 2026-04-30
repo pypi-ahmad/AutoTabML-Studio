@@ -31,8 +31,8 @@ def cuda_device_name() -> str | None:
 
         if torch.cuda.is_available():
             return torch.cuda.get_device_name(0)
-    except Exception:  # pragma: no cover
-        pass
+    except (ImportError, AttributeError, RuntimeError):  # pragma: no cover - optional dep
+        logger.debug("cuda_device_name probe failed", exc_info=True)
     return None
 
 
@@ -82,7 +82,8 @@ def _torch_cuda_available() -> bool | None:
         import torch
 
         return torch.cuda.is_available()
-    except Exception:
+    except (ImportError, AttributeError, RuntimeError):
+        logger.debug("torch CUDA availability probe failed", exc_info=True)
         return None
 
 
@@ -91,7 +92,8 @@ def _torch_device_count() -> int:
         import torch
 
         return torch.cuda.device_count()
-    except Exception:
+    except (ImportError, AttributeError, RuntimeError):
+        logger.debug("torch CUDA device-count probe failed", exc_info=True)
         return 0
 
 
@@ -120,7 +122,7 @@ def _driver_probe() -> bool:
             result = lib.cuInit(0)
             if result != 0:
                 continue
-        except Exception:
+        except (OSError, AttributeError):
             continue
 
         # Query actual device count to confirm at least one GPU is present.
@@ -129,7 +131,7 @@ def _driver_probe() -> bool:
             result = lib.cuDeviceGetCount(ctypes.byref(count))
             if result == 0 and count.value > 0:
                 return True
-        except Exception:
+        except (OSError, AttributeError):
             continue
 
     return False

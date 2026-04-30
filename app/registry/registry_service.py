@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from app.registry.errors import ModelNotFoundError, PromotionError
+import logging
+
+from app.errors import log_exception
+from app.registry.errors import ModelNotFoundError, PromotionError, RegistryError
 from app.registry.schemas import (
     PromotionAction,
     PromotionRequest,
@@ -11,6 +14,9 @@ from app.registry.schemas import (
     RegistryVersionSummary,
 )
 from app.tracking import mlflow_query
+from app.tracking.errors import TrackingError
+
+logger = logging.getLogger(__name__)
 
 
 class RegistryService:
@@ -130,7 +136,13 @@ class RegistryService:
                 tracking_uri=self._tracking_uri,
                 registry_uri=self._registry_uri,
             )
-        except Exception as exc:
+        except (RegistryError, TrackingError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="registry.promote.lookup_version",
+                context={"model": request.model_name, "version": request.version},
+            )
             raise PromotionError(
                 f"Cannot promote: version '{request.version}' of model "
                 f"'{request.model_name}' not found: {exc}"
@@ -138,7 +150,13 @@ class RegistryService:
 
         try:
             model = self.get_model(request.model_name)
-        except Exception:
+        except (RegistryError, TrackingError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="registry.promote.get_model",
+                context={"model": request.model_name},
+            )
             model = RegistryModelSummary(name=request.model_name)
             warnings.append(
                 "Could not inspect existing alias state; status tags may need manual cleanup."
@@ -149,7 +167,13 @@ class RegistryService:
                 version.version: version
                 for version in self.list_versions(request.model_name)
             }
-        except Exception:
+        except (RegistryError, TrackingError) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="registry.promote.list_versions",
+                context={"model": request.model_name},
+            )
             existing_versions = {}
             warnings.append(
                 "Could not inspect existing version tags; status tags may need manual cleanup."

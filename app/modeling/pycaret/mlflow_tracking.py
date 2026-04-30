@@ -7,6 +7,12 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from app.modeling.base import (
+    BaseTracker,
+    get_mlflow_module as _base_get_mlflow_module,
+    is_mlflow_available as _base_is_mlflow_available,
+    mlflow_exception_types as _base_mlflow_exception_types,
+)
 from app.modeling.pycaret.schemas import ExperimentArtifactBundle, ExperimentResultBundle
 
 logger = logging.getLogger(__name__)
@@ -15,32 +21,19 @@ logger = logging.getLogger(__name__)
 def is_mlflow_available() -> bool:
     """Return True when mlflow is importable."""
 
-    try:
-        import mlflow  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    return _base_is_mlflow_available()
 
 
 def _get_mlflow_module() -> Any:
-    import mlflow
-
-    return mlflow
+    return _base_get_mlflow_module()
 
 
-class MLflowExperimentTracker:
+def _mlflow_exception_types(mlflow_module: Any) -> tuple[type[BaseException], ...]:
+    return _base_mlflow_exception_types(mlflow_module)
+
+
+class MLflowExperimentTracker(BaseTracker[ExperimentResultBundle]):
     """Lightweight explicit MLflow tracker for experiment runs."""
-
-    def __init__(
-        self,
-        experiment_name: str,
-        *,
-        tracking_uri: str | None = None,
-        registry_uri: str | None = None,
-    ) -> None:
-        self._experiment_name = experiment_name
-        self._tracking_uri = tracking_uri
-        self._registry_uri = registry_uri
 
     def log_experiment_bundle(
         self,
@@ -48,32 +41,47 @@ class MLflowExperimentTracker:
         *,
         existing_run_id: str | None = None,
     ) -> tuple[str | None, list[str]]:
-        """Log experiment params, metrics, and artifacts to MLflow."""
+        """Backward-compatible experiment tracker entrypoint."""
 
-        warnings: list[str] = []
-        if not is_mlflow_available():
-            warnings.append("MLflow tracking skipped because mlflow is not installed.")
-            return None, warnings
+        return self.log_bundle(bundle, existing_run_id=existing_run_id)
 
-        mlflow = _get_mlflow_module()
-        try:
-            if self._tracking_uri:
-                mlflow.set_tracking_uri(self._tracking_uri)
-            if self._registry_uri:
-                mlflow.set_registry_uri(self._registry_uri)
-            mlflow.set_experiment(self._experiment_name)
-            with mlflow.start_run(
-                run_name=_build_run_name(bundle),
-                run_id=existing_run_id,
-            ) as run:
-                mlflow.log_params(_build_params(bundle))
-                mlflow.log_metrics(_build_metrics(bundle))
-                _log_artifacts(mlflow, bundle.artifacts)
-                return run.info.run_id, warnings
-        except Exception as exc:  # pragma: no cover - exercised through tests
-            logger.warning("MLflow experiment tracking failed: %s", exc)
-            warnings.append(f"MLflow tracking failed: {exc}")
-            return existing_run_id, warnings
+    def _is_mlflow_available(self) -> bool:
+        return is_mlflow_available()
+
+    def _get_mlflow_module(self) -> Any:
+        return _get_mlflow_module()
+
+    def _operation_name(self) -> str:
+        return "pycaret.mlflow_tracking"
+
+    def _build_run_name(self, bundle: ExperimentResultBundle) -> str:
+        return _build_run_name(bundle)
+
+    def _build_params(self, bundle: ExperimentResultBundle) -> dict[str, Any]:
+        return _build_params(bundle)
+
+    def _build_metrics(self, bundle: ExperimentResultBundle) -> dict[str, float]:
+        return _build_metrics(bundle)
+
+    def _artifact_paths(self, bundle: ExperimentResultBundle) -> list[Path | None]:
+        artifacts = bundle.artifacts
+        if artifacts is None:
+            return []
+
+        paths: list[Path | None] = [
+            artifacts.setup_json_path,
+            artifacts.metrics_csv_path,
+            artifacts.metrics_json_path,
+            artifacts.compare_csv_path,
+            artifacts.compare_json_path,
+            artifacts.tune_json_path,
+            artifacts.summary_json_path,
+            artifacts.markdown_summary_path,
+            artifacts.saved_model_metadata_path,
+            artifacts.experiment_snapshot_metadata_path,
+        ]
+        paths.extend(plot.path for plot in artifacts.plot_artifacts)
+        return paths
 
 
 def _build_run_name(bundle: ExperimentResultBundle) -> str:

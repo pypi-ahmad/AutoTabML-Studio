@@ -19,6 +19,14 @@ from app.providers.catalog_service import (
     get_allowed_providers,
     resolve_default_model,
 )
+from app.pages.ui_cache import (
+    DATASET_LOAD_TTL_SECONDS,
+    MLFLOW_QUERY_TTL_SECONDS,
+    invalidate_all_ui_caches,
+    invalidate_dataset_cache,
+    invalidate_mlflow_query_cache,
+    invalidate_service_cache,
+)
 from app.security.masking import (
     MSG_DEFAULT_MODEL_UNAVAILABLE,
     MSG_EMPTY_OLLAMA_CATALOG,
@@ -71,6 +79,7 @@ def render_settings_page() -> None:
         _section_credentials(state)
         _section_models(state)
         _section_mlflow_descriptions(state)
+        _section_cache_controls()
         _section_save(state, key_suffix="_advanced")
 
 
@@ -394,6 +403,32 @@ def _section_mlflow_descriptions(state: RuntimeState) -> None:
                 )
     else:
         state.settings.llm_descriptions_enabled = False
+
+
+def _section_cache_controls() -> None:
+    st.divider()
+    st.subheader("Performance Cache")
+    st.caption(
+        f"MLflow query data is cached for **{MLFLOW_QUERY_TTL_SECONDS} seconds** and dataset loads for **{DATASET_LOAD_TTL_SECONDS // 60} minutes**. "
+        "Use these controls to force-refresh UI caches when source files or tracking state change outside the current page."
+    )
+
+    cache_col1, cache_col2, cache_col3 = st.columns(3)
+    if cache_col1.button("Clear MLflow Cache", key="clear_mlflow_cache"):
+        invalidate_mlflow_query_cache()
+        st.success("Cleared cached MLflow query data.")
+
+    if cache_col2.button("Clear Dataset Cache", key="clear_dataset_cache"):
+        invalidate_dataset_cache()
+        st.success("Cleared cached dataset loads.")
+
+    if cache_col3.button("Clear Service Cache", key="clear_service_cache"):
+        invalidate_service_cache()
+        st.success("Cleared cached UI services and metadata resources.")
+
+    if st.button("Clear All UI Caches", key="clear_all_ui_caches"):
+        invalidate_all_ui_caches()
+        st.success("Cleared all Streamlit UI caches.")
 
 
 def _section_save(state: RuntimeState, *, key_suffix: str = "") -> None:

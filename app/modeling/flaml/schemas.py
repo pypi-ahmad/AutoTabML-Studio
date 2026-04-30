@@ -117,6 +117,9 @@ class FlamlSavedModelMetadata(BaseModel):
     metric: str | None = None
     search_duration_seconds: float = 0.0
     framework: str = "flaml"
+    artifact_format: str | None = None
+    trusted_source: str | None = None
+    model_sha256: str | None = None
 
 
 class FlamlArtifactBundle(BaseModel):

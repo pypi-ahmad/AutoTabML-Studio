@@ -16,6 +16,7 @@ import pandas as pd
 
 from app.config.models import ArtifactSettings
 from app.path_utils import safe_artifact_stem
+from app.security.safe_csv import dataframe_to_safe_csv
 
 
 class ArtifactKind(str, Enum):
@@ -120,11 +121,7 @@ class LocalArtifactManager:
         return self.write_text(path, json.dumps(payload, indent=2, default=str))
 
     def write_dataframe_csv(self, path: Path, dataframe: pd.DataFrame, *, index: bool = False) -> Path:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        partial_path = self._partial_path_for(path)
-        dataframe.to_csv(partial_path, index=index)
-        partial_path.replace(path)
-        return path
+        return self.write_text(path, dataframe_to_safe_csv(dataframe, index=index))
 
     def cleanup_stale_temp_artifacts(self, older_than_hours: int | None = None) -> list[Path]:
         threshold_hours = older_than_hours or self._settings.temp_retention_hours

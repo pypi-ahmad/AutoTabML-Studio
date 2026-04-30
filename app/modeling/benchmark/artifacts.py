@@ -6,10 +6,66 @@ import logging
 from pathlib import Path
 
 from app.artifacts import ArtifactKind, LocalArtifactManager
+from app.modeling.base import BaseArtifacts
 from app.modeling.benchmark.schemas import BenchmarkArtifactBundle, BenchmarkResultBundle
 from app.modeling.benchmark.summary import leaderboard_to_dataframe
 
 logger = logging.getLogger(__name__)
+
+
+class BenchmarkArtifactsWriter(BaseArtifacts[BenchmarkResultBundle, BenchmarkArtifactBundle]):
+    """Shared-path artifact writer for benchmark result bundles."""
+
+    artifact_kind = ArtifactKind.BENCHMARK
+    artifact_bundle_cls = BenchmarkArtifactBundle
+
+    def build(self) -> BenchmarkArtifactBundle:
+        raw_csv_path = self._artifact_path(label="benchmark_raw", suffix=".csv")
+        self._write_dataframe(raw_csv_path, self.bundle.raw_results, index=True)
+        self.artifacts.raw_results_csv_path = raw_csv_path
+
+        leaderboard_df = leaderboard_to_dataframe(self.bundle.leaderboard)
+
+        leaderboard_csv_path = self._artifact_path(label="benchmark_leaderboard", suffix=".csv")
+        self._write_dataframe(leaderboard_csv_path, leaderboard_df, index=False)
+        self.artifacts.leaderboard_csv_path = leaderboard_csv_path
+
+        leaderboard_json_path = self._artifact_path(label="benchmark_leaderboard", suffix=".json")
+        self._write_json(
+            leaderboard_json_path,
+            [row.model_dump(mode="json") for row in self.bundle.leaderboard],
+        )
+        self.artifacts.leaderboard_json_path = leaderboard_json_path
+
+        summary_json_path = self._artifact_path(label="benchmark_summary", suffix=".json")
+        self._write_text(summary_json_path, self.bundle.summary.model_dump_json(indent=2))
+        self.artifacts.summary_json_path = summary_json_path
+
+        markdown_path = self._artifact_path(label="benchmark_summary", suffix=".md")
+        self._write_text(markdown_path, _render_markdown(self.bundle))
+        self.artifacts.markdown_summary_path = markdown_path
+
+        score_chart_path = _write_score_chart(
+            self.manager,
+            self.bundle,
+            self.artifacts_dir,
+            self.bundle.dataset_name,
+            self.bundle.summary.run_timestamp,
+        )
+        if score_chart_path is not None:
+            self.artifacts.score_chart_path = score_chart_path
+
+        time_chart_path = _write_time_chart(
+            self.manager,
+            self.bundle,
+            self.artifacts_dir,
+            self.bundle.dataset_name,
+            self.bundle.summary.run_timestamp,
+        )
+        if time_chart_path is not None:
+            self.artifacts.training_time_chart_path = time_chart_path
+
+        return self.artifacts
 
 
 def write_benchmark_artifacts(
@@ -18,75 +74,7 @@ def write_benchmark_artifacts(
 ) -> BenchmarkArtifactBundle:
     """Write benchmark artifacts to disk and return their paths."""
 
-    manager = LocalArtifactManager()
-    artifact_bundle = BenchmarkArtifactBundle()
-
-    raw_csv_path = manager.build_artifact_path(
-        kind=ArtifactKind.BENCHMARK,
-        stem=bundle.dataset_name,
-        label="benchmark_raw",
-        suffix=".csv",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_dataframe_csv(raw_csv_path, bundle.raw_results, index=True)
-    artifact_bundle.raw_results_csv_path = raw_csv_path
-
-    leaderboard_df = leaderboard_to_dataframe(bundle.leaderboard)
-
-    leaderboard_csv_path = manager.build_artifact_path(
-        kind=ArtifactKind.BENCHMARK,
-        stem=bundle.dataset_name,
-        label="benchmark_leaderboard",
-        suffix=".csv",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_dataframe_csv(leaderboard_csv_path, leaderboard_df, index=False)
-    artifact_bundle.leaderboard_csv_path = leaderboard_csv_path
-
-    leaderboard_json_path = manager.build_artifact_path(
-        kind=ArtifactKind.BENCHMARK,
-        stem=bundle.dataset_name,
-        label="benchmark_leaderboard",
-        suffix=".json",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_json(leaderboard_json_path, [row.model_dump(mode="json") for row in bundle.leaderboard])
-    artifact_bundle.leaderboard_json_path = leaderboard_json_path
-
-    summary_json_path = manager.build_artifact_path(
-        kind=ArtifactKind.BENCHMARK,
-        stem=bundle.dataset_name,
-        label="benchmark_summary",
-        suffix=".json",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_text(summary_json_path, bundle.summary.model_dump_json(indent=2))
-    artifact_bundle.summary_json_path = summary_json_path
-
-    markdown_path = manager.build_artifact_path(
-        kind=ArtifactKind.BENCHMARK,
-        stem=bundle.dataset_name,
-        label="benchmark_summary",
-        suffix=".md",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_text(markdown_path, _render_markdown(bundle))
-    artifact_bundle.markdown_summary_path = markdown_path
-
-    score_chart_path = _write_score_chart(bundle, artifacts_dir, bundle.dataset_name, bundle.summary.run_timestamp)
-    if score_chart_path is not None:
-        artifact_bundle.score_chart_path = score_chart_path
-
-    time_chart_path = _write_time_chart(bundle, artifacts_dir, bundle.dataset_name, bundle.summary.run_timestamp)
-    if time_chart_path is not None:
-        artifact_bundle.training_time_chart_path = time_chart_path
-
-    return artifact_bundle
+    return BenchmarkArtifactsWriter(bundle, artifacts_dir).build()
 
 
 def _render_markdown(bundle: BenchmarkResultBundle) -> str:
@@ -132,6 +120,7 @@ def _render_markdown(bundle: BenchmarkResultBundle) -> str:
 
 
 def _write_score_chart(
+    manager: LocalArtifactManager,
     bundle: BenchmarkResultBundle,
     artifacts_dir: Path,
     dataset_name: str | None,
@@ -145,7 +134,6 @@ def _write_score_chart(
     except ImportError:
         return None
 
-    manager = LocalArtifactManager()
     chart_path = manager.build_artifact_path(
         kind=ArtifactKind.BENCHMARK,
         stem=dataset_name,
@@ -166,6 +154,7 @@ def _write_score_chart(
 
 
 def _write_time_chart(
+    manager: LocalArtifactManager,
     bundle: BenchmarkResultBundle,
     artifacts_dir: Path,
     dataset_name: str | None,
@@ -180,7 +169,6 @@ def _write_time_chart(
     except ImportError:
         return None
 
-    manager = LocalArtifactManager()
     chart_path = manager.build_artifact_path(
         kind=ArtifactKind.BENCHMARK,
         stem=dataset_name,

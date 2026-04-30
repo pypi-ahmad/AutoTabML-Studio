@@ -7,8 +7,90 @@ from pathlib import Path
 import pandas as pd
 
 from app.artifacts import ArtifactKind, LocalArtifactManager
+from app.modeling.base import BaseArtifacts
 from app.modeling.pycaret.schemas import ExperimentArtifactBundle, ExperimentResultBundle
 from app.modeling.pycaret.summary import leaderboard_to_dataframe
+from app.security.trusted_artifacts import write_checksum_file
+
+
+class ExperimentArtifactsWriter(BaseArtifacts[ExperimentResultBundle, ExperimentArtifactBundle]):
+    """Shared-path artifact writer for experiment result bundles."""
+
+    artifact_kind = ArtifactKind.EXPERIMENT
+    artifact_bundle_cls = ExperimentArtifactBundle
+
+    def build(self) -> ExperimentArtifactBundle:
+        self.artifacts.plot_artifacts = list(self.bundle.evaluation_plots)
+        if self.bundle.saved_model_artifacts:
+            self.artifacts.saved_model_metadata_paths = [
+                artifact.metadata_path
+                for artifact in self.bundle.saved_model_artifacts
+                if artifact.metadata_path is not None
+            ]
+
+        setup_json_path = self._artifact_path(label="experiment_setup", suffix=".json")
+        self._write_text(setup_json_path, self.bundle.summary.setup_config.model_dump_json(indent=2))
+        self.artifacts.setup_json_path = setup_json_path
+
+        if self.bundle.available_metrics:
+            metrics_df = pd.DataFrame([row.model_dump(mode="json") for row in self.bundle.available_metrics])
+            metrics_csv_path = self._artifact_path(label="experiment_metrics", suffix=".csv")
+            self._write_dataframe(metrics_csv_path, metrics_df, index=False)
+            self.artifacts.metrics_csv_path = metrics_csv_path
+
+            metrics_json_path = self._artifact_path(label="experiment_metrics", suffix=".json")
+            self._write_text(metrics_json_path, metrics_df.to_json(orient="records", indent=2))
+            self.artifacts.metrics_json_path = metrics_json_path
+
+        if self.bundle.compare_leaderboard:
+            compare_df = leaderboard_to_dataframe(self.bundle.compare_leaderboard)
+            compare_csv_path = self._artifact_path(label="experiment_compare", suffix=".csv")
+            self._write_dataframe(compare_csv_path, compare_df, index=False)
+            self.artifacts.compare_csv_path = compare_csv_path
+
+            compare_json_path = self._artifact_path(label="experiment_compare", suffix=".json")
+            self._write_json(
+                compare_json_path,
+                [row.model_dump(mode="json") for row in self.bundle.compare_leaderboard],
+            )
+            self.artifacts.compare_json_path = compare_json_path
+
+        if self.bundle.tuned_result is not None:
+            tune_json_path = self._artifact_path(label="experiment_tune", suffix=".json")
+            self._write_text(tune_json_path, self.bundle.tuned_result.model_dump_json(indent=2))
+            self.artifacts.tune_json_path = tune_json_path
+
+        summary_json_path = self._artifact_path(label="experiment_summary", suffix=".json")
+        self._write_text(summary_json_path, self.bundle.summary.model_dump_json(indent=2))
+        self.artifacts.summary_json_path = summary_json_path
+
+        markdown_summary_path = self._artifact_path(label="experiment_summary", suffix=".md")
+        self._write_text(markdown_summary_path, _render_markdown(self.bundle))
+        self.artifacts.markdown_summary_path = markdown_summary_path
+
+        if self.bundle.saved_model_metadata is not None:
+            model_metadata_path = self._artifact_path(label="saved_model_metadata", suffix=".json")
+            self._write_text(model_metadata_path, self.bundle.saved_model_metadata.model_dump_json(indent=2))
+            write_checksum_file(model_metadata_path)
+            self.artifacts.saved_model_metadata_path = model_metadata_path
+            if model_metadata_path not in self.artifacts.saved_model_metadata_paths:
+                self.artifacts.saved_model_metadata_paths.append(model_metadata_path)
+
+            if self.bundle.saved_model_metadata.experiment_snapshot_path is not None:
+                snapshot_metadata_path = self._artifact_path(
+                    label="experiment_snapshot_metadata",
+                    suffix=".json",
+                )
+                self._write_json(
+                    snapshot_metadata_path,
+                    {
+                        "snapshot_path": str(self.bundle.saved_model_metadata.experiment_snapshot_path),
+                        "includes_original_data": False,
+                    },
+                )
+                self.artifacts.experiment_snapshot_metadata_path = snapshot_metadata_path
+
+        return self.artifacts
 
 
 def write_experiment_artifacts(
@@ -17,141 +99,7 @@ def write_experiment_artifacts(
 ) -> ExperimentArtifactBundle:
     """Write experiment artifacts to disk and return their paths."""
 
-    manager = LocalArtifactManager()
-    artifact_bundle = ExperimentArtifactBundle(plot_artifacts=list(bundle.evaluation_plots))
-    if bundle.saved_model_artifacts:
-        artifact_bundle.saved_model_metadata_paths = [
-            artifact.metadata_path
-            for artifact in bundle.saved_model_artifacts
-            if artifact.metadata_path is not None
-        ]
-
-    setup_json_path = manager.build_artifact_path(
-        kind=ArtifactKind.EXPERIMENT,
-        stem=bundle.dataset_name,
-        label="experiment_setup",
-        suffix=".json",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_text(setup_json_path, bundle.summary.setup_config.model_dump_json(indent=2))
-    artifact_bundle.setup_json_path = setup_json_path
-
-    if bundle.available_metrics:
-        metrics_df = pd.DataFrame([row.model_dump(mode="json") for row in bundle.available_metrics])
-        metrics_csv_path = manager.build_artifact_path(
-            kind=ArtifactKind.EXPERIMENT,
-            stem=bundle.dataset_name,
-            label="experiment_metrics",
-            suffix=".csv",
-            timestamp=bundle.summary.run_timestamp,
-            output_dir=artifacts_dir,
-        )
-        manager.write_dataframe_csv(metrics_csv_path, metrics_df, index=False)
-        artifact_bundle.metrics_csv_path = metrics_csv_path
-
-        metrics_json_path = manager.build_artifact_path(
-            kind=ArtifactKind.EXPERIMENT,
-            stem=bundle.dataset_name,
-            label="experiment_metrics",
-            suffix=".json",
-            timestamp=bundle.summary.run_timestamp,
-            output_dir=artifacts_dir,
-        )
-        manager.write_text(metrics_json_path, metrics_df.to_json(orient="records", indent=2))
-        artifact_bundle.metrics_json_path = metrics_json_path
-
-    if bundle.compare_leaderboard:
-        compare_df = leaderboard_to_dataframe(bundle.compare_leaderboard)
-        compare_csv_path = manager.build_artifact_path(
-            kind=ArtifactKind.EXPERIMENT,
-            stem=bundle.dataset_name,
-            label="experiment_compare",
-            suffix=".csv",
-            timestamp=bundle.summary.run_timestamp,
-            output_dir=artifacts_dir,
-        )
-        manager.write_dataframe_csv(compare_csv_path, compare_df, index=False)
-        artifact_bundle.compare_csv_path = compare_csv_path
-
-        compare_json_path = manager.build_artifact_path(
-            kind=ArtifactKind.EXPERIMENT,
-            stem=bundle.dataset_name,
-            label="experiment_compare",
-            suffix=".json",
-            timestamp=bundle.summary.run_timestamp,
-            output_dir=artifacts_dir,
-        )
-        manager.write_json(compare_json_path, [row.model_dump(mode="json") for row in bundle.compare_leaderboard])
-        artifact_bundle.compare_json_path = compare_json_path
-
-    if bundle.tuned_result is not None:
-        tune_json_path = manager.build_artifact_path(
-            kind=ArtifactKind.EXPERIMENT,
-            stem=bundle.dataset_name,
-            label="experiment_tune",
-            suffix=".json",
-            timestamp=bundle.summary.run_timestamp,
-            output_dir=artifacts_dir,
-        )
-        manager.write_text(tune_json_path, bundle.tuned_result.model_dump_json(indent=2))
-        artifact_bundle.tune_json_path = tune_json_path
-
-    summary_json_path = manager.build_artifact_path(
-        kind=ArtifactKind.EXPERIMENT,
-        stem=bundle.dataset_name,
-        label="experiment_summary",
-        suffix=".json",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_text(summary_json_path, bundle.summary.model_dump_json(indent=2))
-    artifact_bundle.summary_json_path = summary_json_path
-
-    markdown_summary_path = manager.build_artifact_path(
-        kind=ArtifactKind.EXPERIMENT,
-        stem=bundle.dataset_name,
-        label="experiment_summary",
-        suffix=".md",
-        timestamp=bundle.summary.run_timestamp,
-        output_dir=artifacts_dir,
-    )
-    manager.write_text(markdown_summary_path, _render_markdown(bundle))
-    artifact_bundle.markdown_summary_path = markdown_summary_path
-
-    if bundle.saved_model_metadata is not None:
-        model_metadata_path = manager.build_artifact_path(
-            kind=ArtifactKind.EXPERIMENT,
-            stem=bundle.dataset_name,
-            label="saved_model_metadata",
-            suffix=".json",
-            timestamp=bundle.summary.run_timestamp,
-            output_dir=artifacts_dir,
-        )
-        manager.write_text(model_metadata_path, bundle.saved_model_metadata.model_dump_json(indent=2))
-        artifact_bundle.saved_model_metadata_path = model_metadata_path
-        if model_metadata_path not in artifact_bundle.saved_model_metadata_paths:
-            artifact_bundle.saved_model_metadata_paths.append(model_metadata_path)
-
-        if bundle.saved_model_metadata.experiment_snapshot_path is not None:
-            snapshot_metadata_path = manager.build_artifact_path(
-                kind=ArtifactKind.EXPERIMENT,
-                stem=bundle.dataset_name,
-                label="experiment_snapshot_metadata",
-                suffix=".json",
-                timestamp=bundle.summary.run_timestamp,
-                output_dir=artifacts_dir,
-            )
-            manager.write_json(
-                snapshot_metadata_path,
-                {
-                    "snapshot_path": str(bundle.saved_model_metadata.experiment_snapshot_path),
-                    "includes_original_data": False,
-                },
-            )
-            artifact_bundle.experiment_snapshot_metadata_path = snapshot_metadata_path
-
-    return artifact_bundle
+    return ExperimentArtifactsWriter(bundle, artifacts_dir).build()
 
 
 def _render_markdown(bundle: ExperimentResultBundle) -> str:

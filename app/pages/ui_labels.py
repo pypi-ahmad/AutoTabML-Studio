@@ -7,6 +7,8 @@ from typing import Any
 
 import streamlit as st
 
+from app.pages.ui_errors import log_ui_debug_exception
+
 # ── Technical key → business label ────────────────────────────────────
 
 _META_KEY_LABELS: dict[str, str] = {
@@ -291,7 +293,12 @@ def _format_trained_at(trained_at: str | None) -> str:
             months = delta.days // 30
             return f"{months} month{'s' if months != 1 else ''} ago"
         return dt.strftime("%b %d, %Y")
-    except Exception:
+    except Exception as exc:
+        log_ui_debug_exception(
+            exc,
+            operation="ui_labels.relative_trained_at_label",
+            context={"trained_at": trained_at},
+        )
         return trained_at[:10] if len(trained_at) >= 10 else trained_at
 
 

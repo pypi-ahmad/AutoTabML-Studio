@@ -110,6 +110,26 @@ class BenchmarkArtifactBundle(BaseModel):
     training_time_chart_path: Path | None = None
 
 
+class BenchmarkSavedModelMetadata(BaseModel):
+    """Metadata sidecar for a benchmark-saved local model."""
+
+    source: str = "benchmark"
+    model_name: str
+    task_type: BenchmarkTaskType
+    target_column: str
+    dataset_name: str | None = None
+    dataset_fingerprint: str | None = None
+    trained_at: str | None = None
+    feature_columns: list[str] = Field(default_factory=list)
+    split_test_size: float | None = None
+    split_random_state: int | None = None
+    model_path: Path
+    artifact_format: str | None = None
+    trusted_source: str | None = None
+    model_sha256: str | None = None
+    trusted_types: list[str] = Field(default_factory=list)
+
+
 class BenchmarkResultBundle(BaseModel):
     """Complete benchmark result package for UI, CLI, and tracking."""
 

@@ -37,13 +37,16 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
+import logging
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
 from app import APP_NAME, CLI_ENTRYPOINT, DIST_NAME, STREAMLIT_ENTRYPOINT, __version__
 from app.config.settings import load_settings, save_settings
+from app.errors import log_exception
 from app.gpu import cuda_summary
 from app.ingestion import DatasetInputSpec, IngestionSourceType, load_dataset
 from app.ingestion.errors import IngestionError
@@ -55,18 +58,34 @@ from app.security.masking import safe_error_message
 from app.startup import format_startup_issues, initialize_local_runtime
 from app.storage import BatchItemStatus, build_metadata_store, ensure_dataset_record
 
+logger = logging.getLogger(__name__)
 
-def _cli_error(exc: Exception) -> None:
+
+def _cli_error(exc: Exception, *, operation: str | None = None) -> None:
     """Print a redacted error message to stderr and exit."""
+    if operation is None:
+        caller = inspect.currentframe().f_back
+        caller_name = caller.f_code.co_name if caller is not None else "unknown"
+        operation = f"cli.{caller_name}"
+    log_exception(logger, exc, operation=operation)
     print(f"Error: {safe_error_message(exc)}", file=sys.stderr)
     sys.exit(1)
+
+
+def _print_local_model_trust_notice(args: argparse.Namespace) -> None:
+    if getattr(args, "model_source", None) != "local_saved_model":
+        return
+    print(
+        "Using local trusted-model loading: the model must have been saved by AutoTabML Studio with checksum sidecars and trusted metadata.",
+        file=sys.stderr,
+    )
 
 
 def _load_runtime_settings():  # noqa: ANN201
     try:
         return load_settings()
     except Exception as exc:
-        _cli_error(exc)
+        _cli_error(exc, operation="cli.load_settings")
 
 
 def _build_input_spec(locator: str, source_type: str | None = None) -> DatasetInputSpec:
@@ -596,6 +615,7 @@ def cmd_predict_single(args: argparse.Namespace) -> None:
     settings = _load_runtime_settings()
     _validate_prediction_source_requirements(args, settings)
     service = _build_prediction_service(settings)
+    _print_local_model_trust_notice(args)
 
     try:
         row_payload = _load_prediction_row_payload(args)
@@ -641,6 +661,7 @@ def cmd_predict_batch(args: argparse.Namespace) -> None:
     metadata_store = build_metadata_store(settings)
     _validate_prediction_source_requirements(args, settings)
     service = _build_prediction_service(settings)
+    _print_local_model_trust_notice(args)
 
     try:
         loaded, name = _load_cli_dataset(args.dataset, source_type=args.source_type)
@@ -1300,9 +1321,17 @@ def _add_prediction_model_source_args(parser: argparse.ArgumentParser) -> None:
         help="Prediction model source type",
     )
     parser.add_argument("--model-id", default=None, help="Local saved-model identifier or discovered model name")
-    parser.add_argument("--model-path", default=None, help="Explicit local saved-model path")
+    parser.add_argument(
+        "--model-path",
+        default=None,
+        help="Explicit path to a trusted AutoTabML-saved local model artifact inside the configured model directories",
+    )
     parser.add_argument("--model-uri", default=None, help="Explicit MLflow model URI")
-    parser.add_argument("--metadata-path", default=None, help="Optional saved-model metadata JSON path")
+    parser.add_argument(
+        "--metadata-path",
+        default=None,
+        help="Optional path to the checksum-backed metadata JSON sidecar for the same trusted local model",
+    )
     parser.add_argument(
         "--task-type",
         choices=["unknown", "classification", "regression"],
