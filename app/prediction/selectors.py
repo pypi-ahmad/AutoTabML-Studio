@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 
+from pydantic import ValidationError
+
+from app.errors import log_exception
 from app.modeling.pycaret.schemas import ExperimentTaskType, SavedModelMetadata
 from app.prediction.errors import ModelDiscoveryError
 from app.prediction.schemas import AvailableModelReference, ModelSourceType, PredictionTaskType
+from app.security.errors import TrustedArtifactError
+from app.security.trusted_artifacts import require_metadata_checksum, require_trusted_source, verify_local_artifact
+
+logger = logging.getLogger(__name__)
 
 _SAVED_MODEL_METADATA_GLOB = "*_saved_model_metadata_*.json"
 _FLAML_METADATA_GLOB = "*_flaml_saved_model_metadata_*.json"
@@ -19,12 +28,17 @@ def discover_local_saved_models(
     """Discover local saved models and optional metadata sidecars."""
 
     references_by_path: dict[str, tuple[SavedModelMetadata, Path]] = {}
+    trusted_metadata_dirs = _dedupe_paths(metadata_dirs + model_dirs)
 
-    for metadata_dir in metadata_dirs:
+    for metadata_dir in trusted_metadata_dirs:
         if not metadata_dir.exists():
             continue
         for metadata_path in metadata_dir.rglob(_SAVED_MODEL_METADATA_GLOB):
-            metadata = load_saved_model_metadata_file(metadata_path)
+            metadata = load_saved_model_metadata_file(
+                metadata_path,
+                metadata_roots=trusted_metadata_dirs,
+                model_roots=model_dirs,
+            )
             if metadata is None:
                 continue
             model_path = Path(metadata.model_path)
@@ -52,33 +66,17 @@ def discover_local_saved_models(
                 feature_columns=list(metadata.feature_columns),
                 metadata={
                     "target_column": metadata.target_column,
+                    "dataset_name": metadata.dataset_name,
                     "dataset_fingerprint": metadata.dataset_fingerprint,
                     "feature_dtypes": dict(metadata.feature_dtypes),
                     "target_dtype": metadata.target_dtype,
                     "model_only": metadata.model_only,
+                    "trained_at": metadata.trained_at,
+                    "artifact_format": metadata.artifact_format,
+                    "trusted_source": metadata.trusted_source,
                 },
             )
         )
-
-    for model_dir in model_dirs:
-        if not model_dir.exists():
-            continue
-        for model_path in model_dir.rglob("*.pkl"):
-            key = _path_key(model_path)
-            if key in known_paths:
-                continue
-            references.append(
-                AvailableModelReference(
-                    source_type=ModelSourceType.LOCAL_SAVED_MODEL,
-                    display_name=model_path.stem,
-                    model_identifier=model_path.stem,
-                    load_reference=str(model_path),
-                    task_type=PredictionTaskType.UNKNOWN,
-                    description="Local saved PyCaret model without saved metadata.",
-                    model_path=model_path,
-                    metadata={"metadata_available": False},
-                )
-            )
 
     return sorted(references, key=lambda item: (item.display_name.lower(), item.load_reference.lower()))
 
@@ -117,28 +115,47 @@ def resolve_local_model_reference(
             f"Model identifier '{candidate}' matched multiple local saved models. Use an explicit path."
         )
 
-    if path.exists() or path.with_suffix(".pkl").exists():
-        resolved_path = path if path.exists() else path.with_suffix(".pkl")
-        return AvailableModelReference(
-            source_type=ModelSourceType.LOCAL_SAVED_MODEL,
-            display_name=resolved_path.stem,
-            model_identifier=resolved_path.stem,
-            load_reference=str(resolved_path),
-            task_type=PredictionTaskType.UNKNOWN,
-            description="Local saved PyCaret model resolved directly from path.",
-            model_path=resolved_path,
-            metadata={"metadata_available": False},
+    if path.exists() or path.with_suffix(".pkl").exists() or path.with_suffix(".skops").exists():
+        raise ModelDiscoveryError(
+            "Local model paths must resolve to a trusted saved model discovered from checksum-backed metadata. "
+            "Re-save the model from within AutoTabML Studio before loading it for prediction."
         )
 
     raise ModelDiscoveryError(f"Could not resolve local saved model '{candidate}'.")
 
 
-def load_saved_model_metadata_file(path: Path) -> SavedModelMetadata | None:
+def load_saved_model_metadata_file(
+    path: Path,
+    *,
+    metadata_roots: list[Path],
+    model_roots: list[Path],
+    raise_on_error: bool = False,
+) -> SavedModelMetadata | None:
     """Parse a saved-model metadata file, returning None when invalid."""
 
     try:
-        return SavedModelMetadata.model_validate_json(path.read_text(encoding="utf-8"))
-    except Exception:
+        verified_metadata = verify_local_artifact(path, trusted_roots=metadata_roots, label="model metadata")
+        metadata = SavedModelMetadata.model_validate_json(verified_metadata.path.read_text(encoding="utf-8"))
+        payload = metadata.model_dump(mode="json")
+        require_trusted_source(payload)
+        model_sha256 = require_metadata_checksum(payload)
+        verified_model = verify_local_artifact(
+            metadata.model_path,
+            trusted_roots=model_roots,
+            expected_sha256=model_sha256,
+            label="model artifact",
+        )
+        return metadata.model_copy(update={"model_path": verified_model.path})
+    except (TrustedArtifactError, ValidationError, OSError, ValueError, json.JSONDecodeError) as exc:
+        if raise_on_error:
+            raise
+        log_exception(
+            logger,
+            exc,
+            operation="prediction.load_saved_model_metadata",
+            level=logging.DEBUG,
+            context={"metadata_path": str(path)},
+        )
         return None
 
 
@@ -233,12 +250,16 @@ def discover_flaml_saved_models(
 
     references_by_path: dict[str, tuple[FlamlSavedModelMetadata, Path]] = {}
 
-    search_dirs = list(dict.fromkeys(metadata_dirs + model_dirs))
+    search_dirs = _dedupe_paths(metadata_dirs + model_dirs)
     for search_dir in search_dirs:
         if not search_dir.exists():
             continue
         for metadata_path in search_dir.rglob(_FLAML_METADATA_GLOB):
-            metadata = load_flaml_saved_model_metadata_file(metadata_path)
+            metadata = load_flaml_saved_model_metadata_file(
+                metadata_path,
+                metadata_roots=search_dirs,
+                model_roots=model_dirs,
+            )
             if metadata is None:
                 continue
             model_path = Path(metadata.model_path)
@@ -265,10 +286,16 @@ def discover_flaml_saved_models(
                 metadata={
                     "framework": "flaml",
                     "target_column": metadata.target_column,
+                    "dataset_name": metadata.dataset_name,
                     "dataset_fingerprint": metadata.dataset_fingerprint,
                     "feature_dtypes": dict(metadata.feature_dtypes),
                     "target_dtype": metadata.target_dtype,
                     "best_estimator": metadata.best_estimator,
+                    "best_loss": metadata.best_loss,
+                    "metric": metadata.metric,
+                    "trained_at": metadata.trained_at,
+                    "artifact_format": metadata.artifact_format,
+                    "trusted_source": metadata.trusted_source,
                 },
             )
         )
@@ -276,14 +303,40 @@ def discover_flaml_saved_models(
     return sorted(references, key=lambda r: (r.display_name.lower(), r.load_reference.lower()))
 
 
-def load_flaml_saved_model_metadata_file(path: Path):  # noqa: ANN201
+def load_flaml_saved_model_metadata_file(  # noqa: ANN201
+    path: Path,
+    *,
+    metadata_roots: list[Path],
+    model_roots: list[Path],
+    raise_on_error: bool = False,
+):
     """Parse a FLAML saved-model metadata file, returning None when invalid."""
 
     try:
         from app.modeling.flaml.schemas import FlamlSavedModelMetadata
 
-        return FlamlSavedModelMetadata.model_validate_json(path.read_text(encoding="utf-8"))
-    except Exception:
+        verified_metadata = verify_local_artifact(path, trusted_roots=metadata_roots, label="FLAML metadata")
+        metadata = FlamlSavedModelMetadata.model_validate_json(verified_metadata.path.read_text(encoding="utf-8"))
+        payload = metadata.model_dump(mode="json")
+        require_trusted_source(payload, artifact_label="flaml model")
+        model_sha256 = require_metadata_checksum(payload)
+        verified_model = verify_local_artifact(
+            metadata.model_path,
+            trusted_roots=model_roots,
+            expected_sha256=model_sha256,
+            label="FLAML model artifact",
+        )
+        return metadata.model_copy(update={"model_path": verified_model.path})
+    except (TrustedArtifactError, ValidationError, OSError, ValueError, json.JSONDecodeError) as exc:
+        if raise_on_error:
+            raise
+        log_exception(
+            logger,
+            exc,
+            operation="prediction.load_flaml_metadata",
+            level=logging.DEBUG,
+            context={"metadata_path": str(path)},
+        )
         return None
 
 
@@ -296,3 +349,11 @@ def _coerce_flaml_task_type(value) -> PredictionTaskType:  # noqa: ANN001
     if normalized == "regression":
         return PredictionTaskType.REGRESSION
     return PredictionTaskType.UNKNOWN
+
+
+def _dedupe_paths(paths: list[Path]) -> list[Path]:
+    unique_paths: list[Path] = []
+    for path in paths:
+        if path not in unique_paths:
+            unique_paths.append(path)
+    return unique_paths

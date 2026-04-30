@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import abc
 from typing import Any
 
@@ -43,10 +44,49 @@ class BaseLoader(abc.ABC):
             input_spec=input_spec,
         )
 
+    async def load_async(
+        self,
+        input_spec: DatasetInputSpec,
+        *,
+        preview: bool = False,
+        preview_rows: int | None = None,
+    ) -> LoadedDataset:
+        """Async counterpart of :meth:`load` for I/O-heavy loader implementations."""
+
+        self.validate_input(input_spec)
+        applied_row_limit = preview_rows if preview else input_spec.row_limit
+        raw_dataframe, source_details = await self.load_raw_dataframe_async(
+            input_spec,
+            row_limit=applied_row_limit,
+        )
+        normalized_dataframe, actions = await asyncio.to_thread(
+            normalize_to_pandas,
+            raw_dataframe,
+        )
+        metadata = await asyncio.to_thread(
+            extract_dataset_metadata,
+            normalized_dataframe,
+            input_spec,
+            normalization_actions=actions,
+            source_details=source_details,
+            is_preview=preview,
+            applied_row_limit=applied_row_limit,
+        )
+        return LoadedDataset(
+            dataframe=normalized_dataframe,
+            metadata=metadata,
+            input_spec=input_spec,
+        )
+
     def preview(self, input_spec: DatasetInputSpec, rows: int = 5) -> LoadedDataset:
         """Load only a preview slice where the underlying loader supports it."""
 
         return self.load(input_spec, preview=True, preview_rows=rows)
+
+    async def preview_async(self, input_spec: DatasetInputSpec, rows: int = 5) -> LoadedDataset:
+        """Async counterpart of :meth:`preview`."""
+
+        return await self.load_async(input_spec, preview=True, preview_rows=rows)
 
     def validate_input(self, input_spec: DatasetInputSpec) -> None:
         """Ensure the loader is being used for a compatible source type."""
@@ -66,3 +106,22 @@ class BaseLoader(abc.ABC):
         row_limit: int | None = None,
     ) -> tuple[pd.DataFrame, dict[str, Any]]:
         """Return a raw DataFrame and source details before normalization."""
+
+    async def load_raw_dataframe_async(
+        self,
+        input_spec: DatasetInputSpec,
+        *,
+        row_limit: int | None = None,
+    ) -> tuple[pd.DataFrame, dict[str, Any]]:
+        """Async counterpart of :meth:`load_raw_dataframe`.
+
+        Loaders with native async I/O should override this. The default falls
+        back to a worker thread so existing sync loaders remain usable via the
+        async ingestion API.
+        """
+
+        return await asyncio.to_thread(
+            self.load_raw_dataframe,
+            input_spec,
+            row_limit=row_limit,
+        )
