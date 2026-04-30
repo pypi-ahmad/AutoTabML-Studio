@@ -77,7 +77,7 @@ experiment = [
     "catboost>=1.2",
 ]
 flaml = [
-    "flaml[automl]>=2.1",
+    "flaml[automl]>=2.5.0",
     "scikit-learn>=1.4",
     "lightgbm>=4.0",
     "xgboost>=2.0",
