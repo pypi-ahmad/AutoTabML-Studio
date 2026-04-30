@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import logging
+import sqlite3
 from abc import ABC, abstractmethod
 from pathlib import Path
+from time import perf_counter
 
+from app.errors import log_exception
+from app.observability import Counter, Histogram, correlation_scope, start_span
 from app.prediction.artifacts import write_prediction_artifacts
 from app.prediction.batch_predict import build_batch_prediction_result, resolve_batch_dataframe
+from app.prediction.errors import PredictionHistoryError
 from app.prediction.history import PredictionHistoryStore
 from app.prediction.loader import LocalFlamlModelLoader, LocalPyCaretModelLoader, MLflowModelLoader
 from app.prediction.schemas import (
@@ -34,6 +40,15 @@ from app.prediction.validators import (
 )
 from app.registry.registry_service import RegistryService
 from app.storage import AppJobStatus, AppJobType, AppMetadataStore, record_prediction_history_entry
+
+logger = logging.getLogger(__name__)
+
+_PREDICTION_MODEL_LOADS_TOTAL = Counter("prediction_model_loads_total")
+_PREDICTION_MODEL_LOAD_FAILURES_TOTAL = Counter("prediction_model_load_failures_total")
+_PREDICTION_MODEL_LOAD_SECONDS = Histogram("prediction_model_load_seconds")
+_PREDICTION_REQUESTS_TOTAL = Counter("prediction_requests_total")
+_PREDICTION_FAILURES_TOTAL = Counter("prediction_failures_total")
+_PREDICTION_DURATION_SECONDS = Histogram("prediction_duration_seconds")
 
 
 class BasePredictionService(ABC):
@@ -153,184 +168,391 @@ class PredictionService(BasePredictionService):
         return self._history_store.list_recent(limit)
 
     def load_model(self, request: PredictionRequest) -> LoadedModel:
-        if request.source_type == ModelSourceType.LOCAL_SAVED_MODEL:
-            # Check if this is a FLAML model by looking for a FLAML metadata sidecar
-            flaml_refs = self._flaml_loader.discover()
-            identifier = str(request.model_identifier or request.model_path or "")
-            for ref in flaml_refs:
-                if identifier and identifier.lower() in {
-                    ref.model_identifier.lower(),
-                    ref.display_name.lower(),
-                    ref.load_reference.lower(),
-                }:
-                    return self._flaml_loader.load(request)
-            return self._local_loader.load(request)
-        return self._mlflow_loader.load(request)
+        source_type_label = request.source_type.value
+        request_model_identifier = self._request_model_identifier(request)
+        started_at = perf_counter()
+        loaded_model: LoadedModel | None = None
+
+        _PREDICTION_MODEL_LOADS_TOTAL.inc(source_type=source_type_label)
+        try:
+            with correlation_scope(
+                operation="prediction.load_model",
+                source_type=source_type_label,
+                model_identifier=request_model_identifier,
+                run_id=request.run_id,
+                registry_model_name=request.registry_model_name,
+            ):
+                with start_span(
+                    "prediction.load_model",
+                    source_type=source_type_label,
+                    model_identifier=request_model_identifier,
+                    requested_run_id=request.run_id,
+                ) as span:
+                    if request.source_type == ModelSourceType.LOCAL_SAVED_MODEL:
+                        # Check if this is a FLAML model by looking for a FLAML metadata sidecar
+                        flaml_refs = self._flaml_loader.discover()
+                        identifier = str(request.model_identifier or request.model_path or "")
+                        for ref in flaml_refs:
+                            if identifier and identifier.lower() in {
+                                ref.model_identifier.lower(),
+                                ref.display_name.lower(),
+                                ref.load_reference.lower(),
+                            }:
+                                loaded_model = self._flaml_loader.load(request)
+                                break
+                        if loaded_model is None:
+                            loaded_model = self._local_loader.load(request)
+                    else:
+                        loaded_model = self._mlflow_loader.load(request)
+
+                    loaded_context = self._loaded_model_observability_fields(loaded_model)
+                    for key, value in loaded_context.items():
+                        if value is not None:
+                            span.set_attribute(key, value)
+
+                    with correlation_scope(**loaded_context):
+                        logger.info(
+                            "prediction_model_loaded",
+                            extra={
+                                "operation": "prediction.load_model",
+                                "source_type": source_type_label,
+                                "loader_name": loaded_model.loader_name,
+                                "task_type": getattr(loaded_model.task_type, "value", str(loaded_model.task_type)),
+                            },
+                        )
+        except Exception:
+            _PREDICTION_MODEL_LOAD_FAILURES_TOTAL.inc(source_type=source_type_label)
+            _PREDICTION_MODEL_LOAD_SECONDS.observe(
+                perf_counter() - started_at,
+                source_type=source_type_label,
+                status="error",
+            )
+            raise
+
+        _PREDICTION_MODEL_LOAD_SECONDS.observe(
+            perf_counter() - started_at,
+            source_type=source_type_label,
+            status="success",
+        )
+        if loaded_model is None:
+            raise RuntimeError("Prediction model load completed without a loaded model.")
+        return loaded_model
 
     def predict_single(self, request: SingleRowPredictionRequest) -> PredictionResult:
         input_source = request.input_source_label or "manual_row"
+        source_type_label = request.source_type.value
+        request_model_identifier = self._request_model_identifier(request)
+        started_at = perf_counter()
+        loaded_context: dict[str, str] = {}
+        result: PredictionResult | None = None
+
+        _PREDICTION_REQUESTS_TOTAL.inc(
+            mode=PredictionMode.SINGLE_ROW.value,
+            source_type=source_type_label,
+        )
         try:
-            loaded_model = self.load_model(request)
-            raw_frame = normalize_single_row_input(request.row_data)
-            validate_single_row_shape(raw_frame)
+            with correlation_scope(
+                operation="prediction.predict_single",
+                source_type=source_type_label,
+                prediction_mode=PredictionMode.SINGLE_ROW.value,
+                model_identifier=request_model_identifier,
+                run_id=request.run_id,
+            ):
+                with start_span(
+                    "prediction.predict_single",
+                    source_type=source_type_label,
+                    input_source=input_source,
+                ) as span:
+                    loaded_model = self.load_model(request)
+                    loaded_context = self._loaded_model_observability_fields(loaded_model)
+                    for key, value in loaded_context.items():
+                        if value is not None:
+                            span.set_attribute(key, value)
 
-            validation_mode = self._resolve_validation_mode(request)
-            normalized_frame, validation = validate_prediction_dataframe(
-                raw_frame,
-                loaded_model,
-                validation_mode=validation_mode,
-            )
-            ensure_validation_can_score(validation)
+                    with correlation_scope(**loaded_context):
+                        logger.info(
+                            "prediction_single_started",
+                            extra={
+                                "operation": "prediction.predict_single",
+                                "input_source": input_source,
+                            },
+                        )
 
-            scored_features = self._scorer.score(
-                loaded_model,
-                normalized_frame,
-                prediction_column_name=self._prediction_column_name,
-                prediction_score_column_name=self._prediction_score_column_name,
-            )
-            scored = raw_frame.copy()
-            scored[self._prediction_column_name] = scored_features[self._prediction_column_name].to_list()
-            if self._prediction_score_column_name in scored_features.columns:
-                scored[self._prediction_score_column_name] = scored_features[
-                    self._prediction_score_column_name
-                ].to_list()
+                        raw_frame = normalize_single_row_input(request.row_data)
+                        validate_single_row_shape(raw_frame)
 
-            warnings = list(validation.warnings)
-            summary = build_prediction_summary(
-                mode=PredictionMode.SINGLE_ROW,
-                loaded_model=loaded_model,
-                input_source=input_source,
-                input_row_count=1,
-                rows_scored=1,
-                rows_failed=0,
-                prediction_column=self._prediction_column_name,
-                prediction_score_column=(
-                    self._prediction_score_column_name
-                    if self._prediction_score_column_name in scored.columns
-                    else None
-                ),
-                validation_mode=validation_mode,
-                warnings=warnings,
-            )
+                        validation_mode = self._resolve_validation_mode(request)
+                        normalized_frame, validation = validate_prediction_dataframe(
+                            raw_frame,
+                            loaded_model,
+                            validation_mode=validation_mode,
+                        )
+                        ensure_validation_can_score(validation)
 
-            artifacts = write_prediction_artifacts(
-                loaded_model=loaded_model,
-                scored_dataframe=scored,
-                summary=summary,
-                output_dir=request.output_dir or self._artifacts_dir,
-                output_stem=request.output_stem,
-            )
-            summary.output_artifact_path = artifacts.scored_csv_path
-            history_entry = build_history_entry(
-                summary,
-                summary_json_path=artifacts.summary_json_path,
-                metadata_json_path=artifacts.metadata_json_path,
-            )
-            history_warning = self._persist_history(history_entry)
-            if history_warning is not None:
-                warnings.append(history_warning)
-                summary.warnings.append(history_warning)
+                        scored_features = self._scorer.score(
+                            loaded_model,
+                            normalized_frame,
+                            prediction_column_name=self._prediction_column_name,
+                            prediction_score_column_name=self._prediction_score_column_name,
+                        )
+                        scored = raw_frame.copy()
+                        scored[self._prediction_column_name] = scored_features[self._prediction_column_name].to_list()
+                        if self._prediction_score_column_name in scored_features.columns:
+                            scored[self._prediction_score_column_name] = scored_features[
+                                self._prediction_score_column_name
+                            ].to_list()
 
-            return build_single_prediction_result(
-                loaded_model=loaded_model,
-                scored_dataframe=scored,
-                validation=validation,
-                summary=summary,
-                artifacts=artifacts,
-                history_entry=history_entry,
-                warnings=warnings,
-                prediction_column_name=self._prediction_column_name,
-                prediction_score_column_name=self._prediction_score_column_name,
-            )
+                        warnings = list(validation.warnings)
+                        summary = build_prediction_summary(
+                            mode=PredictionMode.SINGLE_ROW,
+                            loaded_model=loaded_model,
+                            input_source=input_source,
+                            input_row_count=1,
+                            rows_scored=1,
+                            rows_failed=0,
+                            prediction_column=self._prediction_column_name,
+                            prediction_score_column=(
+                                self._prediction_score_column_name
+                                if self._prediction_score_column_name in scored.columns
+                                else None
+                            ),
+                            validation_mode=validation_mode,
+                            warnings=warnings,
+                        )
+
+                        artifacts = write_prediction_artifacts(
+                            loaded_model=loaded_model,
+                            scored_dataframe=scored,
+                            summary=summary,
+                            output_dir=request.output_dir or self._artifacts_dir,
+                            output_stem=request.output_stem,
+                        )
+                        summary.output_artifact_path = artifacts.scored_csv_path
+                        history_entry = build_history_entry(
+                            summary,
+                            summary_json_path=artifacts.summary_json_path,
+                            metadata_json_path=artifacts.metadata_json_path,
+                        )
+                        history_warning = self._persist_history(history_entry)
+                        if history_warning is not None:
+                            warnings.append(history_warning)
+                            summary.warnings.append(history_warning)
+
+                        result = build_single_prediction_result(
+                            loaded_model=loaded_model,
+                            scored_dataframe=scored,
+                            validation=validation,
+                            summary=summary,
+                            artifacts=artifacts,
+                            history_entry=history_entry,
+                            warnings=warnings,
+                            prediction_column_name=self._prediction_column_name,
+                            prediction_score_column_name=self._prediction_score_column_name,
+                        )
+                        logger.info(
+                            "prediction_single_completed",
+                            extra={
+                                "operation": "prediction.predict_single",
+                                "rows_scored": 1,
+                                "warning_count": len(warnings),
+                            },
+                        )
         except Exception as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.predict_single",
+                context={
+                    "source_type": source_type_label,
+                    "model_identifier": request_model_identifier,
+                    **loaded_context,
+                },
+            )
+            _PREDICTION_FAILURES_TOTAL.inc(
+                mode=PredictionMode.SINGLE_ROW.value,
+                source_type=source_type_label,
+            )
+            _PREDICTION_DURATION_SECONDS.observe(
+                perf_counter() - started_at,
+                mode=PredictionMode.SINGLE_ROW.value,
+                source_type=source_type_label,
+                status="error",
+            )
             self._record_failure(
                 request=request,
                 mode=PredictionMode.SINGLE_ROW,
                 input_source=input_source,
                 row_count=1,
             )
-            raise exc
+            raise
+
+        _PREDICTION_DURATION_SECONDS.observe(
+            perf_counter() - started_at,
+            mode=PredictionMode.SINGLE_ROW.value,
+            source_type=source_type_label,
+            status="success",
+        )
+        if result is None:
+            raise RuntimeError("Single-row prediction completed without a result.")
+        return result
 
     def predict_batch(self, request: BatchPredictionRequest) -> BatchPredictionResult:
         dataframe = None
+        source_type_label = request.source_type.value
+        request_model_identifier = self._request_model_identifier(request)
+        started_at = perf_counter()
+        loaded_context: dict[str, str] = {}
+        result: BatchPredictionResult | None = None
+
+        _PREDICTION_REQUESTS_TOTAL.inc(
+            mode=PredictionMode.BATCH.value,
+            source_type=source_type_label,
+        )
         try:
             dataframe, input_source = resolve_batch_dataframe(request)
-            loaded_model = self.load_model(request)
-            validation_mode = self._resolve_validation_mode(request)
-            normalized_frame, validation = validate_prediction_dataframe(
-                dataframe,
-                loaded_model,
-                validation_mode=validation_mode,
-            )
-            ensure_validation_can_score(validation)
+            with correlation_scope(
+                operation="prediction.predict_batch",
+                source_type=source_type_label,
+                prediction_mode=PredictionMode.BATCH.value,
+                model_identifier=request_model_identifier,
+                run_id=request.run_id,
+            ):
+                with start_span(
+                    "prediction.predict_batch",
+                    source_type=source_type_label,
+                    input_source=input_source,
+                    row_count=len(dataframe.index),
+                ) as span:
+                    loaded_model = self.load_model(request)
+                    loaded_context = self._loaded_model_observability_fields(loaded_model)
+                    for key, value in loaded_context.items():
+                        if value is not None:
+                            span.set_attribute(key, value)
 
-            scored_features = self._scorer.score(
-                loaded_model,
-                normalized_frame,
-                prediction_column_name=self._prediction_column_name,
-                prediction_score_column_name=self._prediction_score_column_name,
-            )
-            scored = dataframe.copy()
-            scored[self._prediction_column_name] = scored_features[self._prediction_column_name].to_list()
-            if self._prediction_score_column_name in scored_features.columns:
-                scored[self._prediction_score_column_name] = scored_features[
-                    self._prediction_score_column_name
-                ].to_list()
+                    with correlation_scope(**loaded_context):
+                        logger.info(
+                            "prediction_batch_started",
+                            extra={
+                                "operation": "prediction.predict_batch",
+                                "input_source": input_source,
+                                "row_count": len(dataframe.index),
+                            },
+                        )
 
-            warnings = list(validation.warnings)
-            summary = build_prediction_summary(
-                mode=PredictionMode.BATCH,
-                loaded_model=loaded_model,
-                input_source=input_source,
-                input_row_count=len(normalized_frame.index),
-                rows_scored=len(scored.index),
-                rows_failed=0,
-                prediction_column=self._prediction_column_name,
-                prediction_score_column=(
-                    self._prediction_score_column_name
-                    if self._prediction_score_column_name in scored.columns
-                    else None
-                ),
-                validation_mode=validation_mode,
-                warnings=warnings,
-            )
+                        validation_mode = self._resolve_validation_mode(request)
+                        normalized_frame, validation = validate_prediction_dataframe(
+                            dataframe,
+                            loaded_model,
+                            validation_mode=validation_mode,
+                        )
+                        ensure_validation_can_score(validation)
 
-            artifacts = write_prediction_artifacts(
-                loaded_model=loaded_model,
-                scored_dataframe=scored,
-                summary=summary,
-                output_dir=request.output_dir or self._artifacts_dir,
-                output_path=request.output_path,
-                output_stem=request.output_stem,
-            )
-            summary.output_artifact_path = artifacts.scored_csv_path
-            history_entry = build_history_entry(
-                summary,
-                summary_json_path=artifacts.summary_json_path,
-                metadata_json_path=artifacts.metadata_json_path,
-            )
-            history_warning = self._persist_history(history_entry)
-            if history_warning is not None:
-                warnings.append(history_warning)
-                summary.warnings.append(history_warning)
+                        scored_features = self._scorer.score(
+                            loaded_model,
+                            normalized_frame,
+                            prediction_column_name=self._prediction_column_name,
+                            prediction_score_column_name=self._prediction_score_column_name,
+                        )
+                        scored = dataframe.copy()
+                        scored[self._prediction_column_name] = scored_features[self._prediction_column_name].to_list()
+                        if self._prediction_score_column_name in scored_features.columns:
+                            scored[self._prediction_score_column_name] = scored_features[
+                                self._prediction_score_column_name
+                            ].to_list()
 
-            return build_batch_prediction_result(
-                loaded_model=loaded_model,
-                scored_dataframe=scored,
-                validation=validation,
-                summary=summary,
-                artifacts=artifacts,
-                history_entry=history_entry,
-                warnings=warnings,
-            )
+                        warnings = list(validation.warnings)
+                        summary = build_prediction_summary(
+                            mode=PredictionMode.BATCH,
+                            loaded_model=loaded_model,
+                            input_source=input_source,
+                            input_row_count=len(normalized_frame.index),
+                            rows_scored=len(scored.index),
+                            rows_failed=0,
+                            prediction_column=self._prediction_column_name,
+                            prediction_score_column=(
+                                self._prediction_score_column_name
+                                if self._prediction_score_column_name in scored.columns
+                                else None
+                            ),
+                            validation_mode=validation_mode,
+                            warnings=warnings,
+                        )
+
+                        artifacts = write_prediction_artifacts(
+                            loaded_model=loaded_model,
+                            scored_dataframe=scored,
+                            summary=summary,
+                            output_dir=request.output_dir or self._artifacts_dir,
+                            output_path=request.output_path,
+                            output_stem=request.output_stem,
+                        )
+                        summary.output_artifact_path = artifacts.scored_csv_path
+                        history_entry = build_history_entry(
+                            summary,
+                            summary_json_path=artifacts.summary_json_path,
+                            metadata_json_path=artifacts.metadata_json_path,
+                        )
+                        history_warning = self._persist_history(history_entry)
+                        if history_warning is not None:
+                            warnings.append(history_warning)
+                            summary.warnings.append(history_warning)
+
+                        result = build_batch_prediction_result(
+                            loaded_model=loaded_model,
+                            scored_dataframe=scored,
+                            validation=validation,
+                            summary=summary,
+                            artifacts=artifacts,
+                            history_entry=history_entry,
+                            warnings=warnings,
+                        )
+                        logger.info(
+                            "prediction_batch_completed",
+                            extra={
+                                "operation": "prediction.predict_batch",
+                                "rows_scored": len(scored.index),
+                                "warning_count": len(warnings),
+                            },
+                        )
         except Exception as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.predict_batch",
+                context={
+                    "source_type": source_type_label,
+                    "model_identifier": request_model_identifier,
+                    "row_count": len(dataframe.index) if dataframe is not None else 0,
+                    **loaded_context,
+                },
+            )
+            _PREDICTION_FAILURES_TOTAL.inc(
+                mode=PredictionMode.BATCH.value,
+                source_type=source_type_label,
+            )
+            _PREDICTION_DURATION_SECONDS.observe(
+                perf_counter() - started_at,
+                mode=PredictionMode.BATCH.value,
+                source_type=source_type_label,
+                status="error",
+            )
             self._record_failure(
                 request=request,
                 mode=PredictionMode.BATCH,
                 input_source=request.input_source_label or request.dataset_name or "batch_input",
                 row_count=len(dataframe.index) if dataframe is not None else 0,
             )
-            raise exc
+            raise
+
+        _PREDICTION_DURATION_SECONDS.observe(
+            perf_counter() - started_at,
+            mode=PredictionMode.BATCH.value,
+            source_type=source_type_label,
+            status="success",
+        )
+        if result is None:
+            raise RuntimeError("Batch prediction completed without a result.")
+        return result
 
     def _persist_history(self, entry):  # noqa: ANN001, ANN201
         try:
@@ -339,7 +561,14 @@ class PredictionService(BasePredictionService):
                 return None
             self._history_store.append(entry)
             return None
-        except Exception as exc:
+        except (PredictionHistoryError, OSError, RuntimeError, ValueError, sqlite3.Error) as exc:
+            log_exception(
+                logger,
+                exc,
+                operation="prediction.persist_history",
+                level=logging.DEBUG,
+                context={"job_id": entry.job_id},
+            )
             return f"Prediction history could not be written: {exc}"
 
     def _record_failure(
@@ -385,3 +614,16 @@ class PredictionService(BasePredictionService):
             or request.model_uri
             or str(request.model_path or request.run_id or "unknown_model")
         )
+
+    def _loaded_model_observability_fields(self, loaded_model: LoadedModel) -> dict[str, str]:
+        metadata = loaded_model.metadata or {}
+        task_type = getattr(loaded_model.task_type, "value", str(loaded_model.task_type))
+        fields = {
+            "run_id": metadata.get("run_id"),
+            "experiment_name": metadata.get("experiment_name"),
+            "run_name": metadata.get("run_name"),
+            "model_identifier": loaded_model.model_identifier,
+            "task_type": task_type,
+            "loader_name": loaded_model.loader_name,
+        }
+        return {key: str(value) for key, value in fields.items() if value is not None}
