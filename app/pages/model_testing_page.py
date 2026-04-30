@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import json
 import logging
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
+from app.modeling.benchmark.persistence import discover_saved_benchmark_models
 from app.pages.dataset_workspace import go_to_page
+from app.pages.ui_cache import get_prediction_service, get_prediction_workflow_service
+from app.pages.ui_errors import log_ui_debug_exception, log_ui_exception
 from app.pages.ui_labels import (
     PREDICTION_TASK_TYPE_LABELS,
     SOURCE_TYPE_LABELS,
@@ -17,25 +18,17 @@ from app.pages.ui_labels import (
     render_decision_support_banner,
     render_model_trust_card,
 )
-from app.prediction import (
-    BatchPredictionRequest,
-    ModelSourceType,
-    PredictionRequest,
-    PredictionService,
-    SchemaValidationMode,
-)
 from app.security.masking import safe_error_message
+from app.security.safe_csv import dataframe_to_safe_csv
 from app.state.session import get_or_init_state
-from app.storage import build_metadata_store
 
 logger = logging.getLogger(__name__)
 
 
 def render_model_testing_page(*, _show_header: bool = True) -> None:
     state = get_or_init_state()
-    prediction_settings = state.settings.prediction
-    tracking_settings = state.settings.tracking
-    metadata_store = build_metadata_store(state.settings)
+    workflow = get_prediction_workflow_service()
+    execution_config = workflow.build_execution_config(state.settings.prediction, state.settings.tracking)
     if _show_header:
         st.title("📊 Test & Evaluate")
         st.caption(
@@ -43,26 +36,14 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
             "and see how well it performs."
         )
 
-    service = PredictionService(
-        artifacts_dir=prediction_settings.artifacts_dir,
-        history_path=prediction_settings.history_path,
-        schema_validation_mode=SchemaValidationMode(prediction_settings.schema_validation_mode),
-        prediction_column_name=prediction_settings.prediction_column_name,
-        prediction_score_column_name=prediction_settings.prediction_score_column_name,
-        local_model_dirs=prediction_settings.supported_local_model_dirs,
-        local_metadata_dirs=prediction_settings.local_model_metadata_dirs,
-        tracking_uri=tracking_settings.tracking_uri,
-        registry_uri=tracking_settings.registry_uri,
-        registry_enabled=tracking_settings.registry_enabled,
-        metadata_store=metadata_store,
-    )
+    service = get_prediction_service(state.settings)
 
     # ── Step 1: Model Selection ────────────────────────────────────────
     st.subheader("1. Select a Model")
     model_refs = service.discover_local_models()
 
     # Also discover benchmark-saved models (joblib .pkl with .json sidecar)
-    benchmark_refs = _discover_benchmark_models(state.settings.pycaret.models_dir)
+    benchmark_refs = discover_saved_benchmark_models(state.settings.pycaret.models_dir)
 
     if not model_refs and not benchmark_refs:
         st.info(
@@ -75,67 +56,34 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
         return
 
     # Build unified selection list
-    selection_items: list[dict] = []
-    for ref in model_refs:
-        _task_label = PREDICTION_TASK_TYPE_LABELS.get(ref.task_type.value, format_enum_value(ref.task_type.value))
-        selection_items.append({
-            "label": f"🔬 {ref.display_name} ({_task_label})",
-            "source": "pycaret",
-            "ref": ref,
-            "benchmark_meta": None,
-        })
-    for meta in benchmark_refs:
-        _raw_task = meta.get('task_type', '?')
-        _task_label = PREDICTION_TASK_TYPE_LABELS.get(_raw_task, format_enum_value(_raw_task))
-        selection_items.append({
-            "label": f"🏁 {meta['model_name']} — {meta.get('dataset_name', '?')} ({_task_label})",
-            "source": "benchmark",
-            "ref": None,
-            "benchmark_meta": meta,
-        })
-
-    labels = [item["label"] for item in selection_items]
+    selection_items = workflow.build_model_testing_selections(model_refs, benchmark_refs)
+    labels = [item.label for item in selection_items]
     selected_label = st.selectbox(
         "Saved model",
         options=labels,
         key="mt_model_select",
         help="🔬 = trained via Train & Tune, 🏁 = trained via Quick Benchmark. Pick the model you want to test.",
     )
-    selected_item = selection_items[labels.index(selected_label)]
+    selected_item = next(item for item in selection_items if item.label == selected_label)
 
     # ── Load model ─────────────────────────────────────────────────────
-    load_key = f"mt_loaded_{selected_label}"
-    if st.session_state.get("mt_loaded_key") != load_key:
-        st.session_state.pop("mt_loaded_model", None)
-        st.session_state.pop("mt_batch_result", None)
-        st.session_state.pop("mt_eval_result", None)
+    load_key = workflow.build_model_testing_load_key(selected_item)
+    workflow.reset_model_testing_state(st.session_state, load_key)
 
     if st.button("Load Model", key="mt_load"):
         try:
-            if selected_item["source"] == "pycaret":
-                ref = selected_item["ref"]
-                request = PredictionRequest(
-                    source_type=ModelSourceType.LOCAL_SAVED_MODEL,
-                    model_identifier=ref.load_reference,
-                    model_path=ref.model_path,
-                    metadata_path=ref.metadata_path,
-                    tracking_uri=tracking_settings.tracking_uri,
-                    registry_uri=tracking_settings.registry_uri,
-                    output_dir=prediction_settings.artifacts_dir,
-                    output_stem=prediction_settings.default_output_stem,
-                )
-                loaded_model = service.load_model(request)
-                st.session_state["mt_loaded_model"] = loaded_model
-                st.session_state["mt_loaded_key"] = load_key
-                st.session_state["mt_loaded_source"] = "pycaret"
-            else:
-                meta = selected_item["benchmark_meta"]
-                loaded = _load_benchmark_model(meta)
-                st.session_state["mt_loaded_model"] = loaded
-                st.session_state["mt_loaded_key"] = load_key
-                st.session_state["mt_loaded_source"] = "benchmark"
+            loaded_model = workflow.load_model_testing_model(
+                selection=selected_item,
+                prediction_service=service,
+                config=execution_config,
+                trusted_model_roots=[state.settings.pycaret.models_dir],
+            )
+            st.session_state["mt_loaded_model"] = loaded_model
+            st.session_state["mt_loaded_key"] = load_key
+            st.session_state["mt_loaded_source"] = selected_item.source_kind
             st.success("Model loaded.")
         except Exception as exc:
+            log_ui_exception(exc, operation="model_testing.load_model", context={"source": selected_item.source_kind})
             st.error(
                 f"**Could not load model:** {safe_error_message(exc)}\n\n"
                 "**Likely cause:** The model file may be missing or corrupted.\n\n"
@@ -148,7 +96,7 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
         return
 
     # ── Model info ─────────────────────────────────────────────────────
-    source_kind = st.session_state.get("mt_loaded_source", "pycaret")
+    source_kind = st.session_state.get("mt_loaded_source", selected_item.source_kind)
 
     if source_kind == "pycaret":
         _meta = loaded_model.metadata if hasattr(loaded_model, "metadata") and isinstance(loaded_model.metadata, dict) else {}
@@ -164,7 +112,7 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
             with st.expander("Expected features"):
                 st.code(", ".join(loaded_model.feature_columns), language="text")
     else:
-        meta = selected_item["benchmark_meta"]
+        meta = selected_item.benchmark_metadata or {}
         render_model_trust_card(
             trained_at=meta.get("trained_at"),
             dataset_name=meta.get("dataset_name"),
@@ -200,12 +148,10 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
         )
         if uploaded is not None:
             try:
-                if uploaded.name.endswith((".xlsx", ".xls")):
-                    test_df = pd.read_excel(uploaded)
-                else:
-                    test_df = pd.read_csv(uploaded)
+                test_df = workflow.load_uploaded_test_dataframe(uploaded)
                 data_label = uploaded.name
             except Exception as exc:
+                log_ui_exception(exc, operation="model_testing.parse_uploaded_file", context={"filename": uploaded.name})
                 st.error(f"Failed to parse file: {safe_error_message(exc)}")
     else:
         loaded_datasets = st.session_state.get("loaded_datasets", {})
@@ -232,12 +178,7 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
     st.subheader("3. Run Predictions")
 
     # Detect if target column is present (for evaluation)
-    target_col: str | None = None
-    if source_kind == "pycaret" and loaded_model.target_column:
-        target_col = loaded_model.target_column
-    elif source_kind == "benchmark":
-        target_col = selected_item["benchmark_meta"].get("target_column")
-
+    target_col = workflow.target_column_for_testing(source_kind, loaded_model, selected_item)
     has_ground_truth = target_col is not None and target_col in test_df.columns
     if has_ground_truth:
         st.caption(f"Target column **{target_col}** found in test data — evaluation metrics will be computed.")
@@ -245,44 +186,20 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
     if st.button("Run Test", key="mt_run_test"):
         with st.spinner("Running predictions on test data…"):
             try:
-                if source_kind == "pycaret":
-                    ref = selected_item["ref"]
-                    result = service.predict_batch(
-                        BatchPredictionRequest(
-                            source_type=ModelSourceType.LOCAL_SAVED_MODEL,
-                            model_identifier=ref.load_reference,
-                            model_path=ref.model_path,
-                            metadata_path=ref.metadata_path,
-                            tracking_uri=tracking_settings.tracking_uri,
-                            registry_uri=tracking_settings.registry_uri,
-                            output_dir=prediction_settings.artifacts_dir,
-                            output_stem=prediction_settings.default_output_stem,
-                            dataframe=test_df,
-                            dataset_name=data_label,
-                            input_source_label=data_label,
-                        )
-                    )
-                    st.session_state["mt_batch_result"] = result.scored_dataframe
-                    st.session_state["mt_predictions"] = result.scored_dataframe[
-                        prediction_settings.prediction_column_name
-                    ] if prediction_settings.prediction_column_name in result.scored_dataframe.columns else None
-                else:
-                    meta = selected_item["benchmark_meta"]
-                    native_model = st.session_state["mt_loaded_model"]
-                    feature_cols = meta.get("feature_columns", [])
-                    available = [c for c in feature_cols if c in test_df.columns]
-                    if not available:
-                        st.error("Test data does not contain any of the expected input columns.")
-                        return
-                    X_test = test_df[available]
-                    predictions = native_model.predict(X_test)
-                    scored = test_df.copy()
-                    scored["prediction"] = predictions
-                    st.session_state["mt_batch_result"] = scored
-                    st.session_state["mt_predictions"] = pd.Series(predictions, name="prediction")
+                run_result = workflow.run_model_testing_predictions(
+                    selection=selected_item,
+                    loaded_model=loaded_model,
+                    test_dataframe=test_df,
+                    data_label=data_label,
+                    prediction_service=service,
+                    config=execution_config,
+                )
+                st.session_state["mt_batch_result"] = run_result.scored_dataframe
+                st.session_state["mt_predictions"] = run_result.predictions
 
                 st.success("Predictions complete.")
             except Exception as exc:
+                log_ui_exception(exc, operation="model_testing.run_predictions", context={"source": source_kind})
                 st.error(
                     f"**Prediction failed:** {safe_error_message(exc)}\n\n"
                     "**Likely cause:** Your test data columns may not match what the model expects.\n\n"
@@ -300,32 +217,29 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
 
     _n_rows = len(scored_df)
     if has_ground_truth and predictions is not None:
-        _task = _infer_task_type(source_kind, loaded_model, selected_item)
         try:
-            if _task == "classification":
-                from sklearn.metrics import accuracy_score as _acc
-                _mask = test_df[target_col].notna() & pd.Series(predictions).notna()
-                _score_val = _acc(test_df[target_col][_mask], predictions[_mask])
-                _score_lbl = f"accuracy of **{_score_val:.2%}**"
-                _good = _score_val >= 0.7
-            else:
-                from sklearn.metrics import r2_score as _r2
-                _mask = test_df[target_col].notna() & pd.Series(predictions).notna()
-                _score_val = _r2(test_df[target_col][_mask].astype(float), predictions[_mask].astype(float))
-                _score_lbl = f"R² of **{_score_val:.4f}**"
-                _good = _score_val >= 0.5
-            _verdict = (
-                "The model performs well on this test set."
-                if _good
-                else "The model's accuracy is low — consider tuning it or trying a different algorithm."
+            evaluation = workflow.evaluate_predictions(
+                y_true=test_df[target_col],
+                y_pred=predictions,
+                task_type=workflow.infer_model_testing_task_type(source_kind, loaded_model, selected_item),
             )
+            primary_value = evaluation.metrics[evaluation.primary_metric_key]
+            if evaluation.primary_metric_key == "accuracy":
+                score_label = f"accuracy of **{primary_value:.2%}**"
+            else:
+                score_label = f"R² of **{primary_value:.4f}**"
             st.info(
                 f"**What happened:** Generated predictions for **{_n_rows:,}** rows. "
-                f"Compared against ground truth and achieved {_score_lbl}.\n\n"
-                f"**Looks good?** {_verdict}\n\n"
+                f"Compared against ground truth and achieved {score_label}.\n\n"
+                f"**Looks good?** {evaluation.verdict}\n\n"
                 "**Next step:** Download the scored file below, or head to **Predict** to run on new data."
             )
-        except Exception:
+        except Exception as exc:
+            log_ui_debug_exception(
+                exc,
+                operation="model_testing.preview_metrics",
+                context={"task_type": workflow.infer_model_testing_task_type(source_kind, loaded_model, selected_item)},
+            )
             st.info(
                 f"**What happened:** Generated predictions for **{_n_rows:,}** rows with ground truth available.\n\n"
                 "**Next step:** Review the metrics below, then download the scored file."
@@ -339,14 +253,27 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
     st.dataframe(scored_df.head(50), width="stretch")
 
     if has_ground_truth and predictions is not None:
-        _render_evaluation_metrics(
-            y_true=test_df[target_col],
-            y_pred=predictions,
-            task_type=_infer_task_type(source_kind, loaded_model, selected_item),
-        )
+        try:
+            evaluation = workflow.evaluate_predictions(
+                y_true=test_df[target_col],
+                y_pred=predictions,
+                task_type=workflow.infer_model_testing_task_type(source_kind, loaded_model, selected_item),
+            )
+            _render_evaluation_metrics(evaluation)
+        except Exception as exc:
+            log_ui_exception(
+                exc,
+                operation="model_testing.render_evaluation_metrics",
+                context={"task_type": workflow.infer_model_testing_task_type(source_kind, loaded_model, selected_item)},
+            )
+            st.warning(
+                f"Could not compute evaluation metrics: {safe_error_message(exc)}\n\n"
+                "This can happen when predictions contain unexpected data types. "
+                "Your prediction results are still available above."
+            )
 
     # Download button
-    csv_data = scored_df.to_csv(index=False)
+    csv_data = dataframe_to_safe_csv(scored_df, index=False)
     st.download_button(
         "Download scored CSV",
         data=csv_data,
@@ -356,84 +283,19 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
     )
 
 
-# ── Helpers ───────────────────────────────────────────────────────────
-
-
-def _discover_benchmark_models(models_dir: Path) -> list[dict]:
-    """Discover joblib models saved from benchmark with JSON sidecar metadata."""
-
-    results = []
-    if not models_dir.exists():
-        return results
-    for json_path in models_dir.glob("benchmark_*_*.json"):
-        pkl_path = json_path.with_suffix(".pkl")
-        if pkl_path.exists():
-            try:
-                meta = json.loads(json_path.read_text(encoding="utf-8"))
-                meta["_model_path"] = str(pkl_path)
-                meta["_metadata_path"] = str(json_path)
-                results.append(meta)
-            except Exception:
-                continue
-    return results
-
-
-def _load_benchmark_model(meta: dict):
-    """Load a benchmark-saved joblib model."""
-
-    import joblib
-
-    return joblib.load(meta["_model_path"])
-
-
-def _infer_task_type(source_kind: str, loaded_model, selected_item: dict) -> str:
-    """Return 'classification' or 'regression' from available info."""
-
-    if source_kind == "pycaret":
-        task = loaded_model.task_type.value
-        if "classif" in task.lower():
-            return "classification"
-        if "regress" in task.lower():
-            return "regression"
-        return task.lower()
-    meta = selected_item.get("benchmark_meta", {})
-    return meta.get("task_type", "classification").lower()
-
-
-def _render_evaluation_metrics(
-    y_true: pd.Series,
-    y_pred: pd.Series,
-    task_type: str,
-) -> None:
+def _render_evaluation_metrics(evaluation) -> None:  # noqa: ANN001
     """Show evaluation metrics when ground-truth labels are available."""
 
     st.subheader("Evaluation")
-    try:
-        if task_type == "classification":
-            from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+    if evaluation.task_type == "classification":
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Accuracy", f"{evaluation.metrics['accuracy']:.4f}")
+        col2.metric("Precision", f"{evaluation.metrics['precision']:.4f}")
+        col3.metric("Recall", f"{evaluation.metrics['recall']:.4f}")
+        col4.metric("F1", f"{evaluation.metrics['f1']:.4f}")
+        return
 
-            # Drop rows where either is NaN
-            mask = y_true.notna() & pd.Series(y_pred).notna()
-            yt, yp = y_true[mask], y_pred[mask]
-
-            col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Accuracy", f"{accuracy_score(yt, yp):.4f}")
-            col2.metric("Precision", f"{precision_score(yt, yp, average='weighted', zero_division=0):.4f}")
-            col3.metric("Recall", f"{recall_score(yt, yp, average='weighted', zero_division=0):.4f}")
-            col4.metric("F1", f"{f1_score(yt, yp, average='weighted', zero_division=0):.4f}")
-        else:
-            from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-            mask = y_true.notna() & pd.Series(y_pred).notna()
-            yt, yp = y_true[mask].astype(float), y_pred[mask].astype(float)
-
-            col1, col2, col3 = st.columns(3)
-            col1.metric("R²", f"{r2_score(yt, yp):.4f}")
-            col2.metric("MAE", f"{mean_absolute_error(yt, yp):.4f}")
-            col3.metric("RMSE", f"{mean_squared_error(yt, yp, squared=False):.4f}")
-    except Exception as exc:
-        st.warning(
-            f"Could not compute evaluation metrics: {safe_error_message(exc)}\n\n"
-            "This can happen when predictions contain unexpected data types. "
-            "Your prediction results are still available above."
-        )
+    col1, col2, col3 = st.columns(3)
+    col1.metric("R²", f"{evaluation.metrics['r2']:.4f}")
+    col2.metric("MAE", f"{evaluation.metrics['mae']:.4f}")
+    col3.metric("RMSE", f"{evaluation.metrics['rmse']:.4f}")
