@@ -5,36 +5,30 @@
 Use Python 3.11 or 3.12 for the full workflow including PyCaret experiments. Python 3.13 works for everything except PyCaret.
 
 ```bash
-python -m venv .venv
-```
-
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-Install the base dev environment:
-
-```bash
-pip install -e ".[dev]"
+uv sync --locked --extra dev
 ```
 
 Full local maintainer install:
 
 ```bash
-pip install -e ".[dev,validation,profiling,benchmark,experiment,gpu,kaggle]"
+uv sync --locked --all-extras
 ```
 
 Optional extras by workflow:
 
 ```bash
-pip install -e ".[validation]"
-pip install -e ".[profiling]"
-pip install -e ".[benchmark]"
-pip install -e ".[experiment]"
-pip install -e ".[gpu]"
-pip install -e ".[kaggle]"
+uv sync --locked --extra dev --extra validation
+uv sync --locked --extra dev --extra profiling
+uv sync --locked --extra dev --extra benchmark
+uv sync --locked --extra dev --extra experiment
+uv sync --locked --extra dev --extra gpu
+uv sync --locked --extra dev --extra kaggle
+```
+
+Refresh the lockfile after dependency changes with:
+
+```bash
+uv lock --python 3.12
 ```
 
 The benchmark and experiment extras now include the GPU-capable boosting stack by default. Use `.[gpu]` only when you want those libraries without the rest of the benchmark or experiment workflow dependencies.
@@ -129,7 +123,7 @@ autotabml benchmark artifacts/tmp/smoke_iris.csv --target target \
   --task-type classification \
   --include-model DummyClassifier --include-model DecisionTreeClassifier
 
-# 5. Experiment (requires Python ≤3.12 + pip install -e ".[experiment]")
+# 5. Experiment (requires Python ≤3.12 + uv sync --locked --extra dev --extra experiment)
 autotabml experiment-run artifacts/tmp/smoke_iris.csv --target target \
   --task-type classification --n-select 1 --fold 3
 
@@ -209,7 +203,7 @@ The repo emphasizes local, hermetic tests:
 Install the profiling extra:
 
 ```bash
-pip install -e ".[profiling]"
+uv sync --locked --extra dev --extra profiling
 ```
 
 If the import still fails in a fresh environment, pin `setuptools<82` because `ydata-profiling` imports `pkg_resources` at runtime and `setuptools` 82 removed it.
@@ -219,8 +213,8 @@ If the import still fails in a fresh environment, pin `setuptools<82` because `y
 Install the matching extras:
 
 ```bash
-pip install -e ".[benchmark]"
-pip install -e ".[experiment]"
+uv sync --locked --extra dev --extra benchmark
+uv sync --locked --extra dev --extra experiment
 ```
 
 Observed on this execution pass: PyCaret-backed experiment workflows did not install successfully on Python 3.13 in this environment. Use a PyCaret-compatible interpreter for experiment/save/local-saved-model flows until upstream support lands.
