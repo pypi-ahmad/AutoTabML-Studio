@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import contextlib
 import functools
-from typing import Any, Callable, Iterator, Protocol, TypeVar
+from collections.abc import Callable, Iterator
+from typing import Any, Protocol, TypeVar
 
 from app.observability.context import current_context
 

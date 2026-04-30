@@ -15,7 +15,7 @@ from app.modeling.flaml.schemas import (
     FlamlTaskType,
 )
 from app.modeling.flaml.service import FlamlAutoMLService
-from app.modeling.flaml.setup_runner import is_flaml_available, flaml_install_guidance
+from app.modeling.flaml.setup_runner import flaml_install_guidance, is_flaml_available
 from app.pages.dataset_workspace import (
     go_to_page,
     render_dataset_header,
@@ -27,7 +27,6 @@ from app.path_utils import model_save_name
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state
 from app.storage import ensure_dataset_record
-
 
 # ── Estimator display names ───────────────────────────────────────────
 ESTIMATOR_LABELS: dict[str, str] = {

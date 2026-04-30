@@ -23,7 +23,8 @@ from __future__ import annotations
 
 import threading
 from collections import defaultdict
-from typing import Any, Mapping, Protocol
+from collections.abc import Mapping
+from typing import Any, Protocol
 
 from app.observability.context import current_context
 
@@ -148,7 +149,7 @@ class Histogram(_Metric):
     def observe(self, value: float, **labels: Any) -> None:
         _backend.observe(self.name, value, _merge_labels(labels))
 
-    def time(self) -> "_Timer":
+    def time(self) -> _Timer:
         """Return a context manager that records elapsed seconds on exit."""
 
         return _Timer(self)
@@ -163,7 +164,7 @@ class _Timer:
         self._histogram = histogram
         self._start = 0.0
 
-    def __enter__(self) -> "_Timer":
+    def __enter__(self) -> _Timer:
         import time
 
         self._start = time.perf_counter()

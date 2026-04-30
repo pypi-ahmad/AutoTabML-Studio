@@ -19,13 +19,13 @@ from app.modeling.benchmark.schemas import (
 from app.modeling.benchmark.service import benchmark_dataset
 from app.modeling.benchmark.summary import leaderboard_to_dataframe
 from app.pages.dataset_workspace import render_dataset_header
+from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_cache import get_metadata_store
 from app.pages.ui_errors import log_ui_debug_exception, log_ui_exception
-from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.workflow_guide import render_next_step_hint, render_workflow_banner
 from app.path_utils import model_save_name
-from app.security.trusted_artifacts import TRUSTED_MODEL_SOURCE, compute_sha256, write_checksum_file
 from app.security.masking import safe_error_message
+from app.security.trusted_artifacts import TRUSTED_MODEL_SOURCE, compute_sha256, write_checksum_file
 from app.state.session import get_or_init_state
 from app.storage.models import AppJobType
 
@@ -476,9 +476,9 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
         config = bundle.config
 
         try:
+            from sklearn.model_selection import train_test_split
             from skops.io import dump as skops_dump
             from skops.io import get_untrusted_types
-            from sklearn.model_selection import train_test_split
 
             target = df[config.target_column]
             features = df.drop(columns=[config.target_column])
@@ -496,7 +496,6 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
             model = estimator_cls()
             model.fit(X_train, y_train)
 
-            import joblib
 
             state = get_or_init_state()
             models_dir = state.settings.pycaret.models_dir

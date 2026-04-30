@@ -21,7 +21,6 @@ from app.modeling.flaml.service import FlamlAutoMLService
 from app.modeling.pycaret.service import PyCaretExperimentService
 from app.pages.services.experiment_workflow import ExperimentWorkflowService
 from app.pages.services.prediction_workflow import PredictionWorkflowService
-from app.pages.services.experiment_workflow import ExperimentWorkflowService
 from app.prediction import PredictionService, SchemaValidationMode
 from app.registry.registry_service import RegistryService
 from app.storage.store import AppMetadataStore
@@ -46,13 +45,13 @@ def load_dataset_for_ui(input_spec: DatasetInputSpec) -> LoadedDataset:
     return _load_dataset_cached(signature)
 
 
-def get_metadata_store(app_settings: "AppSettings") -> AppMetadataStore | None:
+def get_metadata_store(app_settings: AppSettings) -> AppMetadataStore | None:
     """Return a cached metadata-store resource for the current app settings."""
 
     return _get_metadata_store_resource(database_path=str(app_settings.database.path))
 
 
-def get_prediction_service(app_settings: "AppSettings") -> PredictionService:
+def get_prediction_service(app_settings: AppSettings) -> PredictionService:
     """Return a cached prediction service for the current UI settings."""
 
     prediction_settings = app_settings.prediction
@@ -84,7 +83,7 @@ def get_experiment_workflow_service() -> ExperimentWorkflowService:
     return _get_experiment_workflow_service_resource()
 
 
-def get_history_service(app_settings: "AppSettings") -> HistoryService:
+def get_history_service(app_settings: AppSettings) -> HistoryService:
     """Return a cached MLflow history service for the current UI settings."""
 
     tracking_settings = app_settings.tracking
@@ -95,7 +94,7 @@ def get_history_service(app_settings: "AppSettings") -> HistoryService:
     )
 
 
-def get_registry_service(app_settings: "AppSettings") -> RegistryService:
+def get_registry_service(app_settings: AppSettings) -> RegistryService:
     """Return a cached MLflow registry service for the current UI settings."""
 
     tracking_settings = app_settings.tracking
@@ -108,7 +107,7 @@ def get_registry_service(app_settings: "AppSettings") -> RegistryService:
     )
 
 
-def get_pycaret_experiment_service(app_settings: "AppSettings") -> PyCaretExperimentService:
+def get_pycaret_experiment_service(app_settings: AppSettings) -> PyCaretExperimentService:
     """Return a cached PyCaret experiment service for the current UI settings."""
 
     settings = app_settings.pycaret
@@ -128,7 +127,7 @@ def get_pycaret_experiment_service(app_settings: "AppSettings") -> PyCaretExperi
     )
 
 
-def get_flaml_automl_service(app_settings: "AppSettings") -> FlamlAutoMLService:
+def get_flaml_automl_service(app_settings: AppSettings) -> FlamlAutoMLService:
     """Return a cached FLAML AutoML service for the current UI settings."""
 
     settings = app_settings.flaml
@@ -146,12 +145,12 @@ def get_flaml_automl_service(app_settings: "AppSettings") -> FlamlAutoMLService:
 
 
 def list_cached_mlflow_runs(
-    app_settings: "AppSettings",
+    app_settings: AppSettings,
     *,
     limit: int | None = None,
     sort_field: str | None = None,
     sort_direction: str | None = None,
-) -> list["RunHistoryItem"]:
+) -> list[RunHistoryItem]:
     """Return cached MLflow run history for the current UI settings."""
 
     tracking_settings = app_settings.tracking
@@ -165,7 +164,7 @@ def list_cached_mlflow_runs(
     )
 
 
-def list_cached_registered_models(app_settings: "AppSettings") -> list["RegistryModelSummary"]:
+def list_cached_registered_models(app_settings: AppSettings) -> list[RegistryModelSummary]:
     """Return cached registry model summaries for the current UI settings."""
 
     tracking_settings = app_settings.tracking
@@ -179,9 +178,9 @@ def list_cached_registered_models(app_settings: "AppSettings") -> list["Registry
 
 
 def list_cached_model_versions(
-    app_settings: "AppSettings",
+    app_settings: AppSettings,
     model_name: str,
-) -> list["RegistryVersionSummary"]:
+) -> list[RegistryVersionSummary]:
     """Return cached registry versions for one registered model."""
 
     tracking_settings = app_settings.tracking
@@ -404,7 +403,7 @@ def _list_cached_mlflow_runs(
     limit: int | None,
     sort_field: str | None = None,
     sort_direction: str | None = None,
-) -> list["RunHistoryItem"]:
+) -> list[RunHistoryItem]:
     from app.tracking.filters import RunHistorySort, RunSortField, SortDirection
 
     sort_spec: RunHistorySort | None = None
@@ -429,7 +428,7 @@ def _list_cached_registered_models(
     champion_alias: str,
     candidate_alias: str,
     archived_tag_key: str,
-) -> list["RegistryModelSummary"]:
+) -> list[RegistryModelSummary]:
     return _get_registry_service_resource(
         tracking_uri=tracking_uri,
         registry_uri=registry_uri,
@@ -448,7 +447,7 @@ def _list_cached_model_versions(
     candidate_alias: str,
     archived_tag_key: str,
     model_name: str,
-) -> list["RegistryVersionSummary"]:
+) -> list[RegistryVersionSummary]:
     return _get_registry_service_resource(
         tracking_uri=tracking_uri,
         registry_uri=registry_uri,

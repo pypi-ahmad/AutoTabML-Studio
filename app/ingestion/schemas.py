@@ -11,7 +11,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.ingestion.types import IngestionSourceType
 
-
 DEFAULT_LOCAL_MAX_FILE_BYTES = 200 * 1024 * 1024
 
 

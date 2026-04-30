@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page
+from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_cache import (
     get_metadata_store,
     get_registry_service,
@@ -14,7 +15,6 @@ from app.pages.ui_cache import (
     list_cached_registered_models,
 )
 from app.pages.ui_errors import log_ui_exception
-from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_labels import PROMOTION_LABELS, format_enum_value, make_format_func
 from app.security.masking import safe_error_message
 from app.state.session import get_or_init_state

@@ -11,9 +11,9 @@ import respx
 from app.ingestion.errors import RemoteAccessError
 from app.ingestion.url_loader import fetch_url_bytes, probe_url
 from app.security.safe_http import (
+    TABULAR_CONTENT_TYPES,
     ResponseTooLargeError,
     SafeFetchPolicy,
-    TABULAR_CONTENT_TYPES,
     UnsafeContentTypeError,
     UnsafeURLError,
     safe_download_to_path,

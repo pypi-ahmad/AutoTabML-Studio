@@ -35,7 +35,7 @@ _REGISTRY_LIST_PAGE_SIZE = 1000
 _registry_cache_lock = threading.Lock()
 _registry_cache: dict[
     tuple[str | None, str | None],
-    tuple[float, list["RegistryModelSummary"]],
+    tuple[float, list[RegistryModelSummary]],
 ] = {}
 
 

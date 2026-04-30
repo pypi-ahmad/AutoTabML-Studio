@@ -5,9 +5,9 @@ from __future__ import annotations
 import streamlit as st
 
 from app.pages.dataset_workspace import go_to_page, render_dataset_header
+from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_cache import get_metadata_store
 from app.pages.ui_errors import log_ui_exception
-from app.pages.shared_history import render_past_runs_section, render_saved_models_section
 from app.pages.ui_labels import format_enum_value
 from app.pages.workflow_guide import render_workflow_banner
 from app.security.masking import safe_error_message

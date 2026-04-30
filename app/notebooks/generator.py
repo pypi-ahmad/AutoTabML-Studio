@@ -19,7 +19,6 @@ from typing import Any
 import nbformat
 from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
-
 # ── Allowlists & validation ────────────────────────────────────────────
 
 ALLOWED_JOB_TYPES: frozenset[str] = frozenset(

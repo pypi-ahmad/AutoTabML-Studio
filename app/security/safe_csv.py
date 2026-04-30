@@ -12,7 +12,6 @@ from typing import Any
 
 import pandas as pd
 
-
 DANGEROUS_CSV_PREFIXES: tuple[str, ...] = ("=", "+", "-", "@")
 
 

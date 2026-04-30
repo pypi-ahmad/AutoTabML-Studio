@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import asyncio
 import abc
+import asyncio
 from typing import Any
 
 import pandas as pd

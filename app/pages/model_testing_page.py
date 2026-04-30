@@ -12,9 +12,7 @@ from app.pages.dataset_workspace import go_to_page
 from app.pages.ui_cache import get_prediction_service, get_prediction_workflow_service
 from app.pages.ui_errors import log_ui_debug_exception, log_ui_exception
 from app.pages.ui_labels import (
-    PREDICTION_TASK_TYPE_LABELS,
     SOURCE_TYPE_LABELS,
-    format_enum_value,
     render_decision_support_banner,
     render_model_trust_card,
 )
