@@ -91,9 +91,7 @@ def _render_markdown(bundle: BenchmarkResultBundle) -> str:
     if summary.best_model_name is not None:
         lines.append(f"- Best model: {summary.best_model_name} ({summary.best_score})")
     if summary.fastest_model_name is not None:
-        lines.append(
-            f"- Fastest model: {summary.fastest_model_name} ({summary.fastest_model_time_seconds:.4f}s)"
-        )
+        lines.append(f"- Fastest model: {summary.fastest_model_name} ({summary.fastest_model_time_seconds:.4f}s)")
     if summary.sampled_row_count is not None:
         lines.append(f"- Sampled rows used for benchmark: {summary.sampled_row_count}")
     lines.append("")
@@ -111,9 +109,7 @@ def _render_markdown(bundle: BenchmarkResultBundle) -> str:
         lines.append("| Rank | Model | Primary Score | Time (s) |")
         lines.append("|------|-------|---------------|----------|")
         for row in bundle.top_models:
-            lines.append(
-                f"| {row.rank} | {row.model_name} | {row.primary_score} | {row.training_time_seconds} |"
-            )
+            lines.append(f"| {row.rank} | {row.model_name} | {row.primary_score} | {row.training_time_seconds} |")
         lines.append("")
 
     return "\n".join(lines)
@@ -144,7 +140,9 @@ def _write_score_chart(
     )
     top_models = bundle.top_models[:10]
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.barh([row.model_name for row in reversed(top_models)], [row.primary_score or 0.0 for row in reversed(top_models)])
+    ax.barh(
+        [row.model_name for row in reversed(top_models)], [row.primary_score or 0.0 for row in reversed(top_models)]
+    )
     ax.set_title(f"Top Benchmark Models by {bundle.summary.ranking_metric}")
     ax.set_xlabel(bundle.summary.ranking_metric)
     fig.tight_layout()
@@ -179,7 +177,10 @@ def _write_time_chart(
     )
     top_models = timed_models[:10]
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.barh([row.model_name for row in reversed(top_models)], [row.training_time_seconds or 0.0 for row in reversed(top_models)])
+    ax.barh(
+        [row.model_name for row in reversed(top_models)],
+        [row.training_time_seconds or 0.0 for row in reversed(top_models)],
+    )
     ax.set_title("Top Benchmark Model Training Times")
     ax.set_xlabel("Time Taken (seconds)")
     fig.tight_layout()

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
+import sqlite3
 from typing import TYPE_CHECKING
 
 from app.storage.models import SavedLocalModelRecord
@@ -102,9 +102,7 @@ class SavedModelRepository(BaseRepository):
             target_column=row["target_column"],
             dataset_fingerprint=row["dataset_fingerprint"],
             metadata_path=Path(row["metadata_path"]) if row["metadata_path"] else None,
-            experiment_snapshot_path=Path(row["experiment_snapshot_path"])
-            if row["experiment_snapshot_path"]
-            else None,
+            experiment_snapshot_path=Path(row["experiment_snapshot_path"]) if row["experiment_snapshot_path"] else None,
             metadata=self._loads_dict(row["metadata_json"]),
             created_at=self._from_iso(row["created_at"]),
             updated_at=self._from_iso(row["updated_at"]),

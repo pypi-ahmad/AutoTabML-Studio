@@ -18,9 +18,11 @@ from app.ingestion.types import IngestionSourceType
 class BaseLoader(abc.ABC):
     """Common load lifecycle for all dataset sources."""
 
-    supported_source_types: tuple[IngestionSourceType, ...] = tuple()
+    supported_source_types: tuple[IngestionSourceType, ...] = ()
 
-    def load(self, input_spec: DatasetInputSpec, *, preview: bool = False, preview_rows: int | None = None) -> LoadedDataset:
+    def load(
+        self, input_spec: DatasetInputSpec, *, preview: bool = False, preview_rows: int | None = None
+    ) -> LoadedDataset:
         """Load, normalize, and enrich a dataset from the supplied input spec."""
 
         self.validate_input(input_spec)

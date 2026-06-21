@@ -281,9 +281,8 @@ def _find_score_column(df: pd.DataFrame) -> str | None:
     # Fallback: first numeric column after Rank/Model
     for col in df.columns:
         if col not in ("Rank", "Model", "Task Type", "Benchmark Backend",
-                        "Run Timestamp", "Warnings", "Training Time (s)"):
-            if pd.api.types.is_numeric_dtype(df[col]):
-                return col
+                        "Run Timestamp", "Warnings", "Training Time (s)") and pd.api.types.is_numeric_dtype(df[col]):
+            return col
     return None
 
 

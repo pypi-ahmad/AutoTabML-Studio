@@ -108,9 +108,7 @@ def _render_markdown(bundle: ExperimentResultBundle) -> str:
     lines.append(f"- Task type: {summary.task_type.value}")
     lines.append(f"- Target column: {summary.target_column}")
     if summary.compare_optimize_metric:
-        lines.append(
-            f"- Compare metric: {summary.compare_optimize_metric} ({summary.compare_ranking_direction.value})"
-        )
+        lines.append(f"- Compare metric: {summary.compare_optimize_metric} ({summary.compare_ranking_direction.value})")
     if summary.best_baseline_model_name:
         lines.append(f"- Best baseline: {summary.best_baseline_model_name} ({summary.best_baseline_score})")
     if summary.tuned_model_name:

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import importlib
 from dataclasses import dataclass
+import importlib
 
 from app.config.enums import WorkspaceMode
 
@@ -64,7 +64,7 @@ def get_nav_sections() -> list[tuple[str, list[PageSpec]]]:
 
     Returns a list of ``(section_display_name, [PageSpec, ...])``.
     """
-    section_lookup = {key: display for key, display in NAV_SECTIONS}
+    section_lookup = dict(NAV_SECTIONS)
     groups: dict[str, list[PageSpec]] = {key: [] for key, _ in NAV_SECTIONS}
     for page in _PAGES:
         groups.setdefault(page.section, []).append(page)

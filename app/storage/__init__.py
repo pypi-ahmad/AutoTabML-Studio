@@ -32,6 +32,7 @@ def build_metadata_store(settings: AppSettings) -> AppMetadataStore | None:
     store.initialize_if_needed()
     return store
 
+
 __all__ = [
     "AppJobStatus",
     "AppJobType",

@@ -22,8 +22,8 @@ are still observable and never silent.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Mapping
+import logging
 from typing import Any, NoReturn, TypeVar
 
 ExceptionT = TypeVar("ExceptionT", bound=BaseException)

@@ -54,9 +54,7 @@ def resolve_ranking_metric(
         candidates.append(default_metric)
 
     task_defaults = (
-        DEFAULT_CLASSIFICATION_METRICS
-        if task_type == BenchmarkTaskType.CLASSIFICATION
-        else DEFAULT_REGRESSION_METRICS
+        DEFAULT_CLASSIFICATION_METRICS if task_type == BenchmarkTaskType.CLASSIFICATION else DEFAULT_REGRESSION_METRICS
     )
     for metric in task_defaults:
         if metric not in candidates:
@@ -77,9 +75,7 @@ def resolve_ranking_metric(
                 )
                 continue
             if preferred_metric and metric != preferred_metric:
-                warnings.append(
-                    f"Ranking metric '{preferred_metric}' was unavailable; fell back to '{metric}'."
-                )
+                warnings.append(f"Ranking metric '{preferred_metric}' was unavailable; fell back to '{metric}'.")
             return metric, metric_sort_direction(metric), warnings
 
     raise BenchmarkExecutionError("Unable to resolve a usable ranking metric from benchmark results.")

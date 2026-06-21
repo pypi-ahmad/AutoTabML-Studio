@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timezone
+import logging
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlparse
@@ -81,7 +81,9 @@ def initialize_local_runtime(
                 operation="startup.initialize_database",
                 context={"db_path": str(settings.database.path)},
             )
-            status.issues.append(StartupIssue(severity="error", message=f"Could not initialize local app database: {exc}"))
+            status.issues.append(
+                StartupIssue(severity="error", message=f"Could not initialize local app database: {exc}")
+            )
 
     status.issues.extend(_validate_mlflow_settings(settings))
 
@@ -104,22 +106,39 @@ def format_startup_issues(status: StartupStatus) -> list[str]:
 
 def _validate_mlflow_settings(settings: AppSettings) -> list[StartupIssue]:
     issues: list[StartupIssue] = []
-    for label, value in (("tracking_uri", settings.mlflow.tracking_uri), ("registry_uri", settings.mlflow.registry_uri)):
+    for label, value in (
+        ("tracking_uri", settings.mlflow.tracking_uri),
+        ("registry_uri", settings.mlflow.registry_uri),
+    ):
         if not value:
             continue
         cleaned = value.strip()
         if not cleaned:
-            issues.append(StartupIssue(severity="warning", message=f"Configured MLflow {label} is blank and will be ignored."))
+            issues.append(
+                StartupIssue(severity="warning", message=f"Configured MLflow {label} is blank and will be ignored.")
+            )
             continue
         if any(char.isspace() for char in cleaned):
-            issues.append(StartupIssue(severity="warning", message=f"Configured MLflow {label} contains whitespace and may be invalid: {cleaned!r}"))
+            issues.append(
+                StartupIssue(
+                    severity="warning",
+                    message=f"Configured MLflow {label} contains whitespace and may be invalid: {cleaned!r}",
+                )
+            )
             continue
         parsed = urlparse(cleaned)
-        looks_like_local_path = Path(cleaned).anchor or cleaned.startswith(".") or cleaned.startswith("/")
+        looks_like_local_path = Path(cleaned).anchor or cleaned.startswith((".", "/"))
         if "://" in cleaned and not parsed.scheme:
-            issues.append(StartupIssue(severity="warning", message=f"Configured MLflow {label} is malformed: {cleaned!r}"))
+            issues.append(
+                StartupIssue(severity="warning", message=f"Configured MLflow {label} is malformed: {cleaned!r}")
+            )
         elif not parsed.scheme and not looks_like_local_path:
-            issues.append(StartupIssue(severity="warning", message=f"Configured MLflow {label} does not look like a URI or local path: {cleaned!r}"))
+            issues.append(
+                StartupIssue(
+                    severity="warning",
+                    message=f"Configured MLflow {label} does not look like a URI or local path: {cleaned!r}",
+                )
+            )
     return issues
 
 
@@ -154,10 +173,7 @@ def _validate_colab_mcp_prerequisites() -> list[StartupIssue]:
         issues.append(
             StartupIssue(
                 severity="warning",
-                message=(
-                    "Colab MCP backend selected but 'uvx' is not on PATH. "
-                    "Install it with: pip install uv"
-                ),
+                message=("Colab MCP backend selected but 'uvx' is not on PATH. Install it with: pip install uv"),
             )
         )
     try:

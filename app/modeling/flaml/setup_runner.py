@@ -9,8 +9,10 @@ import pandas as pd
 
 from app.errors import log_exception
 from app.modeling.benchmark.schemas import BenchmarkTaskType
-from app.modeling.benchmark.selectors import infer_task_type as benchmark_infer_task_type
-from app.modeling.benchmark.selectors import validate_target as benchmark_validate_target
+from app.modeling.benchmark.selectors import (
+    infer_task_type as benchmark_infer_task_type,
+    validate_target as benchmark_validate_target,
+)
 from app.modeling.flaml.errors import FlamlDependencyError
 from app.modeling.flaml.schemas import FlamlTaskType
 
@@ -38,10 +40,7 @@ def is_flaml_available() -> bool:
 def flaml_install_guidance() -> str:
     """Return a user-facing installation hint for environments without FLAML."""
 
-    message = (
-        "FLAML is not available in this environment. "
-        "Install it with: `pip install flaml[automl]`"
-    )
+    message = "FLAML is not available in this environment. Install it with: `pip install flaml[automl]`"
     if sys.version_info >= (3, 13):
         message += (
             "\n\n**Note:** FLAML may not be compatible with your current Python version. "

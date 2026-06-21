@@ -66,17 +66,11 @@ class CustomMetricSpec(BaseModel):
         }
         duplicate_keys = sorted(reserved.intersection(value))
         if duplicate_keys:
-            raise ValueError(
-                "Custom metric kwargs contain reserved names: "
-                + ", ".join(duplicate_keys)
-                + "."
-            )
+            raise ValueError("Custom metric kwargs contain reserved names: " + ", ".join(duplicate_keys) + ".")
 
         for key, item in value.items():
             if not _is_json_safe_metric_kwarg(item):
-                raise ValueError(
-                    f"Custom metric kwarg '{key}' must be JSON-serializable and non-callable."
-                )
+                raise ValueError(f"Custom metric kwarg '{key}' must be JSON-serializable and non-callable.")
         return value
 
 

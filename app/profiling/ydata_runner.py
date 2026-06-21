@@ -9,10 +9,10 @@ from __future__ import annotations
 import contextlib
 import io
 import logging
-import shutil
-import warnings
 from pathlib import Path
+import shutil
 from typing import Any
+import warnings
 
 import pandas as pd
 
@@ -35,7 +35,11 @@ _YDATA_IMPORT_ERROR: ImportError | None = None
 def _suppress_profiling_runtime_noise():
     """Suppress known non-actionable third-party warnings during profiling."""
 
-    with warnings.catch_warnings(), contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+    with (
+        warnings.catch_warnings(),
+        contextlib.redirect_stdout(io.StringIO()),
+        contextlib.redirect_stderr(io.StringIO()),
+    ):
         try:
             from pyparsing.warnings import PyparsingDeprecationWarning
         except ImportError:  # pragma: no cover - optional dependency surface
@@ -137,6 +141,7 @@ class YDataProfilingService(BaseProfilingService):
         try:
             with _suppress_profiling_runtime_noise():
                 from ydata_profiling import ProfileReport  # noqa: WPS433
+
                 return ProfileReport(df, **kwargs)
         except (AttributeError, ImportError, RuntimeError, TypeError, ValueError) as exc:
             log_and_wrap(

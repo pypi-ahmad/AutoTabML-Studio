@@ -7,10 +7,10 @@ schemas and raises app-level exceptions.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import logging
 import threading
 import time
-from datetime import datetime, timezone
 from typing import Any
 
 from app.errors import log_exception
@@ -71,9 +71,7 @@ def is_mlflow_available() -> bool:
 
 def _require_mlflow():
     if not is_mlflow_available():
-        raise TrackingUnavailableError(
-            "mlflow is not installed. Install it with: pip install mlflow"
-        )
+        raise TrackingUnavailableError("mlflow is not installed. Install it with: pip install mlflow")
 
 
 def _get_client(tracking_uri: str | None = None, registry_uri: str | None = None):
@@ -222,15 +220,11 @@ def list_registered_models(
         raw_models = _list_all_registered_models(client)
     except handled_errors as exc:
         raise RegistryUnavailableError(
-            f"Model registry is not available. This MLflow backend may not expose "
-            f"registry APIs. Error: {exc}"
+            f"Model registry is not available. This MLflow backend may not expose registry APIs. Error: {exc}"
         ) from exc
 
     versions_by_name = _list_all_model_versions_grouped(client)
-    summaries = [
-        _normalize_registered_model(m, versions=versions_by_name.get(m.name))
-        for m in raw_models
-    ]
+    summaries = [_normalize_registered_model(m, versions=versions_by_name.get(m.name)) for m in raw_models]
 
     if use_cache:
         _write_registry_cache(cache_key, summaries)
@@ -267,9 +261,7 @@ def list_model_versions(
     try:
         raw_versions = client.search_model_versions(f"name='{name}'")
     except handled_errors as exc:
-        raise ModelNotFoundError(
-            f"Could not list versions for model '{name}': {exc}"
-        ) from exc
+        raise ModelNotFoundError(f"Could not list versions for model '{name}': {exc}") from exc
     return [_normalize_model_version(v) for v in raw_versions]
 
 
@@ -287,9 +279,7 @@ def get_model_version(
     try:
         raw = client.get_model_version(name, version)
     except handled_errors as exc:
-        raise VersionNotFoundError(
-            f"Version '{version}' of model '{name}' not found: {exc}"
-        ) from exc
+        raise VersionNotFoundError(f"Version '{version}' of model '{name}' not found: {exc}") from exc
     return _normalize_model_version(raw)
 
 
@@ -307,9 +297,7 @@ def get_model_version_by_alias(
     try:
         raw = client.get_model_version_by_alias(name, alias)
     except handled_errors as exc:
-        raise VersionNotFoundError(
-            f"Alias '{alias}' of model '{name}' not found: {exc}"
-        ) from exc
+        raise VersionNotFoundError(f"Alias '{alias}' of model '{name}' not found: {exc}") from exc
     return _normalize_model_version(raw)
 
 
@@ -337,9 +325,7 @@ def create_registered_model(
             tags=tags or {},
         )
     except handled_errors as exc:
-        raise RegistryUnavailableError(
-            f"Could not create registered model '{name}': {exc}"
-        ) from exc
+        raise RegistryUnavailableError(f"Could not create registered model '{name}': {exc}") from exc
     invalidate_registry_cache()
     return _normalize_registered_model(raw)
 
@@ -367,9 +353,7 @@ def create_model_version(
             tags=tags or {},
         )
     except handled_errors as exc:
-        raise RegistryUnavailableError(
-            f"Could not create version for model '{name}': {exc}"
-        ) from exc
+        raise RegistryUnavailableError(f"Could not create version for model '{name}': {exc}") from exc
     invalidate_registry_cache()
     return _normalize_model_version(raw)
 
@@ -511,13 +495,13 @@ def _normalize_run(raw, experiment_name_map: dict[str, str]) -> RunHistoryItem:
     status = _safe_run_status(info.status)
 
     model_name = (
-        params.get("best_baseline_model_name")
-        or params.get("tuned_model_name")
-        or params.get("selected_model_name")
+        params.get("best_baseline_model_name") or params.get("tuned_model_name") or params.get("selected_model_name")
     )
 
     primary_metric_name, primary_metric_value = _extract_primary_metric(
-        metrics, params, run_type,
+        metrics,
+        params,
+        run_type,
     )
 
     return RunHistoryItem(
@@ -606,10 +590,7 @@ def _normalize_registered_model(raw, versions: list[Any] | None = None) -> Regis
     aliases: dict[str, str] = {}
     if hasattr(raw, "aliases") and raw.aliases:
         if isinstance(raw.aliases, dict):
-            aliases = {
-                str(alias_name): str(alias_version)
-                for alias_name, alias_version in raw.aliases.items()
-            }
+            aliases = {str(alias_name): str(alias_version) for alias_name, alias_version in raw.aliases.items()}
         else:
             for alias in raw.aliases:
                 if hasattr(alias, "alias") and hasattr(alias, "version"):
@@ -823,5 +804,3 @@ def _safe_version_number(version: Any) -> int:
         return int(str(version))
     except (TypeError, ValueError):
         return 0
-
-

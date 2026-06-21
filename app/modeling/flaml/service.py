@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import logging
-import pickle
 from datetime import datetime, timezone
+import logging
 from pathlib import Path
+import pickle
 from time import perf_counter
 from typing import Any
 
@@ -100,9 +100,7 @@ class FlamlAutoMLService(BaseService):
         require_flaml()
 
         if config.target_column not in df.columns:
-            raise FlamlTargetError(
-                f"Target column '{config.target_column}' was not found in the dataset."
-            )
+            raise FlamlTargetError(f"Target column '{config.target_column}' was not found in the dataset.")
 
         started_at = perf_counter()
         working_df = df.copy()
@@ -112,9 +110,7 @@ class FlamlAutoMLService(BaseService):
         dropped_null_targets = int(working_df[config.target_column].isna().sum())
         if dropped_null_targets > 0:
             working_df = working_df.loc[working_df[config.target_column].notna()].copy()
-            warnings.append(
-                f"Dropped {dropped_null_targets} row(s) with null target values before search."
-            )
+            warnings.append(f"Dropped {dropped_null_targets} row(s) with null target values before search.")
 
         if working_df.empty:
             raise FlamlTargetError("No rows remain after dropping null target values.")

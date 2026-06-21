@@ -94,9 +94,7 @@ class PyCaretExperimentService(BaseExperimentService):
 
         setup_runner.require_pycaret()
         if config.target_column not in df.columns:
-            raise PyCaretTargetError(
-                f"Target column '{config.target_column}' was not found in the dataset."
-            )
+            raise PyCaretTargetError(f"Target column '{config.target_column}' was not found in the dataset.")
 
         started_at = perf_counter()
         working_df = df.copy()
@@ -104,9 +102,7 @@ class PyCaretExperimentService(BaseExperimentService):
         warnings: list[str] = []
         if dropped_null_targets > 0:
             working_df = working_df.loc[working_df[config.target_column].notna()].copy()
-            warnings.append(
-                f"Dropped {dropped_null_targets} row(s) with null target values before setup."
-            )
+            warnings.append(f"Dropped {dropped_null_targets} row(s) with null target values before setup.")
 
         task_type, task_warnings = resolve_task_type(
             working_df[config.target_column],
@@ -137,7 +133,13 @@ class PyCaretExperimentService(BaseExperimentService):
                 message=str(exc),
                 context={"task_type": task_type.value},
             )
-        except (AttributeError, KeyError, RuntimeError, TypeError, ValueError) as exc:  # pragma: no cover - exercised through tests
+        except (
+            AttributeError,
+            KeyError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:  # pragma: no cover - exercised through tests
             log_and_wrap(
                 logger,
                 exc,
@@ -386,9 +388,7 @@ class PyCaretExperimentService(BaseExperimentService):
     ) -> ExperimentResultBundle:
         self._require_runtime(bundle)
         if not bundle.compare_leaderboard:
-            raise PyCaretExecutionError(
-                "No compared models are available to save. Run compare_models first."
-            )
+            raise PyCaretExecutionError("No compared models are available to save. Run compare_models first.")
 
         rows_to_save = list(bundle.compare_leaderboard)
         if max_models is not None and max_models > 0:
@@ -434,9 +434,7 @@ class PyCaretExperimentService(BaseExperimentService):
             )
 
         if saved_count == 0:
-            raise PyCaretExecutionError(
-                "Automatic save could not persist any compared model."
-            )
+            raise PyCaretExecutionError("Automatic save could not persist any compared model.")
 
         top_row = bundle.compare_leaderboard[0]
         bundle.summary.selected_model_id = top_row.model_id
@@ -455,9 +453,7 @@ class PyCaretExperimentService(BaseExperimentService):
         runtime = self._require_runtime(bundle)
         resolved_model_id = resolve_model_id(selection, runtime.model_name_to_id)
         if resolved_model_id is None:
-            raise PyCaretExecutionError(
-                f"Could not resolve a PyCaret model id for '{selection.model_name}'."
-            )
+            raise PyCaretExecutionError(f"Could not resolve a PyCaret model id for '{selection.model_name}'.")
 
         estimator_key = f"baseline::{resolved_model_id}"
         if estimator_key in runtime.created_models:

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import hashlib
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -34,10 +34,7 @@ def compute_content_hash(dataframe: pd.DataFrame, sample_rows: int = 50) -> str 
     sample = dataframe.head(sample_rows).reset_index(drop=True)
     payload = {
         "columns": [str(column) for column in sample.columns],
-        "rows": [
-            [_stable_value(value) for value in row]
-            for row in sample.itertuples(index=False, name=None)
-        ],
+        "rows": [[_stable_value(value) for value in row] for row in sample.itertuples(index=False, name=None)],
     }
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()

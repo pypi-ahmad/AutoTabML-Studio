@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import importlib
 import json
 import logging
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
@@ -108,9 +108,7 @@ class LocalPyCaretModelLoader(ModelLoader):
         task_type = coerce_prediction_task_type(metadata.task_type)
 
         if task_type in {None, PredictionTaskType.UNKNOWN}:
-            raise ModelLoadError(
-                "Local saved PyCaret models require saved metadata or an explicit task_type_hint."
-            )
+            raise ModelLoadError("Local saved PyCaret models require saved metadata or an explicit task_type_hint.")
 
         try:
             from app.modeling.pycaret.persistence import load_model_artifact
@@ -228,9 +226,7 @@ class LocalFlamlModelLoader(ModelLoader):
             task_type = coerce_prediction_task_type(raw_task)
 
         if task_type in {None, PredictionTaskType.UNKNOWN}:
-            raise ModelLoadError(
-                "FLAML models require saved metadata or an explicit task_type_hint."
-            )
+            raise ModelLoadError("FLAML models require saved metadata or an explicit task_type_hint.")
 
         try:
             native_model = load_verified_pickle_artifact(
@@ -347,11 +343,7 @@ class MLflowModelLoader(ModelLoader):
             target_column = target_column or history_metadata.get("target_column")
 
         model_identifier = (
-            request.registry_model_name
-            or request.model_identifier
-            or request.model_uri
-            or run_id
-            or model_uri
+            request.registry_model_name or request.model_identifier or request.model_uri or run_id or model_uri
         )
 
         return LoadedModel(
@@ -399,6 +391,7 @@ class MLflowModelLoader(ModelLoader):
             raise ModelLoadError("mlflow is not installed. Install it with: pip install mlflow")
         try:
             import mlflow
+
             pyfunc = importlib.import_module("mlflow.pyfunc")
             if self._tracking_uri:
                 mlflow.set_tracking_uri(self._tracking_uri)

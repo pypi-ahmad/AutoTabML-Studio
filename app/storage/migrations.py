@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import sqlite3
 
 _VERSION_TABLE = "schema_migrations"
 _LEGACY_INFO_TABLE = "app_metadata_info"
@@ -196,9 +196,7 @@ def _detect_legacy_version(connection: sqlite3.Connection) -> int:
             return 1
         return 0
 
-    row = connection.execute(
-        f"SELECT value FROM {_LEGACY_INFO_TABLE} WHERE key = 'schema_version'"
-    ).fetchone()
+    row = connection.execute(f"SELECT value FROM {_LEGACY_INFO_TABLE} WHERE key = 'schema_version'").fetchone()
     if row is None:
         return 0
     try:

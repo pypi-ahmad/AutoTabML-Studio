@@ -236,8 +236,7 @@ def render_experiment_page() -> None:
         st.caption("**Hardware**")
         from app.gpu import cuda_summary
         gpu_info = cuda_summary()
-        from app.pages.ui_labels import GPU_LABELS
-        from app.pages.ui_labels import make_format_func as _mff
+        from app.pages.ui_labels import GPU_LABELS, make_format_func as _mff
         gpu_options: list[bool | str] = [True, False, "force"]
         default_gpu = settings.default_use_gpu if settings.default_use_gpu in gpu_options else True
         use_gpu = st.selectbox(

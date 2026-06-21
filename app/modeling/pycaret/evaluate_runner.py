@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 import logging
 import os
-from contextlib import contextmanager
 from pathlib import Path
 
 from app.errors import log_exception
@@ -48,7 +48,14 @@ def generate_evaluation_plots(
                     plot_kwargs=evaluation.plot_kwargs or None,
                     verbose=False,
                 )
-        except (AttributeError, KeyError, OSError, RuntimeError, TypeError, ValueError) as exc:  # pragma: no cover - exercised through tests
+        except (
+            AttributeError,
+            KeyError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:  # pragma: no cover - exercised through tests
             log_exception(
                 logger,
                 exc,
@@ -64,9 +71,7 @@ def generate_evaluation_plots(
             warnings.append(f"Plot '{plot_id}' did not produce a saved artifact for {model_name}.")
             continue
 
-        final_name = (
-            f"{safe_artifact_stem(model_name)}_{safe_artifact_stem(plot_id)}.png"
-        )
+        final_name = f"{safe_artifact_stem(model_name)}_{safe_artifact_stem(plot_id)}.png"
         final_path = output_dir / final_name
         if final_path.exists() and final_path != generated_path:
             final_path.unlink()
@@ -84,7 +89,13 @@ def generate_evaluation_plots(
     if evaluation.interactive:
         try:
             experiment_handle.evaluate_model(estimator, plot_kwargs=evaluation.plot_kwargs or None)
-        except (AttributeError, OSError, RuntimeError, TypeError, ValueError) as exc:  # pragma: no cover - exercised through tests
+        except (
+            AttributeError,
+            OSError,
+            RuntimeError,
+            TypeError,
+            ValueError,
+        ) as exc:  # pragma: no cover - exercised through tests
             log_exception(
                 logger,
                 exc,

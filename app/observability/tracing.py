@@ -9,9 +9,9 @@ changes required.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterator
 import contextlib
 import functools
-from collections.abc import Callable, Iterator
 from typing import Any, Protocol, TypeVar
 
 from app.observability.context import current_context

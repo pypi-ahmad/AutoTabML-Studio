@@ -40,8 +40,8 @@ import argparse
 import inspect
 import json
 import logging
-import sys
 from pathlib import Path
+import sys
 from urllib.parse import urlparse
 
 from app import APP_NAME, CLI_ENTRYPOINT, DIST_NAME, STREAMLIT_ENTRYPOINT, __version__
