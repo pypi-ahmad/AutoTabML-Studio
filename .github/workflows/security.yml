@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
         with:
           python-version: '3.13'
 
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
         with:
           fetch-depth: 0
 
@@ -98,3 +98,32 @@ jobs:
 
       - name: Run gitleaks
         run: gitleaks detect --source . --config .gitleaks.toml --no-banner --redact
+
+  bandit-pip-audit:
+    name: Bandit + pip-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --group security --group dev
+
+      - name: Run Bandit
+        run: uv run --no-sync bandit -r app/ -c pyproject.toml
+
+      - name: Run pip-audit
+        run: uv run --no-sync pip-audit

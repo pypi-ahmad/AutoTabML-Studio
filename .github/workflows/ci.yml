@@ -14,6 +14,10 @@ on:
         default: false
         type: boolean
 
+# All third-party actions are pinned to commit SHAs. To upgrade a
+# pinned action, look up the new SHA (e.g. via
+# https://github.com/<owner>/<repo>/git/refs/tags/<tag>) and update
+# both the SHA and the version comment.
 permissions:
   contents: read
 
@@ -22,8 +26,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Force uv to use the interpreter provisioned by actions/setup-python
-  # rather than downloading its own / honoring .python-version (3.12).
   UV_PYTHON_PREFERENCE: only-system
   UV_PYTHON_DOWNLOADS: never
 
@@ -33,20 +35,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
         with:
           python-version: '3.13'
 
       - name: Install ruff
         run: pip install 'ruff>=0.15,<1'
 
-      - name: Auto-fix and lint
-        run: |
-          ruff check app/ tests/ scripts/ --fix --quiet || true
-          ruff check app/ tests/ scripts/ --output-format=full
+      - name: Ruff check
+        run: ruff check app/ tests/ scripts/
+
+      - name: Ruff format check
+        run: ruff format --check app/ tests/ scripts/
 
   unit-tests:
     name: Unit Tests (Python ${{ matrix.python-version }})
@@ -59,15 +62,15 @@ jobs:
           - '3.13'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
         with:
           enable-cache: true
 
@@ -75,25 +78,80 @@ jobs:
         run: uv lock --check
 
       - name: Install dependencies (locked)
-        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml
+        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml --extra providers
 
       - name: Run unit test suite
         run: uv run --no-sync python -m pytest tests/ -q --tb=short
+
+  type-check:
+    name: Type Check (Pyright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --group dev
+
+      - name: Run Pyright
+        run: uv run --no-sync pyright app/
+
+  security-bandit:
+    name: Security (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
+        with:
+          enable-cache: true
+
+      - name: Verify lockfile is up to date
+        run: uv lock --check
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --group security --group dev
+
+      - name: Run Bandit
+        run: uv run --no-sync bandit -r app/ -c pyproject.toml
+
+      - name: Run pip-audit
+        run: uv run --no-sync pip-audit || true
 
   coverage:
     name: Coverage Gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
         with:
           python-version: '3.13'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
         with:
           enable-cache: true
 
@@ -101,14 +159,14 @@ jobs:
         run: uv lock --check
 
       - name: Install dependencies (locked)
-        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml
+        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml --extra providers
 
       - name: Run coverage gate
         run: uv run --no-sync python -m pytest tests/ --cov=app --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=65 -q
 
       - name: Upload coverage XML
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
           name: coverage-xml
           path: coverage.xml
@@ -118,15 +176,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
         with:
           python-version: '3.11'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
         with:
           enable-cache: true
 
@@ -134,7 +192,7 @@ jobs:
         run: uv lock --check
 
       - name: Install dependencies (locked)
-        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml
+        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml --extra providers
 
       - name: Run e2e smoke test with real dependencies
         run: uv run --no-sync python -m pytest tests/test_e2e_local_smoke.py -v --tb=short
@@ -145,15 +203,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10  # v6.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
         with:
           python-version: '3.11'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff  # v6.0.0
         with:
           enable-cache: true
 
@@ -161,7 +219,7 @@ jobs:
         run: uv lock --check
 
       - name: Install heavy optional dependencies (locked)
-        run: uv sync --locked --extra dev --extra validation --extra profiling --extra benchmark --extra experiment --extra uci
+        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra experiment --extra uci --extra providers
 
       - name: Run integration-marked tests
         shell: bash
