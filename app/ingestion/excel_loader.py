@@ -178,7 +178,7 @@ class ExcelLoader(BaseLoader):
             sheet_names = list(excel_file.sheet_names)
             dataframe = pd.read_excel(excel_file, sheet_name=sheet_name, nrows=row_limit)
             actual_sheet_name = self._resolve_sheet_name(sheet_name, sheet_names)
-        return dataframe, sheet_names, actual_sheet_name, False
+        return dataframe, sheet_names, actual_sheet_name, False  # pyright: ignore[reportArgumentType,reportReturnType]  # pandas-stubs overload narrowing
 
     def _supports_read_only(self, path: Path, *, content_type: str | None) -> bool:
         return path.suffix.lower() in _OPENPYXL_READ_ONLY_SUFFIXES or content_type in _OPENPYXL_READ_ONLY_CONTENT_TYPES

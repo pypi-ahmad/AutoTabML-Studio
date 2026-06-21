@@ -141,7 +141,9 @@ class FlamlAutoMLService(BaseService):
             )
 
         # Run FLAML
-        from flaml import AutoML
+        from flaml import (
+            AutoML,  # pyright: ignore[reportPrivateImportUsage,reportUnknownVariableType]  # FLAML's __init__ marks AutoML as private
+        )
 
         automl = AutoML()
         fit_kwargs: dict[str, Any] = {

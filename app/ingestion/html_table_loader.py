@@ -258,7 +258,9 @@ class HTMLTableLoader(BaseLoader):
         return self._coerce_dataframe_types(pd.DataFrame(normalized_rows, columns=normalized_header))
 
     def _is_header_row(self, row_tags: list[str], existing_header: list[str] | None) -> bool:
-        return existing_header is None and row_tags and all(tag == "th" for tag in row_tags)
+        return bool(
+            existing_header is None and row_tags and all(tag == "th" for tag in row_tags),
+        )  # pyright: ignore[reportArgumentType]  # pandas-stubs overload narrowing
 
     def _extract_text(self, element) -> str:
         return " ".join(part.strip() for part in element.itertext() if part and part.strip())
