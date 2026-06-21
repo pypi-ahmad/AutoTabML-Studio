@@ -198,14 +198,36 @@ class TestSettingsPersistence:
 
 
 class TestPackagingMetadata:
-    def test_profiling_extra_pins_compatible_setuptools(self):
+    def test_profiling_extra_has_no_setuptools_pin(self):
+        """As of v0.2.0 the project builds with hatchling; the profiling extra no
+        longer needs to pin ``setuptools<82`` to keep ``ydata-profiling`` happy
+        because ``pkg_resources`` is no longer imported from the runtime.
+        """
         data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
 
         profiling_deps = data["project"]["optional-dependencies"]["profiling"]
-        setuptools_dep = next(dep for dep in profiling_deps if dep.startswith("setuptools"))
+        assert not any(dep.startswith("setuptools") for dep in profiling_deps), (
+            "Profiling extra should not pin setuptools now that the build uses hatchling."
+        )
 
-        assert ">=68" in setuptools_dep
-        assert "<82" in setuptools_dep
+    def test_build_backend_is_hatchling(self):
+        data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+        backend = data["build-system"]["build-backend"]
+        assert backend == "hatchling.build"
+        requires = data["build-system"]["requires"]
+        assert any(req.startswith("hatchling") for req in requires)
+
+    def test_dependency_groups_declared(self):
+        data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+        groups = data["dependency-groups"]
+        assert "dev" in groups
+        assert "security" in groups
+        assert "docs" in groups
+
+    def test_pyproject_marks_package_typed(self):
+        data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+        classifiers = data["project"]["classifiers"]
+        assert "Typing :: Typed" in classifiers
 
     def test_experiment_extra_guards_pycaret_on_python_313(self):
         data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
