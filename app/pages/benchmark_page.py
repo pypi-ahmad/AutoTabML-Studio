@@ -68,7 +68,9 @@ def render_benchmark_page() -> None:
 
     # ── Step 1: Choose Your Data ───────────────────────────────────────
     st.subheader("1. Choose Your Data")
-    selected_name, loaded_dataset = render_dataset_header("Benchmark", key_prefix="benchmark", metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header(
+        "Benchmark", key_prefix="benchmark", metadata_store=metadata_store
+    )
     if selected_name is None or loaded_dataset is None:
         return
 
@@ -87,6 +89,7 @@ def render_benchmark_page() -> None:
         help="The column you want the model to predict. For example, 'Price' for a pricing model or 'Churn' for customer churn.",
     )
     from app.pages.ui_labels import TASK_TYPE_LABELS, make_format_func
+
     task_type = BenchmarkTaskType(
         st.selectbox(
             "Task type",
@@ -250,7 +253,9 @@ def render_benchmark_page() -> None:
         )
 
         dataset_fingerprint = metadata.content_hash or metadata.schema_hash
-        with st.spinner("Running benchmark — testing dozens of algorithms. This may take several minutes for large datasets…"):
+        with st.spinner(
+            "Running benchmark — testing dozens of algorithms. This may take several minutes for large datasets…"
+        ):
             try:
                 bundle = benchmark_dataset(
                     df,
@@ -322,6 +327,7 @@ def render_benchmark_page() -> None:
 
 def _render_result_bundle(bundle) -> None:  # noqa: ANN001
     from app.pages.ui_labels import format_enum_value
+
     summary = bundle.summary
 
     # ── Plain-English summary ──────────────────────────────────────────
@@ -335,7 +341,9 @@ def _render_result_bundle(bundle) -> None:  # noqa: ANN001
 
     # Quality assessment
     if _count >= 10:
-        _verdict = "Solid coverage — many algorithms were tested. The leaderboard gives a reliable picture of what works."
+        _verdict = (
+            "Solid coverage — many algorithms were tested. The leaderboard gives a reliable picture of what works."
+        )
     elif _count >= 3:
         _verdict = "Decent coverage. For broader confidence, try the **Deep** run mode."
     else:
@@ -374,7 +382,12 @@ def _render_result_bundle(bundle) -> None:  # noqa: ANN001
 
     # Metric explanations
     from app.pages.glossary import render_metric_legend
-    _metric_cols = [c for c in leaderboard_df.columns if c not in ("Rank", "Model", "Task Type", "Benchmark Backend", "Run Timestamp", "Warnings")]
+
+    _metric_cols = [
+        c
+        for c in leaderboard_df.columns
+        if c not in ("Rank", "Model", "Task Type", "Benchmark Backend", "Run Timestamp", "Warnings")
+    ]
     render_metric_legend(_metric_cols, key_prefix="bench_legend")
 
     if bundle.top_models:
@@ -460,7 +473,9 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
     if st.button("Retrain & Save", key="bench_save_model_btn"):
         estimator_cls = _resolve_estimator_class(selected_model, bundle.task_type)
         if estimator_cls is None:
-            st.error(f"Could not find the algorithm '{selected_model}'. It may not be installed or supported for this task type.")
+            st.error(
+                f"Could not find the algorithm '{selected_model}'. It may not be installed or supported for this task type."
+            )
             return
 
         loaded_datasets = st.session_state.get("loaded_datasets", {})
@@ -494,7 +509,6 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
 
             model = estimator_cls()
             model.fit(X_train, y_train)
-
 
             state = get_or_init_state()
             models_dir = state.settings.pycaret.models_dir

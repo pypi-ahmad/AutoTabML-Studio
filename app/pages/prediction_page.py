@@ -42,9 +42,7 @@ def render_prediction_page(*, _show_header: bool = True) -> None:
     if _show_header:
         st.title("🔮 Predictions")
         render_workflow_banner(current_step=5)
-        st.caption(
-            "Choose a saved model, provide data, and get predictions."
-        )
+        st.caption("Choose a saved model, provide data, and get predictions.")
 
     service = get_prediction_service(state.settings)
     workflow = get_prediction_workflow_service()
@@ -245,7 +243,9 @@ def _render_advanced_model_sources(
         if adv_choice == "MLFLOW_RUN_MODEL":
             base_kwargs["source_type"] = ModelSourceType.MLFLOW_RUN_MODEL
             if not mlflow_available:
-                st.warning("Experiment tracking is not set up, so MLflow-based predictions are unavailable. Ask your administrator to configure it.")
+                st.warning(
+                    "Experiment tracking is not set up, so MLflow-based predictions are unavailable. Ask your administrator to configure it."
+                )
                 return None
             reference_mode = st.radio(
                 "How to find the model",
@@ -255,9 +255,17 @@ def _render_advanced_model_sources(
                 format_func=lambda v: "Paste a model URI" if v == "model_uri" else "Specify run + folder",
             )
             task_type_hint = _prediction_task_type_input("pred_mlflow_run_task_type_hint")
-            metadata_path_value = st.text_input("Model metadata file (optional)", key="pred_mlflow_run_metadata", help="Path to a metadata file with model details. Leave blank if unavailable.").strip()
+            metadata_path_value = st.text_input(
+                "Model metadata file (optional)",
+                key="pred_mlflow_run_metadata",
+                help="Path to a metadata file with model details. Leave blank if unavailable.",
+            ).strip()
             if reference_mode == "model_uri":
-                model_uri = st.text_input("Model URI", key="pred_mlflow_model_uri", help="A model URI like 'runs:/<run_id>/model' or 'models:/<name>/<version>'.").strip()
+                model_uri = st.text_input(
+                    "Model URI",
+                    key="pred_mlflow_model_uri",
+                    help="A model URI like 'runs:/<run_id>/model' or 'models:/<name>/<version>'.",
+                ).strip()
                 if not model_uri:
                     return None
                 base_kwargs.update(
@@ -270,7 +278,9 @@ def _render_advanced_model_sources(
                 )
                 return base_kwargs
 
-            run_id = st.text_input("Run ID", key="pred_mlflow_run_id", help="The ID of the tracking run that produced the model.").strip()
+            run_id = st.text_input(
+                "Run ID", key="pred_mlflow_run_id", help="The ID of the tracking run that produced the model."
+            ).strip()
             artifact_path = st.text_input(
                 "Model folder name",
                 value=prediction_settings.default_mlflow_run_artifact_path,
@@ -299,14 +309,21 @@ def _render_advanced_model_sources(
                 models = list_cached_registered_models(get_or_init_state().settings)
             except Exception as exc:
                 log_ui_exception(exc, operation="prediction_page.list_registered_models")
-                st.warning(f"Model registry is unavailable for the current MLflow configuration: {safe_error_message(exc)}")
+                st.warning(
+                    f"Model registry is unavailable for the current MLflow configuration: {safe_error_message(exc)}"
+                )
                 return None
             if not models:
                 st.info("No registered models are available yet.")
                 return None
 
             model_lookup = {model.name: model for model in models}
-            selected_model_name = st.selectbox("Registered model", options=list(model_lookup.keys()), key="pred_registry_model", help="Pick a model from the registry to use for predictions.")
+            selected_model_name = st.selectbox(
+                "Registered model",
+                options=list(model_lookup.keys()),
+                key="pred_registry_model",
+                help="Pick a model from the registry to use for predictions.",
+            )
             versions = list_cached_model_versions(get_or_init_state().settings, selected_model_name)
             if not versions:
                 st.info("The selected registered model has no versions.")
@@ -321,7 +338,11 @@ def _render_advanced_model_sources(
                 format_func=lambda v: "Version label (e.g. 'production')" if v == "alias" else "Version number",
             )
             task_type_hint = _prediction_task_type_input("pred_registry_task_type_hint")
-            metadata_path_value = st.text_input("Model metadata file (optional)", key="pred_registry_metadata", help="Path to a metadata file with model details. Leave blank if unavailable.").strip()
+            metadata_path_value = st.text_input(
+                "Model metadata file (optional)",
+                key="pred_registry_metadata",
+                help="Path to a metadata file with model details. Leave blank if unavailable.",
+            ).strip()
             base_kwargs.update(
                 {
                     "registry_model_name": selected_model_name,
@@ -331,7 +352,12 @@ def _render_advanced_model_sources(
                 }
             )
             if resolution_mode == "alias":
-                selected_alias = st.selectbox("Version label", options=alias_options, key="pred_registry_alias", help="Named tag like 'production' or 'staging' pointing to a specific version.")
+                selected_alias = st.selectbox(
+                    "Version label",
+                    options=alias_options,
+                    key="pred_registry_alias",
+                    help="Named tag like 'production' or 'staging' pointing to a specific version.",
+                )
                 base_kwargs["registry_alias"] = selected_alias
                 return base_kwargs
             selected_version = st.selectbox(
@@ -357,7 +383,9 @@ def _render_loaded_model_metadata(loaded_model) -> None:  # noqa: ANN001
         task_type=loaded_model.task_type.value,
         target_column=loaded_model.target_column,
         feature_count=len(loaded_model.feature_columns),
-        source_label=SOURCE_TYPE_LABELS.get(loaded_model.source_type.value, format_enum_value(loaded_model.source_type.value)),
+        source_label=SOURCE_TYPE_LABELS.get(
+            loaded_model.source_type.value, format_enum_value(loaded_model.source_type.value)
+        ),
     )
     render_decision_support_banner()
     if loaded_model.target_column:
@@ -368,7 +396,10 @@ def _render_loaded_model_metadata(loaded_model) -> None:  # noqa: ANN001
     with st.expander("Model details", expanded=False):
         if loaded_model.metadata:
             from app.pages.ui_labels import render_metadata_table
-            _meta = loaded_model.metadata if isinstance(loaded_model.metadata, dict) else {"value": loaded_model.metadata}
+
+            _meta = (
+                loaded_model.metadata if isinstance(loaded_model.metadata, dict) else {"value": loaded_model.metadata}
+            )
             render_metadata_table(_meta)
 
 
@@ -401,7 +432,7 @@ def _render_single_row_panel(service: PredictionService, request_kwargs: dict, l
             value="{}",
             height=220,
             key="pred_single_row_json",
-            help="Enter a JSON object with one key-value pair per input column, e.g. {\"age\": 30, \"income\": 50000}.",
+            help='Enter a JSON object with one key-value pair per input column, e.g. {"age": 30, "income": 50000}.',
         )
         row_payload = None
 
@@ -483,7 +514,9 @@ def _render_column_form(feature_columns: list[str], feature_dtypes: dict[str, st
                     )
                     if val.strip():
                         try:
-                            row_payload[col_name] = float(val) if "float" in dtype_str or "double" in dtype_str else int(val)
+                            row_payload[col_name] = (
+                                float(val) if "float" in dtype_str or "double" in dtype_str else int(val)
+                            )
                         except ValueError:
                             row_payload[col_name] = val.strip()
                     else:
@@ -520,7 +553,12 @@ def _render_batch_panel(service: PredictionService, request_kwargs: dict, loaded
 
     batch_request_kwargs = {}
     if batch_source == "session_dataset":
-        selected_name = st.selectbox("Loaded dataset", options=list(loaded_datasets.keys()), key="pred_session_dataset", help="Choose one of the datasets you loaded earlier.")
+        selected_name = st.selectbox(
+            "Loaded dataset",
+            options=list(loaded_datasets.keys()),
+            key="pred_session_dataset",
+            help="Choose one of the datasets you loaded earlier.",
+        )
         selected_dataset = loaded_datasets[selected_name]
         batch_request_kwargs = {
             "dataframe": selected_dataset.dataframe,
@@ -541,7 +579,11 @@ def _render_batch_panel(service: PredictionService, request_kwargs: dict, loaded
             }
 
     with st.expander("Output options", expanded=False):
-        output_path_value = st.text_input("Custom output file path (optional)", key="pred_batch_output_path", help="Where to save the scored output file. Leave blank to use the default location.").strip()
+        output_path_value = st.text_input(
+            "Custom output file path (optional)",
+            key="pred_batch_output_path",
+            help="Where to save the scored output file. Leave blank to use the default location.",
+        ).strip()
 
     if st.button("Run Predictions", key="pred_run_batch", type="primary"):
         if not batch_request_kwargs:
@@ -575,7 +617,9 @@ def _render_batch_panel(service: PredictionService, request_kwargs: dict, loaded
     # Plain-English summary
     _n = result.summary.rows_scored
     _status = format_enum_value(result.summary.status.value)
-    _task = PREDICTION_TASK_TYPE_LABELS.get(loaded_model.task_type.value, format_enum_value(loaded_model.task_type.value))
+    _task = PREDICTION_TASK_TYPE_LABELS.get(
+        loaded_model.task_type.value, format_enum_value(loaded_model.task_type.value)
+    )
     st.info(
         f"**What happened:** Scored **{_n:,}** rows using a **{_task}** model.\n\n"
         "**Next step:** Download the scored file below, or review the predictions in the table."
@@ -666,9 +710,13 @@ def _render_prediction_history(service: PredictionService) -> None:
                     "Timestamp": entry.timestamp,
                     "Status": format_enum_value(entry.status.value),
                     "Mode": format_enum_value(entry.mode.value),
-                    "Model source": SOURCE_TYPE_LABELS.get(entry.model_source.value, format_enum_value(entry.model_source.value)),
+                    "Model source": SOURCE_TYPE_LABELS.get(
+                        entry.model_source.value, format_enum_value(entry.model_source.value)
+                    ),
                     "Model": entry.model_identifier,
-                    "Task": PREDICTION_TASK_TYPE_LABELS.get(entry.task_type.value, format_enum_value(entry.task_type.value)),
+                    "Task": PREDICTION_TASK_TYPE_LABELS.get(
+                        entry.task_type.value, format_enum_value(entry.task_type.value)
+                    ),
                     "Input": entry.input_source,
                     "Rows": entry.row_count,
                     "Output": _output_name,
@@ -683,7 +731,11 @@ _TASK_TYPE_LABELS: dict[str, str] = PREDICTION_TASK_TYPE_LABELS
 def _prediction_task_type_input(key: str):  # noqa: ANN201
     task_type_value = st.selectbox(
         "Task type hint",
-        options=[PredictionTaskType.UNKNOWN.value, PredictionTaskType.CLASSIFICATION.value, PredictionTaskType.REGRESSION.value],
+        options=[
+            PredictionTaskType.UNKNOWN.value,
+            PredictionTaskType.CLASSIFICATION.value,
+            PredictionTaskType.REGRESSION.value,
+        ],
         key=key,
         format_func=make_format_func(PREDICTION_TASK_TYPE_LABELS),
         help="Helps the system load the model correctly. Use 'Auto-detect' if unsure.",

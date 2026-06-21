@@ -55,9 +55,7 @@ async def to_thread_many(
     """
 
     coros = [asyncio.to_thread(func, *args, **kwargs) for args, kwargs in arg_batches]
-    return await gather_with_concurrency(
-        coros, limit=limit, return_exceptions=return_exceptions
-    )
+    return await gather_with_concurrency(coros, limit=limit, return_exceptions=return_exceptions)
 
 
 __all__ = ["gather_with_concurrency", "to_thread_many"]

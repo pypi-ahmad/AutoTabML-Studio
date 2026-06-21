@@ -18,10 +18,7 @@ def select_profiling_mode(
 ) -> ProfilingMode:
     """Choose profiling mode based on dataset size and config thresholds."""
     n_rows, n_cols = df.shape
-    if (
-        n_rows > config.large_dataset_row_threshold
-        or n_cols > config.large_dataset_col_threshold
-    ):
+    if n_rows > config.large_dataset_row_threshold or n_cols > config.large_dataset_col_threshold:
         logger.info(
             "Dataset size (%d rows, %d cols) exceeds threshold – using minimal mode.",
             n_rows,
@@ -42,9 +39,7 @@ def maybe_sample(
     n_rows = len(df)
     if n_rows > config.sampling_row_threshold:
         sample_size = min(config.sample_size, n_rows)
-        logger.info(
-            "Sampling %d rows from %d for profiling.", sample_size, n_rows
-        )
+        logger.info("Sampling %d rows from %d for profiling.", sample_size, n_rows)
         sampled = df.sample(n=sample_size, random_state=42)
         return sampled, True, sample_size
     return df, False, None

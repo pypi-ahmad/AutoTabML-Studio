@@ -82,14 +82,15 @@ def render_experiment_page() -> None:
         "Unlike Quick Benchmark, this step produces a model you can use for predictions."
     )
 
-
     if not is_pycaret_available():
         st.error(pycaret_install_guidance())
         return
 
     # ── Step 1: Choose Your Data ───────────────────────────────────────
     st.subheader("1. Choose Your Data")
-    selected_name, loaded_dataset = render_dataset_header("Experiment", key_prefix="experiment", metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header(
+        "Experiment", key_prefix="experiment", metadata_store=metadata_store
+    )
     if selected_name is None or loaded_dataset is None:
         return
 
@@ -108,6 +109,7 @@ def render_experiment_page() -> None:
         help="The column your model should learn to predict.",
     )
     from app.pages.ui_labels import TASK_TYPE_LABELS, make_format_func
+
     task_type = ExperimentTaskType(
         st.selectbox(
             "Task type",
@@ -235,8 +237,10 @@ def render_experiment_page() -> None:
         # ── Hardware ───────────────────────────────────────────────────
         st.caption("**Hardware**")
         from app.gpu import cuda_summary
+
         gpu_info = cuda_summary()
         from app.pages.ui_labels import GPU_LABELS, make_format_func as _mff
+
         gpu_options: list[bool | str] = [True, False, "force"]
         default_gpu = settings.default_use_gpu if settings.default_use_gpu in gpu_options else True
         use_gpu = st.selectbox(
@@ -245,12 +249,15 @@ def render_experiment_page() -> None:
             index=gpu_options.index(default_gpu),
             format_func=_mff(GPU_LABELS, fallback_title=False),
             key="exp_use_gpu",
-            help=f"CUDA detected: {gpu_info['device_name'] or 'No'}" if gpu_info['cuda_available'] else "No CUDA GPU detected. GPU options will fall back to CPU automatically.",
+            help=f"CUDA detected: {gpu_info['device_name'] or 'No'}"
+            if gpu_info["cuda_available"]
+            else "No CUDA GPU detected. GPU options will fall back to CPU automatically.",
         )
 
         # ── Experiment tracking ────────────────────────────────────────
         st.caption("**Experiment tracking**")
         from app.pages.ui_labels import TRACKING_MODE_LABELS
+
         tracking_mode_value = st.selectbox(
             "Tracking mode",
             options=[mode.value for mode in MLflowTrackingMode],
@@ -365,9 +372,7 @@ def render_experiment_page() -> None:
 
         bundles[requested_result_key] = pipeline_result.bundle
         if pipeline_result.saved_count > 0:
-            st.success(
-                f"Training complete. Saved {pipeline_result.saved_count} model(s) for Predictions."
-            )
+            st.success(f"Training complete. Saved {pipeline_result.saved_count} model(s) for Predictions.")
         else:
             st.success("Training complete.")
 
@@ -406,7 +411,9 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
     elif _count >= 3:
         _verdict = "Good comparison. For even more confidence, try the **Deep** run mode."
     else:
-        _verdict = "Few algorithms were tested. Consider using the **Standard** or **Deep** run mode for broader coverage."
+        _verdict = (
+            "Few algorithms were tested. Consider using the **Standard** or **Deep** run mode for broader coverage."
+        )
 
     # Tuning note
     _tuned_note = ""
@@ -456,6 +463,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
 
         # Metric explanations
         from app.pages.glossary import render_metric_legend
+
         _exp_metric_cols = [c for c in _exp_lb_df.columns if c not in ("Rank", "Model")]
         render_metric_legend(_exp_metric_cols, key_prefix="exp_legend")
 
@@ -477,7 +485,11 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
 
         service = _build_service(get_or_init_state().settings)
         tune_col, eval_col, save_col, save_all_col = st.columns(4)
-        if tune_col.button("🎯 Tune", key="exp_tune_button", help="Fine-tune the selected model's settings for better accuracy. Results appear in the Tuning Summary below."):
+        if tune_col.button(
+            "🎯 Tune",
+            key="exp_tune_button",
+            help="Fine-tune the selected model's settings for better accuracy. Results appear in the Tuning Summary below.",
+        ):
             try:
                 updated = service.tune_model(bundle, selection)
                 st.session_state["experiment_bundles"][
@@ -496,7 +508,11 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                     "**What to try:** Try a different model, or re-run the experiment with adjusted settings."
                 )
 
-        if eval_col.button("📊 Charts", key="exp_eval_button", help="Generate performance charts (ROC curve, confusion matrix, etc.) to visualise model quality."):
+        if eval_col.button(
+            "📊 Charts",
+            key="exp_eval_button",
+            help="Generate performance charts (ROC curve, confusion matrix, etc.) to visualise model quality.",
+        ):
             try:
                 updated = service.evaluate_model(bundle, selection)
                 st.session_state["experiment_bundles"][
@@ -515,7 +531,12 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                     "**What to try:** Some plot types may not be available for this model type. Try a different model."
                 )
 
-        if save_col.button("💾 Save", key="exp_save_button", type="primary", help="Save this model so you can load it on the Predictions page."):
+        if save_col.button(
+            "💾 Save",
+            key="exp_save_button",
+            type="primary",
+            help="Save this model so you can load it on the Predictions page.",
+        ):
             try:
                 _save_name = model_save_name(bundle.dataset_name, selection.model_name)
                 updated = service.finalize_and_save_model(bundle, selection, save_name=_save_name)
@@ -535,7 +556,11 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                     "**What to try:** Check that the models folder is writable in **Settings**, or try saving a different model."
                 )
 
-        if save_all_col.button("💾 Save All", key="exp_save_all_button", help="Save every compared model so you can pick any of them on the Predictions page."):
+        if save_all_col.button(
+            "💾 Save All",
+            key="exp_save_all_button",
+            help="Save every compared model so you can pick any of them on the Predictions page.",
+        ):
             try:
                 updated = service.finalize_and_save_all_models(bundle, save_name_prefix="manual")
                 st.session_state["experiment_bundles"][
@@ -545,9 +570,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
                         bundle.task_type,
                     )
                 ] = updated
-                st.success(
-                    f"Saved {len(updated.saved_model_artifacts)} model(s)."
-                )
+                st.success(f"Saved {len(updated.saved_model_artifacts)} model(s).")
                 bundle = updated
             except PyCaretExperimentError as exc:
                 log_ui_exception(exc, operation="experiment_page.save_all_models")
@@ -558,7 +581,9 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
 
     if bundle.tuned_result is not None:
         st.subheader("Tuning Summary")
-        st.caption("Comparison of the baseline model vs the fine-tuned version. Look for improved scores in the tuned row.")
+        st.caption(
+            "Comparison of the baseline model vs the fine-tuned version. Look for improved scores in the tuned row."
+        )
         tune_df = pd.DataFrame(
             [
                 {"Stage": "Before tuning (baseline)", **bundle.tuned_result.baseline_metrics},
@@ -579,6 +604,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
         st.subheader("Performance Charts")
         st.caption("Visual diagnostics for the selected model — hover over charts for detail.")
         from app.pages.glossary import plot_explanation
+
         for plot in bundle.evaluation_plots:
             plot_label = PLOT_LABELS.get(plot.plot_id, plot.plot_id.replace("_", " ").title())
             st.markdown(f"**{plot_label}**")

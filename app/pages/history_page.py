@@ -48,10 +48,23 @@ def render_history_page() -> None:
             help="Filter by the type of workflow that was run.",
         )
     with filter_col2:
-        dataset_filter = st.text_input("Dataset name (contains)", value="", key="hist_ds_filter", help="Type part of a dataset name to narrow down results.").strip()
+        dataset_filter = st.text_input(
+            "Dataset name (contains)",
+            value="",
+            key="hist_ds_filter",
+            help="Type part of a dataset name to narrow down results.",
+        ).strip()
     with filter_col3:
         limit = int(
-            st.number_input("Max results", min_value=5, max_value=500, value=50, step=10, key="hist_limit", help="How many past runs to show at most.")
+            st.number_input(
+                "Max results",
+                min_value=5,
+                max_value=500,
+                value=50,
+                step=10,
+                key="hist_limit",
+                help="How many past runs to show at most.",
+            )
         )
 
     # ── Fetch jobs ─────────────────────────────────────────────────────
@@ -101,14 +114,16 @@ def render_history_page() -> None:
     # ── Main table ─────────────────────────────────────────────────────
     rows = []
     for job in jobs:
-        rows.append({
-            "Dataset": job.dataset_name or "—",
-            "Job": format_enum_value(job.job_type.value),
-            "Status": _status_badge(job.status.value),
-            "Title": job.title or "",
-            "Updated": job.updated_at,
-            "Created": job.created_at,
-        })
+        rows.append(
+            {
+                "Dataset": job.dataset_name or "—",
+                "Job": format_enum_value(job.job_type.value),
+                "Status": _status_badge(job.status.value),
+                "Title": job.title or "",
+                "Updated": job.updated_at,
+                "Created": job.created_at,
+            }
+        )
     _history_df = pd.DataFrame(rows)
     st.dataframe(_history_df, width="stretch", hide_index=True)
 
@@ -126,7 +141,9 @@ def render_history_page() -> None:
         f"{j.dataset_name or '—'} · {format_enum_value(j.job_type.value)} · {_status_icon(j.status.value)} ({j.updated_at:%Y-%m-%d %H:%M})"
         for j in jobs
     ]
-    selected_label = st.selectbox("Inspect job", options=job_labels, key="hist_inspect", help="Pick a past job to see its details below.")
+    selected_label = st.selectbox(
+        "Inspect job", options=job_labels, key="hist_inspect", help="Pick a past job to see its details below."
+    )
     if selected_label:
         selected_job = jobs[job_labels.index(selected_label)]
 
@@ -135,7 +152,7 @@ def render_history_page() -> None:
         # Decision-support: one-line purpose
         _job_type_label = format_enum_value(selected_job.job_type.value)
         _status_label = format_enum_value(selected_job.status.value)
-        _ds_name = selected_job.dataset_name or 'N/A'
+        _ds_name = selected_job.dataset_name or "N/A"
         _purpose = f"{_job_type_label} on **{_ds_name}** — {_status_label.lower()}"
         st.caption(_purpose)
 
@@ -148,9 +165,7 @@ def render_history_page() -> None:
             st.caption(f"Title: {selected_job.title}")
 
         _has_tech_details = (
-            selected_job.primary_artifact_path
-            or selected_job.summary_path
-            or selected_job.mlflow_run_id
+            selected_job.primary_artifact_path or selected_job.summary_path or selected_job.mlflow_run_id
         )
         if _has_tech_details:
             with st.expander("Technical details", expanded=False):
@@ -160,11 +175,17 @@ def render_history_page() -> None:
                 if selected_job.summary_path:
                     st.caption(f"Summary file: `{Path(selected_job.summary_path).name}`")
                 if selected_job.mlflow_run_id:
-                    st.caption(f"Tracking run ID: `{selected_job.mlflow_run_id}` — use this to look up the run in MLflow.")
+                    st.caption(
+                        f"Tracking run ID: `{selected_job.mlflow_run_id}` — use this to look up the run in MLflow."
+                    )
 
         if selected_job.metadata:
             with st.expander("Run details", expanded=False):
-                _meta = selected_job.metadata if isinstance(selected_job.metadata, dict) else {"value": selected_job.metadata}
+                _meta = (
+                    selected_job.metadata
+                    if isinstance(selected_job.metadata, dict)
+                    else {"value": selected_job.metadata}
+                )
                 render_metadata_table(_meta)
 
         # ── MLflow Run Description ─────────────────────────────────────
@@ -201,6 +222,7 @@ def _render_job_description(job, state) -> None:  # noqa: ANN001
             model_id = state.selected_model_id
             if not api_key:
                 from app.pages.ui_labels import PROVIDER_LABELS
+
                 _provider_name = PROVIDER_LABELS.get(state.provider.value, state.provider.value.title())
                 st.warning(
                     f"AI-powered summaries need a **{_provider_name}** API key. "
@@ -217,10 +239,7 @@ def _render_job_description(job, state) -> None:  # noqa: ANN001
                         provider = build_provider(
                             state.provider,
                             api_key=api_key,
-                            base_url=(
-                                settings.ollama_base_url
-                                if state.provider.value == "ollama" else None
-                            ),
+                            base_url=(settings.ollama_base_url if state.provider.value == "ollama" else None),
                         )
                         desc = generate_llm_description(
                             job.job_type,
@@ -351,15 +370,17 @@ def _render_mlflow_section(app_settings) -> None:  # noqa: ANN001
 
         ml_rows = []
         for run in runs:
-            ml_rows.append({
-                "Dataset": run.dataset_name or "—",
-                "Type": format_enum_value(run.run_type.value),
-                "Status": format_enum_value(run.status.value),
-                "Model": run.model_name or "",
-                "Score": run.primary_metric_value,
-                "Metric": run.primary_metric_name or "",
-                "Duration (s)": run.duration_seconds,
-            })
+            ml_rows.append(
+                {
+                    "Dataset": run.dataset_name or "—",
+                    "Type": format_enum_value(run.run_type.value),
+                    "Status": format_enum_value(run.status.value),
+                    "Model": run.model_name or "",
+                    "Score": run.primary_metric_value,
+                    "Metric": run.primary_metric_name or "",
+                    "Duration (s)": run.duration_seconds,
+                }
+            )
         st.dataframe(
             pd.DataFrame(ml_rows),
             width="stretch",

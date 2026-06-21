@@ -114,9 +114,7 @@ def _build_input_spec(locator: str, source_type: str | None = None) -> DatasetIn
         if suffix in EXCEL_FILE_SUFFIXES:
             resolved_type = IngestionSourceType.EXCEL
         elif suffix in DELIMITED_FILE_SUFFIXES:
-            resolved_type = (
-                IngestionSourceType.CSV if suffix == ".csv" else IngestionSourceType.DELIMITED_TEXT
-            )
+            resolved_type = IngestionSourceType.CSV if suffix == ".csv" else IngestionSourceType.DELIMITED_TEXT
         else:
             raise ValueError(f"unsupported file type: {suffix}")
 
@@ -280,7 +278,9 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
         prefer_gpu=settings.benchmark.prefer_gpu if args.prefer_gpu == "auto" else args.prefer_gpu == "true",
         split=BenchmarkSplitConfig(
             test_size=args.test_size or settings.benchmark.default_test_size,
-            random_state=args.random_state if args.random_state is not None else settings.benchmark.default_random_state,
+            random_state=args.random_state
+            if args.random_state is not None
+            else settings.benchmark.default_random_state,
             stratify=stratify_value,
         ),
         ranking_metric=args.ranking_metric or None,
@@ -318,10 +318,7 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
 
     print(f"\n=== Benchmark: {name} ===")
     print(f"Task: {bundle.summary.task_type.value}  Target: {bundle.summary.target_column}")
-    print(
-        f"Ranking: {bundle.summary.ranking_metric} "
-        f"({bundle.summary.ranking_direction.value})"
-    )
+    print(f"Ranking: {bundle.summary.ranking_metric} ({bundle.summary.ranking_direction.value})")
     print(
         f"Rows: source={bundle.summary.source_row_count} benchmark={bundle.summary.benchmark_row_count}  "
         f"Train/Test={bundle.summary.train_row_count}/{bundle.summary.test_row_count}"
@@ -329,18 +326,12 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
     if bundle.summary.best_model_name is not None:
         print(f"Best: {bundle.summary.best_model_name} ({bundle.summary.best_score})")
     if bundle.summary.fastest_model_name is not None:
-        print(
-            f"Fastest: {bundle.summary.fastest_model_name} "
-            f"({bundle.summary.fastest_model_time_seconds:.4f}s)"
-        )
+        print(f"Fastest: {bundle.summary.fastest_model_name} ({bundle.summary.fastest_model_time_seconds:.4f}s)")
     print(f"Duration: {bundle.summary.benchmark_duration_seconds:.2f}s")
 
     print("\nLeaderboard:")
     for row in bundle.top_models:
-        print(
-            f"  #{row.rank} {row.model_name}: {row.primary_score} "
-            f"(time={row.training_time_seconds})"
-        )
+        print(f"  #{row.rank} {row.model_name}: {row.primary_score} (time={row.training_time_seconds})")
 
     if bundle.summary.warnings:
         print("\nWarnings:")
@@ -428,10 +419,7 @@ def cmd_experiment_run(args: argparse.Namespace) -> None:
     print(f"Task: {bundle.summary.task_type.value}  Target: {bundle.summary.target_column}")
     print(f"Ranking score: {bundle.summary.compare_optimize_metric}")
     if bundle.summary.best_baseline_model_name is not None:
-        print(
-            f"Best baseline: {bundle.summary.best_baseline_model_name} "
-            f"({bundle.summary.best_baseline_score})"
-        )
+        print(f"Best baseline: {bundle.summary.best_baseline_model_name} ({bundle.summary.best_baseline_score})")
     print(f"Duration: {bundle.summary.experiment_duration_seconds:.2f}s")
     if bundle.mlflow_run_id:
         print(f"MLflow run id: {bundle.mlflow_run_id}")
@@ -767,7 +755,7 @@ def cmd_uci_list(args: argparse.Namespace) -> None:
         _cli_error(exc)
 
     if args.limit and args.limit > 0:
-        rows = rows[:args.limit]
+        rows = rows[: args.limit]
 
     if not rows:
         print("No UCI datasets found.")
@@ -823,7 +811,7 @@ def cmd_doctor(args: argparse.Namespace) -> None:  # noqa: ARG001
     print("\n=== AutoTabML Doctor ===")
     gpu_info = cuda_summary()
     print(f"CUDA available: {gpu_info['cuda_available']}")
-    if gpu_info['device_name']:
+    if gpu_info["device_name"]:
         print(f"CUDA device: {gpu_info['device_name']} (count: {gpu_info['device_count']})")
     if status.database_path is not None:
         print(f"Database: {status.database_path}")
@@ -1205,8 +1193,7 @@ def cmd_batch_show(args: argparse.Namespace) -> None:
     print(f"Name: {batch.batch_name}")
     print(f"Status: {batch.status.value}")
     success_count, failed_count, skipped_count = _resolve_batch_status_counts(metadata_store, batch)
-    print(f"Total: {batch.total_datasets}  Success: {success_count}  "
-          f"Failed: {failed_count}  Skipped: {skipped_count}")
+    print(f"Total: {batch.total_datasets}  Success: {success_count}  Failed: {failed_count}  Skipped: {skipped_count}")
     print(f"Started: {batch.started_at.isoformat()}")
     print(f"Updated: {batch.updated_at.isoformat()}")
 
@@ -1474,9 +1461,16 @@ def main() -> None:
     )
     run_parser.add_argument("--compare-metric", default=None, help="compare_models sort metric")
     run_parser.add_argument("--n-select", type=int, default=1, help="Top N models returned by compare_models")
-    run_parser.add_argument("--budget-time", type=float, default=None, help="Optional compare_models budget time in minutes")
+    run_parser.add_argument(
+        "--budget-time", type=float, default=None, help="Optional compare_models budget time in minutes"
+    )
     run_parser.add_argument("--no-turbo", dest="turbo", action="store_false", help="Disable PyCaret turbo compare mode")
-    run_parser.add_argument("--use-gpu", choices=["false", "true", "force"], default=None, help="GPU acceleration (false/true/force); defaults to settings")
+    run_parser.add_argument(
+        "--use-gpu",
+        choices=["false", "true", "force"],
+        default=None,
+        help="GPU acceleration (false/true/force); defaults to settings",
+    )
     run_parser.add_argument("--artifacts-dir", default=None, help="Directory for artifacts")
     run_parser.set_defaults(turbo=True)
 
@@ -1498,7 +1492,12 @@ def main() -> None:
     )
     tune_parser.add_argument("--tune-metric", default=None, help="tune_model optimize metric")
     tune_parser.add_argument("--n-iter", type=int, default=10, help="Number of tuning iterations")
-    tune_parser.add_argument("--use-gpu", choices=["false", "true", "force"], default=None, help="GPU acceleration (false/true/force); defaults to settings")
+    tune_parser.add_argument(
+        "--use-gpu",
+        choices=["false", "true", "force"],
+        default=None,
+        help="GPU acceleration (false/true/force); defaults to settings",
+    )
 
     eval_parser = subparsers.add_parser("experiment-evaluate", help="Generate evaluation plots for one model id")
     eval_parser.add_argument("dataset", help="Dataset path or supported URL")
@@ -1522,7 +1521,12 @@ def main() -> None:
         default=[],
         help="Evaluation plot id to generate; repeat to include multiple",
     )
-    eval_parser.add_argument("--use-gpu", choices=["false", "true", "force"], default=None, help="GPU acceleration (false/true/force); defaults to settings")
+    eval_parser.add_argument(
+        "--use-gpu",
+        choices=["false", "true", "force"],
+        default=None,
+        help="GPU acceleration (false/true/force); defaults to settings",
+    )
 
     save_parser = subparsers.add_parser("experiment-save", help="Finalize and save one model id")
     save_parser.add_argument("dataset", help="Dataset path or supported URL")
@@ -1542,7 +1546,12 @@ def main() -> None:
     )
     save_parser.add_argument("--save-name", default="selected_model", help="Base name for saved model artifacts")
     save_parser.add_argument("--save-snapshot", action="store_true", help="Also save a PyCaret experiment snapshot")
-    save_parser.add_argument("--use-gpu", choices=["false", "true", "force"], default=None, help="GPU acceleration (false/true/force); defaults to settings")
+    save_parser.add_argument(
+        "--use-gpu",
+        choices=["false", "true", "force"],
+        default=None,
+        help="GPU acceleration (false/true/force); defaults to settings",
+    )
 
     # flaml-run
     flaml_run_parser = subparsers.add_parser("flaml-run", help="Run FLAML AutoML search")
@@ -1759,7 +1768,9 @@ def main() -> None:
         sys.exit(1)
 
 
-def _build_pycaret_service(settings, *, artifacts_dir: Path | None = None, metadata_store=None) -> PyCaretExperimentService:
+def _build_pycaret_service(
+    settings, *, artifacts_dir: Path | None = None, metadata_store=None
+) -> PyCaretExperimentService:
     return PyCaretExperimentService(
         artifacts_dir=artifacts_dir if artifacts_dir is not None else settings.pycaret.artifacts_dir,
         models_dir=settings.pycaret.models_dir,

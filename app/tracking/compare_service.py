@@ -42,22 +42,14 @@ def _check_comparability(left: RunHistoryItem, right: RunHistoryItem) -> list[st
             warnings.append("Runs used different datasets.")
     elif left.dataset_name and right.dataset_name:
         if left.dataset_name != right.dataset_name:
-            warnings.append(
-                f"Runs reference different dataset names: '{left.dataset_name}' vs '{right.dataset_name}'."
-            )
-        warnings.append(
-            "Dataset fingerprints are missing, so dataset equality could not be fully verified."
-        )
+            warnings.append(f"Runs reference different dataset names: '{left.dataset_name}' vs '{right.dataset_name}'.")
+        warnings.append("Dataset fingerprints are missing, so dataset equality could not be fully verified.")
     else:
-        warnings.append(
-            "Dataset identity could not be fully verified because dataset fingerprints are missing."
-        )
+        warnings.append("Dataset identity could not be fully verified because dataset fingerprints are missing.")
 
     if left.target_column and right.target_column:
         if left.target_column != right.target_column:
-            warnings.append(
-                f"Runs targeted different columns: '{left.target_column}' vs '{right.target_column}'."
-            )
+            warnings.append(f"Runs targeted different columns: '{left.target_column}' vs '{right.target_column}'.")
     else:
         warnings.append(
             "Target-column metadata is missing on one or both runs, so label alignment could not be fully verified."
@@ -65,9 +57,7 @@ def _check_comparability(left: RunHistoryItem, right: RunHistoryItem) -> list[st
 
     if left.task_type and right.task_type:
         if left.task_type != right.task_type:
-            warnings.append(
-                f"Runs used different task types: '{left.task_type}' vs '{right.task_type}'."
-            )
+            warnings.append(f"Runs used different task types: '{left.task_type}' vs '{right.task_type}'.")
     else:
         warnings.append(
             "Task-type metadata is missing on one or both runs, so task comparability could not be fully verified."
@@ -76,8 +66,7 @@ def _check_comparability(left: RunHistoryItem, right: RunHistoryItem) -> list[st
     if left.primary_metric_name and right.primary_metric_name:
         if left.primary_metric_name != right.primary_metric_name:
             warnings.append(
-                f"Runs optimized different metrics: "
-                f"'{left.primary_metric_name}' vs '{right.primary_metric_name}'."
+                f"Runs optimized different metrics: '{left.primary_metric_name}' vs '{right.primary_metric_name}'."
             )
     else:
         warnings.append(
@@ -85,9 +74,7 @@ def _check_comparability(left: RunHistoryItem, right: RunHistoryItem) -> list[st
         )
 
     if left.run_type != right.run_type:
-        warnings.append(
-            f"Runs are of different types: '{left.run_type.value}' vs '{right.run_type.value}'."
-        )
+        warnings.append(f"Runs are of different types: '{left.run_type.value}' vs '{right.run_type.value}'.")
     elif left.run_type.value == "unknown":
         warnings.append("Run type could not be fully inferred for one or both runs.")
 

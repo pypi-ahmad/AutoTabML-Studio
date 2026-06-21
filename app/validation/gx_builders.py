@@ -33,10 +33,12 @@ def build_expectations(config: ValidationRuleConfig, column_names: list[str]) ->
     # Uniqueness checks
     for col in config.uniqueness_columns:
         if col in column_names:
-            specs.append({
-                "type": "expect_column_values_to_be_unique",
-                "kwargs": {"column": col},
-            })
+            specs.append(
+                {
+                    "type": "expect_column_values_to_be_unique",
+                    "kwargs": {"column": col},
+                }
+            )
 
     # Numeric range checks
     for col, bounds in config.numeric_range_checks.items():
@@ -46,17 +48,21 @@ def build_expectations(config: ValidationRuleConfig, column_names: list[str]) ->
                 kwargs["min_value"] = bounds["min"]
             if "max" in bounds:
                 kwargs["max_value"] = bounds["max"]
-            specs.append({
-                "type": "expect_column_values_to_be_between",
-                "kwargs": kwargs,
-            })
+            specs.append(
+                {
+                    "type": "expect_column_values_to_be_between",
+                    "kwargs": kwargs,
+                }
+            )
 
     # Allowed category checks
     for col, allowed in config.allowed_category_checks.items():
         if col in column_names:
-            specs.append({
-                "type": "expect_column_values_to_be_in_set",
-                "kwargs": {"column": col, "value_set": allowed},
-            })
+            specs.append(
+                {
+                    "type": "expect_column_values_to_be_in_set",
+                    "kwargs": {"column": col, "value_set": allowed},
+                }
+            )
 
     return specs

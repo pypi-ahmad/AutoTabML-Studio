@@ -41,18 +41,19 @@ def render_past_runs_section(
     with st.expander(f"📋 Past {label} Runs ({len(jobs)})", expanded=False):
         rows = []
         for job in jobs:
-            rows.append({
-                "Dataset": job.dataset_name or "—",
-                "Status": _status_badge(job.status.value),
-                "Title": job.title or "",
-                "Updated": job.updated_at,
-            })
+            rows.append(
+                {
+                    "Dataset": job.dataset_name or "—",
+                    "Status": _status_badge(job.status.value),
+                    "Title": job.title or "",
+                    "Updated": job.updated_at,
+                }
+            )
         st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
         # Detail selector
         job_labels = [
-            f"{j.dataset_name or '—'} · {_status_icon(j.status.value)} ({j.updated_at:%Y-%m-%d %H:%M})"
-            for j in jobs
+            f"{j.dataset_name or '—'} · {_status_icon(j.status.value)} ({j.updated_at:%Y-%m-%d %H:%M})" for j in jobs
         ]
         selected = st.selectbox(
             "Inspect run",
@@ -112,7 +113,11 @@ def render_saved_models_section(
         if selected:
             ref = refs[labels.index(selected)]
             c1, c2, c3 = st.columns(3)
-            task_label = PREDICTION_TASK_TYPE_LABELS.get(ref.task_type.value, format_enum_value(ref.task_type.value)) if ref.task_type != PredictionTaskType.UNKNOWN else "Unknown"
+            task_label = (
+                PREDICTION_TASK_TYPE_LABELS.get(ref.task_type.value, format_enum_value(ref.task_type.value))
+                if ref.task_type != PredictionTaskType.UNKNOWN
+                else "Unknown"
+            )
             c1.metric("Task", task_label)
             c2.metric("Features", len(ref.feature_columns))
             target = ref.metadata.get("target_column", "—")
@@ -122,7 +127,9 @@ def render_saved_models_section(
                 st.caption(f"Model file: **{ref.model_path.name}**")
             if ref.metadata.get("dataset_fingerprint"):
                 with st.expander("Training data details", expanded=False):
-                    st.caption(f"Dataset version: `{ref.metadata['dataset_fingerprint'][:16]}…` — a unique ID for the exact data this model was trained on.")
+                    st.caption(
+                        f"Dataset version: `{ref.metadata['dataset_fingerprint'][:16]}…` — a unique ID for the exact data this model was trained on."
+                    )
             if ref.feature_columns:
                 with st.expander("Input columns", expanded=False):
                     st.code(", ".join(ref.feature_columns), language="text")

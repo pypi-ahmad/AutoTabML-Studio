@@ -13,6 +13,7 @@ from app.config.models import ProfilingMode
 
 class ProfilingConfig(BaseModel):
     """User-facing configuration for a profiling run."""
+
     mode: ProfilingMode = ProfilingMode.STANDARD
     large_dataset_row_threshold: int = 50_000
     large_dataset_col_threshold: int = 100
@@ -23,6 +24,7 @@ class ProfilingConfig(BaseModel):
 
 class ProfilingResultSummary(BaseModel):
     """Quick-access summary extracted from a profiling run."""
+
     run_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     dataset_name: str | None = None
     row_count: int = 0
@@ -44,5 +46,6 @@ class ProfilingResultSummary(BaseModel):
 
 class ProfilingArtifactBundle(BaseModel):
     """Paths and metadata for profiling artifacts produced."""
+
     html_report_path: Path | None = None
     summary_json_path: Path | None = None

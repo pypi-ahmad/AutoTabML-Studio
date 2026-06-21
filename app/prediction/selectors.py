@@ -105,7 +105,11 @@ def resolve_local_model_reference(
             _path_key(Path(reference.load_reference)).lower(),
             _path_key(Path(reference.load_reference).with_suffix("")).lower(),
         }
-        if candidate.lower() in options or normalized_path.lower() in options or normalized_without_suffix.lower() in options:
+        if (
+            candidate.lower() in options
+            or normalized_path.lower() in options
+            or normalized_without_suffix.lower() in options
+        ):
             matches.append(reference)
 
     if len(matches) == 1:
@@ -226,9 +230,7 @@ def to_experiment_task_type(task_type: PredictionTaskType) -> ExperimentTaskType
         return ExperimentTaskType.CLASSIFICATION
     if task_type == PredictionTaskType.REGRESSION:
         return ExperimentTaskType.REGRESSION
-    raise ModelDiscoveryError(
-        "PyCaret model loading requires a known task type (classification or regression)."
-    )
+    raise ModelDiscoveryError("PyCaret model loading requires a known task type (classification or regression).")
 
 
 def _path_key(path: Path) -> str:
@@ -239,6 +241,7 @@ def _path_key(path: Path) -> str:
 
 
 # ── FLAML model discovery ────────────────────────────────────────────
+
 
 def discover_flaml_saved_models(
     model_dirs: list[Path],

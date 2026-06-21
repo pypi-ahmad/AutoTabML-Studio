@@ -57,6 +57,7 @@ class DatabaseSettings(BaseModel):
 
 class ProviderSettings(BaseModel):
     """Credentials and connection settings for a single LLM provider."""
+
     provider: LLMProvider = LLMProvider.OPENAI
     base_url: str | None = None
 
@@ -71,11 +72,13 @@ class ProviderSettings(BaseModel):
 
 class ExecutionSettings(BaseModel):
     """Settings related to the execution backend."""
+
     backend: ExecutionBackend = ExecutionBackend.COLAB_MCP
 
 
 class UISettings(BaseModel):
     """Transient UI-level preferences."""
+
     selected_model_id: str | None = None
 
 
@@ -83,8 +86,10 @@ class UISettings(BaseModel):
 # Validation & Profiling configuration
 # ---------------------------------------------------------------------------
 
+
 class ValidationSeverity(str, Enum):
     """Severity levels for validation checks."""
+
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
@@ -92,12 +97,14 @@ class ValidationSeverity(str, Enum):
 
 class ProfilingMode(str, Enum):
     """Profiling report modes."""
+
     STANDARD = "standard"
     MINIMAL = "minimal"
 
 
 class ValidationSettings(BaseModel):
     """Configuration for the data validation layer."""
+
     artifacts_dir: Path = Field(default=_VALIDATION_DIR)
     gx_context_dir: Path = Field(default=Path("gx"))
     data_docs_enabled: bool = False
@@ -108,6 +115,7 @@ class ValidationSettings(BaseModel):
 
 class ProfilingSettings(BaseModel):
     """Configuration for the automated profiling layer."""
+
     artifacts_dir: Path = Field(default=_PROFILING_DIR)
     default_mode: ProfilingMode = ProfilingMode.STANDARD
     large_dataset_row_threshold: int = Field(default=50_000, gt=0)
@@ -237,14 +245,13 @@ class PredictionSettings(BaseModel):
     prediction_column_name: str = "prediction"
     prediction_score_column_name: str = "prediction_score"
     supported_local_model_dirs: list[Path] = Field(default_factory=lambda: [_MODELS_DIR])
-    local_model_metadata_dirs: list[Path] = Field(
-        default_factory=lambda: [_EXPERIMENTS_DIR, _MODELS_DIR]
-    )
+    local_model_metadata_dirs: list[Path] = Field(default_factory=lambda: [_EXPERIMENTS_DIR, _MODELS_DIR])
     default_mlflow_run_artifact_path: str = "model"
 
 
 class AppSettings(BaseModel):
     """Top-level application configuration with safe defaults."""
+
     workspace_mode: WorkspaceMode = WorkspaceMode.DASHBOARD
     execution: ExecutionSettings = Field(default_factory=ExecutionSettings)
     provider: ProviderSettings = Field(default_factory=ProviderSettings)

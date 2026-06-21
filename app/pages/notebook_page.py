@@ -48,7 +48,9 @@ def render_notebook_page() -> None:
     state = get_or_init_state()
     metadata_store = get_metadata_store(state.settings)
     st.title("📓 Notebooks")
-    st.caption("Auto-generated Jupyter notebooks for every job you’ve run — ready to download, share, or open in Google Colab.")
+    st.caption(
+        "Auto-generated Jupyter notebooks for every job you’ve run — ready to download, share, or open in Google Colab."
+    )
 
     # ── Primary view: notebooks per dataset / job ────────────────────
     _render_job_notebooks(metadata_store)
@@ -210,6 +212,7 @@ def _render_notebook_preview(notebook_json: str) -> None:
 # Colab MCP notebook
 # ------------------------------------------------------------------
 
+
 def _render_colab_mcp_notebook(state) -> None:  # noqa: ANN001
     st.markdown(
         "This connects your machine to a **Google Colab** notebook in the "
@@ -222,14 +225,14 @@ def _render_colab_mcp_notebook(state) -> None:  # noqa: ANN001
     uvx_ok = _find_uvx() is not None
     try:
         from mcp import ClientSession  # noqa: F401
+
         mcp_ok = True
     except ImportError:
         mcp_ok = False
 
     if not uvx_ok or not mcp_ok:
         st.error(
-            "**Cloud connection is not set up yet.** "
-            "Some required packages need to be installed by your administrator."
+            "**Cloud connection is not set up yet.** Some required packages need to be installed by your administrator."
         )
         with st.expander("Technical details for administrators"):
             st.caption("Run these commands in a terminal to install the required packages:")
@@ -299,11 +302,7 @@ def _render_colab_mcp_notebook(state) -> None:  # noqa: ANN001
         key="colab_code_input",
     )
 
-    can_execute = (
-        backend is not None
-        and session_info is not None
-        and session_info.get("status") == "ready"
-    )
+    can_execute = backend is not None and session_info is not None and session_info.get("status") == "ready"
 
     if st.button("▶️ Run in Colab", key="colab_run", disabled=not can_execute):
         if code.strip() and backend is not None:
@@ -314,10 +313,14 @@ def _render_colab_mcp_notebook(state) -> None:  # noqa: ANN001
                 executed = False
                 for tool_name in ("execute_cell", "run_code", "add_and_run_cell"):
                     if tool_name in tools:
-                        result = _run_async(backend.run_job({
-                            "tool": tool_name,
-                            "arguments": {"code": code},
-                        }))
+                        result = _run_async(
+                            backend.run_job(
+                                {
+                                    "tool": tool_name,
+                                    "arguments": {"code": code},
+                                }
+                            )
+                        )
                         st.code(result.get("output", "(no output)"), language="text")
                         executed = True
                         break
@@ -338,14 +341,13 @@ def _render_colab_mcp_notebook(state) -> None:  # noqa: ANN001
         f"Running on: **{'Cloud (Google Colab)' if state.execution_backend.value == 'colab_mcp' else 'Local'}** · "
         f"AI Provider: **{state.provider.value}**"
     )
-    st.caption(
-        "💡 Switch to **Local** in Settings if you prefer to run everything on your own machine."
-    )
+    st.caption("💡 Switch to **Local** in Settings if you prefer to run everything on your own machine.")
 
 
 # ------------------------------------------------------------------
 # Local notebook (fallback)
 # ------------------------------------------------------------------
+
 
 def _render_local_notebook(state) -> None:  # noqa: ANN001
     st.info(
@@ -357,7 +359,4 @@ def _render_local_notebook(state) -> None:  # noqa: ANN001
         "- Run code cells using your machine’s Python\n"
         "- Track experiments automatically via MLflow\n"
     )
-    st.caption(
-        f"AI Provider: **{state.provider.value}** · "
-        f"Running on: **Local**"
-    )
+    st.caption(f"AI Provider: **{state.provider.value}** · Running on: **Local**")

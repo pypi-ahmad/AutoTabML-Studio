@@ -60,9 +60,7 @@ class HistoryService:
         # widen the fetch pool so the client-side sort sees the full
         # candidate set rather than a partial window.
         needs_full_pool = _requires_client_sort(effective_sort.field)
-        fetch_size = (
-            max(effective_limit, _CLIENT_SORT_POOL_SIZE) if needs_full_pool else effective_limit
-        )
+        fetch_size = max(effective_limit, _CLIENT_SORT_POOL_SIZE) if needs_full_pool else effective_limit
 
         runs = mlflow_query.search_runs(
             experiment_ids=experiment_ids or None,
@@ -103,8 +101,7 @@ class HistoryService:
         if len(matches) == 0:
             raise RunNotFoundError(f"No run found matching prefix '{cleaned}'.")
         raise RunNotFoundError(
-            f"Ambiguous prefix '{cleaned}': matches {len(matches)} runs. "
-            "Provide more characters to disambiguate."
+            f"Ambiguous prefix '{cleaned}': matches {len(matches)} runs. Provide more characters to disambiguate."
         )
 
     def get_run_detail(self, run_id: str) -> RunDetailView:
@@ -134,7 +131,8 @@ class HistoryService:
         for name in names:
             try:
                 info = mlflow_query.get_experiment_by_name(
-                    name, tracking_uri=self._tracking_uri,
+                    name,
+                    tracking_uri=self._tracking_uri,
                 )
                 ids.append(info.experiment_id)
                 name_map[info.experiment_id] = info.name

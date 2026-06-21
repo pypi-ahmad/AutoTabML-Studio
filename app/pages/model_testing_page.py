@@ -29,10 +29,7 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
     execution_config = workflow.build_execution_config(state.settings.prediction, state.settings.tracking)
     if _show_header:
         st.title("📊 Test & Evaluate")
-        st.caption(
-            "Pick a trained model, upload real-world data, "
-            "and see how well it performs."
-        )
+        st.caption("Pick a trained model, upload real-world data, and see how well it performs.")
 
     service = get_prediction_service(state.settings)
 
@@ -97,14 +94,20 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
     source_kind = st.session_state.get("mt_loaded_source", selected_item.source_kind)
 
     if source_kind == "pycaret":
-        _meta = loaded_model.metadata if hasattr(loaded_model, "metadata") and isinstance(loaded_model.metadata, dict) else {}
+        _meta = (
+            loaded_model.metadata
+            if hasattr(loaded_model, "metadata") and isinstance(loaded_model.metadata, dict)
+            else {}
+        )
         render_model_trust_card(
             trained_at=_meta.get("trained_at"),
             dataset_name=_meta.get("dataset_name"),
             task_type=loaded_model.task_type.value if hasattr(loaded_model, "task_type") else None,
             target_column=loaded_model.target_column if hasattr(loaded_model, "target_column") else None,
             feature_count=len(loaded_model.feature_columns) if hasattr(loaded_model, "feature_columns") else None,
-            source_label=SOURCE_TYPE_LABELS.get(getattr(loaded_model, "source_type", None) and loaded_model.source_type.value, "Local"),
+            source_label=SOURCE_TYPE_LABELS.get(
+                getattr(loaded_model, "source_type", None) and loaded_model.source_type.value, "Local"
+            ),
         )
         if loaded_model.feature_columns:
             with st.expander("Expected features"):
@@ -149,7 +152,9 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
                 test_df = workflow.load_uploaded_test_dataframe(uploaded)
                 data_label = uploaded.name
             except Exception as exc:
-                log_ui_exception(exc, operation="model_testing.parse_uploaded_file", context={"filename": uploaded.name})
+                log_ui_exception(
+                    exc, operation="model_testing.parse_uploaded_file", context={"filename": uploaded.name}
+                )
                 st.error(f"Failed to parse file: {safe_error_message(exc)}")
     else:
         loaded_datasets = st.session_state.get("loaded_datasets", {})
@@ -159,7 +164,9 @@ def render_model_testing_page(*, _show_header: bool = True) -> None:
                 go_to_page("Load Data")
         else:
             selected_ds = st.selectbox(
-                "Loaded dataset", options=list(loaded_datasets.keys()), key="mt_session_ds",
+                "Loaded dataset",
+                options=list(loaded_datasets.keys()),
+                key="mt_session_ds",
                 help="Choose one of the datasets you loaded earlier.",
             )
             test_df = loaded_datasets[selected_ds].dataframe

@@ -18,9 +18,7 @@ def render_dataset_intake_page() -> None:
 
     st.title("📥 Load Data")
     render_workflow_banner(current_step=1)
-    st.write(
-        "Load a dataset, review your cleaned data, and choose which dataset the rest of the app works with."
-    )
+    st.write("Load a dataset, review your cleaned data, and choose which dataset the rest of the app works with.")
 
     render_dataset_workspace(
         title="Load Your Data",
@@ -43,11 +41,14 @@ def render_dataset_intake_page() -> None:
     metadata = active_dataset.metadata
 
     from app.pages.ui_labels import DATASET_SOURCE_LABELS, format_enum_value
+
     metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
     metric_col1.metric("Current dataset", active_name)
     metric_col2.metric("Rows", f"{len(dataframe):,}")
     metric_col3.metric("Columns", f"{len(dataframe.columns):,}")
-    metric_col4.metric("Source", DATASET_SOURCE_LABELS.get(metadata.source_type.value, format_enum_value(metadata.source_type.value)))
+    metric_col4.metric(
+        "Source", DATASET_SOURCE_LABELS.get(metadata.source_type.value, format_enum_value(metadata.source_type.value))
+    )
 
     with st.expander("Dataset details", expanded=False):
         _md = metadata.model_dump(mode="json")
@@ -75,9 +76,17 @@ def render_dataset_intake_page() -> None:
 
     st.caption("**Optional preparation** — check your data before modeling:")
     opt_col1, opt_col2, _ = st.columns([2, 2, 4])
-    if opt_col1.button("✅ Validate Data", key="dataset_intake_to_validation", help="Check for missing values, duplicates, and other quality issues."):
+    if opt_col1.button(
+        "✅ Validate Data",
+        key="dataset_intake_to_validation",
+        help="Check for missing values, duplicates, and other quality issues.",
+    ):
         go_to_page("Validation")
-    if opt_col2.button("📊 Explore Data", key="dataset_intake_to_profiling", help="Visual summary of distributions, correlations, and statistics."):
+    if opt_col2.button(
+        "📊 Explore Data",
+        key="dataset_intake_to_profiling",
+        help="Visual summary of distributions, correlations, and statistics.",
+    ):
         go_to_page("Profiling")
 
 
@@ -89,7 +98,9 @@ def _build_schema_frame(dataframe: pd.DataFrame) -> pd.DataFrame:
             "Dtype": [str(dtype) for dtype in dataframe.dtypes],
             "Non-null": [int(dataframe[column].notna().sum()) for column in dataframe.columns],
             "Nulls": [int(null_counts[column]) for column in dataframe.columns],
-            "Null %": [round(float(null_counts[column]) / max(len(dataframe), 1) * 100, 2) for column in dataframe.columns],
+            "Null %": [
+                round(float(null_counts[column]) / max(len(dataframe), 1) * 100, 2) for column in dataframe.columns
+            ],
             "Unique": [int(dataframe[column].nunique(dropna=True)) for column in dataframe.columns],
         }
     )

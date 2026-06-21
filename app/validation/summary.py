@@ -21,12 +21,8 @@ def build_summary(
 ) -> ValidationResultSummary:
     """Aggregate individual check results into a summary."""
     passed = sum(1 for c in checks if c.passed)
-    warnings = sum(
-        1 for c in checks if not c.passed and c.severity == CheckSeverity.WARNING
-    )
-    failed = sum(
-        1 for c in checks if not c.passed and c.severity == CheckSeverity.ERROR
-    )
+    warnings = sum(1 for c in checks if not c.passed and c.severity == CheckSeverity.WARNING)
+    failed = sum(1 for c in checks if not c.passed and c.severity == CheckSeverity.ERROR)
 
     return ValidationResultSummary(
         run_timestamp=datetime.now(timezone.utc),

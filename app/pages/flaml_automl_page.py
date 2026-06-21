@@ -94,7 +94,9 @@ def render_flaml_automl_page() -> None:
     # ── Step 1: Choose Your Data ───────────────────────────────────────
     st.subheader("1. Choose Your Data")
     selected_name, loaded_dataset = render_dataset_header(
-        "FLAML AutoML", key_prefix="flaml", metadata_store=metadata_store,
+        "FLAML AutoML",
+        key_prefix="flaml",
+        metadata_store=metadata_store,
     )
     if selected_name is None or loaded_dataset is None:
         return
@@ -124,8 +126,7 @@ def render_flaml_automl_page() -> None:
             index=0,
             key="flaml_task_type",
             help=(
-                "Choose 'Classification' for categories, 'Regression' for numbers, "
-                "or 'Auto' to let the system decide."
+                "Choose 'Classification' for categories, 'Regression' for numbers, or 'Auto' to let the system decide."
             ),
         )
     )
@@ -348,18 +349,24 @@ def _render_flaml_results(bundle, app_settings, metadata_store) -> None:  # noqa
         st.subheader("Leaderboard")
         lb_data = []
         for row in search.leaderboard:
-            lb_data.append({
-                "Rank": row.rank,
-                "Algorithm": ESTIMATOR_LABELS.get(row.estimator_name, row.estimator_name),
-                "Best Loss": f"{row.best_loss:.4f}" if row.best_loss is not None else "N/A",
-            })
+            lb_data.append(
+                {
+                    "Rank": row.rank,
+                    "Algorithm": ESTIMATOR_LABELS.get(row.estimator_name, row.estimator_name),
+                    "Best Loss": f"{row.best_loss:.4f}" if row.best_loss is not None else "N/A",
+                }
+            )
         st.dataframe(pd.DataFrame(lb_data), width="stretch")
 
     # ── Save ──────────────────────────────────────────────────────────
     st.subheader("Save Model")
     save_col, predict_col = st.columns(2)
-    if save_col.button("💾 Save Best Model", key="flaml_save", type="primary",
-                       help="Save the best model so you can load it on the Predictions page."):
+    if save_col.button(
+        "💾 Save Best Model",
+        key="flaml_save",
+        type="primary",
+        help="Save the best model so you can load it on the Predictions page.",
+    ):
         service = _build_service(app_settings, metadata_store=metadata_store)
         _save_name = model_save_name(bundle.dataset_name, summary.best_estimator or "flaml_best")
         try:

@@ -255,5 +255,3 @@ class CSVLoader(BaseLoader):
         if len(collected_chunks) == 1:
             return collected_chunks[0].reset_index(drop=True)
         return pd.concat(collected_chunks, ignore_index=True)
-
-

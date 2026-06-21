@@ -108,9 +108,7 @@ def _driver_probe() -> bool:
     import ctypes
     import sys
 
-    lib_names = (
-        ["nvcuda.dll"] if sys.platform == "win32" else ["libcuda.so.1", "libcuda.so", "libcuda.dylib"]
-    )
+    lib_names = ["nvcuda.dll"] if sys.platform == "win32" else ["libcuda.so.1", "libcuda.so", "libcuda.dylib"]
     for name in lib_names:
         try:
             lib = ctypes.CDLL(name)

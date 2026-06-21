@@ -20,12 +20,12 @@ def _detect_completed_steps() -> int:
     """
     loaded = get_loaded_datasets()
     if not loaded:
-        return 0                                       # nothing loaded → step 0
+        return 0  # nothing loaded → step 0
     if not st.session_state.get("benchmark_bundles"):
-        return 2                                       # data loaded → skip optional step 2, benchmark next
+        return 2  # data loaded → skip optional step 2, benchmark next
     if not st.session_state.get("experiment_bundles") and not st.session_state.get("flaml_bundles"):
-        return 3                                       # benchmarked, no experiment yet
-    return 4                                           # trained → predict is next
+        return 3  # benchmarked, no experiment yet
+    return 4  # trained → predict is next
 
 
 # ── One-click example datasets ────────────────────────────────────────
@@ -129,8 +129,7 @@ def render_dashboard_page() -> None:
         st.markdown("")
         st.markdown("#### Your path to predictions")
         st.caption(
-            "Follow these five steps to go from raw data to a working model. "
-            "Steps marked *optional* can be skipped."
+            "Follow these five steps to go from raw data to a working model. Steps marked *optional* can be skipped."
         )
         for step in WORKFLOW_STEPS:
             num = int(step["number"])
@@ -236,17 +235,18 @@ def render_dashboard_page() -> None:
         job_rows = []
         for job in jobs:
             friendly_name = _friendly_job_name(job)
-            job_rows.append({
-                "Dataset / Subject": friendly_name,
-                "Job Type": format_enum_value(job.job_type.value),
-                "Status": _status_badge(job.status.value),
-                "Updated": job.updated_at,
-            })
+            job_rows.append(
+                {
+                    "Dataset / Subject": friendly_name,
+                    "Job Type": format_enum_value(job.job_type.value),
+                    "Status": _status_badge(job.status.value),
+                    "Updated": job.updated_at,
+                }
+            )
         st.dataframe(pd.DataFrame(job_rows), width="stretch", hide_index=True)
     else:
         st.info(
-            "**No activity yet.** Load a dataset and run your first workflow — "
-            "results will appear here automatically."
+            "**No activity yet.** Load a dataset and run your first workflow — results will appear here automatically."
         )
         if st.button("📥 Load a Dataset", key="dash_activity_goto_load", type="primary"):
             go_to_page("Load Data")
@@ -297,10 +297,13 @@ def render_dashboard_page() -> None:
 
     # ── Environment details (collapsed, bottom of page) ────────────────
     from app.pages.ui_labels import BACKEND_LABELS, MODE_LABELS, PROVIDER_LABELS
+
     with st.expander("⚙️ Environment", expanded=False):
         env_col1, env_col2, env_col3 = st.columns(3)
         env_col1.caption(f"**AI Provider:** {PROVIDER_LABELS.get(state.provider.value, state.provider.value)}")
-        env_col2.caption(f"**Runs on:** {BACKEND_LABELS.get(state.execution_backend.value, state.execution_backend.value)}")
+        env_col2.caption(
+            f"**Runs on:** {BACKEND_LABELS.get(state.execution_backend.value, state.execution_backend.value)}"
+        )
         env_col3.caption(f"**Mode:** {MODE_LABELS.get(state.workspace_mode.value, state.workspace_mode.value)}")
 
 

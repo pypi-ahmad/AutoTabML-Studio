@@ -181,10 +181,7 @@ class ExcelLoader(BaseLoader):
         return dataframe, sheet_names, actual_sheet_name, False
 
     def _supports_read_only(self, path: Path, *, content_type: str | None) -> bool:
-        return (
-            path.suffix.lower() in _OPENPYXL_READ_ONLY_SUFFIXES
-            or content_type in _OPENPYXL_READ_ONLY_CONTENT_TYPES
-        )
+        return path.suffix.lower() in _OPENPYXL_READ_ONLY_SUFFIXES or content_type in _OPENPYXL_READ_ONLY_CONTENT_TYPES
 
     def _read_excel_read_only(
         self,
@@ -208,8 +205,7 @@ class ExcelLoader(BaseLoader):
                 return pd.DataFrame(), sheet_names, actual_sheet_name
 
             headers = [
-                value if value not in (None, "") else f"Unnamed: {index}"
-                for index, value in enumerate(header_row)
+                value if value not in (None, "") else f"Unnamed: {index}" for index, value in enumerate(header_row)
             ]
 
             rows: list[tuple[Any, ...]] = []
