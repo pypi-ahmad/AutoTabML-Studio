@@ -1,0 +1,58 @@
+# Build artifacts (uv, build backends, tests)
+build/
+dist/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# Tests
+tests/
+
+# Docs source (built docs would be served, not sources)
+docs/
+
+# Project-internal dev artifacts
+.claude/
+.playwright-mcp/
+.coverage
+coverage.xml
+detect-secrets-report.json
+gitleaks.tar.gz
+
+# User data
+artifacts/
+mlruns/
+data/
+datasets/
+*.csv
+*.tsv
+*.parquet
+*.pkl
+*.joblib
+
+# Local environment / secrets
+.env
+.env.local
+.streamlit/secrets.toml
+
+# Logs
+*.log
