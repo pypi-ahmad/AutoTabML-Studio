@@ -1,14 +1,11 @@
 [build-system]
-requires = [
-    "setuptools>=68",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
 
 [project]
 name = "autotabml-studio"
-dynamic = ["version"]
-description = "Local-first tabular ML workbench with Streamlit UI and CLI"
+version = "0.2.0"
+description = "Local-first automated machine learning workbench for tabular data with Streamlit UI and CLI"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
@@ -17,7 +14,7 @@ maintainers = [
 ]
 keywords = ["automl", "machine-learning", "tabular-data", "streamlit", "mlflow"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
@@ -27,6 +24,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: User Interfaces",
+    "Typing :: Typed",
 ]
 requires-python = ">=3.10,<3.14"
 dependencies = [
@@ -54,7 +53,6 @@ validation = [
     "great_expectations>=1.0",
 ]
 profiling = [
-    "setuptools>=68,<82",
     "ydata-profiling>=4.6",
 ]
 benchmark = [
@@ -90,13 +88,32 @@ gpu = [
 colab = [
     "mcp>=1.0",
 ]
+providers = [
+    "openai>=1.40",
+    "anthropic>=0.40",
+    "google-genai>=1.0",
+]
+
+[dependency-groups]
 dev = [
     "build>=1.2",
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "pytest-asyncio>=0.23",
     "respx>=0.21",
+    "freezegun>=1.5",
+    "hypothesis>=6.100",
+    "ruff>=0.15,<1",
+    "mypy>=1.10",
+    "types-requests",
     "tomli>=2.0; python_version < '3.11'",
+]
+security = [
+    "bandit[toml]>=1.7",
+    "pip-audit>=2.7",
+]
+docs = [
+    "mkdocs-material>=9.5",
 ]
 
 [project.scripts]
@@ -107,31 +124,178 @@ Homepage = "https://github.com/pypi-ahmad/AutoTabML-Studio"
 Repository = "https://github.com/pypi-ahmad/AutoTabML-Studio"
 Documentation = "https://github.com/pypi-ahmad/AutoTabML-Studio/tree/main/docs"
 Issues = "https://github.com/pypi-ahmad/AutoTabML-Studio/issues"
+Changelog = "https://github.com/pypi-ahmad/AutoTabML-Studio/blob/main/CHANGELOG.md"
 
-[tool.setuptools.dynamic]
-version = {attr = "app.__version__"}
+[tool.uv]
+default-groups = ["dev"]
+managed = true
 
-[tool.setuptools.packages.find]
-include = ["app*"]
+# ───────────────────────────────────────────────────────────────────────────
+# Hatchling — build backend
+# ───────────────────────────────────────────────────────────────────────────
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "app",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "MIGRATION.md",
+    "UPGRADE.md",
+    "docs",
+    "tests",
+    "scripts",
+    "pyproject.toml",
+    "uv.lock",
+    ".python-version",
+    ".env.example",
+    ".github",
+    "Dockerfile",
+    "docker-compose.yml",
+    ".pre-commit-config.yaml",
+]
+exclude = [".venv", "build", "dist", "artifacts", "mlruns"]
+
+# ───────────────────────────────────────────────────────────────────────────
+# Test configuration
+# ───────────────────────────────────────────────────────────────────────────
 
 [tool.pytest.ini_options]
+minversion = "8.0"
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-m 'not integration'"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "-m not integration",
+]
 markers = [
     "integration: optional heavy-dependency integration tests run in the manual CI job",
 ]
+asyncio_mode = "auto"
+filterwarnings = [
+    # Default behavior in tests is to surface real DeprecationWarnings as errors.
+    # Upstream library warnings (ydata-profiling, marshmallow, matplotlib,
+    # pytest's own unraisable hook warnings) are demoted to default so they
+    # do not block CI on third-party lifecycle events.
+    "error::DeprecationWarning:app",
+    "error::DeprecationWarning:tests",
+    "default::DeprecationWarning:ydata_profiling",
+    "default::DeprecationWarning:visions",
+    "default::DeprecationWarning:matplotlib",
+    "default::DeprecationWarning:marshmallow",
+    "default::pytest.PytestUnraisableExceptionWarning",
+    "default::ResourceWarning",
+]
+
+# ───────────────────────────────────────────────────────────────────────────
+# Ruff — linter + formatter
+# ───────────────────────────────────────────────────────────────────────────
 
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+extend-exclude = [
+    "artifacts",
+    "mlruns",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = false
 
 [tool.ruff.lint]
-select = ["F", "E4", "E7", "E9", "I", "UP"]
-ignore = ["E741", "E402"]
-per-file-ignores = {"app/pages/*" = ["F821"], "app/cli.py" = ["F841"]}
+select = [
+    "F",      # pyflakes
+    "E4",     # pycodestyle errors
+    "E7",
+    "E9",
+    "I",      # isort
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "PIE",    # flake8-pie
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "N",      # pep8-naming
+    "W",      # pycodestyle warnings
+]
+ignore = [
+    "E741",   # ambiguous variable names (kept for backwards compatibility)
+    "E402",   # module-level import not at top (CLI patterns)
+    "B008",   # function call in default argument (FastAPI/pydantic idiom)
+    "B904",   # raise from inside except (we re-raise carefully)
+    "B039",   # ContextVar mutable default — we use a factory; stylistic
+    "SIM102", # nested if: sometimes more readable
+    "SIM105", # try/except/pass: we intentionally never let telemetry break callers
+    "SIM108", # ternary: sometimes less readable
+    "SIM117", # nested with: stylistic
+    "N803",   # argument name should be lowercase — sklearn X_train/X_test convention
+    "N806",   # variable in function should be lowercase — sklearn X_train convention
+    "N815",   # mixedCase variable class — sklearn X_test
+    "N802",   # function name should be lowercase — preserve in ML/sklearn code
+    "N801",   # class name should be CapWords — streamlit `st.sidebar` looks like a class
+    "N813",   # camelcase imported as lowercase — `lazypredict.Supervised` accessed as `lazy_module.Supervised`
+]
+[tool.ruff.lint.per-file-ignores]
+"app/pages/*" = ["F821", "E402"]
+"app/cli.py" = ["F841"]
+"tests/*" = ["B011", "N802", "N803"]
+"scripts/*" = ["T201", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+combine-as-imports = true
+force-sort-within-sections = true
+
+# ───────────────────────────────────────────────────────────────────────────
+# mypy — type checking (non-blocking; advisory for now)
+# ───────────────────────────────────────────────────────────────────────────
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+ignore_missing_imports_per_module = true
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+show_error_codes = true
+show_traceback = true
+plugins = ["pydantic.mypy"]
+exclude = [
+    "^artifacts/",
+    "^mlruns/",
+    "^build/",
+    "^dist/",
+    "^tests/",
+    "^scripts/",
+]
+
+[[tool.mypy.overrides]]
+module = ["app.ingestion.*", "app.profiling.*", "app.notebooks.*"]
+ignore_errors = true
+
+# ───────────────────────────────────────────────────────────────────────────
+# Coverage
+# ───────────────────────────────────────────────────────────────────────────
 
 [tool.coverage.run]
+branch = true
 omit = [
     "app/main.py",
     "app/pages/*_page.py",
@@ -143,11 +307,22 @@ omit = [
 ]
 
 [tool.coverage.report]
+show_missing = true
+skip_covered = false
 exclude_lines = [
     "pragma: no cover",
     "if __name__ == .__main__.",
     "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\b.*:",
 ]
 
+# ───────────────────────────────────────────────────────────────────────────
+# Bandit — security lint
+# ───────────────────────────────────────────────────────────────────────────
 
-
+[tool.bandit]
+exclude_dirs = ["tests", "artifacts", "mlruns", "build", "dist", ".venv"]
+skips = ["B101"]
+# Pickle is intentional in app/security/trusted_artifacts.py; reviewed in
+# docs/security.md.

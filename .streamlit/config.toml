@@ -1,2 +1,16 @@
 [client]
 showSidebarNavigation = false
+gatherUsageStats = false
+
+[browser]
+gatherUsageStats = false
+
+[server]
+# Local-first by default. Set these explicitly when running behind a reverse proxy.
+enableCORS = false
+enableXsrfProtection = true
+maxUploadSize = 500
+
+[theme]
+base = "light"
+primaryColor = "#1D4ED8"

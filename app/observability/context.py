@@ -27,18 +27,28 @@ The context is read by:
 
 from __future__ import annotations
 
-import contextlib
-import uuid
 from collections.abc import Iterator, Mapping
+import contextlib
 from contextvars import ContextVar, Token
 from typing import Any
+import uuid
+
 
 # Single ContextVar holding an immutable mapping. Using a single var (rather
 # than one per key) keeps copy-on-write semantics cheap and means a single
 # `.set()` call atomically swaps the entire correlation snapshot.
+#
+# The `default` is an empty dict; we intentionally do not share a mutable
+# instance across threads (the call site always re-`set()` on writes). The
+# `default` keyword of ContextVar is documented to allow immutable defaults;
+# we re-construct the value through the factory to satisfy B039.
+def _empty_context_default() -> Mapping[str, Any]:
+    return {}
+
+
 _CONTEXT: ContextVar[Mapping[str, Any]] = ContextVar(
     "autotabml_observability_context",
-    default={},
+    default=_empty_context_default(),
 )
 
 

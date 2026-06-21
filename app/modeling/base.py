@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import abc
-import logging
 from collections.abc import Iterable
+import logging
 from pathlib import Path
 from typing import Any, Generic, TypeVar
 
@@ -52,7 +52,7 @@ def mlflow_exception_types(mlflow_module: Any) -> tuple[type[BaseException], ...
     return tuple(exception_types)
 
 
-class BaseService(abc.ABC):
+class BaseService(abc.ABC):  # noqa: B024 - intentionally a marker base
     """Common modeling-service configuration and helpers."""
 
     def __init__(
@@ -231,7 +231,7 @@ class BaseArtifacts(Generic[BundleT, ArtifactBundleT], abc.ABC):
         stem: str | None = None,
         kind: ArtifactKind | None = None,
     ) -> Path:
-        summary = getattr(self.bundle, "summary")
+        summary = self.bundle.summary
         dataset_name = stem if stem is not None else getattr(self.bundle, "dataset_name", None)
         return self.manager.build_artifact_path(
             kind=kind or self.artifact_kind,
