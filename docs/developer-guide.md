@@ -167,6 +167,32 @@ autotabml --help
 - keep [.env.example](../.env.example) aligned with the real settings keys
 - keep notebook mode and `colab_mcp` messaging explicitly scoped to their current implemented state
 - run `python -m app.release_metadata` before any public release build or tag; it verifies the committed license and public maintainer/contact metadata in `pyproject.toml`
+- update [MIGRATION_GUIDE.md](../MIGRATION_GUIDE.md) and [UPGRADE_SUMMARY.md](../UPGRADE_SUMMARY.md) for any breaking change
+- cut a `RELEASE_NOTES_vX.Y.Z.md` for each minor/major release
+- update [CHANGELOG.md](../CHANGELOG.md) per Keep-a-Changelog format
+
+### Common dev commands (Makefile)
+
+The `Makefile` at the repo root documents every command. Most
+useful:
+
+```bash
+make install        # uv venv --python 3.12.10 + uv sync --locked --all-groups --all-extras
+make sync           # uv sync --locked --all-groups
+make test           # run unit tests
+make test-cov       # run with coverage gate (>= 65%)
+make lint           # ruff check
+make format         # ruff format (writes changes)
+make type-check     # pyright app/
+make security       # bandit + pip-audit
+make build          # python -m build
+make clean          # remove build artifacts
+make doctor         # autotabml doctor
+```
+
+The pre-commit hook set runs `ruff check --fix`, `ruff format`,
+and `mypy` on every commit. Install once with
+`pip install pre-commit && pre-commit install`.
 
 ### Public release packaging check
 
