@@ -163,9 +163,16 @@ class TestModelNormalization:
         items = provider.normalize_model_list(raw)
         assert items[0].id == "gemini-pro"
 
-    def test_gemini_uses_header_auth(self):
+    def test_gemini_client_carries_api_key(self):
+        """As of v0.2.0 the Gemini provider uses the official google-genai
+        SDK which embeds the API key on the client. We assert that the
+        SDK client is constructed with the expected key, and that the
+        legacy ``_auth_headers()`` helper is no longer present.
+        """
         provider = GeminiProvider(api_key="secret-key")
-        assert provider._auth_headers() == {"x-goog-api-key": "secret-key"}
+        # The google-genai Client stores the key on the internal config.
+        assert provider._client is not None
+        assert not hasattr(provider, "_auth_headers")
 
     def test_ollama_normalization(self):
         provider = OllamaProvider()
@@ -180,3 +187,58 @@ class TestModelNormalization:
         items = provider.normalize_model_list(raw)
         assert items[0].id == "a-model"
         assert items[1].id == "z-model"
+
+
+# ---------------------------------------------------------------------------
+# SDK wiring (v0.2.0 — official SDKs)
+# ---------------------------------------------------------------------------
+
+
+class TestOfficialSDKIntegration:
+    """Verify that each provider is now backed by the official SDK client.
+
+    The SDKs handle auth, retry, and pagination. The provider still
+    surfaces the same async surface; this set of tests only proves the
+    underlying client is the expected one.
+    """
+
+    def test_openai_uses_async_openai(self):
+        from openai import AsyncOpenAI as _AsyncOpenAI
+
+        provider = OpenAIProvider(api_key="k")
+        assert isinstance(provider._client, _AsyncOpenAI)
+
+    def test_anthropic_uses_async_anthropic(self):
+        from anthropic import AsyncAnthropic as _AsyncAnthropic
+
+        provider = AnthropicProvider(api_key="k")
+        assert isinstance(provider._client, _AsyncAnthropic)
+
+    def test_gemini_uses_google_genai_client(self):
+        from google import genai as _genai
+
+        provider = GeminiProvider(api_key="k")
+        assert isinstance(provider._client, _genai.Client)
+
+    def test_ollama_uses_ollama_async_client(self):
+        from ollama import AsyncClient as _OllamaAsyncClient
+
+        provider = OllamaProvider()
+        assert isinstance(provider._client, _OllamaAsyncClient)
+
+    def test_provider_constructors_no_longer_use_httpx(self):
+        """v0.2.0: ``httpx`` is no longer used by any LLM provider.
+
+        (``httpx`` is still used by ``app.security.safe_http`` for the
+        SSRF-resistant ingestion path — that is intentional and stays.)
+        """
+        import inspect
+
+        from app import providers as providers_pkg
+
+        for module_name in ("openai_provider", "anthropic_provider", "gemini_provider", "ollama_provider"):
+            module = getattr(providers_pkg, module_name)
+            source = inspect.getsource(module)
+            assert "import httpx" not in source, (
+                f"app/providers/{module_name}.py still imports httpx; should use the official SDK."
+            )

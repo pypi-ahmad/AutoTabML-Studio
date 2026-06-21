@@ -270,9 +270,16 @@ class TestOptionalDependencyProbes:
         assert isinstance(result, bool)
 
     def test_ydata_availability_check_does_not_raise(self):
+        import warnings
+
         from app.profiling.ydata_runner import is_ydata_available
 
-        result = is_ydata_available()
+        with warnings.catch_warnings():
+            # The ydata-profiling package emits a DeprecationWarning on
+            # import. The e2e test only cares that the availability
+            # helper returns a bool, not about the upstream migration.
+            warnings.simplefilter("ignore", DeprecationWarning)
+            result = is_ydata_available()
         assert isinstance(result, bool)
 
     def test_lazypredict_availability_check_does_not_raise(self):

@@ -1,63 +1,58 @@
-"""Anthropic provider – model discovery via GET /v1/models."""
+"""Anthropic provider — model discovery and text generation via the official SDK.
+
+Migrated from a hand-rolled ``httpx`` client to the official
+``anthropic`` SDK. The SDK handles auth headers (``x-api-key`` and
+``anthropic-version``), pagination, retry, and the streaming shape.
+"""
 
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-import httpx
+from anthropic import AsyncAnthropic
 
 from app.config.enums import DEFAULT_MODELS, LLMProvider
 from app.providers.base import BaseProvider, ModelItem
 
 logger = logging.getLogger(__name__)
 
-_BASE_URL = "https://api.anthropic.com"
-_ANTHROPIC_VERSION = "2023-06-01"
-
 
 class AnthropicProvider(BaseProvider):
     provider = LLMProvider.ANTHROPIC
 
-    def __init__(self, api_key: str) -> None:
-        self._api_key = api_key
+    def __init__(self, api_key: str, *, base_url: str | None = None, timeout: float = 30.0) -> None:
+        self._client = AsyncAnthropic(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+        )
 
+    # --- credentials ---
     async def validate_credentials(self) -> bool:
         try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.get(
-                    f"{_BASE_URL}/v1/models",
-                    headers=self._auth_headers(),
-                    timeout=15,
-                )
-            return resp.status_code == 200
-        except httpx.HTTPError as exc:
-            logger.warning("Anthropic credential validation failed (%s).", _safe_http_error_detail(exc))
+            await self._client.models.list()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Anthropic credential validation failed (%s).", exc.__class__.__name__)
             return False
+        return True
 
+    # --- models ---
     async def list_models(self) -> list[ModelItem]:
         try:
             all_models: list[dict[str, Any]] = []
-            url: str | None = f"{_BASE_URL}/v1/models"
-            async with httpx.AsyncClient() as client:
-                while url:
-                    resp = await client.get(
-                        url,
-                        headers=self._auth_headers(),
-                        timeout=30,
-                    )
-                    resp.raise_for_status()
-                    body = resp.json()
-                    all_models.extend(body.get("data", []))
-                    # Anthropic paginates via `has_more` + `last_id`
-                    if body.get("has_more"):
-                        last_id = body.get("last_id", "")
-                        url = f"{_BASE_URL}/v1/models?after_id={last_id}"
+            async for page in self._client.models.list():
+                # SDK returns ModelInfo objects; coerce to dict.
+                for m in page.data:
+                    if hasattr(m, "model_dump"):
+                        all_models.append(m.model_dump())
+                    elif isinstance(m, dict):
+                        all_models.append(m)
                     else:
-                        url = None
+                        all_models.append({"id": getattr(m, "id", "")})
             return self.normalize_model_list(all_models)
-        except httpx.HTTPError as exc:
-            logger.error("Failed to fetch Anthropic models (%s).", _safe_http_error_detail(exc))
+        except Exception as exc:  # noqa: BLE001
+            logger.error("Failed to fetch Anthropic models (%s).", exc.__class__.__name__)
             return []
 
     def get_default_model(self) -> str | None:
@@ -90,31 +85,10 @@ class AnthropicProvider(BaseProvider):
         temperature: float = 0.3,
     ) -> str:
         chosen_model = model_id or self.get_default_model() or "claude-sonnet-4-6"
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"{_BASE_URL}/v1/messages",
-                headers=self._auth_headers(),
-                json={
-                    "model": chosen_model,
-                    "max_tokens": max_tokens,
-                    "temperature": temperature,
-                    "messages": [{"role": "user", "content": prompt}],
-                },
-                timeout=60,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            blocks = data.get("content", [])
-            return "".join(b.get("text", "") for b in blocks if b.get("type") == "text")
-
-    def _auth_headers(self) -> dict[str, str]:
-        return {
-            "x-api-key": self._api_key,
-            "anthropic-version": _ANTHROPIC_VERSION,
-        }
-
-
-def _safe_http_error_detail(exc: httpx.HTTPError) -> str:
-    if isinstance(exc, httpx.HTTPStatusError):
-        return f"status={exc.response.status_code}"
-    return exc.__class__.__name__
+        message = await self._client.messages.create(
+            model=chosen_model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return "".join(block.text for block in message.content if getattr(block, "type", "") == "text")

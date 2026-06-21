@@ -12,6 +12,7 @@ from app.config.enums import LLMProvider
 @dataclass
 class ModelItem:
     """Normalized internal representation of a model returned by any provider."""
+
     id: str
     display_name: str
     provider: LLMProvider
@@ -60,6 +61,4 @@ class BaseProvider(abc.ABC):
         Returns the generated text string.  Raises ``NotImplementedError``
         for providers that have not implemented generation yet.
         """
-        raise NotImplementedError(
-            f"{self.provider.value} provider does not support text generation."
-        )
+        raise NotImplementedError(f"{self.provider.value} provider does not support text generation.")
