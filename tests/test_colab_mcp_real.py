@@ -85,10 +85,12 @@ class TestColabMCPRealHandshake:
 
             # open_colab_browser_connection should return an error or
             # non-success when no browser is actually connected.
-            job_result = await backend.run_job({
-                "tool": "open_colab_browser_connection",
-                "arguments": {},
-            })
+            job_result = await backend.run_job(
+                {
+                    "tool": "open_colab_browser_connection",
+                    "arguments": {},
+                }
+            )
             # We just verify structurally valid response — no crash.
             assert "tool" in job_result
             assert "output" in job_result

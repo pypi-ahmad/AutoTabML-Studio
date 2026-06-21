@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -17,6 +17,7 @@ from app.config.models import AppSettings, ExecutionSettings
 # ---------------------------------------------------------------------------
 # Default backend is Colab MCP
 # ---------------------------------------------------------------------------
+
 
 class TestDefaultBackendIsColabMCP:
     def test_execution_settings_defaults_to_colab_mcp(self):
@@ -35,6 +36,7 @@ class TestDefaultBackendIsColabMCP:
 # ---------------------------------------------------------------------------
 # Backend factory
 # ---------------------------------------------------------------------------
+
 
 class TestBuildBackend:
     def test_builds_colab_mcp_backend(self):
@@ -56,6 +58,7 @@ class TestBuildBackend:
 # ColabMCPExecutionBackend
 # ---------------------------------------------------------------------------
 
+
 class TestColabMCPExecutionBackend:
     def test_initial_state(self):
         backend = ColabMCPExecutionBackend()
@@ -64,19 +67,16 @@ class TestColabMCPExecutionBackend:
 
     @pytest.mark.asyncio
     async def test_validate_backend_fails_without_uvx(self, monkeypatch):
-        monkeypatch.setattr(
-            "app.backends.colab_mcp_backend._find_uvx", lambda: None
-        )
+        monkeypatch.setattr("app.backends.colab_mcp_backend._find_uvx", lambda: None)
         backend = ColabMCPExecutionBackend()
         assert await backend.validate_backend() is False
 
     @pytest.mark.asyncio
     async def test_validate_backend_fails_without_mcp_sdk(self, monkeypatch):
-        monkeypatch.setattr(
-            "app.backends.colab_mcp_backend._find_uvx", lambda: "/usr/bin/uvx"
-        )
+        monkeypatch.setattr("app.backends.colab_mcp_backend._find_uvx", lambda: "/usr/bin/uvx")
         # Simulate mcp not importable
         import builtins
+
         real_import = builtins.__import__
 
         def _fake_import(name, *args, **kwargs):
@@ -90,9 +90,7 @@ class TestColabMCPExecutionBackend:
 
     @pytest.mark.asyncio
     async def test_validate_backend_ok_when_both_present(self, monkeypatch):
-        monkeypatch.setattr(
-            "app.backends.colab_mcp_backend._find_uvx", lambda: "/usr/bin/uvx"
-        )
+        monkeypatch.setattr("app.backends.colab_mcp_backend._find_uvx", lambda: "/usr/bin/uvx")
         # Ensure the mcp import inside validate_backend succeeds regardless of
         # whether the real mcp package is installed in this test environment.
         fake_mcp = type(sys)("mcp")
@@ -103,9 +101,7 @@ class TestColabMCPExecutionBackend:
 
     @pytest.mark.asyncio
     async def test_prepare_session_error_without_uvx(self, monkeypatch):
-        monkeypatch.setattr(
-            "app.backends.colab_mcp_backend._find_uvx", lambda: None
-        )
+        monkeypatch.setattr("app.backends.colab_mcp_backend._find_uvx", lambda: None)
         # Ensure the mcp import inside prepare_session succeeds so we reach the
         # uvx-not-found branch rather than the mcp-missing branch.
         fake_mcp = type(sys)("mcp")
@@ -151,15 +147,15 @@ class TestColabMCPExecutionBackend:
         mock_session.call_tool = AsyncMock(return_value=mock_result)
         backend._session = mock_session
 
-        result = await backend.run_job({
-            "tool": "execute_cell",
-            "arguments": {"code": "print('hi')"},
-        })
+        result = await backend.run_job(
+            {
+                "tool": "execute_cell",
+                "arguments": {"code": "print('hi')"},
+            }
+        )
         assert result["success"] is True
         assert result["output"] == "Hello from Colab"
-        mock_session.call_tool.assert_awaited_once_with(
-            "execute_cell", {"code": "print('hi')"}
-        )
+        mock_session.call_tool.assert_awaited_once_with("execute_cell", {"code": "print('hi')"})
 
     @pytest.mark.asyncio
     async def test_list_tools_empty_when_no_session(self):
@@ -200,6 +196,7 @@ class TestColabMCPExecutionBackend:
 # LocalExecutionBackend still works
 # ---------------------------------------------------------------------------
 
+
 class TestLocalExecutionBackend:
     @pytest.mark.asyncio
     async def test_validate_backend_always_true(self):
@@ -217,16 +214,20 @@ class TestLocalExecutionBackend:
 # Startup diagnostics for Colab MCP
 # ---------------------------------------------------------------------------
 
+
 class TestStartupColabMCPDiagnostics:
     def test_startup_warns_when_uvx_missing(self, tmp_path: Path, monkeypatch):
         import shutil as _shutil
 
         monkeypatch.setattr(_shutil, "which", lambda _name: None)
-        settings = AppSettings.model_validate({
-            "artifacts": {"root_dir": str(tmp_path / "runtime")},
-            "execution": {"backend": "colab_mcp"},
-        })
+        settings = AppSettings.model_validate(
+            {
+                "artifacts": {"root_dir": str(tmp_path / "runtime")},
+                "execution": {"backend": "colab_mcp"},
+            }
+        )
         from app.startup import initialize_local_runtime
+
         status = initialize_local_runtime(settings, include_optional_network_checks=False)
         messages = [i.message for i in status.issues]
         assert any("uvx" in m for m in messages)
@@ -236,6 +237,7 @@ class TestStartupColabMCPDiagnostics:
 
         monkeypatch.setattr(_shutil, "which", lambda _name: "/usr/bin/uvx")
         import builtins
+
         real_import = builtins.__import__
 
         def _fake_import(name, *args, **kwargs):
@@ -244,21 +246,27 @@ class TestStartupColabMCPDiagnostics:
             return real_import(name, *args, **kwargs)
 
         monkeypatch.setattr(builtins, "__import__", _fake_import)
-        settings = AppSettings.model_validate({
-            "artifacts": {"root_dir": str(tmp_path / "runtime")},
-            "execution": {"backend": "colab_mcp"},
-        })
+        settings = AppSettings.model_validate(
+            {
+                "artifacts": {"root_dir": str(tmp_path / "runtime")},
+                "execution": {"backend": "colab_mcp"},
+            }
+        )
         from app.startup import initialize_local_runtime
+
         status = initialize_local_runtime(settings, include_optional_network_checks=False)
         messages = [i.message for i in status.issues]
         assert any("mcp" in m for m in messages)
 
     def test_startup_no_colab_warnings_for_local_backend(self, tmp_path: Path):
-        settings = AppSettings.model_validate({
-            "artifacts": {"root_dir": str(tmp_path / "runtime")},
-            "execution": {"backend": "local"},
-        })
+        settings = AppSettings.model_validate(
+            {
+                "artifacts": {"root_dir": str(tmp_path / "runtime")},
+                "execution": {"backend": "local"},
+            }
+        )
         from app.startup import initialize_local_runtime
+
         status = initialize_local_runtime(settings, include_optional_network_checks=False)
         messages = [i.message for i in status.issues]
         assert not any("uvx" in m or "Colab MCP" in m for m in messages)
@@ -268,9 +276,11 @@ class TestStartupColabMCPDiagnostics:
 # Packaging: colab extra
 # ---------------------------------------------------------------------------
 
+
 class TestPackagingColabExtra:
     def test_colab_extra_includes_mcp(self):
         import tomllib
+
         data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
         colab_deps = data["project"]["optional-dependencies"]["colab"]
         assert any("mcp" in dep for dep in colab_deps)
@@ -279,6 +289,7 @@ class TestPackagingColabExtra:
 # ---------------------------------------------------------------------------
 # Enum ordering: Colab MCP first
 # ---------------------------------------------------------------------------
+
 
 class TestEnumOrdering:
     def test_colab_mcp_is_first_backend(self):

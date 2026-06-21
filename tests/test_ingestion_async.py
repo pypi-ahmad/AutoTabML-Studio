@@ -38,9 +38,7 @@ class TestAsyncIngestionFactory:
         respx.head(url).mock(return_value=httpx.Response(200, headers={"content-type": "text/csv"}))
         respx.get(url).mock(return_value=httpx.Response(200, content=csv_body, headers={"content-type": "text/csv"}))
 
-        loaded = await load_dataset_async(
-            DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url)
-        )
+        loaded = await load_dataset_async(DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["routed_source_type"] == "csv"
@@ -60,9 +58,7 @@ class TestAsyncIngestionFactory:
         """
         respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/html"}))
 
-        loaded = await load_dataset_async(
-            DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url)
-        )
+        loaded = await load_dataset_async(DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["load_strategy"] == "streamed_temp_file_bounded_html_parse_async"
@@ -75,9 +71,7 @@ class TestAsyncIngestionFactory:
         respx.head(url).mock(return_value=httpx.Response(405))
         respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/plain"}))
 
-        loaded = await load_dataset_async(
-            DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url)
-        )
+        loaded = await load_dataset_async(DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url))
 
         assert loaded.dataframe.iloc[0, 0] == 1
         assert loaded.metadata.source_details["probe_method"] == "get-sniff"
@@ -96,15 +90,11 @@ class TestAsyncIngestionFactory:
             return_value=httpx.Response(
                 200,
                 content=payload,
-                headers={
-                    "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                },
+                headers={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
             )
         )
 
-        loaded = await load_dataset_async(
-            DatasetInputSpec(source_type=IngestionSourceType.EXCEL, url=url)
-        )
+        loaded = await load_dataset_async(DatasetInputSpec(source_type=IngestionSourceType.EXCEL, url=url))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["load_strategy"] in {
@@ -153,9 +143,7 @@ class TestAsyncUCIHelpers:
 
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
-        loaded = await load_dataset_async(
-            DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=1)
-        )
+        loaded = await load_dataset_async(DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=1))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["source_kind"] == "uci_repo"

@@ -97,15 +97,11 @@ class TestFilterStringBuilder:
         assert build_mlflow_filter_string(RunHistoryFilter()) == ""
 
     def test_task_type_filter(self):
-        result = build_mlflow_filter_string(
-            RunHistoryFilter(task_type="classification")
-        )
+        result = build_mlflow_filter_string(RunHistoryFilter(task_type="classification"))
         assert "params.task_type = 'classification'" in result
 
     def test_status_filter(self):
-        result = build_mlflow_filter_string(
-            RunHistoryFilter(status=RunStatus.FINISHED)
-        )
+        result = build_mlflow_filter_string(RunHistoryFilter(status=RunStatus.FINISHED))
         assert "attributes.status = 'FINISHED'" in result
 
     def test_combined_filters_joined_with_and(self):
@@ -122,9 +118,7 @@ class TestFilterStringBuilder:
         assert "attributes.status = 'FINISHED'" in result
 
     def test_tag_filter(self):
-        result = build_mlflow_filter_string(
-            RunHistoryFilter(tags={"custom_key": "custom_value"})
-        )
+        result = build_mlflow_filter_string(RunHistoryFilter(tags={"custom_key": "custom_value"}))
         assert "tags.`custom_key` = 'custom_value'" in result
 
 
@@ -181,10 +175,7 @@ class TestHistoryServiceSorting:
 
     def test_start_time_sort_pushed_to_mlflow(self, monkeypatch):
         captured: dict = {}
-        runs = [
-            _make_run(run_id=f"r{i}", duration_seconds=float(i))
-            for i in range(3)
-        ]
+        runs = [_make_run(run_id=f"r{i}", duration_seconds=float(i)) for i in range(3)]
         service = self._service_with_runs(monkeypatch, runs, captured=captured)
 
         service.list_runs(
@@ -229,16 +220,11 @@ class TestHistoryServiceSorting:
 
     def test_primary_score_sort_is_not_partial(self, monkeypatch):
         captured: dict = {}
-        runs = [
-            _make_run(run_id=f"r{i:02d}", primary_metric_value=float(i) / 10)
-            for i in range(8)
-        ]
+        runs = [_make_run(run_id=f"r{i:02d}", primary_metric_value=float(i) / 10) for i in range(8)]
         service = self._service_with_runs(monkeypatch, runs, captured=captured)
 
         result = service.list_runs(
-            sort=RunHistorySort(
-                field=RunSortField.PRIMARY_SCORE, direction=SortDirection.DESCENDING
-            ),
+            sort=RunHistorySort(field=RunSortField.PRIMARY_SCORE, direction=SortDirection.DESCENDING),
             limit=2,
         )
 
@@ -255,9 +241,7 @@ class TestHistoryServiceSorting:
         service = self._service_with_runs(monkeypatch, runs, captured=captured)
 
         result = service.list_runs(
-            sort=RunHistorySort(
-                field=RunSortField.DURATION, direction=SortDirection.ASCENDING
-            ),
+            sort=RunHistorySort(field=RunSortField.DURATION, direction=SortDirection.ASCENDING),
             limit=3,
         )
 
@@ -490,15 +474,11 @@ def _patch_mlflow_query(monkeypatch, experiments, runs):
     def fake_get_client(tracking_uri=None, registry_uri=None):
         client = SimpleNamespace()
         client.search_experiments = lambda view_type=1: experiments
-        client.get_experiment_by_name = lambda name: next(
-            (e for e in experiments if e.name == name), None
-        )
+        client.get_experiment_by_name = lambda name: next((e for e in experiments if e.name == name), None)
         client.search_runs = lambda experiment_ids, filter_string="", order_by=None, max_results=200: [
             r for r in runs if r.info.experiment_id in experiment_ids
         ]
-        client.get_run = lambda run_id: next(
-            (r for r in runs if r.info.run_id == run_id), None
-        )
+        client.get_run = lambda run_id: next((r for r in runs if r.info.run_id == run_id), None)
         client.list_artifacts = lambda run_id, path=None: []
         return client
 
@@ -512,7 +492,8 @@ class TestHistoryService:
         ]
         runs = [
             _FakeMLflowRun(
-                "run-001", "1",
+                "run-001",
+                "1",
                 params={"task_type": "classification", "target_column": "target", "dataset_fingerprint": "fp-1"},
                 metrics={"best_score": 0.92},
                 tags={"mlflow.runName": "benchmark-classification-train"},
@@ -537,13 +518,15 @@ class TestHistoryService:
         ]
         runs = [
             _FakeMLflowRun(
-                "run-bench", "1",
+                "run-bench",
+                "1",
                 params={"task_type": "classification", "target_column": "t", "dataset_fingerprint": ""},
                 metrics={},
                 tags={"mlflow.runName": "benchmark-classification-ds"},
             ),
             _FakeMLflowRun(
-                "run-exp", "2",
+                "run-exp",
+                "2",
                 params={"task_type": "classification", "target_column": "t", "dataset_fingerprint": ""},
                 metrics={},
                 tags={"mlflow.runName": "experiment-classification-ds"},
@@ -565,7 +548,8 @@ class TestHistoryService:
         experiments = [_FakeMLflowExperiment("1", "autotabml-benchmarks")]
         runs = [
             _FakeMLflowRun(
-                "run-detail", "1",
+                "run-detail",
+                "1",
                 params={"task_type": "regression", "target_column": "price", "dataset_fingerprint": "fp"},
                 metrics={"R2": 0.88, "RMSE": 1.23},
                 tags={"mlflow.runName": "benchmark-regression-housing"},
@@ -592,7 +576,8 @@ class TestHistoryService:
         experiments = [_FakeMLflowExperiment("1", "autotabml-benchmarks")]
         runs = [
             _FakeMLflowRun(
-                "run-detail", "1",
+                "run-detail",
+                "1",
                 params={"task_type": "regression", "target_column": "price", "dataset_fingerprint": "fp"},
                 metrics={"R2": 0.88},
                 tags={"mlflow.runName": "benchmark-regression-housing"},
@@ -627,13 +612,15 @@ class TestHistoryService:
         experiments = [_FakeMLflowExperiment("1", "autotabml-benchmarks")]
         runs = [
             _FakeMLflowRun(
-                "run-low", "1",
+                "run-low",
+                "1",
                 params={"task_type": "classification", "target_column": "t", "dataset_fingerprint": ""},
                 metrics={"best_score": 0.70},
                 tags={"mlflow.runName": "benchmark-classification-a"},
             ),
             _FakeMLflowRun(
-                "run-high", "1",
+                "run-high",
+                "1",
                 params={"task_type": "classification", "target_column": "t", "dataset_fingerprint": ""},
                 metrics={"best_score": 0.95},
                 tags={"mlflow.runName": "benchmark-classification-b"},
@@ -777,13 +764,17 @@ class TestHistoryCLI:
             lambda: True,
         )
 
-        args = type("Args", (), {
-            "run_type": "all",
-            "task_type": None,
-            "sort_by": "start_time",
-            "sort_dir": "descending",
-            "limit": 20,
-        })()
+        args = type(
+            "Args",
+            (),
+            {
+                "run_type": "all",
+                "task_type": None,
+                "sort_by": "start_time",
+                "sort_dir": "descending",
+                "limit": 20,
+            },
+        )()
 
         cli_module.cmd_history_list(args)
         output = capsys.readouterr().out
@@ -808,13 +799,15 @@ class TestResolveRunId:
         experiments = [_FakeMLflowExperiment("1", "autotabml-benchmarks")]
         runs = [
             _FakeMLflowRun(
-                "6357094c357e420cb322c4fb37a1754d", "1",
+                "6357094c357e420cb322c4fb37a1754d",
+                "1",
                 params={"task_type": "classification", "target_column": "target", "dataset_fingerprint": "fp"},
                 metrics={"best_score": 0.75},
                 tags={"mlflow.runName": "benchmark-classification-demo"},
             ),
             _FakeMLflowRun(
-                "98dbda0e2725458a926ea14565876d7e", "1",
+                "98dbda0e2725458a926ea14565876d7e",
+                "1",
                 params={"task_type": "classification", "target_column": "target", "dataset_fingerprint": "fp"},
                 metrics={"best_score": 0.58},
                 tags={"mlflow.runName": "benchmark-classification-demo2"},
@@ -831,7 +824,8 @@ class TestResolveRunId:
         experiments = [_FakeMLflowExperiment("1", "autotabml-benchmarks")]
         runs = [
             _FakeMLflowRun(
-                "6357094c357e420cb322c4fb37a1754d", "1",
+                "6357094c357e420cb322c4fb37a1754d",
+                "1",
                 params={"task_type": "classification", "target_column": "target", "dataset_fingerprint": "fp"},
                 metrics={},
                 tags={"mlflow.runName": "benchmark-classification-demo"},
@@ -849,13 +843,15 @@ class TestResolveRunId:
         experiments = [_FakeMLflowExperiment("1", "autotabml-benchmarks")]
         runs = [
             _FakeMLflowRun(
-                "aabb094c357e420cb322c4fb37a1754d", "1",
+                "aabb094c357e420cb322c4fb37a1754d",
+                "1",
                 params={"task_type": "classification", "target_column": "target", "dataset_fingerprint": "fp"},
                 metrics={},
                 tags={"mlflow.runName": "benchmark-classification-a"},
             ),
             _FakeMLflowRun(
-                "aabb0e2725458a926ea14565876d7e99", "1",
+                "aabb0e2725458a926ea14565876d7e99",
+                "1",
                 params={"task_type": "classification", "target_column": "target", "dataset_fingerprint": "fp"},
                 metrics={},
                 tags={"mlflow.runName": "benchmark-classification-b"},

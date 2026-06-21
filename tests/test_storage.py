@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sqlite3
 from pathlib import Path
+import sqlite3
 
 import pytest
 
@@ -115,9 +115,7 @@ def _create_legacy_database(db_path: Path) -> None:
             CREATE INDEX IF NOT EXISTS idx_batch_items_batch ON batch_run_items(batch_id, uci_id);
             """
         )
-        connection.execute(
-            "INSERT INTO app_metadata_info(key, value) VALUES('schema_version', '1')"
-        )
+        connection.execute("INSERT INTO app_metadata_info(key, value) VALUES('schema_version', '1')")
         connection.execute(
             """
             INSERT INTO projects(project_id, name, metadata_json, created_at, updated_at)
@@ -194,9 +192,7 @@ class TestMetadataStore:
             foreign_keys = connection.execute("PRAGMA foreign_keys").fetchone()[0]
             versions = [
                 row[0]
-                for row in connection.execute(
-                    "SELECT version FROM schema_migrations ORDER BY version ASC"
-                ).fetchall()
+                for row in connection.execute("SELECT version FROM schema_migrations ORDER BY version ASC").fetchall()
             ]
             return journal_mode, synchronous, foreign_keys, versions
 
@@ -217,9 +213,7 @@ class TestMetadataStore:
         with sqlite3.connect(db_path) as connection:
             versions = [
                 row[0]
-                for row in connection.execute(
-                    "SELECT version FROM schema_migrations ORDER BY version ASC"
-                ).fetchall()
+                for row in connection.execute("SELECT version FROM schema_migrations ORDER BY version ASC").fetchall()
             ]
             schema_version = connection.execute(
                 "SELECT value FROM app_metadata_info WHERE key = 'schema_version'"
@@ -334,9 +328,7 @@ class TestSQLiteConnector:
     def test_write_rolls_back_atomically_on_exception(self, tmp_path: Path):
         connector = SQLiteConnector(tmp_path / "atomic.sqlite3")
         connector.write(
-            lambda connection: connection.execute(
-                "CREATE TABLE items (id TEXT PRIMARY KEY, value TEXT NOT NULL)"
-            )
+            lambda connection: connection.execute("CREATE TABLE items (id TEXT PRIMARY KEY, value TEXT NOT NULL)")
         )
 
         def _failing_insert(connection: sqlite3.Connection) -> None:

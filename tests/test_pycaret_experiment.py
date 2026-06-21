@@ -248,9 +248,11 @@ def _make_service(monkeypatch, task_type: ExperimentTaskType):
     monkeypatch.setattr("app.modeling.pycaret.setup_runner.is_pycaret_available", lambda: True)
     monkeypatch.setattr(
         "app.modeling.pycaret.setup_runner.build_pycaret_experiment",
-        lambda resolved_task_type: _FakeClassificationExperiment()
-        if resolved_task_type == ExperimentTaskType.CLASSIFICATION
-        else _FakeRegressionExperiment(),
+        lambda resolved_task_type: (
+            _FakeClassificationExperiment()
+            if resolved_task_type == ExperimentTaskType.CLASSIFICATION
+            else _FakeRegressionExperiment()
+        ),
     )
     return PyCaretExperimentService(
         artifacts_dir=None,
@@ -760,10 +762,22 @@ class TestPageHelpers:
     def test_default_metric_helpers(self):
         settings = PyCaretExperimentSettings()
 
-        assert default_compare_metric_for_task(ExperimentTaskType.CLASSIFICATION, settings) == settings.default_compare_metric_classification
-        assert default_compare_metric_for_task(ExperimentTaskType.REGRESSION, settings) == settings.default_compare_metric_regression
-        assert default_tune_metric_for_task(ExperimentTaskType.CLASSIFICATION, settings) == settings.default_tune_metric_classification
-        assert default_tune_metric_for_task(ExperimentTaskType.REGRESSION, settings) == settings.default_tune_metric_regression
+        assert (
+            default_compare_metric_for_task(ExperimentTaskType.CLASSIFICATION, settings)
+            == settings.default_compare_metric_classification
+        )
+        assert (
+            default_compare_metric_for_task(ExperimentTaskType.REGRESSION, settings)
+            == settings.default_compare_metric_regression
+        )
+        assert (
+            default_tune_metric_for_task(ExperimentTaskType.CLASSIFICATION, settings)
+            == settings.default_tune_metric_classification
+        )
+        assert (
+            default_tune_metric_for_task(ExperimentTaskType.REGRESSION, settings)
+            == settings.default_tune_metric_regression
+        )
 
 
 class TestConfigDefaults:
@@ -782,7 +796,9 @@ class TestConfigDefaults:
 
 
 class TestCliBoundary:
-    def test_experiment_run_cli_loads_dataset_and_invokes_service(self, classification_df, monkeypatch, capsys, tmp_path):
+    def test_experiment_run_cli_loads_dataset_and_invokes_service(
+        self, classification_df, monkeypatch, capsys, tmp_path
+    ):
         from app import cli as cli_module
         from app.ingestion import DatasetInputSpec, DatasetMetadata, IngestionSourceType, LoadedDataset
 
@@ -800,7 +816,9 @@ class TestCliBoundary:
         fake_loaded = LoadedDataset(
             dataframe=classification_df,
             metadata=fake_metadata,
-            input_spec=DatasetInputSpec(source_type=IngestionSourceType.CSV, path=__import__("pathlib").Path("train.csv")),
+            input_spec=DatasetInputSpec(
+                source_type=IngestionSourceType.CSV, path=__import__("pathlib").Path("train.csv")
+            ),
         )
 
         monkeypatch.setattr(cli_module, "_load_cli_dataset", lambda locator, source_type=None: (fake_loaded, "train"))
@@ -904,7 +922,9 @@ class TestCliBoundary:
         fake_loaded = LoadedDataset(
             dataframe=classification_df,
             metadata=fake_metadata,
-            input_spec=DatasetInputSpec(source_type=IngestionSourceType.CSV, path=__import__("pathlib").Path("train.csv")),
+            input_spec=DatasetInputSpec(
+                source_type=IngestionSourceType.CSV, path=__import__("pathlib").Path("train.csv")
+            ),
         )
 
         monkeypatch.setattr(cli_module, "_load_cli_dataset", lambda locator, source_type=None: (fake_loaded, "train"))

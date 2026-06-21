@@ -26,9 +26,7 @@ class _StubPredictionService:
 
     def predict_batch(self, request):  # noqa: ANN001
         self.batch_requests.append(request)
-        return SimpleNamespace(
-            scored_dataframe=pd.DataFrame({"feature": [1, 2], "prediction": ["yes", "no"]})
-        )
+        return SimpleNamespace(scored_dataframe=pd.DataFrame({"feature": [1, 2], "prediction": ["yes", "no"]}))
 
 
 class _BenchmarkModel:

@@ -33,6 +33,7 @@ pytestmark = pytest.mark.integration
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _sqlite_uri(db_path: Path) -> str:
     return f"sqlite:///{db_path.as_posix()}"
 
@@ -50,6 +51,7 @@ def _fetch_uci(dataset_id: int) -> tuple[pd.DataFrame, list[str], list[str]]:
 # ---------------------------------------------------------------------------
 # Dataset fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="module")
 def iris_dataset() -> tuple[pd.DataFrame, str]:
@@ -82,6 +84,7 @@ def heart_disease_dataset() -> tuple[pd.DataFrame, str]:
 # ---------------------------------------------------------------------------
 # Ingestion tests – load UCI DataFrames through the ingestion pipeline
 # ---------------------------------------------------------------------------
+
 
 class TestIngestionWithRealData:
     """Pass UCI DataFrames through the ingestion layer."""
@@ -156,11 +159,14 @@ class TestIngestionWithRealData:
 # Validation tests – validate real datasets with GX rules
 # ---------------------------------------------------------------------------
 
+
 class TestValidationWithRealData:
     """Run Great Expectations validation on real UCI datasets."""
 
     def test_iris_validation_all_pass(
-        self, iris_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        iris_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("great_expectations")
         df, target = iris_dataset
@@ -174,7 +180,10 @@ class TestValidationWithRealData:
             },
         )
         summary, bundle = validate_dataset(
-            df, config, dataset_name="iris_validation", artifacts_dir=tmp_path,
+            df,
+            config,
+            dataset_name="iris_validation",
+            artifacts_dir=tmp_path,
         )
 
         assert summary.total_checks > 0
@@ -186,7 +195,9 @@ class TestValidationWithRealData:
         assert bundle.summary_json_path is not None and bundle.summary_json_path.exists()
 
     def test_auto_mpg_validation_detects_nulls(
-        self, auto_mpg_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        auto_mpg_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("great_expectations")
         df, target = auto_mpg_dataset
@@ -198,14 +209,19 @@ class TestValidationWithRealData:
             },
         )
         summary, bundle = validate_dataset(
-            df, config, dataset_name="auto_mpg_validation", artifacts_dir=tmp_path,
+            df,
+            config,
+            dataset_name="auto_mpg_validation",
+            artifacts_dir=tmp_path,
         )
 
         assert summary.total_checks > 0
         assert bundle is not None
 
     def test_heart_disease_category_validation(
-        self, heart_disease_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        heart_disease_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("great_expectations")
         df, target = heart_disease_dataset
@@ -219,7 +235,10 @@ class TestValidationWithRealData:
             },
         )
         summary, _bundle = validate_dataset(
-            df, config, dataset_name="heart_validation", artifacts_dir=tmp_path,
+            df,
+            config,
+            dataset_name="heart_validation",
+            artifacts_dir=tmp_path,
         )
 
         assert summary.total_checks > 0
@@ -229,11 +248,14 @@ class TestValidationWithRealData:
 # Profiling tests – generate ydata-profiling reports on real data
 # ---------------------------------------------------------------------------
 
+
 class TestProfilingWithRealData:
     """Generate profiling reports on real UCI datasets."""
 
     def test_iris_profiling_minimal(
-        self, iris_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        iris_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("ydata_profiling")
         df, _target = iris_dataset
@@ -251,7 +273,9 @@ class TestProfilingWithRealData:
         assert bundle.html_report_path is not None and bundle.html_report_path.exists()
 
     def test_wine_quality_profiling_minimal(
-        self, wine_quality_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        wine_quality_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("ydata_profiling")
         df, _target = wine_quality_dataset
@@ -272,11 +296,14 @@ class TestProfilingWithRealData:
 # Benchmark tests – real LazyPredict benchmarking on UCI datasets
 # ---------------------------------------------------------------------------
 
+
 class TestBenchmarkWithRealData:
     """Run LazyPredict benchmarks on real UCI datasets."""
 
     def test_iris_classification_benchmark(
-        self, iris_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        iris_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("lazypredict")
         pytest.importorskip("mlflow")
@@ -314,7 +341,9 @@ class TestBenchmarkWithRealData:
         assert ranks == sorted(ranks)
 
     def test_auto_mpg_regression_benchmark(
-        self, auto_mpg_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        auto_mpg_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("lazypredict")
         pytest.importorskip("mlflow")
@@ -345,7 +374,9 @@ class TestBenchmarkWithRealData:
         assert bundle.mlflow_run_id is not None
 
     def test_heart_disease_classification_benchmark(
-        self, heart_disease_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        heart_disease_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         pytest.importorskip("lazypredict")
         pytest.importorskip("mlflow")
@@ -375,7 +406,9 @@ class TestBenchmarkWithRealData:
         assert bundle.leaderboard
 
     def test_wine_quality_benchmark_with_auto_task_detection(
-        self, wine_quality_dataset: tuple[pd.DataFrame, str], tmp_path: Path,
+        self,
+        wine_quality_dataset: tuple[pd.DataFrame, str],
+        tmp_path: Path,
     ):
         """Let the system auto-detect task type from the wine quality target."""
         pytest.importorskip("lazypredict")
@@ -409,6 +442,7 @@ class TestBenchmarkWithRealData:
 # End-to-end pipeline tests
 # ---------------------------------------------------------------------------
 
+
 class TestEndToEndPipeline:
     """Run a full pipeline from ingestion through benchmark on real data."""
 
@@ -439,7 +473,8 @@ class TestEndToEndPipeline:
             },
         )
         val_summary, val_bundle = validate_dataset(
-            pipeline_df, val_config,
+            pipeline_df,
+            val_config,
             dataset_name="iris_e2e",
             artifacts_dir=tmp_path / "validation",
         )
@@ -506,7 +541,8 @@ class TestEndToEndPipeline:
             },
         )
         val_summary, _ = validate_dataset(
-            pipeline_df, val_config,
+            pipeline_df,
+            val_config,
             dataset_name="autompg_e2e",
             artifacts_dir=tmp_path / "validation",
         )

@@ -487,15 +487,19 @@ class TestMLflowTracking:
             top_models=ranked,
             summary=summary,
         )
-        bundle.artifacts = type("Artifacts", (), {
-            "raw_results_csv_path": raw_artifact,
-            "leaderboard_csv_path": None,
-            "leaderboard_json_path": None,
-            "summary_json_path": summary_artifact,
-            "markdown_summary_path": None,
-            "score_chart_path": None,
-            "training_time_chart_path": None,
-        })()
+        bundle.artifacts = type(
+            "Artifacts",
+            (),
+            {
+                "raw_results_csv_path": raw_artifact,
+                "leaderboard_csv_path": None,
+                "leaderboard_json_path": None,
+                "summary_json_path": summary_artifact,
+                "markdown_summary_path": None,
+                "score_chart_path": None,
+                "training_time_chart_path": None,
+            },
+        )()
 
         class _FakeRun:
             def __init__(self):

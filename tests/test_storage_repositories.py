@@ -218,9 +218,7 @@ class TestRepositoryContextSharing:
         assert store.datasets._context.connector is store._connector
 
         # Build an independent context bound to the same connector to confirm isolation.
-        independent = ProjectRepository(
-            RepositoryContext(connector=connector, initialize=init)
-        )
+        independent = ProjectRepository(RepositoryContext(connector=connector, initialize=init))
         store.initialize_if_needed()
         # Reading a missing project should not raise even though `init` is custom.
         assert independent.get("missing") is None

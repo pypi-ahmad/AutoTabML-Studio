@@ -32,11 +32,7 @@ def _string_constants(source: str) -> list[str]:
     """
 
     tree = ast.parse(source)
-    return [
-        node.value
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Constant) and isinstance(node.value, str)
-    ]
+    return [node.value for node in ast.walk(tree) if isinstance(node, ast.Constant) and isinstance(node.value, str)]
 
 
 def _non_string_source(source: str) -> str:
@@ -161,7 +157,7 @@ class TestInjectionResistance:
     def test_metadata_with_hostile_keys_is_json_quoted(self, tmp_path):
         hostile_meta = {
             "best_estimator": "lgbm'); raise SystemExit('boom",
-            "raw\nkey": "value\"with\"quotes",
+            "raw\nkey": 'value"with"quotes',
         }
         path = generate_job_notebook(
             dataset_name="ds",
@@ -171,9 +167,7 @@ class TestInjectionResistance:
         )
         nb = _read_notebook(path)
         # Find the metadata code cell and confirm it parses & loads back correctly.
-        meta_cells = [
-            src for src in _all_code_sources(nb) if src.startswith("metadata = json.loads(")
-        ]
+        meta_cells = [src for src in _all_code_sources(nb) if src.startswith("metadata = json.loads(")]
         assert len(meta_cells) == 1
         ast.parse(meta_cells[0])
         # Extract the inner JSON-encoded literal and round-trip it.
@@ -197,9 +191,7 @@ class TestInjectionResistance:
             stripped = _non_string_source(src)
             assert "pwned" not in stripped
         # The hostile path must round-trip exactly as a string constant.
-        leaderboard_cells = [
-            src for src in _all_code_sources(nb) if "leaderboard_path = Path(" in src
-        ]
+        leaderboard_cells = [src for src in _all_code_sources(nb) if "leaderboard_path = Path(" in src]
         assert leaderboard_cells
         constants = _string_constants(leaderboard_cells[0])
         assert any(hostile_path in c for c in constants)

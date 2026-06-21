@@ -91,11 +91,7 @@ def _patch_client(monkeypatch, client):
 
 def test_list_registered_models_uses_single_batched_version_call(monkeypatch):
     models = [_FakeRegisteredModel(f"model-{i}") for i in range(20)]
-    versions = [
-        _FakeVersion(f"model-{i}", str(v))
-        for i in range(20)
-        for v in range(1, 4)
-    ]
+    versions = [_FakeVersion(f"model-{i}", str(v)) for i in range(20) for v in range(1, 4)]
     client = _CountingClient(models, versions)
     _patch_client(monkeypatch, client)
 
@@ -268,6 +264,3 @@ def test_list_registered_models_batched_is_faster_than_unbatched_baseline(monkey
         f"batched={batched_elapsed * 1000:.1f}ms, "
         f"baseline={baseline_elapsed * 1000:.1f}ms"
     )
-
-
-

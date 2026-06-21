@@ -338,10 +338,12 @@ class TestFlamlService:
 
     def test_run_automl_drops_null_targets(self, monkeypatch):
         service = _make_service(monkeypatch)
-        df = pd.DataFrame({
-            "feature": [1, 2, 3, 4],
-            "target": [0, None, 1, 0],
-        })
+        df = pd.DataFrame(
+            {
+                "feature": [1, 2, 3, 4],
+                "target": [0, None, 1, 0],
+            }
+        )
         fake = _FakeAutoML()
 
         with patch("flaml.AutoML", return_value=fake):
@@ -355,10 +357,12 @@ class TestFlamlService:
 
     def test_run_automl_all_null_targets_raises(self, monkeypatch):
         service = _make_service(monkeypatch)
-        df = pd.DataFrame({
-            "feature": [1, 2, 3],
-            "target": [None, None, None],
-        })
+        df = pd.DataFrame(
+            {
+                "feature": [1, 2, 3],
+                "target": [None, None, None],
+            }
+        )
         with pytest.raises(FlamlTargetError, match="No rows remain"):
             service.run_automl(
                 df,
@@ -416,7 +420,9 @@ class TestFlamlService:
         assert updated.saved_model_metadata.model_name == "TestModel"
         assert updated.saved_model_metadata.framework == "flaml"
         assert updated.saved_model_metadata.trusted_source == TRUSTED_MODEL_SOURCE
-        assert updated.saved_model_metadata.model_sha256 == compute_sha256(Path(updated.saved_model_metadata.model_path))
+        assert updated.saved_model_metadata.model_sha256 == compute_sha256(
+            Path(updated.saved_model_metadata.model_path)
+        )
         assert updated.summary.saved_model_name == "TestModel"
         assert Path(updated.saved_model_metadata.model_path).exists()
         assert checksum_file_path(Path(updated.saved_model_metadata.model_path)).exists()

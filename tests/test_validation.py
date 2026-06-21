@@ -25,14 +25,17 @@ from app.validation.summary import build_summary
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def good_df() -> pd.DataFrame:
-    return pd.DataFrame({
-        "id": [1, 2, 3, 4, 5],
-        "feature_a": [10.0, 20.0, 30.0, 40.0, 50.0],
-        "feature_b": ["a", "b", "c", "d", "e"],
-        "target": [0, 1, 0, 1, 0],
-    })
+    return pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "feature_a": [10.0, 20.0, 30.0, 40.0, 50.0],
+            "feature_b": ["a", "b", "c", "d", "e"],
+            "target": [0, 1, 0, 1, 0],
+        }
+    )
 
 
 @pytest.fixture
@@ -42,32 +45,39 @@ def empty_df() -> pd.DataFrame:
 
 @pytest.fixture
 def null_heavy_df() -> pd.DataFrame:
-    return pd.DataFrame({
-        "col_a": [None, None, None, None, 1],
-        "col_b": [None, None, None, None, None],
-        "col_c": [1, 2, 3, 4, 5],
-    })
+    return pd.DataFrame(
+        {
+            "col_a": [None, None, None, None, 1],
+            "col_b": [None, None, None, None, None],
+            "col_c": [1, 2, 3, 4, 5],
+        }
+    )
 
 
 @pytest.fixture
 def constant_df() -> pd.DataFrame:
-    return pd.DataFrame({
-        "const": [42, 42, 42],
-        "varied": [1, 2, 3],
-    })
+    return pd.DataFrame(
+        {
+            "const": [42, 42, 42],
+            "varied": [1, 2, 3],
+        }
+    )
 
 
 @pytest.fixture
 def duplicate_rows_df() -> pd.DataFrame:
-    return pd.DataFrame({
-        "a": [1, 1, 2],
-        "b": ["x", "x", "y"],
-    })
+    return pd.DataFrame(
+        {
+            "a": [1, 1, 2],
+            "b": ["x", "x", "y"],
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Empty dataset
 # ---------------------------------------------------------------------------
+
 
 class TestEmptyDataset:
     def test_empty_dataframe_fails(self, empty_df: pd.DataFrame):
@@ -86,6 +96,7 @@ class TestEmptyDataset:
 # ---------------------------------------------------------------------------
 # Required columns
 # ---------------------------------------------------------------------------
+
 
 class TestRequiredColumns:
     def test_required_columns_present(self, good_df: pd.DataFrame):
@@ -107,6 +118,7 @@ class TestRequiredColumns:
 # ---------------------------------------------------------------------------
 # Null-heavy columns
 # ---------------------------------------------------------------------------
+
 
 class TestNullColumns:
     def test_fully_null_column_detected(self, null_heavy_df: pd.DataFrame):
@@ -137,6 +149,7 @@ class TestNullColumns:
 # Constant columns
 # ---------------------------------------------------------------------------
 
+
 class TestConstantColumns:
     def test_constant_column_detected(self, constant_df: pd.DataFrame):
         config = ValidationRuleConfig()
@@ -149,6 +162,7 @@ class TestConstantColumns:
 # ---------------------------------------------------------------------------
 # Duplicate rows
 # ---------------------------------------------------------------------------
+
 
 class TestDuplicateRows:
     def test_duplicate_rows_detected(self, duplicate_rows_df: pd.DataFrame):
@@ -169,6 +183,7 @@ class TestDuplicateRows:
 # ---------------------------------------------------------------------------
 # Target sanity
 # ---------------------------------------------------------------------------
+
 
 class TestTargetSanity:
     def test_classification_single_class(self):
@@ -208,6 +223,7 @@ class TestTargetSanity:
 # Summary construction
 # ---------------------------------------------------------------------------
 
+
 class TestSummary:
     def test_summary_counts(self, good_df: pd.DataFrame):
         checks = [
@@ -227,6 +243,7 @@ class TestSummary:
 # Config defaults
 # ---------------------------------------------------------------------------
 
+
 class TestConfigDefaults:
     def test_default_rule_config(self):
         config = ValidationRuleConfig()
@@ -237,6 +254,7 @@ class TestConfigDefaults:
 
     def test_validation_settings_defaults(self):
         from app.config.models import ValidationSettings
+
         settings = ValidationSettings()
         assert settings.artifacts_dir == Path("artifacts/validation")
         assert settings.data_docs_enabled is False
@@ -246,12 +264,11 @@ class TestConfigDefaults:
 # Artifact writing
 # ---------------------------------------------------------------------------
 
+
 class TestArtifacts:
     def test_write_artifacts(self, good_df: pd.DataFrame, tmp_path: Path):
         config = ValidationRuleConfig(target_column="target")
-        summary, bundle = validate_dataset(
-            good_df, config, dataset_name="test_ds", artifacts_dir=tmp_path
-        )
+        summary, bundle = validate_dataset(good_df, config, dataset_name="test_ds", artifacts_dir=tmp_path)
         assert bundle is not None
         assert bundle.summary_json_path is not None
         assert bundle.summary_json_path.exists()
@@ -268,24 +285,29 @@ class TestArtifacts:
 # Leakage heuristics
 # ---------------------------------------------------------------------------
 
+
 class TestLeakageHeuristics:
     def test_name_similarity_detected(self):
-        df = pd.DataFrame({
-            "price": [10, 20, 30],
-            "price_predicted": [11, 21, 31],
-            "feature": [1, 2, 3],
-        })
+        df = pd.DataFrame(
+            {
+                "price": [10, 20, 30],
+                "price_predicted": [11, 21, 31],
+                "feature": [1, 2, 3],
+            }
+        )
         config = ValidationRuleConfig(target_column="price", enable_leakage_heuristics=True)
         results = run_app_rules(df, config)
         leakage = [r for r in results if r.check_name == "leakage_name_similarity"]
         assert any("price_predicted" in r.details.get("column", "") for r in leakage)
 
     def test_id_like_column_detected(self):
-        df = pd.DataFrame({
-            "row_id": [1, 2, 3],
-            "target": [0, 1, 0],
-            "feature": [10, 20, 30],
-        })
+        df = pd.DataFrame(
+            {
+                "row_id": [1, 2, 3],
+                "target": [0, 1, 0],
+                "feature": [10, 20, 30],
+            }
+        )
         config = ValidationRuleConfig(target_column="target", enable_leakage_heuristics=True)
         results = run_app_rules(df, config)
         id_like = [r for r in results if r.check_name == "leakage_id_like"]
@@ -293,11 +315,13 @@ class TestLeakageHeuristics:
 
     def test_underscore_only_column_not_false_positive(self):
         """Column names that strip to empty (e.g. '__') must not trigger leakage."""
-        df = pd.DataFrame({
-            "__": [0.1, 0.2, 0.3],
-            "target": [0, 1, 0],
-            "feature": [10, 20, 30],
-        })
+        df = pd.DataFrame(
+            {
+                "__": [0.1, 0.2, 0.3],
+                "target": [0, 1, 0],
+                "feature": [10, 20, 30],
+            }
+        )
         config = ValidationRuleConfig(target_column="target", enable_leakage_heuristics=True)
         results = run_app_rules(df, config)
         leakage = [r for r in results if r.check_name == "leakage_name_similarity"]
@@ -308,12 +332,11 @@ class TestLeakageHeuristics:
 # Expectation-style fallback checks
 # ---------------------------------------------------------------------------
 
+
 class TestExpectationFallbackChecks:
     def test_numeric_range_check_detects_out_of_bounds(self):
         df = pd.DataFrame({"score": [10, 20, 999]})
-        config = ValidationRuleConfig(
-            numeric_range_checks={"score": {"min": 0, "max": 100}}
-        )
+        config = ValidationRuleConfig(numeric_range_checks={"score": {"min": 0, "max": 100}})
 
         results = run_app_rules(df, config)
         range_checks = [r for r in results if r.check_name == "numeric_range_check"]
@@ -324,9 +347,7 @@ class TestExpectationFallbackChecks:
 
     def test_allowed_category_check_detects_unexpected_values(self):
         df = pd.DataFrame({"status": ["active", "inactive", "unknown"]})
-        config = ValidationRuleConfig(
-            allowed_category_checks={"status": ["active", "inactive"]}
-        )
+        config = ValidationRuleConfig(allowed_category_checks={"status": ["active", "inactive"]})
 
         results = run_app_rules(df, config)
         category_checks = [r for r in results if r.check_name == "allowed_category_check"]
@@ -339,6 +360,7 @@ class TestExpectationFallbackChecks:
 # ---------------------------------------------------------------------------
 # Mixed types
 # ---------------------------------------------------------------------------
+
 
 class TestMixedTypes:
     def test_mixed_types_warning(self):
@@ -353,6 +375,7 @@ class TestMixedTypes:
 # ---------------------------------------------------------------------------
 # GX builder specs
 # ---------------------------------------------------------------------------
+
 
 class TestGXBuilders:
     def test_build_expectations_basic(self):

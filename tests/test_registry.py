@@ -17,6 +17,8 @@ def _clear_registry_cache():
     _mlflow_query_module.invalidate_registry_cache()
     yield
     _mlflow_query_module.invalidate_registry_cache()
+
+
 from app.registry.errors import ModelNotFoundError, PromotionError
 from app.registry.registry_service import RegistryService
 from app.registry.schemas import (
@@ -78,10 +80,12 @@ def _patch_registry(monkeypatch, models=None, versions=None):
 
     def fake_list_registered_models(*, tracking_uri=None, registry_uri=None):
         from app.tracking.mlflow_query import _normalize_registered_model
+
         return [_normalize_registered_model(m) for m in all_models + created_models]
 
     def fake_get_registered_model(name, *, tracking_uri=None, registry_uri=None):
         from app.tracking.mlflow_query import _normalize_registered_model
+
         for m in all_models + created_models:
             if m.name == name:
                 return _normalize_registered_model(m)
@@ -89,24 +93,31 @@ def _patch_registry(monkeypatch, models=None, versions=None):
 
     def fake_list_model_versions(name, *, tracking_uri=None, registry_uri=None):
         from app.tracking.mlflow_query import _normalize_model_version
+
         return [_normalize_model_version(v) for v in all_versions + created_versions if v.name == name]
 
     def fake_get_model_version(name, version, *, tracking_uri=None, registry_uri=None):
         from app.tracking.mlflow_query import _normalize_model_version
+
         for v in all_versions + created_versions:
             if v.name == name and str(v.version) == str(version):
                 return _normalize_model_version(v)
         from app.registry.errors import VersionNotFoundError
+
         raise VersionNotFoundError(f"Version '{version}' of model '{name}' not found.")
 
     def fake_create_registered_model(name, *, description="", tags=None, tracking_uri=None, registry_uri=None):
         from app.tracking.mlflow_query import _normalize_registered_model
+
         model = _FakeRegisteredModel(name, description=description, tags=tags or {})
         created_models.append(model)
         return _normalize_registered_model(model)
 
-    def fake_create_model_version(name, *, source, run_id=None, description="", tags=None, tracking_uri=None, registry_uri=None):
+    def fake_create_model_version(
+        name, *, source, run_id=None, description="", tags=None, tracking_uri=None, registry_uri=None
+    ):
         from app.tracking.mlflow_query import _normalize_model_version
+
         version = _FakeModelVersion(
             name,
             str(len([v for v in all_versions + created_versions if v.name == name]) + 1),
@@ -176,10 +187,13 @@ def _patch_registry(monkeypatch, models=None, versions=None):
 
 class TestRegistryServiceListModels:
     def test_list_models_returns_summaries(self, monkeypatch):
-        _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("model-a"),
-            _FakeRegisteredModel("model-b"),
-        ])
+        _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("model-a"),
+                _FakeRegisteredModel("model-b"),
+            ],
+        )
 
         service = RegistryService()
         models = service.list_models()
@@ -226,9 +240,12 @@ class TestRegistryServiceListModels:
         assert models[0].latest_version == "3"
 
     def test_list_models_coerces_integer_alias_versions_to_strings(self, monkeypatch):
-        _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("model-a", aliases={"champion": 1}),
-        ])
+        _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("model-a", aliases={"champion": 1}),
+            ],
+        )
 
         models = RegistryService().list_models()
 
@@ -237,10 +254,13 @@ class TestRegistryServiceListModels:
 
 class TestRegistryServiceVersions:
     def test_list_versions(self, monkeypatch):
-        _patch_registry(monkeypatch, versions=[
-            _FakeModelVersion("mymodel", "1", run_id="run-1"),
-            _FakeModelVersion("mymodel", "2", run_id="run-2"),
-        ])
+        _patch_registry(
+            monkeypatch,
+            versions=[
+                _FakeModelVersion("mymodel", "1", run_id="run-1"),
+                _FakeModelVersion("mymodel", "2", run_id="run-2"),
+            ],
+        )
 
         service = RegistryService()
         versions = service.list_versions("mymodel")
@@ -250,9 +270,12 @@ class TestRegistryServiceVersions:
         assert versions[1].version == "2"
 
     def test_get_version(self, monkeypatch):
-        _patch_registry(monkeypatch, versions=[
-            _FakeModelVersion("mymodel", "1", run_id="run-1", source="s3://bucket/model"),
-        ])
+        _patch_registry(
+            monkeypatch,
+            versions=[
+                _FakeModelVersion("mymodel", "1", run_id="run-1", source="s3://bucket/model"),
+            ],
+        )
 
         service = RegistryService()
         version = service.get_version("mymodel", "1")
@@ -280,9 +303,12 @@ class TestRegistryServiceRegister:
         assert len(log.created_versions) == 1
 
     def test_register_existing_model_creates_only_version(self, monkeypatch):
-        log = _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("existing-model"),
-        ])
+        log = _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("existing-model"),
+            ],
+        )
 
         service = RegistryService()
         version = service.register_model(
@@ -302,18 +328,24 @@ class TestRegistryServiceRegister:
 
 class TestPromotion:
     def test_promote_champion(self, monkeypatch):
-        log = _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("mymodel"),
-        ], versions=[
-            _FakeModelVersion("mymodel", "1"),
-        ])
+        log = _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("mymodel"),
+            ],
+            versions=[
+                _FakeModelVersion("mymodel", "1"),
+            ],
+        )
 
         service = RegistryService()
-        result = service.promote(PromotionRequest(
-            model_name="mymodel",
-            version="1",
-            action=PromotionAction.CHAMPION,
-        ))
+        result = service.promote(
+            PromotionRequest(
+                model_name="mymodel",
+                version="1",
+                action=PromotionAction.CHAMPION,
+            )
+        )
 
         assert result.success is True
         assert any("champion" in c for c in result.alias_changes)
@@ -321,37 +353,49 @@ class TestPromotion:
         assert ("mymodel", "1", "app.status", "champion") in log.version_tag_log
 
     def test_promote_candidate(self, monkeypatch):
-        log = _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("mymodel"),
-        ], versions=[
-            _FakeModelVersion("mymodel", "2"),
-        ])
+        log = _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("mymodel"),
+            ],
+            versions=[
+                _FakeModelVersion("mymodel", "2"),
+            ],
+        )
 
         service = RegistryService()
-        result = service.promote(PromotionRequest(
-            model_name="mymodel",
-            version="2",
-            action=PromotionAction.CANDIDATE,
-        ))
+        result = service.promote(
+            PromotionRequest(
+                model_name="mymodel",
+                version="2",
+                action=PromotionAction.CANDIDATE,
+            )
+        )
 
         assert result.success is True
         assert log.alias_log == [("mymodel", "candidate", "2")]
         assert ("mymodel", "2", "app.status", "candidate") in log.version_tag_log
 
     def test_promote_champion_clears_previous_status_tag(self, monkeypatch):
-        log = _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("mymodel", aliases={"champion": "1"}),
-        ], versions=[
-            _FakeModelVersion("mymodel", "1", tags={"app.status": "champion"}),
-            _FakeModelVersion("mymodel", "2"),
-        ])
+        log = _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("mymodel", aliases={"champion": "1"}),
+            ],
+            versions=[
+                _FakeModelVersion("mymodel", "1", tags={"app.status": "champion"}),
+                _FakeModelVersion("mymodel", "2"),
+            ],
+        )
 
         service = RegistryService()
-        result = service.promote(PromotionRequest(
-            model_name="mymodel",
-            version="2",
-            action=PromotionAction.CHAMPION,
-        ))
+        result = service.promote(
+            PromotionRequest(
+                model_name="mymodel",
+                version="2",
+                action=PromotionAction.CHAMPION,
+            )
+        )
 
         assert result.success is True
         assert ("mymodel", "champion", "2") in log.alias_log
@@ -359,35 +403,46 @@ class TestPromotion:
         assert ("mymodel", "2", "app.status", "champion") in log.version_tag_log
 
     def test_promote_archived(self, monkeypatch):
-        log = _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("mymodel", aliases={"champion": "1"}),
-        ], versions=[
-            _FakeModelVersion("mymodel", "1"),
-        ])
+        log = _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("mymodel", aliases={"champion": "1"}),
+            ],
+            versions=[
+                _FakeModelVersion("mymodel", "1"),
+            ],
+        )
 
         service = RegistryService()
-        result = service.promote(PromotionRequest(
-            model_name="mymodel",
-            version="1",
-            action=PromotionAction.ARCHIVED,
-        ))
+        result = service.promote(
+            PromotionRequest(
+                model_name="mymodel",
+                version="1",
+                action=PromotionAction.ARCHIVED,
+            )
+        )
 
         assert result.success is True
         assert ("mymodel", "1", "app.status", "archived") in log.version_tag_log
         assert ("mymodel", "champion") in log.deleted_aliases
 
     def test_promote_nonexistent_version_fails(self, monkeypatch):
-        _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("mymodel"),
-        ])
+        _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("mymodel"),
+            ],
+        )
 
         service = RegistryService()
         with pytest.raises(PromotionError, match="not found"):
-            service.promote(PromotionRequest(
-                model_name="mymodel",
-                version="999",
-                action=PromotionAction.CHAMPION,
-            ))
+            service.promote(
+                PromotionRequest(
+                    model_name="mymodel",
+                    version="999",
+                    action=PromotionAction.CHAMPION,
+                )
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -451,9 +506,12 @@ class TestRegistryCLI:
             lambda: True,
         )
 
-        _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("model-x"),
-        ])
+        _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("model-x"),
+            ],
+        )
 
         args = type("Args", (), {})()
         cli_module.cmd_registry_list(args)
@@ -478,17 +536,25 @@ class TestRegistryCLI:
             lambda: True,
         )
 
-        _patch_registry(monkeypatch, models=[
-            _FakeRegisteredModel("model-x"),
-        ], versions=[
-            _FakeModelVersion("model-x", "1"),
-        ])
+        _patch_registry(
+            monkeypatch,
+            models=[
+                _FakeRegisteredModel("model-x"),
+            ],
+            versions=[
+                _FakeModelVersion("model-x", "1"),
+            ],
+        )
 
-        args = type("Args", (), {
-            "model_name": "model-x",
-            "version": "1",
-            "action": "champion",
-        })()
+        args = type(
+            "Args",
+            (),
+            {
+                "model_name": "model-x",
+                "version": "1",
+                "action": "champion",
+            },
+        )()
 
         cli_module.cmd_registry_promote(args)
         output = capsys.readouterr().out

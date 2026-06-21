@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import csv
-import os
 from datetime import datetime, timedelta, timezone
+import os
 from pathlib import Path
 
 import pandas as pd
