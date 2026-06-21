@@ -1,0 +1,54 @@
+---
+# See https://pre-commit.com for more information
+# Install: pip install pre-commit && pre-commit install
+# Run on all files: pre-commit run --all-files
+#
+# Versions are pinned to commit SHAs. To upgrade a hook, find the SHA for
+# the new tag and replace both the sha and the comment.
+
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd299e2a236b0eb2dd36e5cb3e30d4c52  # v5.0.0
+    hooks:
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: check-json
+        exclude: ^\.vscode/.*\.json$
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: end-of-file-fixer
+        exclude: ^(.*\.csv|.*\.tsv|.*\.parquet)$
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: ^(.*\.csv|.*\.tsv|.*\.parquet)$
+      - id: trailing-whitespace
+        exclude: ^(.*\.csv|.*\.tsv|.*\.parquet)$
+      - id: detect-private-key
+      - id: no-commit-to-branch
+        args: [--branch=main, --branch=master]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 77039ccd9b744d92d9a0caddb1f4f1acba72c9b5  # v0.15.18
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 9f70dc50c3c3b66c4c52e2161d2e4b8a89e5dc7b  # v1.18.2
+    hooks:
+      - id: mypy
+        files: ^app/
+        args: [--config-file=pyproject.toml, --no-incremental]
+        additional_dependencies:
+          - pydantic>=2.0
