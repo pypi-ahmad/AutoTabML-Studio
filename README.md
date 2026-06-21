@@ -4,8 +4,16 @@
 
 <img src="docs/assets/social-preview/autotabml-social-preview.png" alt="AutoTabML Studio" width="100%">
 
-**Local-first automated machine learning workbench for tabular data.**\
-Go from raw CSV to trained, evaluated, and deployable model — entirely on your machine.
+**Local-first automated machine learning workbench for tabular data.**
+
+Go from a raw CSV to a trained, evaluated, and deployable model — entirely on
+your machine. The same service layer powers the Streamlit UI and the CLI, so
+results are always reproducible. No cloud account, no outbound telemetry.
+
+**What it is.** A single workspace that wraps the three most common tabular
+AutoML paths — quick LazyPredict benchmarks, full PyCaret experiments, and
+budgeted FLAML searches — with MLflow tracking, a local model registry, and
+quality/profiling guard-rails, behind a guided interface and a scriptable CLI.
 
 <br>
 
@@ -36,7 +44,7 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 - **Zero cloud dependency.** Data never leaves your machine. No default outbound telemetry or external uploads.
 - **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
 - **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
-- **530+ unit tests** with a CI-enforced coverage gate. Security scanning on every push.
+- **683 unit tests at 81.65% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
 
 ---
 
@@ -242,7 +250,7 @@ Streamlit pages are **thin entry points**. All business logic lives in the servi
 | **Observability** | JSON logging, metrics hooks, optional OpenTelemetry tracing |
 | **Metadata** | SQLite |
 | **AI Summaries** | OpenAI · Anthropic · Gemini · Ollama |
-| **Testing** | pytest (530+ tests), pytest-cov, pytest-asyncio |
+| **Testing** | pytest (683 tests, 81.65% coverage), pytest-cov, pytest-asyncio, respx |
 
 ---
 
@@ -343,6 +351,24 @@ Dependabot is configured for weekly dependency updates.
 | Kaggle | CLI-only; not exposed in the UI |
 | Single-user | Designed for individual local use |
 | AI summaries | Require an API key or local Ollama |
+
+---
+
+## ✅ Verified Output (current `main`)
+
+The numbers below come from running the project's own test, lint, and
+verification scripts on a fresh `.venv` with Python 3.12.10:
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Lockfile consistency | `uv lock --check` | passes |
+| Unit tests | `pytest tests/ -q` | **683 passed**, 29 deselected |
+| Coverage gate | `pytest --cov=app --cov-fail-under=65` | **81.65%** (gate ≥ 65%) |
+| Lint | `ruff check app/ tests/ scripts/` | **All checks passed** |
+| Release metadata | `python -m app.release_metadata` | passes |
+
+These commands are the same ones the CI and Security workflows run on every
+push, so a passing local run is a faithful predictor of a green PR.
 
 ---
 
