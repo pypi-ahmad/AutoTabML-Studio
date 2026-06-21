@@ -19,10 +19,10 @@ Saves screenshots to docs/assets/screenshots/.
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 import subprocess
 import sys
 import time
-from pathlib import Path
 
 from playwright.sync_api import Page, sync_playwright
 
@@ -133,9 +133,7 @@ def run_benchmark(page: Page) -> None:
     advanced = page.get_by_text("Advanced options").first
     advanced.click()
     page.wait_for_timeout(500)
-    page.get_by_label("Include models (comma-separated names)").first.fill(
-        "DummyRegressor,LinearRegression"
-    )
+    page.get_by_label("Include models (comma-separated names)").first.fill("DummyRegressor,LinearRegression")
     page.wait_for_timeout(500)
 
     run_btn = page.locator('button:has-text("Run Benchmark")').first
@@ -169,7 +167,7 @@ def main() -> None:
             if candidate.exists() and candidate.suffix == ".csv":
                 demo_csv = candidate
                 break
-            elif candidate.is_dir():
+            if candidate.is_dir():
                 csvs = list(candidate.glob("*.csv"))
                 if csvs:
                     demo_csv = csvs[0]
@@ -180,10 +178,17 @@ def main() -> None:
         print(f"Launching Streamlit on port {args.port}...")
         server_proc = subprocess.Popen(
             [
-                sys.executable, "-m", "streamlit", "run", "app/main.py",
-                "--server.headless", "true",
-                "--server.port", str(args.port),
-                "--browser.gatherUsageStats", "false",
+                sys.executable,
+                "-m",
+                "streamlit",
+                "run",
+                "app/main.py",
+                "--server.headless",
+                "true",
+                "--server.port",
+                str(args.port),
+                "--browser.gatherUsageStats",
+                "false",
             ],
             cwd=str(Path(__file__).resolve().parent.parent),
             stdout=subprocess.DEVNULL,

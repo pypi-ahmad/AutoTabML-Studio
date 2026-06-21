@@ -8,11 +8,12 @@ to confirm actual runtime behavior.
 Usage:
     python scripts/verify_optional_deps.py
 """
+
 from __future__ import annotations
 
+from pathlib import Path
 import sys
 import time
-from pathlib import Path
 
 import pandas as pd
 
@@ -20,8 +21,10 @@ import pandas as pd
 # Test dataset
 # ---------------------------------------------------------------------------
 
+
 def _make_iris_df() -> pd.DataFrame:
     from sklearn.datasets import load_iris
+
     return load_iris(as_frame=True).frame
 
 
@@ -43,6 +46,7 @@ def _result(label: str, ok: bool, detail: str = "") -> dict:
 # 1. GX Validation
 # ---------------------------------------------------------------------------
 
+
 def verify_gx(df: pd.DataFrame) -> list[dict]:
     _section("Great Expectations (GX) Validation")
     results = []
@@ -50,6 +54,7 @@ def verify_gx(df: pd.DataFrame) -> list[dict]:
     # Probe
     try:
         from app.validation.gx_context import is_gx_available
+
         avail = is_gx_available()
         results.append(_result("GX importable", avail, f"is_gx_available()={avail}"))
     except Exception as exc:
@@ -68,11 +73,13 @@ def verify_gx(df: pd.DataFrame) -> list[dict]:
     try:
         summary, artifacts = validate_dataset(df, config, dataset_name="gx_verify_native")
         ok = summary.failed_count == 0
-        results.append(_result(
-            "App-native validation",
-            ok,
-            f"{summary.passed_count} passed, {summary.warning_count} warnings, {summary.failed_count} failed",
-        ))
+        results.append(
+            _result(
+                "App-native validation",
+                ok,
+                f"{summary.passed_count} passed, {summary.warning_count} warnings, {summary.failed_count} failed",
+            )
+        )
     except Exception as exc:
         results.append(_result("App-native validation", False, str(exc)))
 
@@ -83,12 +90,14 @@ def verify_gx(df: pd.DataFrame) -> list[dict]:
 # 2. ydata-profiling
 # ---------------------------------------------------------------------------
 
+
 def verify_ydata(df: pd.DataFrame) -> list[dict]:
     _section("ydata-profiling")
     results = []
 
     try:
         from app.profiling.ydata_runner import is_ydata_available
+
         avail = is_ydata_available()
         results.append(_result("ydata importable", avail))
     except Exception as exc:
@@ -110,11 +119,13 @@ def verify_ydata(df: pd.DataFrame) -> list[dict]:
             artifacts_dir=Path("artifacts/tmp"),
         )
         elapsed = round(time.monotonic() - t0, 1)
-        results.append(_result(
-            "Real profiling run",
-            True,
-            f"{summary.row_count} rows, {summary.column_count} cols in {elapsed}s",
-        ))
+        results.append(
+            _result(
+                "Real profiling run",
+                True,
+                f"{summary.row_count} rows, {summary.column_count} cols in {elapsed}s",
+            )
+        )
     except Exception as exc:
         results.append(_result("Real profiling run", False, str(exc)))
 
@@ -125,6 +136,7 @@ def verify_ydata(df: pd.DataFrame) -> list[dict]:
 # 3. LazyPredict + MLflow
 # ---------------------------------------------------------------------------
 
+
 def verify_lazypredict_mlflow(df: pd.DataFrame, tracking_uri: str | None, registry_uri: str | None) -> list[dict]:
     _section("LazyPredict Benchmark + MLflow")
     results = []
@@ -132,6 +144,7 @@ def verify_lazypredict_mlflow(df: pd.DataFrame, tracking_uri: str | None, regist
     # Probe LazyPredict
     try:
         from app.modeling.benchmark.lazypredict_runner import is_lazypredict_available
+
         avail = is_lazypredict_available()
         results.append(_result("LazyPredict importable", avail))
     except Exception as exc:
@@ -144,6 +157,7 @@ def verify_lazypredict_mlflow(df: pd.DataFrame, tracking_uri: str | None, regist
     # Probe MLflow
     try:
         from app.tracking.mlflow_query import is_mlflow_available
+
         mlflow_ok = is_mlflow_available()
         results.append(_result("MLflow importable", mlflow_ok))
     except Exception as exc:
@@ -170,11 +184,13 @@ def verify_lazypredict_mlflow(df: pd.DataFrame, tracking_uri: str | None, regist
             mlflow_experiment_name="verify-optional-deps",
         )
         elapsed = round(time.monotonic() - t0, 1)
-        results.append(_result(
-            "Real benchmark run",
-            True,
-            f"best={result.summary.best_model_name} score={result.summary.best_score:.4f} in {elapsed}s",
-        ))
+        results.append(
+            _result(
+                "Real benchmark run",
+                True,
+                f"best={result.summary.best_model_name} score={result.summary.best_score:.4f} in {elapsed}s",
+            )
+        )
         if result.mlflow_run_id:
             results.append(_result("MLflow run logged", True, f"run_id={result.mlflow_run_id}"))
         else:
@@ -189,12 +205,14 @@ def verify_lazypredict_mlflow(df: pd.DataFrame, tracking_uri: str | None, regist
 # 4. PyCaret
 # ---------------------------------------------------------------------------
 
+
 def verify_pycaret() -> list[dict]:
     _section("PyCaret Experiment Lab")
     results = []
 
     try:
         from app.modeling.pycaret.setup_runner import _probe_pycaret_import_error
+
         err = _probe_pycaret_import_error()
         if err:
             results.append(_result("PyCaret importable", False, err))
@@ -210,12 +228,14 @@ def verify_pycaret() -> list[dict]:
 # 5. MLflow History / Registry
 # ---------------------------------------------------------------------------
 
+
 def verify_mlflow_query(tracking_uri: str | None, registry_uri: str | None) -> list[dict]:
     _section("MLflow History & Registry")
     results = []
 
     try:
         from app.tracking.mlflow_query import is_mlflow_available
+
         if not is_mlflow_available():
             results.append(_result("MLflow available", False))
             return results
@@ -249,12 +269,14 @@ def verify_mlflow_query(tracking_uri: str | None, registry_uri: str | None) -> l
 # 6. Prediction (MLflow model)
 # ---------------------------------------------------------------------------
 
+
 def verify_prediction(df: pd.DataFrame, tracking_uri: str | None, registry_uri: str | None) -> list[dict]:
     _section("Prediction (MLflow registered model)")
     results = []
 
     try:
         from app.tracking.mlflow_query import is_mlflow_available
+
         if not is_mlflow_available():
             results.append(_result("MLflow available", False))
             return results
@@ -309,6 +331,7 @@ def verify_prediction(df: pd.DataFrame, tracking_uri: str | None, registry_uri: 
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main() -> int:
     print("=" * 60)
     print("  Optional Dependency Runtime Verification")
@@ -316,6 +339,7 @@ def main() -> int:
     print("=" * 60)
 
     from app.config.settings import load_settings
+
     settings = load_settings()
     tracking_uri = settings.mlflow.tracking_uri
     registry_uri = settings.mlflow.registry_uri

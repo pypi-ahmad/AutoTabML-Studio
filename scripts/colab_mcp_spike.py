@@ -17,6 +17,7 @@ Exit codes:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import shutil
 import sys
@@ -61,15 +62,11 @@ async def _run_spike() -> dict:
     t0 = time.monotonic()
     exit_stack = AsyncExitStack()
     try:
-        transport = await exit_stack.enter_async_context(
-            stdio_client(server_params)
-        )
+        transport = await exit_stack.enter_async_context(stdio_client(server_params))
         report["server_spawned"] = True
         read_stream, write_stream = transport
 
-        session = await exit_stack.enter_async_context(
-            ClientSession(read_stream, write_stream)
-        )
+        session = await exit_stack.enter_async_context(ClientSession(read_stream, write_stream))
         init_result = await session.initialize()
         report["handshake_ok"] = True
 
@@ -94,9 +91,7 @@ async def _run_spike() -> dict:
             if hasattr(t, "description") and t.description:
                 tool_info["description"] = t.description[:120]
             if hasattr(t, "inputSchema") and t.inputSchema:
-                tool_info["input_schema_keys"] = list(
-                    t.inputSchema.get("properties", {}).keys()
-                )
+                tool_info["input_schema_keys"] = list(t.inputSchema.get("properties", {}).keys())
             tools.append(tool_info)
         report["tools"] = tools
         report["tool_count"] = len(tools)
@@ -105,10 +100,8 @@ async def _run_spike() -> dict:
         report["error"] = f"{type(exc).__name__}: {exc}"
     finally:
         report["elapsed_secs"] = round(time.monotonic() - t0, 2)
-        try:
+        with contextlib.suppress(Exception):
             await exit_stack.aclose()
-        except Exception:
-            pass
 
     return report
 

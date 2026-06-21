@@ -10,15 +10,15 @@ and logs all output to artifacts/batch_runs/<batch_id>/batch.log.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
+from datetime import datetime, timezone
 import json
 import logging
+from pathlib import Path
 import sys
 import time
 import traceback
 import uuid
-from collections import Counter
-from datetime import datetime, timezone
-from pathlib import Path
 
 # Ensure the project root is importable
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -158,14 +158,14 @@ def _setup_batch_logger(log_path: Path) -> None:
     def _attach_file_handler(target_logger: logging.Logger) -> None:
         resolved_path = str(log_path.resolve())
         for existing in target_logger.handlers:
-            if isinstance(existing, logging.FileHandler) and Path(existing.baseFilename).resolve() == Path(resolved_path):
+            if isinstance(existing, logging.FileHandler) and Path(existing.baseFilename).resolve() == Path(
+                resolved_path
+            ):
                 return
 
         file_handler = logging.FileHandler(log_path, encoding="utf-8")
         file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(
-            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-        )
+        file_handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
         target_logger.addHandler(file_handler)
 
     _attach_file_handler(logger)
@@ -181,7 +181,7 @@ def _declared_target_from_item(item: BatchRunItemRecord) -> str:
 
     prefix = f"{item.batch_id}::{item.uci_id}::"
     if item.item_id.startswith(prefix):
-        return item.item_id[len(prefix):]
+        return item.item_id[len(prefix) :]
     return ""
 
 
@@ -226,8 +226,7 @@ def _should_skip_completed_dataset(
     # Backward-compatible fallback for older batches that tracked only one item per UCI id.
     if variant_counts.get(uci_id, 0) == 1:
         return any(
-            item.status in (BatchItemStatus.SUCCESS, BatchItemStatus.SKIPPED)
-            for item in items_by_uci.get(uci_id, [])
+            item.status in (BatchItemStatus.SUCCESS, BatchItemStatus.SKIPPED) for item in items_by_uci.get(uci_id, [])
         )
 
     return False
@@ -379,7 +378,8 @@ def _detect_target_and_task(loaded, declared_target: str, declared_task: str) ->
             if t in df.columns:
                 logger.warning(
                     "Declared target '%s' not in columns; falling back to UCI target '%s'",
-                    declared_target, t,
+                    declared_target,
+                    t,
                 )
                 return t, declared_task
 
@@ -424,8 +424,15 @@ def run_single_dataset(
 
     start_time = time.monotonic()
     logger.info("=" * 70)
-    logger.info("START [%d/%d] uci:%d  %s  target=%s  task=%s",
-                position_index or uci_id, total_datasets, uci_id, dataset_name, target, task_type)
+    logger.info(
+        "START [%d/%d] uci:%d  %s  target=%s  task=%s",
+        position_index or uci_id,
+        total_datasets,
+        uci_id,
+        dataset_name,
+        target,
+        task_type,
+    )
 
     try:
         # Step 1: Validate
@@ -443,8 +450,13 @@ def run_single_dataset(
         item.task_type = actual_task
         item.metadata["resolved_target"] = actual_target
         item.metadata["target_fallback_used"] = actual_target != target
-        logger.info("[%s] Validation %s (rows=%s, cols=%s)",
-                     dataset_name, val_result["status"], item.row_count, item.column_count)
+        logger.info(
+            "[%s] Validation %s (rows=%s, cols=%s)",
+            dataset_name,
+            val_result["status"],
+            item.row_count,
+            item.column_count,
+        )
 
         # Step 2: Profile
         logger.info("[%s] Step 2/3: Profiling...", dataset_name)
@@ -457,8 +469,7 @@ def run_single_dataset(
             logger.warning("[%s] Profiling failed (non-fatal): %s", dataset_name, prof_exc)
 
         # Step 3: Benchmark
-        logger.info("[%s] Step 3/3: Benchmarking (target=%s, task=%s)...",
-                     dataset_name, actual_target, actual_task)
+        logger.info("[%s] Step 3/3: Benchmarking (target=%s, task=%s)...", dataset_name, actual_target, actual_task)
         bench_result = _run_benchmark(loaded, name, actual_target, actual_task)
         item.benchmark_status = bench_result["status"]
         item.best_model = bench_result.get("best_model")
@@ -467,8 +478,13 @@ def run_single_dataset(
         item.mlflow_run_id = bench_result.get("mlflow_run_id")
         item.task_type = bench_result.get("task_type", actual_task)
         item.status = BatchItemStatus.SUCCESS
-        logger.info("[%s] Benchmark SUCCESS: best=%s score=%.4f metric=%s",
-                     dataset_name, item.best_model, item.best_score or 0, item.ranking_metric)
+        logger.info(
+            "[%s] Benchmark SUCCESS: best=%s score=%.4f metric=%s",
+            dataset_name,
+            item.best_model,
+            item.best_score or 0,
+            item.ranking_metric,
+        )
 
     except Exception as exc:
         item.status = BatchItemStatus.FAILED
@@ -548,7 +564,9 @@ def run_batch(
             completed_keys=completed_keys,
             variant_counts=dataset_variant_counts,
         ):
-            logger.info("SKIP [%d/%d] uci:%d %s target=%s (already completed)", idx, len(datasets), uci_id, name, target)
+            logger.info(
+                "SKIP [%d/%d] uci:%d %s target=%s (already completed)", idx, len(datasets), uci_id, name, target
+            )
             continue
 
         item = run_single_dataset(
@@ -584,7 +602,11 @@ def run_batch(
         done_count = success_count + fail_count + skip_count
         logger.info(
             "PROGRESS: %d/%d done  (success=%d, failed=%d, skipped=%d)",
-            done_count, len(datasets), success_count, fail_count, skip_count,
+            done_count,
+            len(datasets),
+            success_count,
+            fail_count,
+            skip_count,
         )
 
     # Finalize – ensure counts reflect the complete session (covers full-resume edge case)
@@ -617,8 +639,9 @@ def run_batch(
 
     logger.info("=" * 70)
     logger.info("BATCH COMPLETE: %s", batch_record.status.value)
-    logger.info("  Success: %d  Failed: %d  Skipped: %d  Total: %d",
-                success_count, fail_count, skip_count, len(datasets))
+    logger.info(
+        "  Success: %d  Failed: %d  Skipped: %d  Total: %d", success_count, fail_count, skip_count, len(datasets)
+    )
     logger.info("  Summary: %s", summary_path)
     logger.info("  Log: %s", batch_dir / "batch.log")
     logger.info("=" * 70)

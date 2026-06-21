@@ -11,8 +11,8 @@ These 200 datasets are *different* from the 100 in batch_uci_runner.py.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 
 # Ensure the project root is importable
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -78,7 +78,12 @@ UCI_DATASETS_200: list[tuple[int, str, str, str]] = [
     (419, "Autistic Spectrum Disorder Screening Data for Children", "class", "classification"),  # 292 rows, 20 cols
     (426, "Autism Screening Adult", "class", "classification"),  # 704 rows, 20 cols
     (467, "Student Academics Performance", "class", "auto"),  # 131 rows, 22 cols
-    (503, "Hepatitis C Virus (HCV) for Egyptian patients", "Baselinehistological staging", "classification"),  # 1385 rows, 28 cols
+    (
+        503,
+        "Hepatitis C Virus (HCV) for Egyptian patients",
+        "Baselinehistological staging",
+        "classification",
+    ),  # 1385 rows, 28 cols
     (537, "Cervical Cancer Behavior Risk", "ca_cervix", "classification"),  # 72 rows, 19 cols
     (547, "Algerian Forest Fires", "Classes  ", "classification"),  # 244 rows, 14 cols
     (565, "Bone marrow transplant: children", "survival_status", "classification"),  # 187 rows, 36 cols
@@ -90,7 +95,12 @@ UCI_DATASETS_200: list[tuple[int, str, str, str]] = [
     (732, "DARWIN", "class", "classification"),  # 174 rows, 451 cols
     (759, "Glioma Grading Clinical and Mutation Features", "Grade", "classification"),  # 839 rows, 23 cols
     (763, "Land Mines", "M", "classification"),  # 338 rows, 3 cols
-    (827, "Sepsis Survival Minimal Clinical Records", "hospital_outcome_1alive_0dead", "classification"),  # 110341 rows, 3 cols
+    (
+        827,
+        "Sepsis Survival Minimal Clinical Records",
+        "hospital_outcome_1alive_0dead",
+        "classification",
+    ),  # 110341 rows, 3 cols
     (887, "NHANES Age Prediction Subset", "age_group", "classification"),  # 2278 rows, 7 cols
     (891, "CDC Diabetes Health Indicators", "Diabetes_binary", "classification"),  # 253680 rows, 21 cols
     (915, "Differentiated Thyroid Cancer Recurrence", "Recurred", "classification"),  # 383 rows, 16 cols
@@ -195,7 +205,12 @@ EXTRA_DATASETS: list[tuple[int, str, str, str]] = [
     (332, "Online News (n_tokens_title)", "n_tokens_title", "regression"),
     (409, "Daily Demand (Banking orders 1)", "Banking orders (1)", "regression"),
     (849, "Power Consumption Tetouan (Zone 2)", "Zone 2  Power Consumption", "regression"),
-    (851, "Steel Industry Energy (Lagging_Current_Reactive.Power_kVarh)", "Lagging_Current_Reactive.Power_kVarh", "regression"),
+    (
+        851,
+        "Steel Industry Energy (Lagging_Current_Reactive.Power_kVarh)",
+        "Lagging_Current_Reactive.Power_kVarh",
+        "regression",
+    ),
     (597, "Garment Productivity (targeted_productivity)", "targeted_productivity", "regression"),
     (464, "Superconductivity (number_of_elements)", "number_of_elements", "regression"),
     (189, "Parkinsons Telemonitoring (motor_UPDRS)", "motor_UPDRS", "regression"),

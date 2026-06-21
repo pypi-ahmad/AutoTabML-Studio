@@ -4,6 +4,7 @@ The six ``fetch_*`` calls are independent network downloads, so we kick them
 off in parallel via a thread executor and only print the summaries once every
 fetch has completed.
 """
+
 import asyncio
 
 import numpy as np
@@ -29,10 +30,8 @@ async def _fetch_all() -> dict[str, object]:
         "rcv1": asyncio.to_thread(fetch_rcv1),
         "species": asyncio.to_thread(fetch_species_distributions),
     }
-    results = await gather_with_concurrency(
-        list(coros.values()), limit=6, return_exceptions=True
-    )
-    return dict(zip(coros.keys(), results))
+    results = await gather_with_concurrency(list(coros.values()), limit=6, return_exceptions=True)
+    return dict(zip(coros.keys(), results, strict=False))
 
 
 def main() -> None:
