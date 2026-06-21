@@ -23,9 +23,7 @@ class TestLocalFileLoaders:
         csv_path = tmp_path / "sample.csv"
         csv_path.write_text("feature,target\n1,0\n2,1\n", encoding="utf-8")
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.CSV, path=csv_path)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.CSV, path=csv_path))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.dataframe.columns.tolist() == ["feature", "target"]
@@ -37,9 +35,7 @@ class TestLocalFileLoaders:
         tsv_path = tmp_path / "sample.tsv"
         tsv_path.write_text("col_a\tcol_b\n10\t20\n30\t40\n", encoding="utf-8")
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.DELIMITED_TEXT, path=tsv_path)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.DELIMITED_TEXT, path=tsv_path))
 
         assert loaded.dataframe.iloc[1].tolist() == [30, 40]
         assert loaded.metadata.source_details["delimiter"] == "\t"
@@ -50,9 +46,7 @@ class TestLocalFileLoaders:
             pd.DataFrame({"a": [1, 2]}).to_excel(writer, sheet_name="first", index=False)
             pd.DataFrame({"b": [3, 4]}).to_excel(writer, sheet_name="second", index=False)
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.EXCEL, path=excel_path)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.EXCEL, path=excel_path))
 
         assert loaded.dataframe.columns.tolist() == ["a"]
         assert loaded.metadata.sheet_name == "first"
@@ -110,9 +104,7 @@ class TestRemoteLoaders:
         """
         respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/html"}))
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["detected_table_count"] == 1
@@ -136,9 +128,7 @@ class TestRemoteLoaders:
         """
         respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/html"}))
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url, row_limit=1)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.HTML_TABLE, url=url, row_limit=1))
 
         assert loaded.dataframe.shape == (1, 2)
         assert loaded.dataframe.iloc[0].to_dict() == {"name": "a", "score": 10}
@@ -181,9 +171,7 @@ class TestRemoteLoaders:
         respx.head(url).mock(return_value=httpx.Response(200, headers={"content-type": "text/csv"}))
         respx.get(url).mock(return_value=httpx.Response(200, content=csv_body, headers={"content-type": "text/csv"}))
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_type == IngestionSourceType.URL_FILE
@@ -201,15 +189,11 @@ class TestRemoteLoaders:
             return_value=httpx.Response(
                 200,
                 content=payload,
-                headers={
-                    "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                },
+                headers={"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
             )
         )
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.EXCEL, url=url)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.EXCEL, url=url))
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.sheet_name == 0 or loaded.metadata.sheet_name == "Sheet1"
@@ -221,9 +205,7 @@ class TestRemoteLoaders:
         respx.head(url).mock(return_value=httpx.Response(405))
         respx.get(url).mock(return_value=httpx.Response(200, text=html, headers={"content-type": "text/plain"}))
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.URL_FILE, url=url))
 
         assert loaded.dataframe.iloc[0, 0] == 1
         assert loaded.metadata.source_details["routed_source_type"] == "html_table"
@@ -253,9 +235,7 @@ class TestDataFrameLoaderAndPreview:
             columns=["feature", "feature", "empty"],
         )
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.DATAFRAME, dataframe=original)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.DATAFRAME, dataframe=original))
 
         assert original.columns.tolist() == ["feature", "feature", "empty"]
         assert loaded.dataframe.columns.tolist() == ["feature", "feature__2"]
@@ -329,7 +309,9 @@ class TestFailures:
     def test_html_table_no_tables_raises(self):
         url = "https://example.com/no-table"
         respx.get(url).mock(
-            return_value=httpx.Response(200, text="<html><body>No table here</body></html>", headers={"content-type": "text/html"})
+            return_value=httpx.Response(
+                200, text="<html><body>No table here</body></html>", headers={"content-type": "text/html"}
+            )
         )
 
         with pytest.raises(ParseFailureError, match="No HTML tables were found"):

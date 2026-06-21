@@ -7,10 +7,10 @@ Tests that need ydata-profiling are skipped if the library is unavailable.
 from __future__ import annotations
 
 import importlib.util
+from pathlib import Path
 import sys
 import types
 import warnings
-from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -24,30 +24,37 @@ from app.profiling.ydata_runner import profiling_install_guidance
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def small_df() -> pd.DataFrame:
-    return pd.DataFrame({
-        "num_a": [1, 2, 3, 4, 5],
-        "num_b": [10.0, 20.0, 30.0, 40.0, 50.0],
-        "cat": ["a", "b", "c", "d", "e"],
-    })
+    return pd.DataFrame(
+        {
+            "num_a": [1, 2, 3, 4, 5],
+            "num_b": [10.0, 20.0, 30.0, 40.0, 50.0],
+            "cat": ["a", "b", "c", "d", "e"],
+        }
+    )
 
 
 @pytest.fixture
 def large_df() -> pd.DataFrame:
     """DataFrame that exceeds default thresholds."""
     import numpy as np
+
     rng = np.random.default_rng(42)
     n = 60_000
-    return pd.DataFrame({
-        "value": rng.standard_normal(n),
-        "category": rng.choice(["a", "b", "c"], n),
-    })
+    return pd.DataFrame(
+        {
+            "value": rng.standard_normal(n),
+            "category": rng.choice(["a", "b", "c"], n),
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Mode selection
 # ---------------------------------------------------------------------------
+
 
 class TestModeSelection:
     def test_standard_mode_for_small_dataset(self, small_df: pd.DataFrame):
@@ -78,6 +85,7 @@ class TestModeSelection:
 # Sampling
 # ---------------------------------------------------------------------------
 
+
 class TestSampling:
     def test_no_sampling_under_threshold(self, small_df: pd.DataFrame):
         config = ProfilingConfig(sampling_row_threshold=200_000)
@@ -88,6 +96,7 @@ class TestSampling:
 
     def test_sampling_applied_over_threshold(self):
         import numpy as np
+
         rng = np.random.default_rng(42)
         big = pd.DataFrame({"v": rng.standard_normal(300_000)})
         config = ProfilingConfig(
@@ -103,6 +112,7 @@ class TestSampling:
 # ---------------------------------------------------------------------------
 # Profiling config / settings defaults
 # ---------------------------------------------------------------------------
+
 
 class TestProfilingConfig:
     def test_default_profiling_config(self):
@@ -120,14 +130,14 @@ class TestProfilingConfig:
     def test_profiling_install_guidance_pins_compatible_setuptools(self):
         guidance = profiling_install_guidance()
 
-        assert 'not available' in guidance.lower()
-        assert 'administrator' in guidance.lower()
+        assert "not available" in guidance.lower()
+        assert "administrator" in guidance.lower()
 
     def test_profiling_install_guidance_mentions_pkg_resources_when_missing(self):
         guidance = profiling_install_guidance(ModuleNotFoundError("No module named 'pkg_resources'"))
 
-        assert 'not available' in guidance.lower()
-        assert 'administrator' in guidance.lower()
+        assert "not available" in guidance.lower()
+        assert "administrator" in guidance.lower()
 
 
 class TestYDataProfilingNoiseSuppression:
@@ -169,12 +179,15 @@ class TestYDataProfilingNoiseSuppression:
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
             with _suppress_profiling_runtime_noise():
-                warnings.warn("'parseString' deprecated - use 'parse_string'", PyparsingDeprecationWarning)
+                warnings.warn(
+                    "'parseString' deprecated - use 'parse_string'", PyparsingDeprecationWarning, stacklevel=2
+                )
                 warnings.warn(
                     "datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version.",
                     DeprecationWarning,
+                    stacklevel=2,
                 )
-                warnings.warn("keep-me", UserWarning)
+                warnings.warn("keep-me", UserWarning, stacklevel=2)
 
         assert len(caught) == 1
         assert str(caught[0].message) == "keep-me"
@@ -201,7 +214,8 @@ class TestYDataProfilingNoiseSuppression:
                 raise OSError("disk full")
 
         summary = ProfilingResultSummary(
-            row_count=3, column_count=2,
+            row_count=3,
+            column_count=2,
         )
 
         # Should log a warning, not crash with NameError
@@ -212,6 +226,7 @@ class TestYDataProfilingNoiseSuppression:
 # ---------------------------------------------------------------------------
 # Summary schema
 # ---------------------------------------------------------------------------
+
 
 class TestProfilingSummary:
     def test_summary_fields(self):
@@ -247,6 +262,7 @@ class TestProfilingSummary:
 # ---------------------------------------------------------------------------
 # Summary extraction (direct DataFrame fallback)
 # ---------------------------------------------------------------------------
+
 
 class TestSummaryExtraction:
     def test_extract_summary_fallback(self, small_df: pd.DataFrame):
@@ -310,6 +326,7 @@ class TestSummaryExtraction:
 # Artifact path handling
 # ---------------------------------------------------------------------------
 
+
 class TestArtifactPaths:
     def test_artifacts_dir_from_settings(self):
         settings = ProfilingSettings(artifacts_dir=Path("/tmp/my_profiles"))
@@ -317,6 +334,7 @@ class TestArtifactPaths:
 
     def test_profiling_result_bundle_defaults(self):
         from app.profiling.schemas import ProfilingArtifactBundle
+
         bundle = ProfilingArtifactBundle()
         assert bundle.html_report_path is None
         assert bundle.summary_json_path is None

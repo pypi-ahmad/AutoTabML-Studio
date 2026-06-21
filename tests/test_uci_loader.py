@@ -19,6 +19,7 @@ from app.ingestion.uci_loader import UCIRepoLoader, list_available_uci_datasets
 # IngestionSourceType enum
 # ---------------------------------------------------------------------------
 
+
 class TestUCISourceType:
     def test_uci_repo_enum_exists(self):
         assert IngestionSourceType.UCI_REPO.value == "uci_repo"
@@ -30,6 +31,7 @@ class TestUCISourceType:
 # ---------------------------------------------------------------------------
 # DatasetInputSpec for UCI
 # ---------------------------------------------------------------------------
+
 
 class TestUCIInputSpec:
     def test_spec_with_uci_id(self):
@@ -59,6 +61,7 @@ class TestUCIInputSpec:
 # Factory routing
 # ---------------------------------------------------------------------------
 
+
 class TestUCIFactory:
     def test_factory_returns_uci_loader(self):
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=53)
@@ -69,6 +72,7 @@ class TestUCIFactory:
 # ---------------------------------------------------------------------------
 # UCIRepoLoader with mock
 # ---------------------------------------------------------------------------
+
 
 def _build_mock_uci_dataset(
     *,
@@ -123,11 +127,13 @@ def _build_mock_uci_dataset(
         "recommended_data_splits": "Standard train/test split",
     }
     mock_ds.metadata.get = lambda key, default=None: getattr(mock_ds.metadata, key, default)
-    mock_ds.variables = pd.DataFrame({
-        "name": ["sepal_length", "sepal_width", "class"],
-        "role": ["Feature", "Feature", "Target"],
-        "type": ["Continuous", "Continuous", "Categorical"],
-    })
+    mock_ds.variables = pd.DataFrame(
+        {
+            "name": ["sepal_length", "sepal_width", "class"],
+            "role": ["Feature", "Feature", "Target"],
+            "type": ["Continuous", "Continuous", "Categorical"],
+        }
+    )
     return mock_ds
 
 
@@ -232,9 +238,7 @@ class TestUCIRepoLoader:
 
     def test_fetch_failure_raises_remote_access_error(self, monkeypatch):
         ucimlrepo = pytest.importorskip("ucimlrepo")
-        monkeypatch.setattr(
-            ucimlrepo, "fetch_ucirepo", MagicMock(side_effect=Exception("Network error"))
-        )
+        monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(side_effect=Exception("Network error")))
 
         spec = DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=999)
         loader = UCIRepoLoader()
@@ -244,6 +248,7 @@ class TestUCIRepoLoader:
 
     def test_missing_ucimlrepo_package(self, monkeypatch):
         import builtins
+
         real_import = builtins.__import__
 
         def _fake_import(name, *args, **kwargs):
@@ -312,15 +317,14 @@ class TestUCICatalog:
 # Full pipeline (load_dataset) with mock
 # ---------------------------------------------------------------------------
 
+
 class TestUCIFullPipeline:
     def test_load_dataset_through_pipeline(self, monkeypatch):
         mock_ds = _build_mock_uci_dataset()
         ucimlrepo = pytest.importorskip("ucimlrepo")
         monkeypatch.setattr(ucimlrepo, "fetch_ucirepo", MagicMock(return_value=mock_ds))
 
-        loaded = load_dataset(
-            DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=53)
-        )
+        loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_id=53))
 
         assert loaded.dataframe.shape[0] == 2
         assert loaded.metadata.source_type == IngestionSourceType.UCI_REPO
@@ -351,6 +355,7 @@ class TestUCIFullPipeline:
 # CLI locator support
 # ---------------------------------------------------------------------------
 
+
 class TestCLIUCILocator:
     def test_uci_id_locator_parsed(self):
         spec = _build_input_spec("uci:53")
@@ -377,9 +382,11 @@ class TestCLIUCILocator:
 # Packaging: uci extra
 # ---------------------------------------------------------------------------
 
+
 class TestPackagingUCIExtra:
     def test_uci_extra_includes_ucimlrepo(self):
         import tomllib
+
         data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
         uci_deps = data["project"]["optional-dependencies"]["uci"]
         assert any("ucimlrepo" in dep for dep in uci_deps)

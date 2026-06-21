@@ -21,6 +21,7 @@ from app.config.settings import load_settings, save_settings
 # Enum basics
 # ---------------------------------------------------------------------------
 
+
 class TestEnums:
     def test_workspace_mode_values(self):
         assert WorkspaceMode.DASHBOARD.value == "dashboard"
@@ -43,6 +44,7 @@ class TestEnums:
 # Default model mapping
 # ---------------------------------------------------------------------------
 
+
 class TestDefaultModels:
     def test_openai_default(self):
         assert DEFAULT_MODELS[LLMProvider.OPENAI] == "gpt-5.4-mini"
@@ -61,6 +63,7 @@ class TestDefaultModels:
 # Provider filtering by backend
 # ---------------------------------------------------------------------------
 
+
 class TestProvidersByBackend:
     def test_local_includes_ollama(self):
         assert LLMProvider.OLLAMA in PROVIDERS_BY_BACKEND[ExecutionBackend.LOCAL]
@@ -78,6 +81,7 @@ class TestProvidersByBackend:
 # ---------------------------------------------------------------------------
 # AppSettings defaults
 # ---------------------------------------------------------------------------
+
 
 class TestAppSettings:
     def test_default_workspace_mode(self, default_settings: AppSettings):
@@ -134,6 +138,7 @@ class TestAppSettings:
 # ---------------------------------------------------------------------------
 # Settings persistence (secrets excluded)
 # ---------------------------------------------------------------------------
+
 
 class TestSettingsPersistence:
     def test_save_contains_no_secret_fields(self, tmp_path: Path, monkeypatch):

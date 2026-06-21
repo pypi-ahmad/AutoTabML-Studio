@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timedelta, timezone
+import logging
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -387,7 +387,6 @@ class TestLocalPyCaretModelLoader:
 
 
 class TestMLflowModelLoader:
-
     @staticmethod
     def _fake_import_module(name):
         """Return a lightweight fake for mlflow and mlflow.pyfunc imports."""
@@ -407,6 +406,7 @@ class TestMLflowModelLoader:
         )
 
         import builtins
+
         _original_import = builtins.__import__
 
         def _patched_import(name, *args, **kwargs):
@@ -454,6 +454,7 @@ class TestMLflowModelLoader:
         )
 
         import builtins
+
         _original_import = builtins.__import__
 
         def _patched_import(name, *args, **kwargs):
@@ -538,10 +539,12 @@ class TestMLflowModelLoader:
 
         monkeypatch.setattr("app.prediction.loader.importlib.import_module", fake_import)
         import app.prediction.loader as loader_mod
+
         monkeypatch.setattr(loader_mod, "mlflow", fake_mlflow, raising=False)
 
         # Patch `import mlflow` inside _load_pyfunc_model
         import builtins
+
         original_import = builtins.__import__
 
         def patched_import(name, *args, **kwargs):

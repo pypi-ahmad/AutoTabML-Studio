@@ -36,7 +36,7 @@ class TestSafeCsv:
         assert rows[5][1] == "safe"
 
     def test_enforces_quote_all_output(self):
-        dataframe = pd.DataFrame({"value": ["hello, \"world\"", "plain"]})
+        dataframe = pd.DataFrame({"value": ['hello, "world"', "plain"]})
 
         csv_text = dataframe_to_safe_csv(dataframe, index=False)
         lines = csv_text.splitlines()

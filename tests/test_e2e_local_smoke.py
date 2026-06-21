@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _sqlite_uri(db_path: Path) -> str:
     return f"sqlite:///{db_path.as_posix()}"
 
@@ -60,25 +61,20 @@ def _classification_csv(tmp_path: Path) -> Path:
 # 1. Startup initialization
 # ---------------------------------------------------------------------------
 
+
 class TestStartupInitialization:
     """Verify the real startup path creates all expected resources."""
 
     def test_local_runtime_initializes_cleanly(self, tmp_path: Path):
-        settings = AppSettings.model_validate(
-            {"artifacts": {"root_dir": str(tmp_path / "artifacts")}}
-        )
-        status: StartupStatus = initialize_local_runtime(
-            settings, include_optional_network_checks=False
-        )
+        settings = AppSettings.model_validate({"artifacts": {"root_dir": str(tmp_path / "artifacts")}})
+        status: StartupStatus = initialize_local_runtime(settings, include_optional_network_checks=False)
 
         assert status.artifact_dirs, "Expected at least one artifact directory"
         assert all(d.exists() for d in status.artifact_dirs)
         assert not status.errors, f"Startup errors: {[e.message for e in status.errors]}"
 
     def test_metadata_store_initializes(self, tmp_path: Path):
-        settings = AppSettings.model_validate(
-            {"artifacts": {"root_dir": str(tmp_path / "artifacts")}}
-        )
+        settings = AppSettings.model_validate({"artifacts": {"root_dir": str(tmp_path / "artifacts")}})
         store = build_metadata_store(settings)
         assert store is not None
         assert store.db_path.exists()
@@ -87,6 +83,7 @@ class TestStartupInitialization:
 # ---------------------------------------------------------------------------
 # 2. Full local pipeline — ingestion → validation → profiling → benchmark
 # ---------------------------------------------------------------------------
+
 
 class TestLocalPipelineEndToEnd:
     """Exercise the real pipeline — no mocks for any service code."""
@@ -97,25 +94,17 @@ class TestLocalPipelineEndToEnd:
         self.tmp_path = tmp_path
         self.csv_path = _classification_csv(tmp_path)
 
-        self.settings = AppSettings.model_validate(
-            {"artifacts": {"root_dir": str(tmp_path / "artifacts")}}
-        )
+        self.settings = AppSettings.model_validate({"artifacts": {"root_dir": str(tmp_path / "artifacts")}})
 
         # Real startup
-        status = initialize_local_runtime(
-            self.settings, include_optional_network_checks=False
-        )
+        status = initialize_local_runtime(self.settings, include_optional_network_checks=False)
         assert not status.errors
 
         self.store = build_metadata_store(self.settings)
         assert self.store is not None
 
         # Real ingestion
-        self.loaded = load_dataset(
-            DatasetInputSpec(
-                source_type=IngestionSourceType.CSV, path=self.csv_path
-            )
-        )
+        self.loaded = load_dataset(DatasetInputSpec(source_type=IngestionSourceType.CSV, path=self.csv_path))
         assert self.loaded.dataframe.shape == (60, 5)
 
     # -- Validation (always runs, GX is optional) -------------------------
@@ -181,9 +170,7 @@ class TestLocalPipelineEndToEnd:
             logger.info("Profiling completed with real ydata-profiling")
         except Exception as exc:
             # ydata-profiling NOT installed — verify error is clean
-            assert "ydata" in str(exc).lower() or "profiling" in str(exc).lower(), (
-                f"Unexpected profiling error: {exc}"
-            )
+            assert "ydata" in str(exc).lower() or "profiling" in str(exc).lower(), f"Unexpected profiling error: {exc}"
             logger.info("Profiling skipped (ydata-profiling not installed): %s", exc)
 
     # -- Benchmark (real LazyPredict + MLflow if installed) ----------------
@@ -240,6 +227,7 @@ class TestLocalPipelineEndToEnd:
 # 3. MLflow URI edge cases
 # ---------------------------------------------------------------------------
 
+
 class TestMLflowURIHandling:
     """Verify the startup MLflow URI validation catches bad config."""
 
@@ -247,25 +235,19 @@ class TestMLflowURIHandling:
         "tracking_uri,expected_severity",
         [
             ("sqlite:///my db.db", "warning"),  # embedded whitespace
-            ("sqlite:///valid.db", None),         # valid URI, no issue
+            ("sqlite:///valid.db", None),  # valid URI, no issue
         ],
     )
-    def test_mlflow_uri_validation(
-        self, tmp_path: Path, tracking_uri: str, expected_severity: str | None
-    ):
+    def test_mlflow_uri_validation(self, tmp_path: Path, tracking_uri: str, expected_severity: str | None):
         settings = AppSettings.model_validate(
             {
                 "artifacts": {"root_dir": str(tmp_path / "artifacts")},
                 "mlflow": {"tracking_uri": tracking_uri},
             }
         )
-        status = initialize_local_runtime(
-            settings, include_optional_network_checks=False
-        )
+        status = initialize_local_runtime(settings, include_optional_network_checks=False)
 
-        mlflow_issues = [
-            i for i in status.issues if "mlflow" in i.message.lower()
-        ]
+        mlflow_issues = [i for i in status.issues if "mlflow" in i.message.lower()]
 
         if expected_severity is None:
             assert not mlflow_issues
@@ -276,6 +258,7 @@ class TestMLflowURIHandling:
 # ---------------------------------------------------------------------------
 # 4. Optional dependency probes — verify clean error messages
 # ---------------------------------------------------------------------------
+
 
 class TestOptionalDependencyProbes:
     """Verify each optional dep has a clean availability check."""

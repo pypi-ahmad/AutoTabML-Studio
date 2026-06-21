@@ -86,7 +86,13 @@ def test_flaml_tracker_preserves_existing_run_id_on_mlflow_failure(monkeypatch):
         task_type=FlamlTaskType.CLASSIFICATION,
         config=SimpleNamespace(target_column="target", search=SimpleNamespace(time_budget=30, n_splits=3)),
         execution_backend=ExecutionBackend.LOCAL,
-        search_result=SimpleNamespace(best_estimator="lgbm", metric="accuracy", best_loss=None, best_config_train_time=None, time_to_find_best=None),
+        search_result=SimpleNamespace(
+            best_estimator="lgbm",
+            metric="accuracy",
+            best_loss=None,
+            best_config_train_time=None,
+            time_to_find_best=None,
+        ),
         summary=SimpleNamespace(search_duration_seconds=1.2),
         artifacts=None,
     )

@@ -237,9 +237,7 @@ def test_local_first_smoke_flow_persists_metadata_across_workflows(tmp_path: Pat
         compare_ranking_direction=ExperimentSortDirection.DESCENDING,
         selected_model_name="SmokeModel",
         saved_model_name="smoke_model",
-        setup_config=ExperimentSetupConfig(session_id=42).to_summary_model(
-            actual_setup_kwargs={"target": "target"}
-        ),
+        setup_config=ExperimentSetupConfig(session_id=42).to_summary_model(actual_setup_kwargs={"target": "target"}),
     )
     tracked_bundle = ExperimentResultBundle(
         dataset_name="train",

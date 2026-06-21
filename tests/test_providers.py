@@ -20,6 +20,7 @@ from app.providers.openai_provider import OpenAIProvider
 # get_allowed_providers
 # ---------------------------------------------------------------------------
 
+
 class TestAllowedProviders:
     def test_local_returns_all_four(self):
         result = get_allowed_providers(ExecutionBackend.LOCAL)
@@ -35,6 +36,7 @@ class TestAllowedProviders:
 # ---------------------------------------------------------------------------
 # build_provider
 # ---------------------------------------------------------------------------
+
 
 class TestBuildProvider:
     def test_openai_requires_key(self, monkeypatch):
@@ -72,6 +74,7 @@ class TestBuildProvider:
 # ---------------------------------------------------------------------------
 # resolve_default_model
 # ---------------------------------------------------------------------------
+
 
 def _make_items(ids: list[str], provider: LLMProvider) -> list[ModelItem]:
     default_id = DEFAULT_MODELS.get(provider)
@@ -114,6 +117,7 @@ class TestResolveDefaultModel:
 # Model normalization
 # ---------------------------------------------------------------------------
 
+
 class TestModelNormalization:
     def test_openai_normalization(self):
         provider = OpenAIProvider(api_key="k")
@@ -135,10 +139,16 @@ class TestModelNormalization:
     def test_gemini_filters_non_text_models(self):
         provider = GeminiProvider(api_key="k")
         raw = [
-            {"name": "models/gemini-2.5-flash", "displayName": "Gemini 2.5 Flash",
-             "supportedGenerationMethods": ["generateContent"]},
-            {"name": "models/embedding-001", "displayName": "Embedding",
-             "supportedGenerationMethods": ["embedContent"]},
+            {
+                "name": "models/gemini-2.5-flash",
+                "displayName": "Gemini 2.5 Flash",
+                "supportedGenerationMethods": ["generateContent"],
+            },
+            {
+                "name": "models/embedding-001",
+                "displayName": "Embedding",
+                "supportedGenerationMethods": ["embedContent"],
+            },
         ]
         items = provider.normalize_model_list(raw)
         assert len(items) == 1

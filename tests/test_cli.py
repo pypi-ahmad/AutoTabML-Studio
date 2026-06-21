@@ -115,7 +115,9 @@ class TestOperationalCommands:
 
         saved_settings = {}
         monkeypatch.setattr(cli_module, "load_settings", lambda: settings)
-        monkeypatch.setattr(cli_module, "save_settings", lambda s: saved_settings.update({"uri": s.mlflow.tracking_uri}))
+        monkeypatch.setattr(
+            cli_module, "save_settings", lambda s: saved_settings.update({"uri": s.mlflow.tracking_uri})
+        )
         monkeypatch.setattr(
             cli_module,
             "initialize_local_runtime",
@@ -174,9 +176,7 @@ class TestOperationalCommands:
             ],
         )
 
-        cli_module.cmd_uci_list(
-            type("Args", (), {"search": "i", "area": None, "filter": None, "limit": 1})()
-        )
+        cli_module.cmd_uci_list(type("Args", (), {"search": "i", "area": None, "filter": None, "limit": 1})())
         output = capsys.readouterr().out
 
         assert "=== UCI Datasets ===" in output
@@ -196,9 +196,15 @@ class TestOperationalCommands:
             status=BatchRunStatus.RUNNING,
         )
         items = [
-            BatchRunItemRecord(item_id="1", batch_id="batch-1", uci_id=1, dataset_name="A", status=BatchItemStatus.SUCCESS),
-            BatchRunItemRecord(item_id="2", batch_id="batch-1", uci_id=2, dataset_name="B", status=BatchItemStatus.SUCCESS),
-            BatchRunItemRecord(item_id="3", batch_id="batch-1", uci_id=3, dataset_name="C", status=BatchItemStatus.FAILED),
+            BatchRunItemRecord(
+                item_id="1", batch_id="batch-1", uci_id=1, dataset_name="A", status=BatchItemStatus.SUCCESS
+            ),
+            BatchRunItemRecord(
+                item_id="2", batch_id="batch-1", uci_id=2, dataset_name="B", status=BatchItemStatus.SUCCESS
+            ),
+            BatchRunItemRecord(
+                item_id="3", batch_id="batch-1", uci_id=3, dataset_name="C", status=BatchItemStatus.FAILED
+            ),
         ]
 
         class _FakeStore:
@@ -231,8 +237,12 @@ class TestOperationalCommands:
             status=BatchRunStatus.PARTIAL,
         )
         items = [
-            BatchRunItemRecord(item_id="1", batch_id="batch-1", uci_id=1, dataset_name="A", status=BatchItemStatus.SUCCESS),
-            BatchRunItemRecord(item_id="2", batch_id="batch-1", uci_id=2, dataset_name="B", status=BatchItemStatus.SKIPPED),
+            BatchRunItemRecord(
+                item_id="1", batch_id="batch-1", uci_id=1, dataset_name="A", status=BatchItemStatus.SUCCESS
+            ),
+            BatchRunItemRecord(
+                item_id="2", batch_id="batch-1", uci_id=2, dataset_name="B", status=BatchItemStatus.SKIPPED
+            ),
         ]
 
         class _FakeStore:
@@ -260,18 +270,22 @@ class TestExperimentCommandsErrorHandling:
     def _make_args(self, tmp_path: Path, command: str):
         csv = tmp_path / "data.csv"
         csv.write_text("a,b,target\n1,2,0\n3,4,1\n", encoding="utf-8")
-        return type("Args", (), {
-            "dataset": str(csv),
-            "target": "target",
-            "task_type": "classification",
-            "source_type": None,
-            "model_id": "lr",
-            "tune_metric": None,
-            "n_iter": 10,
-            "plot": [],
-            "save_name": "test_model",
-            "save_snapshot": False,
-        })()
+        return type(
+            "Args",
+            (),
+            {
+                "dataset": str(csv),
+                "target": "target",
+                "task_type": "classification",
+                "source_type": None,
+                "model_id": "lr",
+                "tune_metric": None,
+                "n_iter": 10,
+                "plot": [],
+                "save_name": "test_model",
+                "save_snapshot": False,
+            },
+        )()
 
     def test_experiment_tune_catches_setup_error(self, monkeypatch, tmp_path):
         from app import cli as cli_module
@@ -472,13 +486,17 @@ class TestCmdValidate:
     """Direct functional tests for cmd_validate."""
 
     def _make_args(self, dataset_path: str, target: str = "approved"):
-        return type("Args", (), {
-            "dataset": dataset_path,
-            "target": target,
-            "source_type": None,
-            "min_rows": None,
-            "artifacts_dir": None,
-        })()
+        return type(
+            "Args",
+            (),
+            {
+                "dataset": dataset_path,
+                "target": target,
+                "source_type": None,
+                "min_rows": None,
+                "artifacts_dir": None,
+            },
+        )()
 
     def test_validate_happy_path(self, monkeypatch, capsys, tmp_path: Path):
         from app import cli as cli_module
@@ -565,22 +583,26 @@ class TestCmdValidate:
 
 class TestCmdBenchmark:
     def _make_args(self, prefer_gpu="auto"):
-        return type("Args", (), {
-            "dataset": "ignored.csv",
-            "target": "target",
-            "task_type": "classification",
-            "source_type": None,
-            "test_size": None,
-            "random_state": None,
-            "stratify": "auto",
-            "ranking_metric": None,
-            "sample_rows": 0,
-            "top_k": None,
-            "prefer_gpu": prefer_gpu,
-            "include_model": [],
-            "exclude_model": [],
-            "artifacts_dir": None,
-        })()
+        return type(
+            "Args",
+            (),
+            {
+                "dataset": "ignored.csv",
+                "target": "target",
+                "task_type": "classification",
+                "source_type": None,
+                "test_size": None,
+                "random_state": None,
+                "stratify": "auto",
+                "ranking_metric": None,
+                "sample_rows": 0,
+                "top_k": None,
+                "prefer_gpu": prefer_gpu,
+                "include_model": [],
+                "exclude_model": [],
+                "artifacts_dir": None,
+            },
+        )()
 
     def test_benchmark_uses_settings_gpu_preference_by_default(self, monkeypatch, capsys):
         from app import cli as cli_module
@@ -683,13 +705,17 @@ class TestCmdHistoryList:
     """Direct functional tests for cmd_history_list."""
 
     def _make_args(self, run_type="all", limit=50, sort_by="start_time", sort_dir="descending", task_type=None):
-        return type("Args", (), {
-            "run_type": run_type,
-            "limit": limit,
-            "sort_by": sort_by,
-            "sort_dir": sort_dir,
-            "task_type": task_type,
-        })()
+        return type(
+            "Args",
+            (),
+            {
+                "run_type": run_type,
+                "limit": limit,
+                "sort_by": sort_by,
+                "sort_dir": sort_dir,
+                "task_type": task_type,
+            },
+        )()
 
     def test_history_list_prints_runs(self, monkeypatch, capsys):
         from app import cli as cli_module
@@ -936,11 +962,15 @@ class TestCmdProfile:
     """Direct functional tests for cmd_profile."""
 
     def _make_args(self, dataset_path: str):
-        return type("Args", (), {
-            "dataset": dataset_path,
-            "source_type": None,
-            "artifacts_dir": None,
-        })()
+        return type(
+            "Args",
+            (),
+            {
+                "dataset": dataset_path,
+                "source_type": None,
+                "artifacts_dir": None,
+            },
+        )()
 
     def test_profile_happy_path(self, monkeypatch, capsys, tmp_path: Path):
         from app import cli as cli_module
@@ -1195,12 +1225,16 @@ class TestCmdRegistryRegister:
         monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
         monkeypatch.setattr("app.registry.registry_service.RegistryService", FakeRegistryService)
 
-        args = type("Args", (), {
-            "model_name": "my-model",
-            "source": "runs:/run-1/model",
-            "run_id": None,
-            "description": None,
-        })()
+        args = type(
+            "Args",
+            (),
+            {
+                "model_name": "my-model",
+                "source": "runs:/run-1/model",
+                "run_id": None,
+                "description": None,
+            },
+        )()
         cli_module.cmd_registry_register(args)
         output = capsys.readouterr().out
 
@@ -1237,11 +1271,15 @@ class TestCmdRegistryPromote:
         monkeypatch.setattr("app.tracking.mlflow_query.is_mlflow_available", lambda: True)
         monkeypatch.setattr("app.registry.registry_service.RegistryService", FakeRegistryService)
 
-        args = type("Args", (), {
-            "model_name": "my-model",
-            "version": "2",
-            "action": "champion",
-        })()
+        args = type(
+            "Args",
+            (),
+            {
+                "model_name": "my-model",
+                "version": "2",
+                "action": "champion",
+            },
+        )()
         cli_module.cmd_registry_promote(args)
         output = capsys.readouterr().out
 
@@ -1392,11 +1430,15 @@ class TestCmdCompareRuns:
         monkeypatch.setattr("app.tracking.history_service.HistoryService", FakeHistoryService)
         monkeypatch.setattr("app.tracking.compare_service.ComparisonService", FakeComparisonService)
 
-        args = type("Args", (), {
-            "left_run_id": "aaaa1111bbbb2222",
-            "right_run_id": "cccc3333dddd4444",
-            "artifacts_dir": None,
-        })()
+        args = type(
+            "Args",
+            (),
+            {
+                "left_run_id": "aaaa1111bbbb2222",
+                "right_run_id": "cccc3333dddd4444",
+                "artifacts_dir": None,
+            },
+        )()
         cli_module.cmd_compare_runs(args)
         output = capsys.readouterr().out
 
@@ -1501,23 +1543,27 @@ class TestCmdExperimentRun:
         monkeypatch.setattr(cli_module, "build_metadata_store", lambda s: None)
         monkeypatch.setattr(cli_module, "_build_pycaret_service", lambda s, **kw: FakeService())
 
-        args = type("Args", (), {
-            "dataset": str(csv),
-            "target": "target",
-            "task_type": "classification",
-            "source_type": None,
-            "train_size": None,
-            "fold": None,
-            "fold_strategy": None,
-            "preprocess": "auto",
-            "ignore_feature": [],
-            "compare_metric": None,
-            "n_select": 1,
-            "budget_time": None,
-            "turbo": True,
-            "use_gpu": None,
-            "artifacts_dir": None,
-        })()
+        args = type(
+            "Args",
+            (),
+            {
+                "dataset": str(csv),
+                "target": "target",
+                "task_type": "classification",
+                "source_type": None,
+                "train_size": None,
+                "fold": None,
+                "fold_strategy": None,
+                "preprocess": "auto",
+                "ignore_feature": [],
+                "compare_metric": None,
+                "n_select": 1,
+                "budget_time": None,
+                "turbo": True,
+                "use_gpu": None,
+                "artifacts_dir": None,
+            },
+        )()
         cli_module.cmd_experiment_run(args)
         output = capsys.readouterr().out
 
@@ -1703,6 +1749,7 @@ class TestParserIntegration:
 
         assert "Validation: sample" in output
         assert "Passed: 1" in output
+
     """Direct functional test for cmd_compare_runs."""
 
     def test_compare_runs_prints_deltas_and_config_diff(self, monkeypatch, capsys):
@@ -1736,9 +1783,7 @@ class TestParserIntegration:
                     better_side="right",
                 )
             ],
-            config_differences=[
-                SimpleNamespace(key="random_state", left_value="42", right_value="7")
-            ],
+            config_differences=[SimpleNamespace(key="random_state", left_value="42", right_value="7")],
         )
 
         class FakeComparisonService:

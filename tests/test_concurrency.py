@@ -65,9 +65,7 @@ class TestGatherWithConcurrency:
         async def _boom() -> int:
             raise RuntimeError("nope")
 
-        results = await gather_with_concurrency(
-            [_ok(), _boom(), _ok()], limit=2, return_exceptions=True
-        )
+        results = await gather_with_concurrency([_ok(), _boom(), _ok()], limit=2, return_exceptions=True)
 
         assert results[0] == 42
         assert isinstance(results[1], RuntimeError)

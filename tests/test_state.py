@@ -16,9 +16,7 @@ class TestRuntimeState:
         assert runtime_state.get_provider_api_key(LLMProvider.GEMINI) is None
 
     def test_provider_change_clears_model_catalog(self, runtime_state):
-        runtime_state.fetched_models = [
-            ModelItem(id="gpt-5.4-mini", display_name="GPT", provider=LLMProvider.OPENAI)
-        ]
+        runtime_state.fetched_models = [ModelItem(id="gpt-5.4-mini", display_name="GPT", provider=LLMProvider.OPENAI)]
         runtime_state.model_fetch_error = "old error"
         runtime_state.selected_model_id = "gpt-5.4-mini"
 
@@ -29,9 +27,7 @@ class TestRuntimeState:
         assert runtime_state.selected_model_id is None
 
     def test_backend_change_clears_model_catalog(self, runtime_state):
-        runtime_state.fetched_models = [
-            ModelItem(id="gpt-5.4-mini", display_name="GPT", provider=LLMProvider.OPENAI)
-        ]
+        runtime_state.fetched_models = [ModelItem(id="gpt-5.4-mini", display_name="GPT", provider=LLMProvider.OPENAI)]
         runtime_state.model_fetch_error = "old error"
         runtime_state.selected_model_id = "gpt-5.4-mini"
 
@@ -69,9 +65,7 @@ class TestRuntimeState:
         """Setting the same backend value should not clear anything."""
         runtime_state.execution_backend = ExecutionBackend.COLAB_MCP
         runtime_state.provider = LLMProvider.OPENAI
-        runtime_state.fetched_models = [
-            ModelItem(id="gpt-5.4-mini", display_name="GPT", provider=LLMProvider.OPENAI)
-        ]
+        runtime_state.fetched_models = [ModelItem(id="gpt-5.4-mini", display_name="GPT", provider=LLMProvider.OPENAI)]
         runtime_state.selected_model_id = "gpt-5.4-mini"
 
         # Re-set to the same value

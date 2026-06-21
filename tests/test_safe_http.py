@@ -113,9 +113,7 @@ class TestRedirectGuards:
     @respx.mock
     def test_redirects_are_not_followed_automatically(self, public_dns):
         url = "https://example.com/data"
-        respx.get(url).mock(
-            return_value=httpx.Response(302, headers={"location": "https://example.com/next"})
-        )
+        respx.get(url).mock(return_value=httpx.Response(302, headers={"location": "https://example.com/next"}))
         respx.get("https://example.com/next").mock(
             return_value=httpx.Response(200, content=b"x,y\n1,2\n", headers={"content-type": "text/csv"})
         )
@@ -175,9 +173,7 @@ class TestRedirectGuards:
 
     @respx.mock
     def test_relative_redirect_is_rejected(self, public_dns):
-        respx.get("https://example.com/start").mock(
-            return_value=httpx.Response(302, headers={"location": "next-page"})
-        )
+        respx.get("https://example.com/start").mock(return_value=httpx.Response(302, headers={"location": "next-page"}))
         with pytest.raises(UnsafeURLError, match="non-absolute"):
             safe_fetch("https://example.com/start")
 
@@ -234,9 +230,7 @@ class TestRetryBehavior:
         url = "https://example.com/big"
         # Don't advertise content-length; deliver a body larger than the cap.
         big_payload = b"x" * 8192
-        respx.get(url).mock(
-            return_value=httpx.Response(200, content=big_payload, headers={"content-type": "text/csv"})
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, content=big_payload, headers={"content-type": "text/csv"}))
         policy = SafeFetchPolicy(max_bytes=1024)
         with pytest.raises(ResponseTooLargeError):
             safe_fetch(url, policy=policy)
@@ -249,9 +243,7 @@ class TestDownloadToPath:
         destination = tmp_path / "downloaded.csv"
         payload = b"x,y\n1,2\n"
 
-        respx.get(url).mock(
-            return_value=httpx.Response(200, content=payload, headers={"content-type": "text/csv"})
-        )
+        respx.get(url).mock(return_value=httpx.Response(200, content=payload, headers={"content-type": "text/csv"}))
 
         result = safe_download_to_path(url, destination_path=destination)
 
@@ -265,9 +257,7 @@ class TestContentTypeGuards:
     def test_disallowed_content_type_is_rejected(self, public_dns):
         url = "https://example.com/binary"
         respx.get(url).mock(
-            return_value=httpx.Response(
-                200, content=b"\x00", headers={"content-type": "application/x-msdownload"}
-            )
+            return_value=httpx.Response(200, content=b"\x00", headers={"content-type": "application/x-msdownload"})
         )
         policy = SafeFetchPolicy(allowed_content_types=TABULAR_CONTENT_TYPES)
         with pytest.raises(UnsafeContentTypeError, match="not in the allowlist"):

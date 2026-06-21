@@ -5,8 +5,8 @@ These tests are marker-gated so the default unit suite stays lightweight.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+import sys
 from uuid import uuid4
 
 import pandas as pd

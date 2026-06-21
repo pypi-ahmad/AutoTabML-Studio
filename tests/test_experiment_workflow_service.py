@@ -36,24 +36,24 @@ def _settings() -> SimpleNamespace:
 
 
 def _form_values(**overrides: Any) -> ExperimentFormValues:
-    base: dict[str, Any] = dict(
-        target_column="y",
-        task_type=ExperimentTaskType.CLASSIFICATION,
-        session_id=123,
-        train_size=0.7,
-        fold=5,
-        preprocess=True,
-        ignore_features_raw=" id, name ,, customer_name ",
-        use_gpu=False,
-        compare_metric="Accuracy",
-        tune_metric="F1",
-        n_select=3,
-        selected_plots=["confusion_matrix"],
-        tracking_mode=MLflowTrackingMode.MANUAL,
-        enable_log_plots=False,
-        enable_log_profile=False,
-        enable_log_data=False,
-    )
+    base: dict[str, Any] = {
+        "target_column": "y",
+        "task_type": ExperimentTaskType.CLASSIFICATION,
+        "session_id": 123,
+        "train_size": 0.7,
+        "fold": 5,
+        "preprocess": True,
+        "ignore_features_raw": " id, name ,, customer_name ",
+        "use_gpu": False,
+        "compare_metric": "Accuracy",
+        "tune_metric": "F1",
+        "n_select": 3,
+        "selected_plots": ["confusion_matrix"],
+        "tracking_mode": MLflowTrackingMode.MANUAL,
+        "enable_log_plots": False,
+        "enable_log_profile": False,
+        "enable_log_data": False,
+    }
     base.update(overrides)
     return ExperimentFormValues(**base)
 
