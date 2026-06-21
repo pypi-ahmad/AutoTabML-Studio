@@ -1,11 +1,17 @@
-"""Ollama provider – local model discovery via /api/tags."""
+"""Ollama provider — local model discovery and text generation via the official client.
+
+Uses the official ``ollama`` Python SDK which is the maintained
+client for the Ollama REST API. The SDK handles retries, async I/O,
+and connection pooling; the custom ``httpx`` wrapper is no longer
+needed.
+"""
 
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-import httpx
+from ollama import AsyncClient
 
 from app.config.enums import DEFAULT_MODELS, LLMProvider
 from app.providers.base import BaseProvider, ModelItem
@@ -18,33 +24,45 @@ _DEFAULT_BASE_URL = "http://localhost:11434"
 class OllamaProvider(BaseProvider):
     provider = LLMProvider.OLLAMA
 
-    def __init__(self, base_url: str | None = None) -> None:
+    def __init__(self, base_url: str | None = None, *, timeout: float = 30.0) -> None:
         self._base_url = (base_url or _DEFAULT_BASE_URL).rstrip("/")
+        # AsyncClient is the official async client; it accepts a
+        # custom host and a per-request timeout via the ``timeout``
+        # argument on individual calls.
+        self._client = AsyncClient(host=self._base_url, timeout=timeout)
 
+    # --- credentials ---
     async def validate_credentials(self) -> bool:
-        """Ollama has no auth – just check reachability."""
+        """Ollama has no auth — just check reachability."""
         try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.get(f"{self._base_url}/api/tags", timeout=10)
-            return resp.status_code == 200
-        except httpx.HTTPError as exc:
-            logger.warning("Ollama not reachable at %s (%s)", self._base_url, _safe_http_error_detail(exc))
+            await self._client.list()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Ollama not reachable at %s (%s)", self._base_url, exc.__class__.__name__)
             return False
+        return True
 
+    # --- models ---
     async def list_models(self) -> list[ModelItem]:
         try:
-            async with httpx.AsyncClient() as client:
-                resp = await client.get(f"{self._base_url}/api/tags", timeout=15)
-                resp.raise_for_status()
-            raw = resp.json().get("models", [])
-            return self.normalize_model_list(raw)
-        except httpx.HTTPError as exc:
+            response = await self._client.list()
+        except Exception as exc:  # noqa: BLE001
             logger.error(
                 "Failed to fetch Ollama models from %s (%s)",
                 self._base_url,
-                _safe_http_error_detail(exc),
+                exc.__class__.__name__,
             )
             return []
+        # New SDK returns ListResponse with .models attribute
+        models = getattr(response, "models", response) or []
+        raw = []
+        for m in models:
+            if hasattr(m, "model_dump"):
+                raw.append(m.model_dump())
+            elif isinstance(m, dict):
+                raw.append(m)
+            else:
+                raw.append({"name": getattr(m, "model", "") or getattr(m, "name", "")})
+        return self.normalize_model_list(raw)
 
     def get_default_model(self) -> str | None:
         return DEFAULT_MODELS[LLMProvider.OLLAMA]
@@ -80,25 +98,13 @@ class OllamaProvider(BaseProvider):
             if not models:
                 raise RuntimeError("No Ollama models available. Pull a model first.")
             chosen_model = models[0].id
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                f"{self._base_url}/api/generate",
-                json={
-                    "model": chosen_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "num_predict": max_tokens,
-                        "temperature": temperature,
-                    },
-                },
-                timeout=120,
-            )
-            resp.raise_for_status()
-            return resp.json().get("response", "")
-
-
-def _safe_http_error_detail(exc: httpx.HTTPError) -> str:
-    if isinstance(exc, httpx.HTTPStatusError):
-        return f"status={exc.response.status_code}"
-    return exc.__class__.__name__
+        response = await self._client.generate(
+            model=chosen_model,
+            prompt=prompt,
+            stream=False,
+            options={
+                "num_predict": max_tokens,
+                "temperature": temperature,
+            },
+        )
+        return getattr(response, "response", "") or ""

@@ -80,8 +80,7 @@ def resolve_default_model(
             if m.id == default_id:
                 return m
         logger.warning(
-            "Default model '%s' not found in %s model list. "
-            "Falling back to first available model.",
+            "Default model '%s' not found in %s model list. Falling back to first available model.",
             default_id,
             provider.value,
         )
