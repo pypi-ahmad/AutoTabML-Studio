@@ -64,7 +64,7 @@ def _lazypredict_gpu_usable() -> bool:
     if not is_cuda_available():
         return False
     try:
-        import torch  # noqa: F811
+        import torch  # noqa: F811  # pyright: ignore[reportMissingImports]  # torch is optional
 
         return torch.cuda.is_available()
     except (ImportError, AttributeError, RuntimeError):
@@ -78,7 +78,7 @@ def _get_lazypredict_module() -> Any:
 def _train_test_split(*args: Any, **kwargs: Any) -> tuple[Any, Any, Any, Any]:
     from sklearn.model_selection import train_test_split
 
-    return train_test_split(*args, **kwargs)
+    return train_test_split(*args, **kwargs)  # pyright: ignore[reportArgumentType,reportReturnType,reportUnknownVariableType]  # sklearn/pandas-stubs overload narrowing
 
 
 class LazyPredictBenchmarkService(BaseBenchmarkService):

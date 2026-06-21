@@ -23,7 +23,9 @@ def _probe_flaml_import_error() -> Exception | None:
     """Return the import-time failure when FLAML is unusable."""
 
     try:
-        from flaml import AutoML  # noqa: F401
+        from flaml import (
+            AutoML,  # noqa: F401  # pyright: ignore[reportPrivateImportUsage,reportMissingImports]  # FLAML's __init__ marks AutoML as private
+        )
 
         return None
     except Exception as exc:

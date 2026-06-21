@@ -27,7 +27,7 @@ def cuda_device_name() -> str | None:
     """Return the name of the first CUDA device, or None."""
 
     try:
-        import torch
+        import torch  # pyright: ignore[reportMissingImports]  # torch is optional
 
         if torch.cuda.is_available():
             return torch.cuda.get_device_name(0)
@@ -79,7 +79,7 @@ def _torch_cuda_available() -> bool | None:
     """Return True/False from torch, or None if torch is not installed."""
 
     try:
-        import torch
+        import torch  # pyright: ignore[reportMissingImports]  # torch is optional
 
         return torch.cuda.is_available()
     except (ImportError, AttributeError, RuntimeError):
@@ -89,11 +89,11 @@ def _torch_cuda_available() -> bool | None:
 
 def _torch_device_count() -> int:
     try:
-        import torch
+        import torch  # pyright: ignore[reportMissingImports]  # torch is optional
 
         return torch.cuda.device_count()
     except (ImportError, AttributeError, RuntimeError):
-        logger.debug("torch CUDA device-count probe failed", exc_info=True)
+        logger.debug("torch device-count probe failed", exc_info=True)
         return 0
 
 
