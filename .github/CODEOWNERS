@@ -1,0 +1,23 @@
+# CODEOWNERS — AutoTabML Studio
+#
+# The maintainer is required to review changes to any file below.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# for the CODEOWNERS syntax.
+
+# Default: any change needs a maintainer review.
+/                                       @pypi-ahmad
+
+# Security-sensitive paths always need maintainer review.
+# Bumping these without an explicit migration note in CHANGELOG.md
+# is a release-blocker.
+/app/security/                          @pypi-ahmad
+/app/providers/                        @pypi-ahmad
+/app/backends/                          @pypi-ahmad
+
+# CI and release plumbing.
+/.github/                               @pypi-ahmad
+/pyproject.toml                         @pypi-ahmad
+/uv.lock                                @pypi-ahmad
+/Makefile                               @pypi-ahmad
+/.pre-commit-config.yaml                @pypi-ahmad
+/.editorconfig                          @pypi-ahmad

@@ -7,6 +7,23 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - dependencies
+      - python
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
+      # Major-version bumps need explicit review — surface them as
+      # their own PR so they can be triaged separately.
+      major:
+        applies-to: version-updates
+        update-types:
+          - major
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions
     directory: /
@@ -15,3 +32,12 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - ci
+      - dependencies
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - "*"
