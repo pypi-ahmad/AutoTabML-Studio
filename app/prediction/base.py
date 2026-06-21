@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import logging
-import sqlite3
 from abc import ABC, abstractmethod
+import logging
 from pathlib import Path
+import sqlite3
 from time import perf_counter
 
 from app.errors import log_exception
@@ -152,7 +152,9 @@ class PredictionService(BasePredictionService):
                             else PredictionStatus.FAILED
                         ),
                         mode=PredictionMode(metadata.get("mode", PredictionMode.BATCH.value)),
-                        model_source=ModelSourceType(metadata.get("model_source", ModelSourceType.LOCAL_SAVED_MODEL.value)),
+                        model_source=ModelSourceType(
+                            metadata.get("model_source", ModelSourceType.LOCAL_SAVED_MODEL.value)
+                        ),
                         model_identifier=metadata.get("model_identifier", record.title or record.job_id),
                         task_type=PredictionTaskType(metadata.get("task_type", PredictionTaskType.UNKNOWN.value)),
                         input_source=record.dataset_name or metadata.get("input_source", "prediction_input"),

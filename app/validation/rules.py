@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # Public entry point
 # ---------------------------------------------------------------------------
 
+
 def run_app_rules(
     df: pd.DataFrame,
     config: ValidationRuleConfig,
@@ -68,11 +69,7 @@ def run_app_rules(
     results.extend(_check_id_columns(df, config.id_columns))
 
     if config.enable_leakage_heuristics and config.target_column:
-        results.extend(
-            _check_leakage_heuristics(
-                df, config.target_column, config.leakage_cardinality_threshold
-            )
-        )
+        results.extend(_check_leakage_heuristics(df, config.target_column, config.leakage_cardinality_threshold))
 
     return results
 
@@ -80,6 +77,7 @@ def run_app_rules(
 # ---------------------------------------------------------------------------
 # Individual checks
 # ---------------------------------------------------------------------------
+
 
 def _ok(name: str, msg: str, severity: CheckSeverity = CheckSeverity.INFO, **details: Any) -> CheckResult:
     return CheckResult(check_name=name, passed=True, severity=severity, message=msg, details=details, source="app")
@@ -116,12 +114,12 @@ def _check_required_columns(df: pd.DataFrame, required: list[str]) -> list[Check
     for col in required:
         if col not in existing:
             results.append(
-                _fail("required_column_present", f"Required column '{col}' is missing.", CheckSeverity.ERROR, column=col)
+                _fail(
+                    "required_column_present", f"Required column '{col}' is missing.", CheckSeverity.ERROR, column=col
+                )
             )
         else:
-            results.append(
-                _ok("required_column_present", f"Required column '{col}' is present.", column=col)
-            )
+            results.append(_ok("required_column_present", f"Required column '{col}' is present.", column=col))
     return results
 
 
@@ -132,12 +130,14 @@ def _check_duplicate_column_names(df: pd.DataFrame) -> list[CheckResult]:
         seen[c] = seen.get(c, 0) + 1
     dupes = {k: v for k, v in seen.items() if v > 1}
     if dupes:
-        return [_fail(
-            "no_duplicate_columns",
-            f"Duplicate column names found: {dupes}",
-            CheckSeverity.WARNING,
-            duplicates=dupes,
-        )]
+        return [
+            _fail(
+                "no_duplicate_columns",
+                f"Duplicate column names found: {dupes}",
+                CheckSeverity.WARNING,
+                duplicates=dupes,
+            )
+        ]
     return [_ok("no_duplicate_columns", "No duplicate column names.")]
 
 
@@ -153,9 +153,7 @@ def _check_duplicate_rows(df: pd.DataFrame) -> CheckResult:
     return _ok("duplicate_rows", "No duplicate rows found.", duplicate_count=0)
 
 
-def _check_null_percentages(
-    df: pd.DataFrame, warn_pct: float, fail_pct: float
-) -> list[CheckResult]:
+def _check_null_percentages(df: pd.DataFrame, warn_pct: float, fail_pct: float) -> list[CheckResult]:
     results: list[CheckResult] = []
     if df.empty:
         return results
@@ -218,7 +216,7 @@ def _check_dtype_summary(df: pd.DataFrame) -> list[CheckResult]:
             sample = df[col].dropna()
             if len(sample) == 0:
                 continue
-            types_found = set(type(v).__name__ for v in sample.head(200))
+            types_found = {type(v).__name__ for v in sample.head(200)}
             if len(types_found) > 1:
                 results.append(
                     _fail(
@@ -234,7 +232,9 @@ def _check_dtype_summary(df: pd.DataFrame) -> list[CheckResult]:
 
 def _check_target_exists(df: pd.DataFrame, target: str) -> list[CheckResult]:
     if target not in df.columns:
-        return [_fail("target_column_exists", f"Target column '{target}' not found.", CheckSeverity.ERROR, column=target)]
+        return [
+            _fail("target_column_exists", f"Target column '{target}' not found.", CheckSeverity.ERROR, column=target)
+        ]
     return [_ok("target_column_exists", f"Target column '{target}' exists.", column=target)]
 
 
@@ -254,9 +254,7 @@ def _check_target_sanity(df: pd.DataFrame, target: str) -> list[CheckResult]:
     nunique = non_null.nunique()
 
     # Classification heuristic: low-cardinality non-numeric, or int with few values
-    is_likely_classification = (
-        not pd.api.types.is_float_dtype(col) and nunique <= 50
-    )
+    is_likely_classification = not pd.api.types.is_float_dtype(col) and nunique <= 50
     if is_likely_classification and nunique == 1:
         results.append(
             _fail(
@@ -269,16 +267,15 @@ def _check_target_sanity(df: pd.DataFrame, target: str) -> list[CheckResult]:
         )
 
     # Regression heuristic: numeric with many unique values
-    if pd.api.types.is_numeric_dtype(col):
-        if non_null.std() == 0:
-            results.append(
-                _fail(
-                    "target_regression_sanity",
-                    f"Regression target '{target}' is constant (std=0).",
-                    CheckSeverity.ERROR,
-                    column=target,
-                )
+    if pd.api.types.is_numeric_dtype(col) and non_null.std() == 0:
+        results.append(
+            _fail(
+                "target_regression_sanity",
+                f"Regression target '{target}' is constant (std=0).",
+                CheckSeverity.ERROR,
+                column=target,
             )
+        )
 
     return results
 
@@ -293,7 +290,12 @@ def _check_uniqueness(
     for col in columns:
         if col not in df.columns:
             results.append(
-                _fail("uniqueness_check", f"Column '{col}' not found for uniqueness check.", CheckSeverity.WARNING, column=col)
+                _fail(
+                    "uniqueness_check",
+                    f"Column '{col}' not found for uniqueness check.",
+                    CheckSeverity.WARNING,
+                    column=col,
+                )
             )
             continue
         if prereq_only:
@@ -312,9 +314,7 @@ def _check_uniqueness(
                 )
             )
         else:
-            results.append(
-                _ok("uniqueness_check", f"Column '{col}' is fully unique.", column=col)
-            )
+            results.append(_ok("uniqueness_check", f"Column '{col}' is fully unique.", column=col))
     return results
 
 
@@ -487,7 +487,7 @@ def _check_leakage_heuristics(
             )
 
         # ID-like column heuristic
-        if re.search(r'(?:^|_)id(?:$|_)|(?:^|_)Id(?:$|_)', col) and df[col].nunique() == n_rows:
+        if re.search(r"(?:^|_)id(?:$|_)|(?:^|_)Id(?:$|_)", col) and df[col].nunique() == n_rows:
             results.append(
                 _fail(
                     "leakage_id_like",
@@ -519,12 +519,10 @@ def _names_too_similar(a: str, b: str) -> bool:
     if a == b:
         return False
     # Strip common decorators
-    stripped_a = re.sub(r'[_\-\s]', '', a)
-    stripped_b = re.sub(r'[_\-\s]', '', b)
+    stripped_a = re.sub(r"[_\-\s]", "", a)
+    stripped_b = re.sub(r"[_\-\s]", "", b)
     if not stripped_a or not stripped_b:
         return False
     if stripped_a == stripped_b:
         return True
-    if stripped_a.startswith(stripped_b) or stripped_b.startswith(stripped_a):
-        return True
-    return False
+    return bool(stripped_a.startswith(stripped_b) or stripped_b.startswith(stripped_a))

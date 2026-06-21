@@ -64,7 +64,7 @@ def render_workflow_banner(current_step: int) -> None:
         1-based index into *WORKFLOW_STEPS* (1 = Load Data … 5 = Predict).
     """
     cols = st.columns(len(WORKFLOW_STEPS))
-    for idx, (col, step) in enumerate(zip(cols, WORKFLOW_STEPS), start=1):
+    for idx, (col, step) in enumerate(zip(cols, WORKFLOW_STEPS, strict=False), start=1):
         num = step["number"]
         label = step["label"]
         is_optional = step.get("optional", False)

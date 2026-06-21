@@ -41,7 +41,7 @@ def infer_task_type(target: pd.Series) -> BenchmarkTaskType:
     if pd.api.types.is_bool_dtype(target):
         return BenchmarkTaskType.CLASSIFICATION
 
-    if pd.api.types.is_integer_dtype(target) and n_unique <= min(20, max(2, int(n_rows ** 0.5))):
+    if pd.api.types.is_integer_dtype(target) and n_unique <= min(20, max(2, int(n_rows**0.5))):
         return BenchmarkTaskType.CLASSIFICATION
 
     if n_unique <= min(10, max(2, int(n_rows * 0.02))):
@@ -58,41 +58,27 @@ def validate_target(target: pd.Series, task_type: BenchmarkTaskType) -> list[str
 
     if task_type == BenchmarkTaskType.CLASSIFICATION:
         if n_unique < 2:
-            raise BenchmarkTargetError(
-                "Classification target must contain at least two classes."
-            )
+            raise BenchmarkTargetError("Classification target must contain at least two classes.")
 
         class_counts = target.value_counts(dropna=True)
         if not class_counts.empty and int(class_counts.min()) < 2:
-            warnings.append(
-                "Some classes have fewer than 2 rows; stratified split may not be possible."
-            )
+            warnings.append("Some classes have fewer than 2 rows; stratified split may not be possible.")
 
         if n_unique > min(len(target) // 2, 100):
-            warnings.append(
-                "Classification target has very high cardinality; baseline results may be unstable."
-            )
+            warnings.append("Classification target has very high cardinality; baseline results may be unstable.")
         return warnings
 
     if task_type == BenchmarkTaskType.REGRESSION:
         numeric_target = pd.to_numeric(target, errors="coerce")
         if numeric_target.isna().any():
-            raise BenchmarkTargetError(
-                "Regression target must be numeric or cleanly coercible to numeric values."
-            )
+            raise BenchmarkTargetError("Regression target must be numeric or cleanly coercible to numeric values.")
         if numeric_target.nunique(dropna=True) < 2 or float(numeric_target.std()) == 0.0:
-            raise BenchmarkTargetError(
-                "Regression target must not be constant."
-            )
+            raise BenchmarkTargetError("Regression target must not be constant.")
         if len(numeric_target) < 30:
-            warnings.append(
-                "Regression benchmark is running on a very small target sample; rankings may be noisy."
-            )
+            warnings.append("Regression benchmark is running on a very small target sample; rankings may be noisy.")
         return warnings
 
-    raise UnsupportedBenchmarkTaskError(
-        f"Unsupported benchmark task type: {task_type.value}."
-    )
+    raise UnsupportedBenchmarkTaskError(f"Unsupported benchmark task type: {task_type.value}.")
 
 
 def choose_stratify_target(
@@ -111,16 +97,12 @@ def choose_stratify_target(
 
     class_counts = target.value_counts(dropna=True)
     if class_counts.empty or int(class_counts.min()) < 2:
-        warnings.append(
-            "Stratified split was skipped because at least one class had fewer than 2 rows."
-        )
+        warnings.append("Stratified split was skipped because at least one class had fewer than 2 rows.")
         return None, False, warnings
 
     estimated_test_rows = max(1, int(round(len(target) * split_config.test_size)))
     if estimated_test_rows < int(target.nunique(dropna=True)):
-        warnings.append(
-            "Stratified split was skipped because the test split would contain fewer rows than classes."
-        )
+        warnings.append("Stratified split was skipped because the test split would contain fewer rows than classes.")
         return None, False, warnings
 
     return target, True, warnings
@@ -144,9 +126,7 @@ def benchmark_reliability_warnings(
         warnings.append("No feature columns remain after removing the target column.")
 
     if feature_count > row_count:
-        warnings.append(
-            "Feature count exceeds row count; baseline metrics may overstate generalization."
-        )
+        warnings.append("Feature count exceeds row count; baseline metrics may overstate generalization.")
 
     feature_frame = frame.drop(columns=[target_column], errors="ignore")
     missing_ratio = float(feature_frame.isna().mean().mean()) if not feature_frame.empty else 0.0
@@ -158,9 +138,7 @@ def benchmark_reliability_warnings(
     if task_type == BenchmarkTaskType.CLASSIFICATION:
         class_share = frame[target_column].value_counts(normalize=True, dropna=True)
         if not class_share.empty and float(class_share.min()) <= 0.05:
-            warnings.append(
-                "Classification target is highly imbalanced; compare models with care."
-            )
+            warnings.append("Classification target is highly imbalanced; compare models with care.")
 
     return warnings
 

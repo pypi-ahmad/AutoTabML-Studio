@@ -471,7 +471,7 @@ def _render_column_form(feature_columns: list[str], feature_dtypes: dict[str, st
     col_pairs = [feature_columns[i : i + 2] for i in range(0, len(feature_columns), 2)]
     for pair in col_pairs:
         cols = st.columns(len(pair))
-        for col_widget, col_name in zip(cols, pair):
+        for col_widget, col_name in zip(cols, pair, strict=False):
             dtype_str = feature_dtypes.get(col_name, "").lower()
             with col_widget:
                 if any(t in dtype_str for t in ("int", "float", "double", "numeric")):

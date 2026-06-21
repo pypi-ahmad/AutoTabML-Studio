@@ -14,9 +14,9 @@ Ollama is intentionally unsupported for this backend (local-only provider).
 
 from __future__ import annotations
 
+from contextlib import AsyncExitStack
 import logging
 import shutil
-from contextlib import AsyncExitStack
 from typing import Any
 
 from app.backends.base import BaseExecutionBackend
@@ -54,17 +54,14 @@ class ColabMCPExecutionBackend(BaseExecutionBackend):
     async def validate_backend(self) -> bool:
         """Check that ``uvx`` is installed and the MCP SDK is importable."""
         if _find_uvx() is None:
-            logger.warning(
-                "uvx is not installed. Install it with: pip install uv"
-            )
+            logger.warning("uvx is not installed. Install it with: pip install uv")
             return False
         try:
             from mcp import ClientSession  # noqa: F401
+
             return True
         except ImportError:
-            logger.warning(
-                "mcp SDK is not installed. Install it with: pip install 'mcp>=1.0'"
-            )
+            logger.warning("mcp SDK is not installed. Install it with: pip install 'mcp>=1.0'")
             return False
 
     async def prepare_session(self) -> dict[str, Any]:
@@ -98,13 +95,9 @@ class ColabMCPExecutionBackend(BaseExecutionBackend):
 
         self._exit_stack = AsyncExitStack()
         try:
-            transport = await self._exit_stack.enter_async_context(
-                stdio_client(server_params)
-            )
+            transport = await self._exit_stack.enter_async_context(stdio_client(server_params))
             read_stream, write_stream = transport
-            self._session = await self._exit_stack.enter_async_context(
-                ClientSession(read_stream, write_stream)
-            )
+            self._session = await self._exit_stack.enter_async_context(ClientSession(read_stream, write_stream))
             await self._session.initialize()
             tools_result = await self._session.list_tools()
             self._available_tools = [t.name for t in tools_result.tools]
@@ -135,9 +128,7 @@ class ColabMCPExecutionBackend(BaseExecutionBackend):
         and an ``"arguments"`` dict forwarded to the tool.
         """
         if not self._connected or self._session is None:
-            raise RuntimeError(
-                "Colab MCP session is not connected. Call prepare_session() first."
-            )
+            raise RuntimeError("Colab MCP session is not connected. Call prepare_session() first.")
         tool_name: str = job_payload.get("tool", "")
         arguments: dict[str, Any] = job_payload.get("arguments", {})
         if not tool_name:
@@ -160,10 +151,12 @@ class ColabMCPExecutionBackend(BaseExecutionBackend):
 
     async def open_browser_connection(self) -> dict[str, Any]:
         """Call ``open_colab_browser_connection`` to link to a Colab notebook."""
-        return await self.run_job({
-            "tool": _TOOL_OPEN_CONNECTION,
-            "arguments": {},
-        })
+        return await self.run_job(
+            {
+                "tool": _TOOL_OPEN_CONNECTION,
+                "arguments": {},
+            }
+        )
 
     async def list_tools(self) -> list[str]:
         """Return the currently available MCP tool names."""

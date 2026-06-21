@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import sqlite3
 from pathlib import Path
+import sqlite3
 
 from app.storage.models import AppJobStatus, AppJobType, JobRecord
 from app.storage.repositories.base import BaseRepository

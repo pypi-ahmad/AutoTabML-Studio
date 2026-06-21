@@ -21,9 +21,9 @@ Design notes
 
 from __future__ import annotations
 
-import threading
 from collections import defaultdict
 from collections.abc import Mapping
+import threading
 from typing import Any, Protocol
 
 from app.observability.context import current_context

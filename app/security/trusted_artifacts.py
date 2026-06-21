@@ -9,11 +9,11 @@ This module centralizes three controls for any local model artifact load:
 
 from __future__ import annotations
 
-import hashlib
-import pickle
 from collections.abc import Iterable
 from dataclasses import dataclass
+import hashlib
 from pathlib import Path
+import pickle
 
 from app.security.errors import TrustedArtifactError
 

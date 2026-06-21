@@ -10,10 +10,10 @@ inject executable code.
 
 from __future__ import annotations
 
-import json
-import re
 from datetime import datetime
+import json
 from pathlib import Path
+import re
 from typing import Any
 
 import nbformat
@@ -21,9 +21,7 @@ from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
 # ── Allowlists & validation ────────────────────────────────────────────
 
-ALLOWED_JOB_TYPES: frozenset[str] = frozenset(
-    {"benchmark", "experiment", "flaml", "profiling", "validation"}
-)
+ALLOWED_JOB_TYPES: frozenset[str] = frozenset({"benchmark", "experiment", "flaml", "profiling", "validation"})
 ALLOWED_TASK_TYPES: frozenset[str] = frozenset({"classification", "regression"})
 
 _FILENAME_SAFE_RE = re.compile(r"[^A-Za-z0-9._-]+")
@@ -169,9 +167,7 @@ def generate_job_notebook(
     output_dir_norm = _validate_output_dir(output_dir)
 
     dataset_name_text = _safe_text(dataset_name or "unknown", max_len=_MAX_DATASET_NAME_LEN)
-    target_column_text = (
-        _safe_text(target_column, max_len=_MAX_TARGET_COLUMN_LEN) if target_column else None
-    )
+    target_column_text = _safe_text(target_column, max_len=_MAX_TARGET_COLUMN_LEN) if target_column else None
     metadata_clean: dict = dict(metadata or {})
 
     safe_name = _safe_filename_component(dataset_name_text, fallback="dataset")
@@ -179,9 +175,7 @@ def generate_job_notebook(
     notebook_path = (output_dir_norm / notebook_name).resolve()
     # Final guard: the resolved file must remain inside output_dir.
     if not notebook_path.is_relative_to(output_dir_norm):
-        raise NotebookGenerationError(
-            "Computed notebook path escapes output_dir; refusing to write."
-        )
+        raise NotebookGenerationError("Computed notebook path escapes output_dir; refusing to write.")
 
     cells: list[Any] = []
 
@@ -241,9 +235,7 @@ def generate_job_notebook(
         cells.append(_markdown_cell("## Job Metadata"))
         cells.append(
             _python_cell(
-                f"metadata = {_json_literal(metadata_clean)}\n"
-                "for k, v in metadata.items():\n"
-                "    print(f'{k}: {v}')"
+                f"metadata = {_json_literal(metadata_clean)}\nfor k, v in metadata.items():\n    print(f'{{k}}: {{v}}')"
             )
         )
 

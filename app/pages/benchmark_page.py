@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timezone
+import logging
 
 import streamlit as st
 
@@ -477,8 +477,7 @@ def _render_save_best_model(bundle) -> None:  # noqa: ANN001
 
         try:
             from sklearn.model_selection import train_test_split
-            from skops.io import dump as skops_dump
-            from skops.io import get_untrusted_types
+            from skops.io import dump as skops_dump, get_untrusted_types
 
             target = df[config.target_column]
             features = df.drop(columns=[config.target_column])

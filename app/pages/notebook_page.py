@@ -266,14 +266,13 @@ def _render_colab_mcp_notebook(state) -> None:  # noqa: ANN001
                         st.warning(f"Connection attempt: {result.get('output', 'no details')}")
 
     with col3:
-        if st.button("🔌 Disconnect", key="colab_disconnect", disabled=backend is None):
-            if backend is not None:
-                _run_async(backend.cleanup())
-                st.session_state.pop(_BACKEND_KEY, None)
-                st.session_state.pop(_SESSION_KEY, None)
-                backend = None
-                session_info = None
-                st.info("Disconnected from Colab MCP.")
+        if st.button("🔌 Disconnect", key="colab_disconnect", disabled=backend is None) and backend is not None:
+            _run_async(backend.cleanup())
+            st.session_state.pop(_BACKEND_KEY, None)
+            st.session_state.pop(_SESSION_KEY, None)
+            backend = None
+            session_info = None
+            st.info("Disconnected from Colab MCP.")
 
     # --- Status display ---
     if session_info:

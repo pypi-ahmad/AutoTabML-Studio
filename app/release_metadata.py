@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+import sys
 from typing import Any
 
 try:  # pragma: no cover - exercised only on Python < 3.11
@@ -36,7 +36,9 @@ def validate_public_release_metadata(project_metadata: Mapping[str, Any]) -> lis
 
     contacts = _collect_contacts(project_metadata)
     if not contacts:
-        issues.append("At least one [project].authors or [project].maintainers entry is required before a public release.")
+        issues.append(
+            "At least one [project].authors or [project].maintainers entry is required before a public release."
+        )
         return issues
 
     if not any(_normalized(entry.get("name")) for entry in contacts):

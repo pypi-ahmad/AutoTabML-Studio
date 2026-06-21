@@ -12,8 +12,8 @@ import logging
 
 from app.observability.logging_setup import (
     _RedactingTextFormatter as _RedactingFormatter,
+    configure_observability_logging,
 )
-from app.observability.logging_setup import configure_observability_logging
 
 __all__ = ["configure_logging", "_RedactingFormatter"]
 

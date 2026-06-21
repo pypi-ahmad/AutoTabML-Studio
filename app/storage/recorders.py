@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timezone
+import logging
 from typing import TYPE_CHECKING, Any
 
 from app.ingestion.schemas import LoadedDataset
@@ -139,8 +139,10 @@ def record_benchmark_job(
         "warnings": list(bundle.warnings),
     }
     _enrich_metadata_with_description(
-        metadata, AppJobType.BENCHMARK,
-        dataset_name=bundle.dataset_name, mlflow_run_id=bundle.mlflow_run_id,
+        metadata,
+        AppJobType.BENCHMARK,
+        dataset_name=bundle.dataset_name,
+        mlflow_run_id=bundle.mlflow_run_id,
     )
     return store.record_job(
         JobRecord(

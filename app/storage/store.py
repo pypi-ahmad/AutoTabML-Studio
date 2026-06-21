@@ -11,9 +11,9 @@ state; this store records local product-level metadata only.
 
 from __future__ import annotations
 
+from pathlib import Path
 import sqlite3
 import threading
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from app.ingestion.schemas import LoadedDataset

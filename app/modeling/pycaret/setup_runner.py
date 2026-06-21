@@ -20,6 +20,7 @@ def _probe_pycaret_import_error() -> Exception | None:
     try:
         import pycaret.classification  # noqa: F401
         import pycaret.regression  # noqa: F401
+
         return None
     except Exception as exc:  # pragma: no cover - exercised through public helpers
         log_exception(logger, exc, operation="pycaret.probe_import", level=logging.DEBUG)
@@ -100,9 +101,7 @@ def build_setup_call_kwargs(
     _audit_only_keys = {"test_data_supplied"}
 
     call_kwargs = {
-        key: value
-        for key, value in actual.items()
-        if value is not None and value != [] and key not in _audit_only_keys
+        key: value for key, value in actual.items() if value is not None and value != [] and key not in _audit_only_keys
     }
     return call_kwargs, actual
 

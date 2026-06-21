@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import tempfile
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+import tempfile
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
@@ -142,9 +142,7 @@ class URLLoader(BaseLoader):
 
             dataframe, source_details = HTMLTableLoader().load_raw_dataframe(routed_spec, row_limit=row_limit)
         else:
-            raise UnsupportedSourceError(
-                f"Unsupported URL source routing result: {probe.routed_source_type.value}"
-            )
+            raise UnsupportedSourceError(f"Unsupported URL source routing result: {probe.routed_source_type.value}")
 
         source_details.update(
             {
@@ -204,9 +202,7 @@ class URLLoader(BaseLoader):
                 row_limit=row_limit,
             )
         else:
-            raise UnsupportedSourceError(
-                f"Unsupported URL source routing result: {probe.routed_source_type.value}"
-            )
+            raise UnsupportedSourceError(f"Unsupported URL source routing result: {probe.routed_source_type.value}")
 
         source_details.update(
             {
@@ -331,9 +327,7 @@ def fetch_url_text(
     try:
         return payload.decode(encoding), content_type, final_url
     except UnicodeDecodeError as exc:
-        raise RemoteAccessError(
-            f"Failed to decode remote content using encoding '{encoding}'."
-        ) from exc
+        raise RemoteAccessError(f"Failed to decode remote content using encoding '{encoding}'.") from exc
 
 
 def probe_url(
@@ -699,6 +693,3 @@ async def async_fetch_url_to_temp_file(
         )
     finally:
         temp_path.unlink(missing_ok=True)
-
-
-

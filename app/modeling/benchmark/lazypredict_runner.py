@@ -45,6 +45,7 @@ def is_lazypredict_available() -> bool:
 
     try:
         import lazypredict.Supervised  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -64,6 +65,7 @@ def _lazypredict_gpu_usable() -> bool:
         return False
     try:
         import torch  # noqa: F811
+
         return torch.cuda.is_available()
     except (ImportError, AttributeError, RuntimeError):
         return False
@@ -122,14 +124,10 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
             )
 
         if not is_lazypredict_available():
-            raise BenchmarkDependencyError(
-                "lazypredict is not installed. Install it with: pip install lazypredict"
-            )
+            raise BenchmarkDependencyError("lazypredict is not installed. Install it with: pip install lazypredict")
 
         if config.target_column not in df.columns:
-            raise BenchmarkTargetError(
-                f"Target column '{config.target_column}' was not found in the dataset."
-            )
+            raise BenchmarkTargetError(f"Target column '{config.target_column}' was not found in the dataset.")
 
         source_row_count = len(df)
         source_column_count = len(df.columns)
@@ -173,9 +171,7 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
                 f"consider sample_rows={self._suggested_sample_rows:,} for faster baselines."
             )
 
-        benchmark_warnings.extend(
-            benchmark_reliability_warnings(working_df, config.target_column, task_type)
-        )
+        benchmark_warnings.extend(benchmark_reliability_warnings(working_df, config.target_column, task_type))
 
         feature_frame, target = self._prepare_frame(working_df, config, task_type, benchmark_warnings)
         stratify_target, stratified_split_applied, split_warnings = choose_stratify_target(
@@ -237,7 +233,9 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
         )
 
         duration_seconds = perf_counter() - started_at
-        sampled_row_count = len(working_df) if config.sample_rows is not None and len(working_df) < source_row_count else None
+        sampled_row_count = (
+            len(working_df) if config.sample_rows is not None and len(working_df) < source_row_count else None
+        )
 
         summary = build_benchmark_summary(
             dataset_name=dataset_name,
@@ -306,9 +304,7 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
             raise BenchmarkConfigurationError("sample_rows must be at least 2 when provided.")
 
         sampled = frame.sample(n=sample_rows, random_state=config.split.random_state)
-        warnings.append(
-            f"Benchmark sampled {sample_rows:,} row(s) from {len(frame):,} source row(s)."
-        )
+        warnings.append(f"Benchmark sampled {sample_rows:,} row(s) from {len(frame):,} source row(s).")
         if task_type == BenchmarkTaskType.CLASSIFICATION:
             warnings.append(
                 "Sampling was applied before classification benchmarking; rare classes may be underrepresented."
@@ -433,12 +429,10 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
                 "LazyPredict estimator filtering is unavailable with the installed package version."
             )
 
-        available_by_name = {name: estimator for name, estimator in available_pairs}
+        available_by_name = dict(available_pairs)
         unknown_models = sorted((include_models | exclude_models) - set(available_by_name))
         if unknown_models:
-            raise BenchmarkConfigurationError(
-                "Unknown model name(s) requested: " + ", ".join(unknown_models)
-            )
+            raise BenchmarkConfigurationError("Unknown model name(s) requested: " + ", ".join(unknown_models))
 
         selected_names = list(available_by_name)
         if include_models:

@@ -26,9 +26,7 @@ def add_custom_metric(
     """Register a custom metric on the active experiment."""
 
     if task_type == ExperimentTaskType.REGRESSION and spec.target != "pred":
-        raise PyCaretConfigurationError(
-            "Regression custom metrics only support the default target='pred'."
-        )
+        raise PyCaretConfigurationError("Regression custom metrics only support the default target='pred'.")
 
     if task_type == ExperimentTaskType.CLASSIFICATION:
         experiment_handle.add_metric(

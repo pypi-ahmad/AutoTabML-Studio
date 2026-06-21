@@ -111,7 +111,7 @@ class RegistryService:
                 registry_uri=self._registry_uri,
             )
 
-        version = mlflow_query.create_model_version(
+        return mlflow_query.create_model_version(
             name,
             source=source,
             run_id=run_id,
@@ -120,7 +120,6 @@ class RegistryService:
             tracking_uri=self._tracking_uri,
             registry_uri=self._registry_uri,
         )
-        return version
 
     def promote(self, request: PromotionRequest) -> PromotionResult:
         """Execute a promotion action on a model version."""
@@ -144,8 +143,7 @@ class RegistryService:
                 context={"model": request.model_name, "version": request.version},
             )
             raise PromotionError(
-                f"Cannot promote: version '{request.version}' of model "
-                f"'{request.model_name}' not found: {exc}"
+                f"Cannot promote: version '{request.version}' of model '{request.model_name}' not found: {exc}"
             ) from exc
 
         try:
@@ -158,15 +156,10 @@ class RegistryService:
                 context={"model": request.model_name},
             )
             model = RegistryModelSummary(name=request.model_name)
-            warnings.append(
-                "Could not inspect existing alias state; status tags may need manual cleanup."
-            )
+            warnings.append("Could not inspect existing alias state; status tags may need manual cleanup.")
 
         try:
-            existing_versions = {
-                version.version: version
-                for version in self.list_versions(request.model_name)
-            }
+            existing_versions = {version.version: version for version in self.list_versions(request.model_name)}
         except (RegistryError, TrackingError) as exc:
             log_exception(
                 logger,
@@ -175,9 +168,7 @@ class RegistryService:
                 context={"model": request.model_name},
             )
             existing_versions = {}
-            warnings.append(
-                "Could not inspect existing version tags; status tags may need manual cleanup."
-            )
+            warnings.append("Could not inspect existing version tags; status tags may need manual cleanup.")
 
         current_aliases = dict(model.aliases)
         desired_aliases = dict(current_aliases)
@@ -260,11 +251,7 @@ class RegistryService:
                 archived_version=request.version if request.action == PromotionAction.ARCHIVED else None,
             )
             existing_status = existing_versions.get(version)
-            current_status = (
-                existing_status.tags.get(self._archived_tag_key)
-                if existing_status is not None
-                else None
-            )
+            current_status = existing_status.tags.get(self._archived_tag_key) if existing_status is not None else None
 
             if desired_status == current_status:
                 continue

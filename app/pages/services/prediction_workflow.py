@@ -7,10 +7,10 @@ reset rules, file parsing, and evaluation logic.
 
 from __future__ import annotations
 
-import json
-import math
 from collections.abc import Mapping, MutableMapping, Sequence
 from dataclasses import dataclass
+import json
+import math
 from pathlib import Path
 from typing import Any
 

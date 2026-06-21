@@ -21,12 +21,12 @@ Guarantees:
 
 from __future__ import annotations
 
-import ipaddress
-import logging
-import socket
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
+import ipaddress
+import logging
 from pathlib import Path
+import socket
 from urllib.parse import urlparse, urlsplit
 
 import httpx
@@ -135,8 +135,7 @@ def _validate_url(url: str, allowed_schemes: Iterable[str]) -> tuple[str, str, i
     scheme = (parsed.scheme or "").lower()
     if scheme not in {s.lower() for s in allowed_schemes}:
         raise UnsafeURLError(
-            f"URL scheme '{scheme or '(empty)'}' is not allowed. Use one of: "
-            f"{sorted(allowed_schemes)}."
+            f"URL scheme '{scheme or '(empty)'}' is not allowed. Use one of: {sorted(allowed_schemes)}."
         )
     if parsed.username or parsed.password:
         raise UnsafeURLError("URLs with embedded credentials are not allowed.")
@@ -170,9 +169,8 @@ def _is_blocked_ip(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> str |
     if addr.is_unspecified:
         return "unspecified"
     # IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1) — re-evaluate the embedded v4.
-    if isinstance(addr, ipaddress.IPv6Address):
-        if addr.ipv4_mapped is not None:
-            return _is_blocked_ip(addr.ipv4_mapped)
+    if isinstance(addr, ipaddress.IPv6Address) and addr.ipv4_mapped is not None:
+        return _is_blocked_ip(addr.ipv4_mapped)
     return None
 
 
@@ -191,9 +189,7 @@ def _resolve_and_check_host(host: str, port: int) -> list[str]:
     if literal is not None:
         reason = _is_blocked_ip(literal)
         if reason is not None:
-            raise UnsafeURLError(
-                f"Refusing to connect to {host}: address is in blocked range ({reason})."
-            )
+            raise UnsafeURLError(f"Refusing to connect to {host}: address is in blocked range ({reason}).")
         return [str(literal)]
 
     try:
@@ -212,8 +208,7 @@ def _resolve_and_check_host(host: str, port: int) -> list[str]:
         reason = _is_blocked_ip(addr)
         if reason is not None:
             raise UnsafeURLError(
-                f"Refusing to connect to {host}: resolved address {ip_str} is in "
-                f"blocked range ({reason})."
+                f"Refusing to connect to {host}: resolved address {ip_str} is in blocked range ({reason})."
             )
         resolved.append(ip_str)
 
@@ -237,16 +232,11 @@ def _check_response_headers(
     lowered = {k.lower(): v for k, v in headers.items()}
     for suspicious in _SUSPICIOUS_RESPONSE_HEADERS:
         if suspicious in lowered:
-            raise UnsafeContentTypeError(
-                f"Response carries disallowed header '{suspicious}'."
-            )
+            raise UnsafeContentTypeError(f"Response carries disallowed header '{suspicious}'.")
 
     content_type = _normalize_content_type(lowered.get("content-type"))
-    if allowed_content_types is not None and content_type is not None:
-        if content_type not in allowed_content_types:
-            raise UnsafeContentTypeError(
-                f"Response Content-Type '{content_type}' is not in the allowlist."
-            )
+    if allowed_content_types is not None and content_type is not None and content_type not in allowed_content_types:
+        raise UnsafeContentTypeError(f"Response Content-Type '{content_type}' is not in the allowlist.")
     return content_type
 
 
@@ -261,9 +251,7 @@ def _check_advertised_size(headers: Mapping[str, str], max_bytes: int) -> None:
     if length < 0:
         raise UnsafeContentTypeError("Response advertised a negative Content-Length.")
     if length > max_bytes:
-        raise ResponseTooLargeError(
-            f"Response advertises {length} bytes which exceeds the cap of {max_bytes} bytes."
-        )
+        raise ResponseTooLargeError(f"Response advertises {length} bytes which exceeds the cap of {max_bytes} bytes.")
 
 
 def _attempt_fetch(
@@ -292,13 +280,9 @@ def _attempt_fetch(
 
             try:
                 with client.stream(method, current_url, headers=request_headers) as response:
-                    if 300 <= response.status_code < 400 and "location" in {
-                        k.lower() for k in response.headers.keys()
-                    }:
+                    if 300 <= response.status_code < 400 and "location" in {k.lower() for k in response.headers}:
                         if hop >= policy.max_redirects:
-                            raise UnsafeURLError(
-                                f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}."
-                            )
+                            raise UnsafeURLError(f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}.")
                         # Resolve the next hop relative to the *current* URL.
                         next_url = str(response.headers.get("location", "")).strip()
                         if not next_url:
@@ -326,9 +310,7 @@ def _attempt_fetch(
                     for chunk in response.iter_bytes():
                         buffer.extend(chunk)
                         if len(buffer) > policy.max_bytes:
-                            raise ResponseTooLargeError(
-                                f"Response exceeded the cap of {policy.max_bytes} bytes."
-                            )
+                            raise ResponseTooLargeError(f"Response exceeded the cap of {policy.max_bytes} bytes.")
                     return SafeFetchResult(
                         content=bytes(buffer),
                         content_type=content_type,
@@ -377,9 +359,7 @@ def safe_fetch(
     last_error: Exception | None = None
     for attempt in range(effective_policy.max_retries + 1):
         try:
-            return _attempt_fetch(
-                url, method=method, policy=effective_policy, extra_headers=extra_headers
-            )
+            return _attempt_fetch(url, method=method, policy=effective_policy, extra_headers=extra_headers)
         except (UnsafeURLError, ResponseTooLargeError, UnsafeContentTypeError):
             # Policy violations: never retry, propagate immediately.
             raise
@@ -396,8 +376,12 @@ def safe_fetch(
             raise
 
     # Defensive fallback; loop above always returns or raises.
-    raise last_error if last_error else RuntimeError(  # pragma: no cover
-        "safe_fetch exhausted retries without an error"
+    raise (
+        last_error
+        if last_error
+        else RuntimeError(  # pragma: no cover
+            "safe_fetch exhausted retries without an error"
+        )
     )
 
 
@@ -414,9 +398,7 @@ def safe_fetch_text(
     try:
         return result.content.decode(encoding), result.content_type, result.final_url
     except UnicodeDecodeError as exc:
-        raise UnsafeContentTypeError(
-            f"Failed to decode remote content using encoding '{encoding}'."
-        ) from exc
+        raise UnsafeContentTypeError(f"Failed to decode remote content using encoding '{encoding}'.") from exc
 
 
 def safe_stream_sample(
@@ -481,13 +463,9 @@ def _attempt_download_to_path(
                 request_headers.update(extra_headers)
 
             with client.stream("GET", current_url, headers=request_headers) as response:
-                if 300 <= response.status_code < 400 and "location" in {
-                    k.lower() for k in response.headers.keys()
-                }:
+                if 300 <= response.status_code < 400 and "location" in {k.lower() for k in response.headers}:
                     if hop >= policy.max_redirects:
-                        raise UnsafeURLError(
-                            f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}."
-                        )
+                        raise UnsafeURLError(f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}.")
                     next_url = str(response.headers.get("location", "")).strip()
                     if not next_url:
                         raise UnsafeURLError("Redirect response missing Location header.")
@@ -505,9 +483,7 @@ def _attempt_download_to_path(
                     for chunk in response.iter_bytes():
                         bytes_written += len(chunk)
                         if bytes_written > policy.max_bytes:
-                            raise ResponseTooLargeError(
-                                f"Response exceeded the cap of {policy.max_bytes} bytes."
-                            )
+                            raise ResponseTooLargeError(f"Response exceeded the cap of {policy.max_bytes} bytes.")
                         handle.write(chunk)
 
                 return SafeDownloadResult(
@@ -557,8 +533,12 @@ def safe_download_to_path(
                 continue
             raise
 
-    raise last_error if last_error else RuntimeError(  # pragma: no cover
-        "safe_download_to_path exhausted retries without an error"
+    raise (
+        last_error
+        if last_error
+        else RuntimeError(  # pragma: no cover
+            "safe_download_to_path exhausted retries without an error"
+        )
     )
 
 
@@ -584,9 +564,7 @@ async def _attempt_fetch_async(
     visited: list[str] = []
 
     timeout = httpx.Timeout(policy.timeout)
-    async with httpx.AsyncClient(
-        follow_redirects=False, timeout=timeout, trust_env=False
-    ) as client:
+    async with httpx.AsyncClient(follow_redirects=False, timeout=timeout, trust_env=False) as client:
         for hop in range(policy.max_redirects + 1):
             scheme, host, port = _validate_url(current_url, policy.allowed_schemes)
             _resolve_and_check_host(host, port)
@@ -596,30 +574,20 @@ async def _attempt_fetch_async(
             if extra_headers:
                 request_headers.update(extra_headers)
 
-            async with client.stream(
-                method, current_url, headers=request_headers
-            ) as response:
-                if 300 <= response.status_code < 400 and "location" in {
-                    k.lower() for k in response.headers.keys()
-                }:
+            async with client.stream(method, current_url, headers=request_headers) as response:
+                if 300 <= response.status_code < 400 and "location" in {k.lower() for k in response.headers}:
                     if hop >= policy.max_redirects:
-                        raise UnsafeURLError(
-                            f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}."
-                        )
+                        raise UnsafeURLError(f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}.")
                     next_url = str(response.headers.get("location", "")).strip()
                     if not next_url:
                         raise UnsafeURLError("Redirect response missing Location header.")
                     current_url = _resolve_redirect(current_url, next_url)
                     if current_url in visited:
-                        raise UnsafeURLError(
-                            f"Redirect loop detected: revisited {current_url}."
-                        )
+                        raise UnsafeURLError(f"Redirect loop detected: revisited {current_url}.")
                     continue
 
                 response.raise_for_status()
-                content_type = _check_response_headers(
-                    response.headers, policy.allowed_content_types
-                )
+                content_type = _check_response_headers(response.headers, policy.allowed_content_types)
                 _check_advertised_size(response.headers, policy.max_bytes)
 
                 if method.upper() == "HEAD":
@@ -635,9 +603,7 @@ async def _attempt_fetch_async(
                 async for chunk in response.aiter_bytes():
                     buffer.extend(chunk)
                     if len(buffer) > policy.max_bytes:
-                        raise ResponseTooLargeError(
-                            f"Response exceeded the cap of {policy.max_bytes} bytes."
-                        )
+                        raise ResponseTooLargeError(f"Response exceeded the cap of {policy.max_bytes} bytes.")
                 return SafeFetchResult(
                     content=bytes(buffer),
                     content_type=content_type,
@@ -664,16 +630,11 @@ async def safe_fetch_async(
     last_error: Exception | None = None
     for attempt in range(effective_policy.max_retries + 1):
         try:
-            return await _attempt_fetch_async(
-                url, method=method, policy=effective_policy, extra_headers=extra_headers
-            )
+            return await _attempt_fetch_async(url, method=method, policy=effective_policy, extra_headers=extra_headers)
         except (UnsafeURLError, ResponseTooLargeError, UnsafeContentTypeError):
             raise
         except httpx.HTTPStatusError as exc:
-            if (
-                500 <= exc.response.status_code < 600
-                and attempt < effective_policy.max_retries
-            ):
+            if 500 <= exc.response.status_code < 600 and attempt < effective_policy.max_retries:
                 last_error = exc
                 continue
             raise
@@ -683,8 +644,12 @@ async def safe_fetch_async(
                 continue
             raise
 
-    raise last_error if last_error else RuntimeError(  # pragma: no cover
-        "safe_fetch_async exhausted retries without an error"
+    raise (
+        last_error
+        if last_error
+        else RuntimeError(  # pragma: no cover
+            "safe_fetch_async exhausted retries without an error"
+        )
     )
 
 
@@ -701,9 +666,7 @@ async def safe_fetch_text_async(
     try:
         return result.content.decode(encoding), result.content_type, result.final_url
     except UnicodeDecodeError as exc:
-        raise UnsafeContentTypeError(
-            f"Failed to decode remote content using encoding '{encoding}'."
-        ) from exc
+        raise UnsafeContentTypeError(f"Failed to decode remote content using encoding '{encoding}'.") from exc
 
 
 async def safe_stream_sample_async(
@@ -760,15 +723,8 @@ async def safe_fetch_many_async(
     # Local import to avoid a circular reference at module load time.
     from app.concurrency import gather_with_concurrency
 
-    coros = [
-        safe_fetch_async(
-            url, method=method, policy=policy, extra_headers=extra_headers
-        )
-        for url in urls
-    ]
-    return await gather_with_concurrency(
-        coros, limit=concurrency, return_exceptions=return_exceptions
-    )
+    coros = [safe_fetch_async(url, method=method, policy=policy, extra_headers=extra_headers) for url in urls]
+    return await gather_with_concurrency(coros, limit=concurrency, return_exceptions=return_exceptions)
 
 
 async def _attempt_download_to_path_async(
@@ -784,9 +740,7 @@ async def _attempt_download_to_path_async(
     visited: list[str] = []
 
     timeout = httpx.Timeout(policy.timeout)
-    async with httpx.AsyncClient(
-        follow_redirects=False, timeout=timeout, trust_env=False
-    ) as client:
+    async with httpx.AsyncClient(follow_redirects=False, timeout=timeout, trust_env=False) as client:
         for hop in range(policy.max_redirects + 1):
             scheme, host, port = _validate_url(current_url, policy.allowed_schemes)
             _resolve_and_check_host(host, port)
@@ -796,30 +750,20 @@ async def _attempt_download_to_path_async(
             if extra_headers:
                 request_headers.update(extra_headers)
 
-            async with client.stream(
-                "GET", current_url, headers=request_headers
-            ) as response:
-                if 300 <= response.status_code < 400 and "location" in {
-                    k.lower() for k in response.headers.keys()
-                }:
+            async with client.stream("GET", current_url, headers=request_headers) as response:
+                if 300 <= response.status_code < 400 and "location" in {k.lower() for k in response.headers}:
                     if hop >= policy.max_redirects:
-                        raise UnsafeURLError(
-                            f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}."
-                        )
+                        raise UnsafeURLError(f"Exceeded redirect cap ({policy.max_redirects}) starting from {url}.")
                     next_url = str(response.headers.get("location", "")).strip()
                     if not next_url:
                         raise UnsafeURLError("Redirect response missing Location header.")
                     current_url = _resolve_redirect(current_url, next_url)
                     if current_url in visited:
-                        raise UnsafeURLError(
-                            f"Redirect loop detected: revisited {current_url}."
-                        )
+                        raise UnsafeURLError(f"Redirect loop detected: revisited {current_url}.")
                     continue
 
                 response.raise_for_status()
-                content_type = _check_response_headers(
-                    response.headers, policy.allowed_content_types
-                )
+                content_type = _check_response_headers(response.headers, policy.allowed_content_types)
                 _check_advertised_size(response.headers, policy.max_bytes)
 
                 bytes_written = 0
@@ -830,9 +774,7 @@ async def _attempt_download_to_path_async(
                     async for chunk in response.aiter_bytes():
                         bytes_written += len(chunk)
                         if bytes_written > policy.max_bytes:
-                            raise ResponseTooLargeError(
-                                f"Response exceeded the cap of {policy.max_bytes} bytes."
-                            )
+                            raise ResponseTooLargeError(f"Response exceeded the cap of {policy.max_bytes} bytes.")
                         handle.write(chunk)
 
                 return SafeDownloadResult(
@@ -873,10 +815,7 @@ async def safe_download_to_path_async(
             raise
         except httpx.HTTPStatusError as exc:
             target_path.unlink(missing_ok=True)
-            if (
-                500 <= exc.response.status_code < 600
-                and attempt < effective_policy.max_retries
-            ):
+            if 500 <= exc.response.status_code < 600 and attempt < effective_policy.max_retries:
                 last_error = exc
                 continue
             raise
@@ -887,6 +826,10 @@ async def safe_download_to_path_async(
                 continue
             raise
 
-    raise last_error if last_error else RuntimeError(  # pragma: no cover
-        "safe_download_to_path_async exhausted retries without an error"
+    raise (
+        last_error
+        if last_error
+        else RuntimeError(  # pragma: no cover
+            "safe_download_to_path_async exhausted retries without an error"
+        )
     )

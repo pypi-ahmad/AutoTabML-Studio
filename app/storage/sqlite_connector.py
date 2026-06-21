@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import logging
-import sqlite3
-import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+import logging
 from pathlib import Path
+import sqlite3
+import time
 from typing import TypeVar
 
 from app.errors import log_exception

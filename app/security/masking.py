@@ -44,12 +44,11 @@ def redact_key_in_text(text: str) -> str:
         redacted,
     )
     # Passwords embedded in connection-style URIs (scheme://user:password@host)
-    redacted = re.sub(
+    return re.sub(
         r"(://[^:/?#]*:)[^@]+(@)",
         r"\1****\2",
         redacted,
     )
-    return redacted
 
 
 def safe_error_message(exc: Exception) -> str:

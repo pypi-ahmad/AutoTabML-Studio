@@ -5,8 +5,10 @@ from __future__ import annotations
 import pandas as pd
 
 from app.modeling.benchmark.schemas import BenchmarkTaskType
-from app.modeling.benchmark.selectors import infer_task_type as benchmark_infer_task_type
-from app.modeling.benchmark.selectors import validate_target as benchmark_validate_target
+from app.modeling.benchmark.selectors import (
+    infer_task_type as benchmark_infer_task_type,
+    validate_target as benchmark_validate_target,
+)
 from app.modeling.pycaret.errors import UnsupportedExperimentTaskError
 from app.modeling.pycaret.schemas import ExperimentSortDirection, ExperimentTaskType, ModelSelectionSpec
 

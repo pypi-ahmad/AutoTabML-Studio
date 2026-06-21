@@ -103,15 +103,11 @@ def normalize_compare_grid(
 
     name_column = _first_existing_column(score_grid, MODEL_NAME_COLUMNS)
     available_metrics = [
-        column
-        for column in score_grid.columns
-        if column not in set(MODEL_NAME_COLUMNS) | set(MODEL_ID_COLUMNS)
+        column for column in score_grid.columns if column not in set(MODEL_NAME_COLUMNS) | set(MODEL_ID_COLUMNS)
     ]
     resolved_metric = resolve_metric_name(requested_metric, available_metrics)
     if requested_metric and resolved_metric != requested_metric:
-        warnings.append(
-            f"Compare metric '{requested_metric}' was unavailable; fell back to '{resolved_metric}'."
-        )
+        warnings.append(f"Compare metric '{requested_metric}' was unavailable; fell back to '{resolved_metric}'.")
     direction = metric_sort_direction(resolved_metric) if resolved_metric is not None else None
 
     rows: list[ExperimentLeaderboardRow] = []
@@ -147,9 +143,7 @@ def extract_mean_metrics(score_grid: pd.DataFrame) -> dict[str, Any]:
     if mean_row is None:
         fold_column = _first_existing_column(score_grid, ("Fold", "fold"))
         if fold_column is not None:
-            mean_candidates = score_grid.loc[
-                score_grid[fold_column].astype(str).str.strip().str.lower() == "mean"
-            ]
+            mean_candidates = score_grid.loc[score_grid[fold_column].astype(str).str.strip().str.lower() == "mean"]
             if not mean_candidates.empty:
                 mean_row = mean_candidates.iloc[0]
 

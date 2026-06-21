@@ -6,9 +6,9 @@ environment variables or the in-memory session.
 
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 import logging
-from copy import deepcopy
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -36,8 +36,6 @@ logger = logging.getLogger(__name__)
 
 _SETTINGS_DIR = Path.home() / ".autotabml"
 _SETTINGS_FILE = _SETTINGS_DIR / "settings.json"
-
-
 
 
 class _EnvironmentSettings(BaseSettings):
