@@ -53,6 +53,7 @@ def _run_async(coro):
         loop = None
     if loop and loop.is_running():
         import concurrent.futures
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
             return pool.submit(asyncio.run, coro).result()
     return asyncio.run(coro)
@@ -87,6 +88,7 @@ def render_settings_page() -> None:
 # Sections
 # ---------------------------------------------------------------------------
 
+
 def _section_privacy_summary() -> None:
     """Always-visible privacy reminder at the top of Essentials."""
     st.header("🔒 Privacy")
@@ -100,6 +102,7 @@ def _section_privacy_summary() -> None:
 def _section_workspace(state: RuntimeState) -> None:
     st.header("Workspace")
     from app.pages.ui_labels import MODE_LABELS, make_format_func
+
     modes = [m.value for m in WorkspaceMode]
     current_idx = modes.index(state.workspace_mode.value)
     selected = st.selectbox(
@@ -123,10 +126,7 @@ def _section_accelerators_summary(state: RuntimeState) -> None:
             f"({gpu_info['device_count']} device(s)). Training will be faster."
         )
     else:
-        st.info(
-            "💻 No GPU detected — training runs on CPU. "
-            "For GPU options, see the **Advanced** tab."
-        )
+        st.info("💻 No GPU detected — training runs on CPU. For GPU options, see the **Advanced** tab.")
 
 
 def _section_descriptions_toggle(state: RuntimeState) -> None:
@@ -149,6 +149,7 @@ def _section_descriptions_toggle(state: RuntimeState) -> None:
 def _section_execution(state: RuntimeState) -> None:
     st.header("Where to Run")
     from app.pages.ui_labels import BACKEND_LABELS, make_format_func
+
     backends = [b.value for b in ExecutionBackend]
     current_idx = backends.index(state.execution_backend.value)
     selected = st.selectbox(
@@ -170,6 +171,7 @@ def _section_execution(state: RuntimeState) -> None:
         uvx_ok = _find_uvx() is not None
         try:
             from mcp import ClientSession  # noqa: F401
+
             mcp_ok = True
         except ImportError:
             mcp_ok = False
@@ -205,7 +207,9 @@ def _section_accelerators(state: RuntimeState) -> None:
     selected = st.selectbox(
         "GPU mode for experiments",
         options=gpu_options,
-        index=gpu_options.index(state.settings.pycaret.default_use_gpu if state.settings.pycaret.default_use_gpu in gpu_options else True),
+        index=gpu_options.index(
+            state.settings.pycaret.default_use_gpu if state.settings.pycaret.default_use_gpu in gpu_options else True
+        ),
         format_func=lambda value: {
             True: "Use GPU when available (recommended)",
             False: "CPU only",
@@ -226,26 +230,30 @@ def _section_accelerators(state: RuntimeState) -> None:
 
     # ── FLAML defaults ─────────────────────────────────────────────────
     st.subheader("FLAML AutoML Defaults")
-    flaml_time_budget = int(st.number_input(
-        "Default time budget (seconds)",
-        min_value=10,
-        max_value=3600,
-        value=int(state.settings.flaml.default_time_budget),
-        step=10,
-        key="flaml_default_time_budget",
-        help="How long FLAML searches for the best model by default.",
-    ))
+    flaml_time_budget = int(
+        st.number_input(
+            "Default time budget (seconds)",
+            min_value=10,
+            max_value=3600,
+            value=int(state.settings.flaml.default_time_budget),
+            step=10,
+            key="flaml_default_time_budget",
+            help="How long FLAML searches for the best model by default.",
+        )
+    )
     state.settings.flaml.default_time_budget = flaml_time_budget
 
-    flaml_n_splits = int(st.number_input(
-        "Default cross-validation folds",
-        min_value=2,
-        max_value=20,
-        value=int(state.settings.flaml.default_n_splits),
-        step=1,
-        key="flaml_default_n_splits",
-        help="Number of CV folds for FLAML evaluation.",
-    ))
+    flaml_n_splits = int(
+        st.number_input(
+            "Default cross-validation folds",
+            min_value=2,
+            max_value=20,
+            value=int(state.settings.flaml.default_n_splits),
+            step=1,
+            key="flaml_default_n_splits",
+            help="Number of CV folds for FLAML evaluation.",
+        )
+    )
     state.settings.flaml.default_n_splits = flaml_n_splits
 
 
@@ -253,6 +261,7 @@ def _section_provider(state: RuntimeState) -> None:
     st.header("AI Provider")
     st.caption("Choose which AI service powers descriptions and optional smart features.")
     from app.pages.ui_labels import PROVIDER_LABELS, make_format_func
+
     allowed = get_allowed_providers(state.execution_backend)
     allowed_values = [p.value for p in allowed]
 
@@ -271,23 +280,18 @@ def _section_provider(state: RuntimeState) -> None:
     )
     state.provider = LLMProvider(selected)
 
-    if (
-        state.execution_backend == ExecutionBackend.COLAB_MCP
-        and LLMProvider.OLLAMA not in allowed
-    ):
+    if state.execution_backend == ExecutionBackend.COLAB_MCP and LLMProvider.OLLAMA not in allowed:
         st.caption("ℹ️ Ollama is not available when running in the cloud (it requires a local server).")
 
 
 def _section_credentials(state: RuntimeState) -> None:
     st.header("API Keys")
-    st.caption(
-        "🔒 Keys are stored in memory only — they are never saved to disk "
-        "and disappear when you close the app."
-    )
+    st.caption("🔒 Keys are stored in memory only — they are never saved to disk and disappear when you close the app.")
     provider = state.provider
 
     if provider in (LLMProvider.OPENAI, LLMProvider.ANTHROPIC, LLMProvider.GEMINI):
         from app.pages.ui_labels import PROVIDER_LABELS
+
         provider_name = PROVIDER_LABELS.get(provider.value, provider.value.title())
         current_raw = state.get_provider_api_key(provider) or ""
         masked_hint = mask_secret(current_raw) if current_raw else ""
@@ -364,8 +368,7 @@ def _section_mlflow_descriptions(state: RuntimeState) -> None:
         "Generate a summary for every run",
         value=state.settings.mlflow_descriptions_enabled,
         key="mlflow_desc_enabled",
-        help="A human-readable summary is created for each job run "
-        "and shown in the History page.",
+        help="A human-readable summary is created for each job run and shown in the History page.",
     )
     state.settings.mlflow_descriptions_enabled = desc_enabled
 
@@ -381,16 +384,14 @@ def _section_mlflow_descriptions(state: RuntimeState) -> None:
 
         if llm_enabled:
             from app.pages.ui_labels import PROVIDER_LABELS
+
             provider_name = PROVIDER_LABELS.get(state.provider.value, state.provider.value.title())
             api_key = state.get_provider_api_key(state.provider)
             has_key = bool(api_key)
             model_id = state.selected_model_id
 
             if has_key and model_id:
-                st.success(
-                    f"AI summaries will use **{provider_name}** "
-                    f"(model: **{model_id}**)."
-                )
+                st.success(f"AI summaries will use **{provider_name}** (model: **{model_id}**).")
             elif has_key:
                 st.warning(
                     f"**{provider_name}** API key is set but no model selected. "
@@ -441,6 +442,7 @@ def _section_save(state: RuntimeState, *, key_suffix: str = "") -> None:
 # ---------------------------------------------------------------------------
 # Model fetch helper
 # ---------------------------------------------------------------------------
+
 
 def _fetch_models(state: RuntimeState) -> None:
     """Build a provider instance and fetch models, updating state."""

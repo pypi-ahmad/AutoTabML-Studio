@@ -68,9 +68,7 @@ class DatasetInputSpec(BaseModel):
             IngestionSourceType.DELIMITED_TEXT,
             IngestionSourceType.EXCEL,
         } and not (self.path or self.url):
-            raise ValueError(
-                f"{self.source_type.value} ingestion requires a local path or URL."
-            )
+            raise ValueError(f"{self.source_type.value} ingestion requires a local path or URL.")
 
         if self.source_type == IngestionSourceType.HTML_TABLE and not self.url:
             raise ValueError("HTML table ingestion requires a URL.")

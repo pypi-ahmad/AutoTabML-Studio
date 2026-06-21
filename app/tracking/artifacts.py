@@ -34,13 +34,15 @@ def write_comparison_artifacts(
     if bundle.metric_deltas:
         rows = []
         for delta in bundle.metric_deltas:
-            rows.append({
-                "Metric": delta.name,
-                "Left": delta.left_value,
-                "Right": delta.right_value,
-                "Delta": delta.delta,
-                "Better": delta.better_side or "",
-            })
+            rows.append(
+                {
+                    "Metric": delta.name,
+                    "Left": delta.left_value,
+                    "Right": delta.right_value,
+                    "Delta": delta.delta,
+                    "Better": delta.better_side or "",
+                }
+            )
         metrics_csv_path = manager.build_artifact_path(
             kind=ArtifactKind.COMPARISON,
             stem=stem,

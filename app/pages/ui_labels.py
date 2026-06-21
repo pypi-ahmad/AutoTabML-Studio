@@ -352,7 +352,4 @@ def render_model_trust_card(
 
 def render_decision_support_banner() -> None:
     """Render a one-line reminder that predictions are decision support, not decisions."""
-    st.caption(
-        "ℹ️ Model predictions are **decision support** — always review results "
-        "before acting on them."
-    )
+    st.caption("ℹ️ Model predictions are **decision support** — always review results before acting on them.")

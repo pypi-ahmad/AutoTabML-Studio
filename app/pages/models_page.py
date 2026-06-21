@@ -103,7 +103,11 @@ def render_models_page() -> None:
 def _render_pycaret_model_card(ref) -> None:  # noqa: ANN001
     """Render an expander card for a PyCaret experiment model."""
 
-    task_label = PREDICTION_TASK_TYPE_LABELS.get(ref.task_type.value, format_enum_value(ref.task_type.value)) if ref.task_type != PredictionTaskType.UNKNOWN else "Unknown"
+    task_label = (
+        PREDICTION_TASK_TYPE_LABELS.get(ref.task_type.value, format_enum_value(ref.task_type.value))
+        if ref.task_type != PredictionTaskType.UNKNOWN
+        else "Unknown"
+    )
     target = ref.metadata.get("target_column", "—")
     features = ref.feature_columns
     dataset_name = ref.metadata.get("dataset_name")
@@ -166,9 +170,7 @@ def _render_pycaret_model_card(ref) -> None:  # noqa: ANN001
         if dtypes:
             with st.expander("Column types", expanded=False):
                 st.dataframe(
-                    pd.DataFrame(
-                        [{"Feature": k, "Type": v} for k, v in dtypes.items()]
-                    ),
+                    pd.DataFrame([{"Feature": k, "Type": v} for k, v in dtypes.items()]),
                     width="stretch",
                     hide_index=True,
                 )
@@ -209,7 +211,9 @@ def _render_benchmark_model_card(meta: dict) -> None:
 
         # Provenance cue (factual, not a quality claim)
         if trained_at:
-            st.caption(f"📅 Saved from benchmark on {trained_at}. Use **Test & Evaluate** to measure real-world accuracy.")
+            st.caption(
+                f"📅 Saved from benchmark on {trained_at}. Use **Test & Evaluate** to measure real-world accuracy."
+            )
         else:
             st.caption("⚠️ Training date unknown — consider re-running the benchmark for a fresh model.")
 
@@ -302,8 +306,7 @@ def _render_flaml_model_card(ref) -> None:  # noqa: ANN001
         if _purpose:
             st.caption(f"🎯 {_purpose}.")
         st.caption(
-            f"Best algorithm: **{best_estimator}** · Metric: **{metric}** "
-            f"· Loss: **{best_loss:.4f}**"
+            f"Best algorithm: **{best_estimator}** · Metric: **{metric}** · Loss: **{best_loss:.4f}**"
             if best_loss is not None
             else f"Best algorithm: **{best_estimator}** · Metric: **{metric}**"
         )
@@ -316,9 +319,7 @@ def _render_flaml_model_card(ref) -> None:  # noqa: ANN001
         if dtypes:
             with st.expander("Column types", expanded=False):
                 st.dataframe(
-                    pd.DataFrame(
-                        [{"Feature": k, "Type": v} for k, v in dtypes.items()]
-                    ),
+                    pd.DataFrame([{"Feature": k, "Type": v} for k, v in dtypes.items()]),
                     width="stretch",
                     hide_index=True,
                 )

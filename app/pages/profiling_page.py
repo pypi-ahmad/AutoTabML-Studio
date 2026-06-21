@@ -26,7 +26,9 @@ def render_profiling_page() -> None:
     prof_settings = state.settings.profiling
     metadata_store = get_metadata_store(state.settings)
 
-    selected_name, loaded_dataset = render_dataset_header("Profiling", key_prefix="profiling", metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header(
+        "Profiling", key_prefix="profiling", metadata_store=metadata_store
+    )
     if selected_name is None or loaded_dataset is None:
         return
 

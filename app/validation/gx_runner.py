@@ -79,9 +79,7 @@ def _execute_specs(df: pd.DataFrame, specs: list[ExpectationSpec]) -> list[Check
     )
 
     # Build expectation suite
-    suite = context.suites.add(
-        gx.ExpectationSuite(name="autotabml_validation_suite")
-    )
+    suite = context.suites.add(gx.ExpectationSuite(name="autotabml_validation_suite"))
     for spec in specs:
         # NOTE(gx-api-compat): ``spec["type"]`` is resolved to the current GX
         # expectation class via ``gx.expectations``.  If a future GX release
@@ -122,7 +120,7 @@ def _convert_results(results: Any) -> list[CheckResult]:
             success = result.success
 
             # Build a readable message
-            kwargs_repr = dict(result.expectation_config.kwargs) if hasattr(result.expectation_config, 'kwargs') else {}
+            kwargs_repr = dict(result.expectation_config.kwargs) if hasattr(result.expectation_config, "kwargs") else {}
             msg = f"GX: {expectation_type}"
             if "column" in kwargs_repr:
                 msg += f" on column '{kwargs_repr['column']}'"

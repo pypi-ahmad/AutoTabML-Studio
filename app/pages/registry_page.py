@@ -101,23 +101,34 @@ def render_registry_page() -> None:
     _candidate_count = sum(1 for m in models if any(k.lower() == settings.candidate_alias.lower() for k in m.aliases))
     st.info(
         f"**Overview:** **{len(models)}** registered model(s) with **{_total_versions}** total version(s). "
-        + (f"**{_champion_count}** champion(s), **{_candidate_count}** candidate(s)." if _champion_count or _candidate_count else "No champions or candidates promoted yet.")
+        + (
+            f"**{_champion_count}** champion(s), **{_candidate_count}** candidate(s)."
+            if _champion_count or _candidate_count
+            else "No champions or candidates promoted yet."
+        )
     )
 
     model_rows = []
     for model in models:
-        model_rows.append({
-            "Name": model.name,
-            "Versions": model.version_count,
-            "Latest": model.latest_version or "N/A",
-            "Version labels": ", ".join(f"{k}->v{v}" for k, v in model.aliases.items()) if model.aliases else "",
-            "Description": model.description[:80] if model.description else "",
-        })
+        model_rows.append(
+            {
+                "Name": model.name,
+                "Versions": model.version_count,
+                "Latest": model.latest_version or "N/A",
+                "Version labels": ", ".join(f"{k}->v{v}" for k, v in model.aliases.items()) if model.aliases else "",
+                "Description": model.description[:80] if model.description else "",
+            }
+        )
     st.dataframe(pd.DataFrame(model_rows), width="stretch")
 
     # --- Model detail ---
     model_names = [m.name for m in models]
-    selected_model_name = st.selectbox("Inspect model", options=model_names, key="reg_model", help="Pick a registered model to see its versions and details.")
+    selected_model_name = st.selectbox(
+        "Inspect model",
+        options=model_names,
+        key="reg_model",
+        help="Pick a registered model to see its versions and details.",
+    )
 
     if selected_model_name:
         try:
@@ -148,12 +159,14 @@ def render_registry_page() -> None:
                     _readiness = format_enum_value(version.app_status)
                 else:
                     _readiness = "—"
-                version_rows.append({
-                    "Version": version.version,
-                    "Readiness": _readiness,
-                    "Version labels": ", ".join(version.aliases) if version.aliases else "",
-                    "Created": version.creation_timestamp,
-                })
+                version_rows.append(
+                    {
+                        "Version": version.version,
+                        "Readiness": _readiness,
+                        "Version labels": ", ".join(version.aliases) if version.aliases else "",
+                        "Created": version.creation_timestamp,
+                    }
+                )
             st.dataframe(pd.DataFrame(version_rows), width="stretch")
 
             # Show run IDs for traceability (power-user need)
@@ -161,13 +174,17 @@ def render_registry_page() -> None:
             if _versions_with_run_id:
                 with st.expander("Technical details", expanded=False):
                     for v in _versions_with_run_id:
-                        st.caption(f"Version {v.version} — tracking run: `{v.run_id[:12]}…` | status: {v.status or '—'}")
+                        st.caption(
+                            f"Version {v.version} — tracking run: `{v.run_id[:12]}…` | status: {v.status or '—'}"
+                        )
 
             # --- Promotion / lifecycle actions ---
             st.subheader("Manage Version")
             version_labels = [v.version for v in versions]
             promote_version = st.selectbox(
-                "Version to promote", options=version_labels, key="reg_promote_version",
+                "Version to promote",
+                options=version_labels,
+                key="reg_promote_version",
                 help="Which version to change the status of.",
             )
             promote_action = PromotionAction(
@@ -189,7 +206,9 @@ def render_registry_page() -> None:
                 try:
                     result = service.promote(request)
                     if result.success:
-                        _action_label = PROMOTION_LABELS.get(result.action.value, format_enum_value(result.action.value))
+                        _action_label = PROMOTION_LABELS.get(
+                            result.action.value, format_enum_value(result.action.value)
+                        )
                         st.session_state[_REGISTRY_FLASH_MESSAGE_KEY] = f"Version {result.version}: {_action_label}."
                         st.session_state[_REGISTRY_FLASH_WARNINGS_KEY] = list(result.warnings)
                         invalidate_mlflow_query_cache()
@@ -218,12 +237,26 @@ def _render_register_section(service) -> None:
 
     reg_col1, reg_col2 = st.columns(2)
     with reg_col1:
-        reg_name = st.text_input("Model name", key="reg_new_name", help="A short, descriptive name for this model (e.g. 'sales-forecast-v2').").strip()
+        reg_name = st.text_input(
+            "Model name",
+            key="reg_new_name",
+            help="A short, descriptive name for this model (e.g. 'sales-forecast-v2').",
+        ).strip()
     with reg_col2:
-        reg_source = st.text_input("Source path", key="reg_new_source", help="Path or URI to the model file. Copy this from Run History.").strip()
+        reg_source = st.text_input(
+            "Source path", key="reg_new_source", help="Path or URI to the model file. Copy this from Run History."
+        ).strip()
 
-    reg_run_id = st.text_input("Tracking run ID (optional)", key="reg_new_run_id", help="The experiment tracking run that produced this model. Leave blank if not applicable.").strip()
-    reg_description = st.text_input("Description (optional)", key="reg_new_description", help="A brief note about this model — e.g. what data it was trained on or its intended use.").strip()
+    reg_run_id = st.text_input(
+        "Tracking run ID (optional)",
+        key="reg_new_run_id",
+        help="The experiment tracking run that produced this model. Leave blank if not applicable.",
+    ).strip()
+    reg_description = st.text_input(
+        "Description (optional)",
+        key="reg_new_description",
+        help="A brief note about this model — e.g. what data it was trained on or its intended use.",
+    ).strip()
 
     if st.button("Register", key="reg_register_button"):
         if not reg_name or not reg_source:

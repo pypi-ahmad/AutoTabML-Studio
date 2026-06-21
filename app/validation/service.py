@@ -36,10 +36,7 @@ class GreatExpectationsValidationService(BaseValidationService):
     ) -> ValidationResultSummary:
         gx_enabled = is_gx_available()
         gx_checks = run_gx_validation(df, config) if gx_enabled else []
-        gx_failed = any(
-            check.check_name == "gx_execution" and not check.passed
-            for check in gx_checks
-        )
+        gx_failed = any(check.check_name == "gx_execution" and not check.passed for check in gx_checks)
         checks = run_app_rules(
             df,
             config,

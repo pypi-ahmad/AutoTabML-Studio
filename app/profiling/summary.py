@@ -42,9 +42,7 @@ def extract_summary(
     dup_pct = (dup_count / n_rows * 100) if n_rows > 0 else 0.0
 
     numeric_count = int(original_df.select_dtypes(include="number").shape[1])
-    categorical_count = int(
-        original_df.select_dtypes(include=["object", "string", "category"]).shape[1]
-    )
+    categorical_count = int(original_df.select_dtypes(include=["object", "string", "category"]).shape[1])
     high_card = _get_high_cardinality_columns(original_df)
     mem = int(original_df.memory_usage(deep=True).sum())
 
@@ -67,9 +65,7 @@ def extract_summary(
     )
 
 
-def _get_high_cardinality_columns(
-    df: pd.DataFrame, threshold: float = 0.9
-) -> list[str]:
+def _get_high_cardinality_columns(df: pd.DataFrame, threshold: float = 0.9) -> list[str]:
     """Identify columns with very high cardinality relative to row count."""
     high_card: list[str] = []
     n_rows = len(df)

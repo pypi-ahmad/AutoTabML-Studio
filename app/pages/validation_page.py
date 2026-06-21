@@ -22,7 +22,9 @@ def render_validation_page() -> None:
     settings = state.settings.validation
     metadata_store = get_metadata_store(state.settings)
 
-    selected_name, loaded_dataset = render_dataset_header("Validation", key_prefix="validation", metadata_store=metadata_store)
+    selected_name, loaded_dataset = render_dataset_header(
+        "Validation", key_prefix="validation", metadata_store=metadata_store
+    )
     if selected_name is None or loaded_dataset is None:
         return
 
@@ -54,7 +56,9 @@ def render_validation_page() -> None:
             key="val_uniqueness_cols",
             help="Columns where every value should be different (e.g. an ID column). Duplicates will be flagged.",
         )
-        uniqueness_cols = [c.strip() for c in uniqueness_cols_raw.split(",") if c.strip()] if uniqueness_cols_raw else []
+        uniqueness_cols = (
+            [c.strip() for c in uniqueness_cols_raw.split(",") if c.strip()] if uniqueness_cols_raw else []
+        )
 
         enable_leakage = st.checkbox(
             "Check for data leakage",

@@ -31,25 +31,109 @@ NAV_SECTIONS: list[tuple[str, str]] = [
 
 _PAGES = [
     # ── Start ──────────────────────────────────────────────────────────
-    PageSpec("Home", "Your local-first workspace dashboard — see recent activity and jump to any workflow.", "app.pages.dashboard_page", "render_dashboard_page", section="start"),
+    PageSpec(
+        "Home",
+        "Your local-first workspace dashboard — see recent activity and jump to any workflow.",
+        "app.pages.dashboard_page",
+        "render_dashboard_page",
+        section="start",
+    ),
     # ── Prepare ────────────────────────────────────────────────────────
-    PageSpec("Load Data", "Upload or connect a dataset (CSV, Excel, URL, or public repository).", "app.pages.dataset_intake_page", "render_dataset_intake_page", section="prepare"),
-    PageSpec("Validation", "Optional — Check your data for missing values, duplicates, and errors before modeling.", "app.pages.validation_page", "render_validation_page", section="prepare"),
-    PageSpec("Profiling", "Optional — Visual summary of your data: distributions, correlations, and statistics.", "app.pages.profiling_page", "render_profiling_page", section="prepare"),
+    PageSpec(
+        "Load Data",
+        "Upload or connect a dataset (CSV, Excel, URL, or public repository).",
+        "app.pages.dataset_intake_page",
+        "render_dataset_intake_page",
+        section="prepare",
+    ),
+    PageSpec(
+        "Validation",
+        "Optional — Check your data for missing values, duplicates, and errors before modeling.",
+        "app.pages.validation_page",
+        "render_validation_page",
+        section="prepare",
+    ),
+    PageSpec(
+        "Profiling",
+        "Optional — Visual summary of your data: distributions, correlations, and statistics.",
+        "app.pages.profiling_page",
+        "render_profiling_page",
+        section="prepare",
+    ),
     # ── Build ──────────────────────────────────────────────────────────
-    PageSpec("Quick Benchmark", "Quickly test dozens of algorithms to find a shortlist — no tuning, just a fast baseline.", "app.pages.benchmark_page", "render_benchmark_page", section="build"),
-    PageSpec("Train & Tune", "Train, fine-tune, and save a production-ready model.", "app.pages.experiment_page", "render_experiment_page", section="build"),
-    PageSpec("FLAML AutoML", "Automatic model selection and tuning powered by Microsoft FLAML.", "app.pages.flaml_automl_page", "render_flaml_automl_page", section="build"),
+    PageSpec(
+        "Quick Benchmark",
+        "Quickly test dozens of algorithms to find a shortlist — no tuning, just a fast baseline.",
+        "app.pages.benchmark_page",
+        "render_benchmark_page",
+        section="build",
+    ),
+    PageSpec(
+        "Train & Tune",
+        "Train, fine-tune, and save a production-ready model.",
+        "app.pages.experiment_page",
+        "render_experiment_page",
+        section="build",
+    ),
+    PageSpec(
+        "FLAML AutoML",
+        "Automatic model selection and tuning powered by Microsoft FLAML.",
+        "app.pages.flaml_automl_page",
+        "render_flaml_automl_page",
+        section="build",
+    ),
     # ── Use ────────────────────────────────────────────────────────────
-    PageSpec("Predictions", "Make predictions on new data, or test a model against ground truth.", "app.pages.predictions_page", "render_predictions_page", section="use"),
+    PageSpec(
+        "Predictions",
+        "Make predictions on new data, or test a model against ground truth.",
+        "app.pages.predictions_page",
+        "render_predictions_page",
+        section="use",
+    ),
     # ── Review ─────────────────────────────────────────────────────────
-    PageSpec("Models", "Browse all your saved models in one place.", "app.pages.models_page", "render_models_page", section="review"),
-    PageSpec("History", "View the full history of every job and dataset run.", "app.pages.history_page", "render_history_page", section="review"),
-    PageSpec("Compare", "Compare algorithm performance side by side for any dataset.", "app.pages.compare_page", "render_compare_page", section="review"),
-    PageSpec("Notebook", "Generate or run reproducible notebooks for your datasets and runs.", "app.pages.notebook_page", "render_notebook_page", section="review"),
+    PageSpec(
+        "Models",
+        "Browse all your saved models in one place.",
+        "app.pages.models_page",
+        "render_models_page",
+        section="review",
+    ),
+    PageSpec(
+        "History",
+        "View the full history of every job and dataset run.",
+        "app.pages.history_page",
+        "render_history_page",
+        section="review",
+    ),
+    PageSpec(
+        "Compare",
+        "Compare algorithm performance side by side for any dataset.",
+        "app.pages.compare_page",
+        "render_compare_page",
+        section="review",
+    ),
+    PageSpec(
+        "Notebook",
+        "Generate or run reproducible notebooks for your datasets and runs.",
+        "app.pages.notebook_page",
+        "render_notebook_page",
+        section="review",
+    ),
     # ── Admin ──────────────────────────────────────────────────────────
-    PageSpec("Registry", "Version and manage your best models for deployment.", "app.pages.registry_page", "render_registry_page", section="admin"),
-    PageSpec("Settings", "Configure providers, execution, and workspace preferences.", "app.pages.settings_page", "render_settings_page", section="admin"),
+    PageSpec(
+        "Registry",
+        "Version and manage your best models for deployment.",
+        "app.pages.registry_page",
+        "render_registry_page",
+        section="admin",
+    ),
+    PageSpec(
+        "Settings",
+        "Configure providers, execution, and workspace preferences.",
+        "app.pages.settings_page",
+        "render_settings_page",
+        section="admin",
+    ),
 ]
 
 

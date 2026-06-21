@@ -118,7 +118,11 @@ def _score_with_predict_api(
         prediction_score_column_name=prediction_score_column_name,
     )
 
-    if score_series is None and loaded_model.task_type == PredictionTaskType.CLASSIFICATION and hasattr(model, "predict_proba"):
+    if (
+        score_series is None
+        and loaded_model.task_type == PredictionTaskType.CLASSIFICATION
+        and hasattr(model, "predict_proba")
+    ):
         score_series = _extract_probability_scores(model, dataframe, prediction_series)
 
     result = dataframe.copy()
@@ -172,9 +176,7 @@ def _extract_prediction_series(scored_frame: pd.DataFrame) -> pd.Series:
             return scored_frame[column]
     if len(scored_frame.columns) == 1:
         return scored_frame.iloc[:, 0]
-    raise PredictionScoringError(
-        "Prediction output could not be normalized because no prediction column was found."
-    )
+    raise PredictionScoringError("Prediction output could not be normalized because no prediction column was found.")
 
 
 def _extract_score_series(

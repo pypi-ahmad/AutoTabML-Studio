@@ -162,9 +162,7 @@ class PredictionRequest(BaseModel):
             has_uri = bool(self.model_uri)
             has_run_reference = bool(self.run_id and self.artifact_path)
             if not has_uri and not has_run_reference:
-                raise ValueError(
-                    "MLflow run-model prediction requires model_uri or both run_id and artifact_path."
-                )
+                raise ValueError("MLflow run-model prediction requires model_uri or both run_id and artifact_path.")
 
         if self.source_type == ModelSourceType.MLFLOW_REGISTERED_MODEL:
             has_uri = bool(self.model_uri)

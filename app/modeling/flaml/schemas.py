@@ -45,6 +45,7 @@ DEFAULT_REGRESSION_METRIC = "r2"
 
 # ── Configuration models ─────────────────────────────────────────────
 
+
 class FlamlSearchConfig(BaseModel):
     """Configuration for the FLAML AutoML search."""
 
@@ -75,6 +76,7 @@ class FlamlConfig(BaseModel):
 
 
 # ── Result models ────────────────────────────────────────────────────
+
 
 class FlamlLeaderboardRow(BaseModel):
     """One row in the FLAML search history leaderboard."""

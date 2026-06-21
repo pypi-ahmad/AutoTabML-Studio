@@ -21,6 +21,7 @@ def is_gx_available() -> bool:
     if _GX_AVAILABLE is None:
         try:
             import great_expectations  # noqa: F401
+
             _GX_AVAILABLE = True
         except ImportError:
             _GX_AVAILABLE = False
@@ -38,9 +39,9 @@ def get_ephemeral_context() -> Any:
     """
     if not is_gx_available():
         from app.validation.errors import ValidationSetupError
+
         raise ValidationSetupError(
-            "great_expectations is not installed.  "
-            "Install it with: pip install 'great_expectations>=1.0'"
+            "great_expectations is not installed.  Install it with: pip install 'great_expectations>=1.0'"
         )
     import great_expectations as gx  # noqa: WPS433
 

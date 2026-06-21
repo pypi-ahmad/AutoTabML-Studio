@@ -56,8 +56,7 @@ def _import_ucimlrepo():
         import ucimlrepo
     except ImportError as exc:
         raise RemoteAccessError(
-            "UCI Repository ingestion requires the 'ucimlrepo' package. "
-            "Install it with: pip install 'ucimlrepo>=0.0.7'"
+            "UCI Repository ingestion requires the 'ucimlrepo' package. Install it with: pip install 'ucimlrepo>=0.0.7'"
         ) from exc
     return ucimlrepo
 
@@ -135,13 +134,9 @@ class UCIRepoLoader(BaseLoader):
         uci_id = input_spec.uci_id
         uci_name = input_spec.uci_name
         if uci_id is None and not uci_name:
-            raise IngestionError(
-                "UCI Repository ingestion requires a dataset ID (uci_id) or name (uci_name)."
-            )
+            raise IngestionError("UCI Repository ingestion requires a dataset ID (uci_id) or name (uci_name).")
         if uci_id is not None and uci_name:
-            raise IngestionError(
-                "UCI Repository ingestion accepts either a dataset ID or a name, not both."
-            )
+            raise IngestionError("UCI Repository ingestion accepts either a dataset ID or a name, not both.")
 
         try:
             if uci_id is not None:

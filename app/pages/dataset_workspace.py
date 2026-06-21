@@ -204,9 +204,7 @@ def _render_dataset_info_bar(
     extra = f"  ·  {n_loaded} datasets in session" if n_loaded > 1 else ""
 
     col_info, col_action = st.columns([6, 1])
-    col_info.caption(
-        f"📋 **{active_name}**  ·  {len(df):,} rows × {len(df.columns)} cols  ·  {source}{extra}"
-    )
+    col_info.caption(f"📋 **{active_name}**  ·  {len(df):,} rows × {len(df.columns)} cols  ·  {source}{extra}")
     if col_action.button("📂", key=f"{key_prefix}_open_intake", help="Open full Load Data page"):
         go_to_page("Load Data")
 
@@ -299,9 +297,7 @@ def render_sidebar_dataset_status() -> None:
         st.sidebar.caption(f"{len(ds.dataframe):,} rows × {len(ds.dataframe.columns)} cols")
     else:
         ds = loaded[active_name]
-        st.sidebar.caption(
-            f"📋 **{active_name}**  \n{len(ds.dataframe):,} rows × {len(ds.dataframe.columns)} cols"
-        )
+        st.sidebar.caption(f"📋 **{active_name}**  \n{len(ds.dataframe):,} rows × {len(ds.dataframe.columns)} cols")
 
 
 def uploaded_file_to_input_spec(uploaded_file) -> DatasetInputSpec:  # noqa: ANN001
@@ -376,7 +372,9 @@ def render_dataset_workspace(
         metric_col2.metric("Latest rows", 0)
         metric_col3.metric("Latest columns", 0)
 
-    upload_tab, path_tab, url_tab, uci_tab, loaded_tab = st.tabs(["📁 Upload", "📂 Local Path", "🌐 Web URL", "🏛️ UCI Dataset Library", "✅ Loaded"])
+    upload_tab, path_tab, url_tab, uci_tab, loaded_tab = st.tabs(
+        ["📁 Upload", "📂 Local Path", "🌐 Web URL", "🏛️ UCI Dataset Library", "✅ Loaded"]
+    )
 
     with upload_tab:
         uploaded_file = st.file_uploader(
@@ -504,10 +502,7 @@ def render_dataset_workspace(
         catalog_results = st.session_state.get(catalog_results_key, [])
         if catalog_results:
             st.dataframe(catalog_results, width="stretch")
-            option_map = {
-                f"{row['uci_id']} - {row['name']}": row
-                for row in catalog_results
-            }
+            option_map = {f"{row['uci_id']} - {row['name']}": row for row in catalog_results}
             selected_catalog_item = st.selectbox(
                 "Catalog result",
                 options=list(option_map.keys()),

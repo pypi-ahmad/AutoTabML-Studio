@@ -46,11 +46,19 @@ page_labels = [page.label for page in page_registry]
 
 # ── Sectioned sidebar navigation ──────────────────────────────────────
 _NAV_ICONS = {
-    "Home": "🏠", "Load Data": "📥", "Validation": "✅", "Profiling": "📊",
-    "Quick Benchmark": "🏁", "Train & Tune": "🧪",
+    "Home": "🏠",
+    "Load Data": "📥",
+    "Validation": "✅",
+    "Profiling": "📊",
+    "Quick Benchmark": "🏁",
+    "Train & Tune": "🧪",
     "Predictions": "🔮",
-    "Models": "📦", "History": "📜", "Compare": "⚖️", "Notebook": "📓",
-    "Registry": "🗂️", "Settings": "⚙️",
+    "Models": "📦",
+    "History": "📜",
+    "Compare": "⚖️",
+    "Notebook": "📓",
+    "Registry": "🗂️",
+    "Settings": "⚙️",
 }
 current_nav = st.session_state.get("nav", default_nav)
 for section_name, section_pages in get_nav_sections():

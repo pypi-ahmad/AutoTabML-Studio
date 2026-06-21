@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 class CheckSeverity(str, Enum):
     """Severity level for a single validation check."""
+
     ERROR = "error"
     WARNING = "warning"
     INFO = "info"
@@ -19,6 +20,7 @@ class CheckSeverity(str, Enum):
 
 class CheckResult(BaseModel):
     """Result of a single validation check."""
+
     check_name: str
     passed: bool
     severity: CheckSeverity
@@ -29,6 +31,7 @@ class CheckResult(BaseModel):
 
 class ValidationRuleConfig(BaseModel):
     """User-facing configuration for a validation run."""
+
     target_column: str | None = None
     id_columns: list[str] = Field(default_factory=list)
     required_columns: list[str] = Field(default_factory=list)
@@ -44,6 +47,7 @@ class ValidationRuleConfig(BaseModel):
 
 class ValidationResultSummary(BaseModel):
     """Aggregated results of a full validation run."""
+
     run_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     dataset_name: str | None = None
     row_count: int = 0
@@ -61,6 +65,7 @@ class ValidationResultSummary(BaseModel):
 
 class ValidationArtifactBundle(BaseModel):
     """Paths and metadata for validation artifacts produced."""
+
     summary_json_path: Path | None = None
     markdown_report_path: Path | None = None
     gx_data_docs_path: Path | None = None

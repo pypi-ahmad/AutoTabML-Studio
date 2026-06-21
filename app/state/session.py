@@ -50,6 +50,7 @@ class RuntimeState:
             self.settings.execution.backend = value
             # Cascade: reset provider if it's no longer valid for the new backend.
             from app.config.enums import PROVIDERS_BY_BACKEND
+
             allowed = PROVIDERS_BY_BACKEND.get(value, [])
             if self.provider not in allowed and allowed:
                 self.provider = allowed[0]
@@ -108,10 +109,12 @@ class RuntimeState:
 
 # --- Streamlit helpers ---
 
+
 def get_or_init_state() -> RuntimeState:
     """Retrieve RuntimeState from Streamlit session_state, or create one."""
     try:
         import streamlit as st
+
         if _SESSION_KEY not in st.session_state:
             st.session_state[_SESSION_KEY] = RuntimeState()
         return st.session_state[_SESSION_KEY]

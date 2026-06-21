@@ -5,18 +5,21 @@ from enum import Enum
 
 class WorkspaceMode(str, Enum):
     """First-class workspace modes."""
+
     DASHBOARD = "dashboard"
     NOTEBOOK = "notebook"
 
 
 class ExecutionBackend(str, Enum):
     """Execution backends – where ML jobs actually run."""
+
     COLAB_MCP = "colab_mcp"
     LOCAL = "local"
 
 
 class LLMProvider(str, Enum):
     """Supported LLM providers."""
+
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"

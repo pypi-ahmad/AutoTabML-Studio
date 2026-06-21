@@ -174,11 +174,7 @@ def _prediction_template(ds: str, meta: dict, run_id: str | None) -> str:
 
 
 def _generic_template(ds: str, meta: dict, run_id: str | None) -> str:
-    return (
-        f"{_TRACKING_OVERVIEW}\n\n"
-        f"This run processed **{ds}**. "
-        f"Check the History page for full details.\n"
-    )
+    return f"{_TRACKING_OVERVIEW}\n\nThis run processed **{ds}**. Check the History page for full details.\n"
 
 
 _JOB_TEMPLATES = {
@@ -275,7 +271,8 @@ def generate_llm_description(
     Falls back to the template description on any error.
     """
     prompt = (
-        _LLM_SYSTEM_PROMPT + "\n\n"
+        _LLM_SYSTEM_PROMPT
+        + "\n\n"
         + _build_llm_prompt(
             job_type,
             dataset_name=dataset_name,
@@ -284,16 +281,26 @@ def generate_llm_description(
         )
     )
     try:
-        result = _run_async(
-            provider.generate_text(prompt, model_id=model_id, max_tokens=1024)
+        result = _run_async(provider.generate_text(prompt, model_id=model_id, max_tokens=1024))
+        return (
+            result.strip()
+            if result
+            else generate_template_description(
+                job_type,
+                dataset_name=dataset_name,
+                metadata=metadata,
+                mlflow_run_id=mlflow_run_id,
+            )
         )
-        return result.strip() if result else generate_template_description(
-            job_type,
-            dataset_name=dataset_name,
-            metadata=metadata,
-            mlflow_run_id=mlflow_run_id,
-        )
-    except (AttributeError, OSError, RuntimeError, TypeError, ValueError, TimeoutError, concurrent.futures.TimeoutError) as exc:
+    except (
+        AttributeError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+        TimeoutError,
+        concurrent.futures.TimeoutError,
+    ) as exc:
         log_exception(
             logger,
             exc,

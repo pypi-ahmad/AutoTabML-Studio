@@ -120,6 +120,7 @@ def render_compare_page() -> None:
 
         # Metric explanations
         from app.pages.glossary import render_metric_legend
+
         _cmp_metric_cols = [c for c in leaderboard_df.columns if c not in ("Rank", "Model")]
         render_metric_legend(_cmp_metric_cols, key_prefix="cmp_legend")
 
@@ -274,14 +275,30 @@ def _leaderboard_rows_to_df(rows: list[dict]) -> pd.DataFrame:
 def _find_score_column(df: pd.DataFrame) -> str | None:
     """Find the primary score column in a leaderboard DataFrame."""
 
-    for candidate in ["Score", "Primary Score", "primary_score", "Balanced Accuracy",
-                      "Accuracy", "R-Squared", "Adjusted R-Squared", "F1", "AUC"]:
+    for candidate in [
+        "Score",
+        "Primary Score",
+        "primary_score",
+        "Balanced Accuracy",
+        "Accuracy",
+        "R-Squared",
+        "Adjusted R-Squared",
+        "F1",
+        "AUC",
+    ]:
         if candidate in df.columns:
             return candidate
     # Fallback: first numeric column after Rank/Model
     for col in df.columns:
-        if col not in ("Rank", "Model", "Task Type", "Benchmark Backend",
-                        "Run Timestamp", "Warnings", "Training Time (s)") and pd.api.types.is_numeric_dtype(df[col]):
+        if col not in (
+            "Rank",
+            "Model",
+            "Task Type",
+            "Benchmark Backend",
+            "Run Timestamp",
+            "Warnings",
+            "Training Time (s)",
+        ) and pd.api.types.is_numeric_dtype(df[col]):
             return col
     return None
 
@@ -318,17 +335,22 @@ def _render_mlflow_comparison(app_settings) -> None:  # noqa: ANN001
             st.caption("Need at least 2 MLflow runs for side-by-side comparison.")
             return
 
-        run_labels = [
-            f"{r.dataset_name or '—'} · {r.model_name or format_enum_value(r.run_type.value)}"
-            for r in runs
-        ]
+        run_labels = [f"{r.dataset_name or '—'} · {r.model_name or format_enum_value(r.run_type.value)}" for r in runs]
 
         col1, col2 = st.columns(2)
         with col1:
-            left_label = st.selectbox("Left run", options=run_labels, index=0, key="cmp_mlflow_left", help="First run to compare.")
+            left_label = st.selectbox(
+                "Left run", options=run_labels, index=0, key="cmp_mlflow_left", help="First run to compare."
+            )
         with col2:
             right_default = 1 if len(run_labels) > 1 else 0
-            right_label = st.selectbox("Right run", options=run_labels, index=right_default, key="cmp_mlflow_right", help="Second run to compare against.")
+            right_label = st.selectbox(
+                "Right run",
+                options=run_labels,
+                index=right_default,
+                key="cmp_mlflow_right",
+                help="Second run to compare against.",
+            )
 
         left_run = runs[run_labels.index(left_label)]
         right_run = runs[run_labels.index(right_label)]
@@ -341,17 +363,21 @@ def _render_mlflow_comparison(app_settings) -> None:  # noqa: ANN001
         bundle = comparison.compare(left_run, right_run)
 
         if bundle.metric_deltas:
-            left_display = f"{left_run.dataset_name or '—'} · {left_run.model_name or format_enum_value(left_run.run_type.value)}"
+            left_display = (
+                f"{left_run.dataset_name or '—'} · {left_run.model_name or format_enum_value(left_run.run_type.value)}"
+            )
             right_display = f"{right_run.dataset_name or '—'} · {right_run.model_name or format_enum_value(right_run.run_type.value)}"
             rows = []
             for delta in bundle.metric_deltas:
-                rows.append({
-                    "Metric": delta.name,
-                    left_display: delta.left_value,
-                    right_display: delta.right_value,
-                    "Delta": delta.delta,
-                    "Better": delta.better_side or "",
-                })
+                rows.append(
+                    {
+                        "Metric": delta.name,
+                        left_display: delta.left_value,
+                        right_display: delta.right_value,
+                        "Delta": delta.delta,
+                        "Better": delta.better_side or "",
+                    }
+                )
             st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
     # --- Save comparison ---
