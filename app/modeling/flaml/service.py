@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import logging
 from pathlib import Path
-import pickle
+import pickle  # nosec B403 — standard ML model serialization; trusted artifacts only
 from time import perf_counter
 from typing import Any
 

@@ -11,7 +11,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: cef0300fd299e2a236b0eb2dd36e5cb3e30d4c52  # v5.0.0
+    rev: cef0300fd299e2a236b0eb2dd36e5cb3e30d4c52  # v5.0.0  # pragma: allowlist secret
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
@@ -36,7 +36,7 @@ repos:
         args: [--branch=main, --branch=master]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 77039ccd9b744d92d9a0caddb1f4f1acba72c9b5  # v0.15.18
+    rev: 77039ccd9b744d92d9a0caddb1f4f1acba72c9b5  # v0.15.18  # pragma: allowlist secret
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -45,7 +45,7 @@ repos:
         types_or: [python, pyi]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 9f70dc50c3c3b66c4c52e2161d2e4b8a89e5dc7b  # v1.18.2
+    rev: 9f70dc50c3c3b66c4c52e2161d2e4b8a89e5dc7b  # v1.18.2  # pragma: allowlist secret
     hooks:
       - id: mypy
         files: ^app/

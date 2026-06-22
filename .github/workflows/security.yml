@@ -126,4 +126,5 @@ jobs:
         run: uv run --no-sync bandit -r app/ -c pyproject.toml
 
       - name: Run pip-audit
+        if: always()
         run: uv run --no-sync pip-audit
