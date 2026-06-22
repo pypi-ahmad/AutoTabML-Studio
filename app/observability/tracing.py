@@ -64,21 +64,21 @@ def start_span(name: str, **attributes: Any) -> Iterator[SpanLike]:
             try:
                 span.set_attribute(key, value)
             except Exception:  # noqa: BLE001 - never let telemetry break the caller
-                pass
+                pass  # nosec B110
         for key, value in attributes.items():
             if value is None:
                 continue
             try:
                 span.set_attribute(key, value)
             except Exception:  # noqa: BLE001
-                pass
+                pass  # nosec B110
         try:
             yield span
         except BaseException as exc:  # noqa: BLE001 - re-raised after recording
             try:
                 span.record_exception(exc)
             except Exception:  # noqa: BLE001
-                pass
+                pass  # nosec B110
             raise
 
 

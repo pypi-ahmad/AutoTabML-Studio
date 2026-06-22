@@ -184,7 +184,7 @@ def _ensure_version_table(connection: sqlite3.Connection) -> None:
 
 
 def _get_applied_versions(connection: sqlite3.Connection) -> set[int]:
-    rows = connection.execute(f"SELECT version FROM {_VERSION_TABLE}").fetchall()
+    rows = connection.execute(f"SELECT version FROM {_VERSION_TABLE}").fetchall()  # nosec B608 — _VERSION_TABLE is a module-level constant, not user input
     return {int(row[0]) for row in rows}
 
 
@@ -196,7 +196,7 @@ def _detect_legacy_version(connection: sqlite3.Connection) -> int:
             return 1
         return 0
 
-    row = connection.execute(f"SELECT value FROM {_LEGACY_INFO_TABLE} WHERE key = 'schema_version'").fetchone()
+    row = connection.execute(f"SELECT value FROM {_LEGACY_INFO_TABLE} WHERE key = 'schema_version'").fetchone()  # nosec B608 — _LEGACY_INFO_TABLE is a module-level constant, not user input
     if row is None:
         return 0
     try:
