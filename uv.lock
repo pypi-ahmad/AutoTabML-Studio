@@ -310,7 +310,6 @@ kaggle = [
     { name = "kaggle", version = "2.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 profiling = [
-    { name = "setuptools" },
     { name = "ydata-profiling" },
 ]
 providers = [
@@ -384,7 +383,6 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "scikit-learn", marker = "extra == 'benchmark'", specifier = ">=1.4" },
     { name = "scikit-learn", marker = "extra == 'flaml'", specifier = ">=1.4" },
-    { name = "setuptools", marker = "extra == 'profiling'", specifier = ">=68,<83" },
     { name = "skops", marker = "extra == 'benchmark'", specifier = ">=0.10" },
     { name = "streamlit", specifier = ">=1.30" },
     { name = "ucimlrepo", marker = "extra == 'uci'", specifier = ">=0.0.7" },
