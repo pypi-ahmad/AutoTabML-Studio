@@ -310,6 +310,7 @@ kaggle = [
     { name = "kaggle", version = "2.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 profiling = [
+    { name = "setuptools" },
     { name = "ydata-profiling" },
 ]
 providers = [
@@ -354,9 +355,9 @@ requires-dist = [
     { name = "catboost", marker = "extra == 'benchmark'", specifier = ">=1.2" },
     { name = "catboost", marker = "extra == 'experiment'", specifier = ">=1.2" },
     { name = "catboost", marker = "extra == 'gpu'", specifier = ">=1.2" },
-    { name = "flaml", extras = ["automl"], marker = "extra == 'flaml'", specifier = ">=2.1" },
+    { name = "flaml", extras = ["automl"], marker = "extra == 'flaml'", specifier = ">=2.5.0" },
     { name = "google-genai", marker = "extra == 'providers'", specifier = ">=1.0" },
-    { name = "great-expectations", marker = "extra == 'validation'", specifier = ">=1.0" },
+    { name = "great-expectations", marker = "extra == 'validation'", specifier = ">=1.16.0" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "kaggle", marker = "extra == 'kaggle'", specifier = ">=1.7" },
     { name = "lazypredict", marker = "extra == 'benchmark'", specifier = ">=0.3.0" },
@@ -383,6 +384,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "scikit-learn", marker = "extra == 'benchmark'", specifier = ">=1.4" },
     { name = "scikit-learn", marker = "extra == 'flaml'", specifier = ">=1.4" },
+    { name = "setuptools", marker = "extra == 'profiling'", specifier = ">=68,<83" },
     { name = "skops", marker = "extra == 'benchmark'", specifier = ">=0.10" },
     { name = "streamlit", specifier = ">=1.30" },
     { name = "ucimlrepo", marker = "extra == 'uci'", specifier = ">=0.0.7" },
@@ -391,7 +393,7 @@ requires-dist = [
     { name = "xgboost", marker = "extra == 'flaml'", specifier = ">=2.0" },
     { name = "xgboost", marker = "extra == 'gpu'", specifier = ">=2.0" },
     { name = "xlrd", specifier = ">=2.0" },
-    { name = "ydata-profiling", marker = "extra == 'profiling'", specifier = ">=4.6" },
+    { name = "ydata-profiling", marker = "extra == 'profiling'", specifier = ">=4.18.1" },
 ]
 provides-extras = ["kaggle", "uci", "validation", "profiling", "benchmark", "experiment", "flaml", "gpu", "colab", "providers"]
 
