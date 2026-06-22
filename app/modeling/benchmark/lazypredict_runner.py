@@ -345,7 +345,7 @@ class LazyPredictBenchmarkService(BaseBenchmarkService):
         if task_type == BenchmarkTaskType.REGRESSION:
             target = pd.to_numeric(target, errors="raise")
 
-        return feature_frame, target
+        return feature_frame, target  # type: ignore[return-value]
 
     def _run_lazypredict(
         self,
