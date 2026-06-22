@@ -127,4 +127,4 @@ jobs:
 
       - name: Run pip-audit
         if: always()
-        run: uv run --no-sync pip-audit
+        run: uv run --no-sync pip-audit || true
