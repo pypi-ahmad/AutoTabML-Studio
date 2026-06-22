@@ -96,7 +96,7 @@ def _is_degenerate_r2(metric_name: str, raw_results: pd.DataFrame) -> bool:
     values = pd.to_numeric(raw_results[metric_name], errors="coerce").dropna()
     if values.empty:
         return False
-    return bool(values.max() > 1.0)
+    return bool(values.max() > 1.0)  # type: ignore[return-value]
 
 
 def metric_sort_direction(metric_name: str) -> BenchmarkSortDirection:

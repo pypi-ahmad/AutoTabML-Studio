@@ -359,9 +359,9 @@ def _check_numeric_ranges(
         max_value = bounds.get("max")
         invalid_mask = pd.Series(False, index=series.index)
         if min_value is not None:
-            invalid_mask = invalid_mask | (series < min_value)
+            invalid_mask = invalid_mask | (series < min_value)  # type: ignore[operator]
         if max_value is not None:
-            invalid_mask = invalid_mask | (series > max_value)
+            invalid_mask = invalid_mask | (series > max_value)  # type: ignore[operator]
         invalid_count = int(invalid_mask.sum())
 
         if invalid_count > 0:

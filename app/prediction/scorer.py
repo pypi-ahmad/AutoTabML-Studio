@@ -173,9 +173,9 @@ def _normalize_predict_output(
 def _extract_prediction_series(scored_frame: pd.DataFrame) -> pd.Series:
     for column in _PREDICTION_COLUMN_CANDIDATES:
         if column in scored_frame.columns:
-            return scored_frame[column]
+            return scored_frame[column]  # type: ignore[return-value]
     if len(scored_frame.columns) == 1:
-        return scored_frame.iloc[:, 0]
+        return scored_frame.iloc[:, 0]  # type: ignore[return-value]
     raise PredictionScoringError("Prediction output could not be normalized because no prediction column was found.")
 
 
@@ -190,7 +190,7 @@ def _extract_score_series(
     candidates.extend(_SCORE_COLUMN_CANDIDATES)
     for column in candidates:
         if column in scored_frame.columns:
-            return scored_frame[column]
+            return scored_frame[column]  # type: ignore[return-value]
     return None
 
 
