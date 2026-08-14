@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "adce20a064aafd7390e7dbcc464a048ee9a08432",
-  "generatedAt": "2026-08-14T09:08:26.898Z",
+  "gitCommitHash": "e9a6773d9501bb37ca0de41acdf033511c87a95c",
+  "generatedAt": "2026-08-14T11:13:18.414Z",
   "files": {
     ".codebase-memory/.gitattributes": {
       "filePath": ".codebase-memory/.gitattributes",
@@ -175,12 +175,12 @@
     },
     "CHANGELOG.md": {
       "filePath": "CHANGELOG.md",
-      "contentHash": "88d3a35f894eb6cc92cae60f35ef73e2ed087566dc609fb0b2ae79fb0c375543",
+      "contentHash": "15feb41624d8f52ba7795fa8d6073718f96cddfc577603e0a6f940c7b5c1ddda",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 216,
+      "totalLines": 222,
       "hasStructuralAnalysis": true
     },
     "CODE_OF_CONDUCT.md": {
@@ -195,7 +195,7 @@
     },
     "Dockerfile": {
       "filePath": "Dockerfile",
-      "contentHash": "dab1b793dfb3025b424c3001b98610e7485d67ef4d50ad569fb8d3b1aa43db33",
+      "contentHash": "da6da44217cdc490a99d7f58c212c2bdf7dc039db6bf0ecf8475d6d07e2e774b",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -225,12 +225,12 @@
     },
     "README.md": {
       "filePath": "README.md",
-      "contentHash": "3af6408069cae5a074ba6aae344dab723a0a932e231bcd2a301188817d78af18",
+      "contentHash": "b0d2b8f1a0647ee4edae188f8b1afff60611486575df1456ac2b5801b5cc480b",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 403,
+      "totalLines": 408,
       "hasStructuralAnalysis": true
     },
     "RELEASE_NOTES_v0.2.0.md": {
@@ -1016,7 +1016,7 @@
     },
     "app/cli.py": {
       "filePath": "app/cli.py",
-      "contentHash": "4d4f7d3b5d47245705dff8575c8d449db04ca35e272cd7f4744a29cc65dbf4df",
+      "contentHash": "3dfbb4a0f38da1fd6c282a201c372f790c02bc685ed315d0050d81c5da0dfa33",
       "functions": [
         {
           "name": "cmd_auto_run",
@@ -1114,16 +1114,7 @@
           ],
           "returnType": "DatasetInputSpec",
           "exported": true,
-          "lineCount": 34
-        },
-        {
-          "name": "_is_url",
-          "params": [
-            "locator"
-          ],
-          "returnType": "bool",
-          "exported": true,
-          "lineCount": 3
+          "lineCount": 35
         },
         {
           "name": "_load_cli_dataset",
@@ -1648,7 +1639,6 @@
         "_print_local_model_trust_notice",
         "_load_runtime_settings",
         "_build_input_spec",
-        "_is_url",
         "_load_cli_dataset",
         "_record_loaded_cli_dataset",
         "cmd_validate",
@@ -1690,7 +1680,7 @@
         "cmd_flaml_run",
         "cmd_flaml_save"
       ],
-      "totalLines": 2103,
+      "totalLines": 2099,
       "hasStructuralAnalysis": true
     },
     "app/concurrency.py": {
@@ -2969,7 +2959,7 @@
     },
     "app/ingestion/csv_loader.py": {
       "filePath": "app/ingestion/csv_loader.py",
-      "contentHash": "56376269ea251f10949fe110ffa17adc57b11bbfe042de7be88a573cc79c203b",
+      "contentHash": "b71f817e27644550969e292359f0f9a69e7db1f1931b1b501c0e1aca638b4c32",
       "functions": [],
       "classes": [
         {
@@ -2978,12 +2968,11 @@
             "load_raw_dataframe",
             "load_raw_dataframe_async",
             "_resolve_delimiter",
-            "_update_delimiter_from_sample",
-            "_read_csv_in_chunks"
+            "_update_delimiter_from_sample"
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 232
+          "lineCount": 203
         }
       ],
       "imports": [
@@ -3002,7 +2991,8 @@
         {
           "source": "typing",
           "specifiers": [
-            "Any"
+            "Any",
+            "cast"
           ]
         },
         {
@@ -3034,7 +3024,6 @@
         {
           "source": "app.ingestion.types",
           "specifiers": [
-            "DELIMITED_FILE_SUFFIXES",
             "IngestionSourceType"
           ]
         },
@@ -3056,7 +3045,7 @@
       "exports": [
         "CSVLoader"
       ],
-      "totalLines": 258,
+      "totalLines": 228,
       "hasStructuralAnalysis": true
     },
     "app/ingestion/dataframe_loader.py": {
@@ -4660,7 +4649,7 @@
     },
     "app/modeling/benchmark/artifacts.py": {
       "filePath": "app/modeling/benchmark/artifacts.py",
-      "contentHash": "01a985794dc741d2aed920aefed89361907a1032bfc2aed32a7be77bfba7102f",
+      "contentHash": "fd7ec11c42c403a5316bfa024a9aa13bbc942782fdb49d043808ffe1bab51871",
       "functions": [
         {
           "name": "write_benchmark_artifacts",
@@ -4679,7 +4668,7 @@
           ],
           "returnType": "str",
           "exported": true,
-          "lineCount": 36
+          "lineCount": 37
         },
         {
           "name": "_write_score_chart",
@@ -4766,62 +4755,7 @@
         "_write_score_chart",
         "_write_time_chart"
       ],
-      "totalLines": 190,
-      "hasStructuralAnalysis": true
-    },
-    "app/modeling/benchmark/base.py": {
-      "filePath": "app/modeling/benchmark/base.py",
-      "contentHash": "c3fceff63759679e9a59bb98d40d8e16752d98d76bac5ae4359eb4cc17d0cdf3",
-      "functions": [],
-      "classes": [
-        {
-          "name": "BaseBenchmarkService",
-          "methods": [
-            "run"
-          ],
-          "properties": [],
-          "exported": true,
-          "lineCount": 15
-        }
-      ],
-      "imports": [
-        {
-          "source": "abc",
-          "specifiers": [
-            "abc"
-          ]
-        },
-        {
-          "source": "pandas",
-          "specifiers": [
-            "pd"
-          ]
-        },
-        {
-          "source": "app.config.enums",
-          "specifiers": [
-            "ExecutionBackend",
-            "WorkspaceMode"
-          ]
-        },
-        {
-          "source": "app.modeling.base",
-          "specifiers": [
-            "BaseService"
-          ]
-        },
-        {
-          "source": "app.modeling.benchmark.schemas",
-          "specifiers": [
-            "BenchmarkConfig",
-            "BenchmarkResultBundle"
-          ]
-        }
-      ],
-      "exports": [
-        "BaseBenchmarkService"
-      ],
-      "totalLines": 29,
+      "totalLines": 191,
       "hasStructuralAnalysis": true
     },
     "app/modeling/benchmark/errors.py": {
@@ -4894,7 +4828,7 @@
     },
     "app/modeling/benchmark/lazypredict_runner.py": {
       "filePath": "app/modeling/benchmark/lazypredict_runner.py",
-      "contentHash": "a063376b602bb84899bc4283a813f7a7309c29df634a8a1d2b04ef2c29bda692",
+      "contentHash": "b65242da8d17efde9fb036d6df2a415200420e59be6005a684e6209be4720e9e",
       "functions": [
         {
           "name": "is_lazypredict_available",
@@ -5023,15 +4957,15 @@
           ]
         },
         {
-          "source": "app.modeling.benchmark.artifacts",
+          "source": "app.modeling.base",
           "specifiers": [
-            "write_benchmark_artifacts"
+            "BaseService"
           ]
         },
         {
-          "source": "app.modeling.benchmark.base",
+          "source": "app.modeling.benchmark.artifacts",
           "specifiers": [
-            "BaseBenchmarkService"
+            "write_benchmark_artifacts"
           ]
         },
         {
@@ -5638,7 +5572,7 @@
     },
     "app/modeling/benchmark/selectors.py": {
       "filePath": "app/modeling/benchmark/selectors.py",
-      "contentHash": "95ada935bebaab77c2b7b3109a0f3696f5a1c28e36d239b4432e1d5b8fd10ea2",
+      "contentHash": "9bb0f771581fc7667e990dffb79106c934d849cad51dac44d4a57195d3638996",
       "functions": [
         {
           "name": "resolve_task_type",
@@ -5699,15 +5633,6 @@
           "returnType": "list[str]",
           "exported": true,
           "lineCount": 9
-        },
-        {
-          "name": "_is_nested_value",
-          "params": [
-            "value"
-          ],
-          "returnType": "bool",
-          "exported": true,
-          "lineCount": 2
         }
       ],
       "classes": [],
@@ -5739,10 +5664,9 @@
         "validate_target",
         "choose_stratify_target",
         "benchmark_reliability_warnings",
-        "collect_nested_object_columns",
-        "_is_nested_value"
+        "collect_nested_object_columns"
       ],
-      "totalLines": 159,
+      "totalLines": 155,
       "hasStructuralAnalysis": true
     },
     "app/modeling/benchmark/service.py": {
@@ -5830,7 +5754,7 @@
     },
     "app/modeling/benchmark/summary.py": {
       "filePath": "app/modeling/benchmark/summary.py",
-      "contentHash": "b0a431f1bff30ba8c9f1d6460b9bc056415b595ea233a59d4f901e02ba636a08",
+      "contentHash": "fc2a6c6616d1a20d1b54a81d084d85c90f360c32dae398c936e5e1107b24beb2",
       "functions": [
         {
           "name": "build_result_rows",
@@ -5842,7 +5766,7 @@
           ],
           "returnType": "list[BenchmarkResultRow]",
           "exported": true,
-          "lineCount": 35
+          "lineCount": 32
         },
         {
           "name": "leaderboard_to_dataframe",
@@ -5851,7 +5775,7 @@
           ],
           "returnType": "pd.DataFrame",
           "exported": true,
-          "lineCount": 19
+          "lineCount": 18
         },
         {
           "name": "build_benchmark_summary",
@@ -5919,7 +5843,7 @@
         "leaderboard_to_dataframe",
         "build_benchmark_summary"
       ],
-      "totalLines": 134,
+      "totalLines": 130,
       "hasStructuralAnalysis": true
     },
     "app/modeling/flaml/__init__.py": {
@@ -6783,7 +6707,7 @@
     },
     "app/modeling/pycaret/artifacts.py": {
       "filePath": "app/modeling/pycaret/artifacts.py",
-      "contentHash": "2b7d10233f9343c15a5339bc4df825dc4ac44f68bf9f4012462b746ce5dda69a",
+      "contentHash": "771b232df235bf500ebcb0cdedb2b84e0ac6060efc1b84e7477df392ab57bdbf",
       "functions": [
         {
           "name": "write_experiment_artifacts",
@@ -6867,64 +6791,6 @@
         "_render_markdown"
       ],
       "totalLines": 136,
-      "hasStructuralAnalysis": true
-    },
-    "app/modeling/pycaret/base.py": {
-      "filePath": "app/modeling/pycaret/base.py",
-      "contentHash": "843a9182193524af693b8f0dda1ae529380df03fc1dfcca090a91406e4984252",
-      "functions": [],
-      "classes": [
-        {
-          "name": "BaseExperimentService",
-          "methods": [
-            "setup_experiment",
-            "compare_models",
-            "tune_model"
-          ],
-          "properties": [],
-          "exported": true,
-          "lineCount": 28
-        }
-      ],
-      "imports": [
-        {
-          "source": "abc",
-          "specifiers": [
-            "abc"
-          ]
-        },
-        {
-          "source": "pandas",
-          "specifiers": [
-            "pd"
-          ]
-        },
-        {
-          "source": "app.config.enums",
-          "specifiers": [
-            "ExecutionBackend",
-            "WorkspaceMode"
-          ]
-        },
-        {
-          "source": "app.modeling.base",
-          "specifiers": [
-            "BaseService"
-          ]
-        },
-        {
-          "source": "app.modeling.pycaret.schemas",
-          "specifiers": [
-            "ExperimentConfig",
-            "ExperimentResultBundle",
-            "ModelSelectionSpec"
-          ]
-        }
-      ],
-      "exports": [
-        "BaseExperimentService"
-      ],
-      "totalLines": 42,
       "hasStructuralAnalysis": true
     },
     "app/modeling/pycaret/compare_runner.py": {
@@ -8066,7 +7932,7 @@
     },
     "app/modeling/pycaret/service.py": {
       "filePath": "app/modeling/pycaret/service.py",
-      "contentHash": "509909b02ecd00b248ef788f5abc6eeca3d35c7a2b6ddede8e2fe04ce656d9e3",
+      "contentHash": "4dacf5663a0c3a13f3cb2618cb44f6013bc2216abfead76e550d69543f50325f",
       "functions": [],
       "classes": [
         {
@@ -8143,6 +8009,12 @@
           ]
         },
         {
+          "source": "app.modeling.base",
+          "specifiers": [
+            "BaseService"
+          ]
+        },
+        {
           "source": "app.modeling.pycaret",
           "specifiers": [
             "setup_runner"
@@ -8152,12 +8024,6 @@
           "source": "app.modeling.pycaret.artifacts",
           "specifiers": [
             "write_experiment_artifacts"
-          ]
-        },
-        {
-          "source": "app.modeling.pycaret.base",
-          "specifiers": [
-            "BaseExperimentService"
           ]
         },
         {
@@ -8377,7 +8243,7 @@
     },
     "app/modeling/pycaret/summary.py": {
       "filePath": "app/modeling/pycaret/summary.py",
-      "contentHash": "1d9110def042a21b5908b0ad2b0f1cc423b6a53f1a890c1cf85523db58500720",
+      "contentHash": "14818e9676a5b411d3c3af8dbb57d29e48b5eeaf55337a97a6ebf7f331687f4d",
       "functions": [
         {
           "name": "safe_json_value",
@@ -8404,7 +8270,7 @@
           ],
           "returnType": "pd.DataFrame",
           "exported": true,
-          "lineCount": 17
+          "lineCount": 16
         },
         {
           "name": "metric_rows_from_dataframe",
@@ -8552,7 +8418,7 @@
         "_first_present",
         "_coerce_bool"
       ],
-      "totalLines": 255,
+      "totalLines": 254,
       "hasStructuralAnalysis": true
     },
     "app/modeling/pycaret/tune_runner.py": {
@@ -10341,7 +10207,7 @@
     },
     "app/pages/experiment_page.py": {
       "filePath": "app/pages/experiment_page.py",
-      "contentHash": "2a4da47f6166cb8fbb4bc3cdb35d4a705c96d9fccae9f7a4e24ac0a29404493b",
+      "contentHash": "6baaa4deb1755f0734fe49e955071bc072cb48b54f02e9cd3387408722bb7ee2",
       "functions": [
         {
           "name": "build_experiment_run_key",
@@ -10403,22 +10269,11 @@
         {
           "name": "_render_bundle",
           "params": [
-            "bundle",
-            "settings"
+            "bundle"
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 274
-        },
-        {
-          "name": "_build_service",
-          "params": [
-            "app_settings",
-            "metadata_store"
-          ],
-          "returnType": "PyCaretExperimentService",
-          "exported": true,
-          "lineCount": 2
+          "lineCount": 273
         }
       ],
       "classes": [],
@@ -10453,12 +10308,6 @@
             "ExperimentTaskType",
             "MLflowTrackingMode",
             "ModelSelectionSpec"
-          ]
-        },
-        {
-          "source": "app.modeling.pycaret.service",
-          "specifiers": [
-            "PyCaretExperimentService"
           ]
         },
         {
@@ -10541,15 +10390,14 @@
         "default_plot_ids_for_task",
         "default_tracking_mode",
         "render_experiment_page",
-        "_render_bundle",
-        "_build_service"
+        "_render_bundle"
       ],
-      "totalLines": 673,
+      "totalLines": 667,
       "hasStructuralAnalysis": true
     },
     "app/pages/flaml_automl_page.py": {
       "filePath": "app/pages/flaml_automl_page.py",
-      "contentHash": "0d5ac66549c13a60bcc77f753116a19a12301bd50ffae7657bb60b2639145cfe",
+      "contentHash": "92ff6230a82909829aa51e8afb15a7f7e0dea83d575c15b96c9cf09391e32a38",
       "functions": [
         {
           "name": "_metric_options_for_task",
@@ -10582,22 +10430,11 @@
           "name": "_render_flaml_results",
           "params": [
             "bundle",
-            "app_settings",
-            "metadata_store"
+            "app_settings"
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 99
-        },
-        {
-          "name": "_build_service",
-          "params": [
-            "app_settings",
-            "metadata_store"
-          ],
-          "returnType": "FlamlAutoMLService",
-          "exported": true,
-          "lineCount": 2
+          "lineCount": 98
         }
       ],
       "classes": [],
@@ -10633,12 +10470,6 @@
             "FlamlConfig",
             "FlamlSearchConfig",
             "FlamlTaskType"
-          ]
-        },
-        {
-          "source": "app.modeling.flaml.service",
-          "specifiers": [
-            "FlamlAutoMLService"
           ]
         },
         {
@@ -10704,10 +10535,9 @@
         "_metric_options_for_task",
         "_build_flaml_run_key",
         "render_flaml_automl_page",
-        "_render_flaml_results",
-        "_build_service"
+        "_render_flaml_results"
       ],
-      "totalLines": 422,
+      "totalLines": 416,
       "hasStructuralAnalysis": true
     },
     "app/pages/glossary.py": {
@@ -15112,49 +14942,6 @@
       "totalLines": 12,
       "hasStructuralAnalysis": true
     },
-    "app/profiling/base.py": {
-      "filePath": "app/profiling/base.py",
-      "contentHash": "516d497b8b04958091b46bdbcaf0cce0034217b0ad1d5f4bb04959829cde991e",
-      "functions": [],
-      "classes": [
-        {
-          "name": "BaseProfilingService",
-          "methods": [
-            "profile"
-          ],
-          "properties": [],
-          "exported": true,
-          "lineCount": 12
-        }
-      ],
-      "imports": [
-        {
-          "source": "abc",
-          "specifiers": [
-            "abc"
-          ]
-        },
-        {
-          "source": "pandas",
-          "specifiers": [
-            "pd"
-          ]
-        },
-        {
-          "source": "app.profiling.schemas",
-          "specifiers": [
-            "ProfilingArtifactBundle",
-            "ProfilingConfig",
-            "ProfilingResultSummary"
-          ]
-        }
-      ],
-      "exports": [
-        "BaseProfilingService"
-      ],
-      "totalLines": 24,
-      "hasStructuralAnalysis": true
-    },
     "app/profiling/errors.py": {
       "filePath": "app/profiling/errors.py",
       "contentHash": "5fba29785160c4be1f1fa2c31bfbf0e05b084f60b6efa84f3ce60335185f5d84",
@@ -15494,7 +15281,7 @@
     },
     "app/profiling/ydata_runner.py": {
       "filePath": "app/profiling/ydata_runner.py",
-      "contentHash": "c6db158927dbf3931e2fa9482feab6a57382f2a55447d810934eaf8cddce2145",
+      "contentHash": "8037d267388502a2d39b4af05ed5195de0b16b487b9171eea1a4c259525ab7a0",
       "functions": [
         {
           "name": "_suppress_profiling_runtime_noise",
@@ -15603,12 +15390,6 @@
           ]
         },
         {
-          "source": "app.profiling.base",
-          "specifiers": [
-            "BaseProfilingService"
-          ]
-        },
-        {
           "source": "app.profiling.errors",
           "specifiers": [
             "ProfilingError",
@@ -15643,7 +15424,7 @@
         "is_ydata_available",
         "YDataProfilingService"
       ],
-      "totalLines": 204,
+      "totalLines": 203,
       "hasStructuralAnalysis": true
     },
     "app/provenance.py": {
@@ -20166,48 +19947,6 @@
       "totalLines": 77,
       "hasStructuralAnalysis": true
     },
-    "app/validation/base.py": {
-      "filePath": "app/validation/base.py",
-      "contentHash": "12b651259870af49b69c39ca263ce342726aacb19b4bdde4314b4a55b6ea1baa",
-      "functions": [],
-      "classes": [
-        {
-          "name": "BaseValidationService",
-          "methods": [
-            "validate"
-          ],
-          "properties": [],
-          "exported": true,
-          "lineCount": 12
-        }
-      ],
-      "imports": [
-        {
-          "source": "abc",
-          "specifiers": [
-            "abc"
-          ]
-        },
-        {
-          "source": "pandas",
-          "specifiers": [
-            "pd"
-          ]
-        },
-        {
-          "source": "app.validation.schemas",
-          "specifiers": [
-            "ValidationResultSummary",
-            "ValidationRuleConfig"
-          ]
-        }
-      ],
-      "exports": [
-        "BaseValidationService"
-      ],
-      "totalLines": 24,
-      "hasStructuralAnalysis": true
-    },
     "app/validation/errors.py": {
       "filePath": "app/validation/errors.py",
       "contentHash": "6c82f66a4423406b2a3d4f61d7a3843faf764c1df33663e9b74682bef79b401c",
@@ -20840,7 +20579,7 @@
     },
     "app/validation/service.py": {
       "filePath": "app/validation/service.py",
-      "contentHash": "dc05776a765d7f98955bf0e824ce4e884b4d14d35bd9d587f863fcee292ee3b1",
+      "contentHash": "421dcdbe32adb52bffba47e67ed4726522f598d9e9e196394fda1ef6f8a127d9",
       "functions": [
         {
           "name": "validate_dataset",
@@ -20907,12 +20646,6 @@
           ]
         },
         {
-          "source": "app.validation.base",
-          "specifiers": [
-            "BaseValidationService"
-          ]
-        },
-        {
           "source": "app.validation.gx_context",
           "specifiers": [
             "is_gx_available"
@@ -20949,7 +20682,7 @@
         "GreatExpectationsValidationService",
         "validate_dataset"
       ],
-      "totalLines": 81,
+      "totalLines": 80,
       "hasStructuralAnalysis": true
     },
     "app/validation/summary.py": {
@@ -21000,7 +20733,7 @@
     },
     "docker-compose.yml": {
       "filePath": "docker-compose.yml",
-      "contentHash": "1731f11292151ccdfd8b46b05829018d6ec1a49b3f2ae4ad33319ca755c425aa",
+      "contentHash": "bbcc1217b5c9dbc35ea8355cc5bb773f2814d34f06682f8e873aeb08ed985b55",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -21010,7 +20743,7 @@
     },
     "docs/README.md": {
       "filePath": "docs/README.md",
-      "contentHash": "b04f0cbe1496382232b04917038bf38dad29e081617900b690046067c1a4a189",
+      "contentHash": "84f133c1d2221b723ae9f3f08627ce8ea0531305511e6f5d436e3e265d1fea57",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -21020,12 +20753,12 @@
     },
     "docs/architecture.md": {
       "filePath": "docs/architecture.md",
-      "contentHash": "8a3296e68c99a5eae1887bb8823dbd5d290ce51b7bd0b408dee2a94fa275299e",
+      "contentHash": "93b1d9f9961926c49aa4a6e7f19b99cc3f5c476bdc7bdfe3c8e8d8bed9134d72",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 235,
+      "totalLines": 237,
       "hasStructuralAnalysis": true
     },
     "docs/assets/demo/README.md": {
@@ -21050,32 +20783,32 @@
     },
     "docs/developer-guide.md": {
       "filePath": "docs/developer-guide.md",
-      "contentHash": "b7a98c9b1b23c800ec8744da16996096d515091f390024d23782da647f90e433",
+      "contentHash": "2b5f1089f899abc7e89f028c8a40a254173d68fd2985731d3df62d9c516b4e72",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 271,
+      "totalLines": 279,
       "hasStructuralAnalysis": true
     },
     "docs/operations.md": {
       "filePath": "docs/operations.md",
-      "contentHash": "0c8748dd8b43da7d078c39c2b3c31fddde291029124d9b72297e65965d956793",
+      "contentHash": "11fdc55efb6d5c44e6825b9a59c89ee2e4f30719484490fbeac21646f13d8eb4",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 329,
+      "totalLines": 333,
       "hasStructuralAnalysis": true
     },
     "pyproject.toml": {
       "filePath": "pyproject.toml",
-      "contentHash": "e17fc2c6591fa73b402a281b62a3e6e171b95d69862c33c2e35f82670a109bfc",
+      "contentHash": "b9ccfc24f8a9c1b28bf40f24d08cac66474ad660b502dee2a2e5460adf95b1df",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 339,
+      "totalLines": 333,
       "hasStructuralAnalysis": true
     },
     "pyrightconfig.json": {
@@ -21086,68 +20819,6 @@
       "imports": [],
       "exports": [],
       "totalLines": 48,
-      "hasStructuralAnalysis": true
-    },
-    "scripts/_fetch_uci_meta.py": {
-      "filePath": "scripts/_fetch_uci_meta.py",
-      "contentHash": "457b84e8d1e82aac947650c5dc6f00d61a485cd2c96f138e4a8ec856f0c7e0ff",
-      "functions": [
-        {
-          "name": "_summarize",
-          "params": [
-            "uid",
-            "ds"
-          ],
-          "returnType": "str",
-          "exported": true,
-          "lineCount": 13
-        },
-        {
-          "name": "_main",
-          "params": [],
-          "returnType": "None",
-          "exported": true,
-          "lineCount": 8
-        }
-      ],
-      "classes": [],
-      "imports": [
-        {
-          "source": "asyncio",
-          "specifiers": [
-            "asyncio"
-          ]
-        },
-        {
-          "source": "sys",
-          "specifiers": [
-            "sys"
-          ]
-        },
-        {
-          "source": "typing",
-          "specifiers": [
-            "Any"
-          ]
-        },
-        {
-          "source": "ucimlrepo",
-          "specifiers": [
-            "fetch_ucirepo"
-          ]
-        },
-        {
-          "source": "app.concurrency",
-          "specifiers": [
-            "to_thread_many"
-          ]
-        }
-      ],
-      "exports": [
-        "_summarize",
-        "_main"
-      ],
-      "totalLines": 115,
       "hasStructuralAnalysis": true
     },
     "scripts/batch_uci_runner.py": {
@@ -21596,181 +21267,6 @@
         "main"
       ],
       "totalLines": 310,
-      "hasStructuralAnalysis": true
-    },
-    "scripts/colab_mcp_spike.py": {
-      "filePath": "scripts/colab_mcp_spike.py",
-      "contentHash": "2aea962c8a696b86b3cb4c48072af52b4fdd4e286c7c033e844f811a86552136",
-      "functions": [
-        {
-          "name": "_check_prerequisites",
-          "params": [],
-          "returnType": "list[str]",
-          "exported": true,
-          "lineCount": 10
-        },
-        {
-          "name": "_run_spike",
-          "params": [],
-          "returnType": "dict",
-          "exported": true,
-          "lineCount": 68
-        },
-        {
-          "name": "main",
-          "params": [],
-          "returnType": "int",
-          "exported": true,
-          "lineCount": 55
-        }
-      ],
-      "classes": [],
-      "imports": [
-        {
-          "source": "asyncio",
-          "specifiers": [
-            "asyncio"
-          ]
-        },
-        {
-          "source": "contextlib",
-          "specifiers": [
-            "contextlib"
-          ]
-        },
-        {
-          "source": "json",
-          "specifiers": [
-            "json"
-          ]
-        },
-        {
-          "source": "shutil",
-          "specifiers": [
-            "shutil"
-          ]
-        },
-        {
-          "source": "sys",
-          "specifiers": [
-            "sys"
-          ]
-        },
-        {
-          "source": "time",
-          "specifiers": [
-            "time"
-          ]
-        }
-      ],
-      "exports": [
-        "_check_prerequisites",
-        "_run_spike",
-        "main"
-      ],
-      "totalLines": 168,
-      "hasStructuralAnalysis": true
-    },
-    "scripts/fetch_remaining_sklearn.py": {
-      "filePath": "scripts/fetch_remaining_sklearn.py",
-      "contentHash": "74d9370607cfc1275627cb2772646f308a1afa49051a6be95b52cc0007be82fd",
-      "functions": [
-        {
-          "name": "_fetch_all",
-          "params": [],
-          "returnType": "dict[str, object]",
-          "exported": true,
-          "lineCount": 11
-        },
-        {
-          "name": "main",
-          "params": [],
-          "returnType": "None",
-          "exported": true,
-          "lineCount": 44
-        }
-      ],
-      "classes": [],
-      "imports": [
-        {
-          "source": "asyncio",
-          "specifiers": [
-            "asyncio"
-          ]
-        },
-        {
-          "source": "numpy",
-          "specifiers": [
-            "np"
-          ]
-        },
-        {
-          "source": "scipy.sparse",
-          "specifiers": [
-            "scipy.sparse"
-          ]
-        },
-        {
-          "source": "sklearn.datasets",
-          "specifiers": [
-            "fetch_20newsgroups_vectorized",
-            "fetch_lfw_pairs",
-            "fetch_lfw_people",
-            "fetch_olivetti_faces",
-            "fetch_rcv1",
-            "fetch_species_distributions"
-          ]
-        },
-        {
-          "source": "app.concurrency",
-          "specifiers": [
-            "gather_with_concurrency"
-          ]
-        }
-      ],
-      "exports": [
-        "_fetch_all",
-        "main"
-      ],
-      "totalLines": 85,
-      "hasStructuralAnalysis": true
-    },
-    "scripts/save_remaining_sklearn.py": {
-      "filePath": "scripts/save_remaining_sklearn.py",
-      "contentHash": "f3dca135e520f29805392d1933e0564107e3773b04eaadb06ed4bc085899b349",
-      "functions": [],
-      "classes": [],
-      "imports": [
-        {
-          "source": "os",
-          "specifiers": [
-            "os"
-          ]
-        },
-        {
-          "source": "numpy",
-          "specifiers": [
-            "np"
-          ]
-        },
-        {
-          "source": "pandas",
-          "specifiers": [
-            "pd"
-          ]
-        },
-        {
-          "source": "sklearn.datasets",
-          "specifiers": [
-            "fetch_20newsgroups_vectorized",
-            "fetch_lfw_pairs",
-            "fetch_lfw_people",
-            "fetch_olivetti_faces"
-          ]
-        }
-      ],
-      "exports": [],
-      "totalLines": 72,
       "hasStructuralAnalysis": true
     },
     "scripts/verify_optional_deps.py": {
@@ -23218,7 +22714,7 @@
     },
     "tests/test_config.py": {
       "filePath": "tests/test_config.py",
-      "contentHash": "0b804cb2bb90a890f2b2834e024ee1a1127ff83c4931856eef08788738466a18",
+      "contentHash": "807c9b98f101b0c79da042d5e91fedecf09f00f56784cdddb3ca95713011cc86",
       "functions": [],
       "classes": [
         {
@@ -23298,7 +22794,7 @@
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 58
+          "lineCount": 57
         }
       ],
       "imports": [
@@ -23353,7 +22849,7 @@
         "TestSettingsPersistence",
         "TestPackagingMetadata"
       ],
-      "totalLines": 263,
+      "totalLines": 262,
       "hasStructuralAnalysis": true
     },
     "tests/test_dataset_workspace.py": {
@@ -24319,8 +23815,14 @@
     },
     "tests/test_hardening_smoke.py": {
       "filePath": "tests/test_hardening_smoke.py",
-      "contentHash": "693c3857dcfd7aad36fa14d543a83c55d785ba626cfaca9a12c4e6291ba75879",
+      "contentHash": "761dcb9248e83fcb2321a13a7eb651323f3735e7c5d8886cb9fcf51c6972dfe9",
       "functions": [
+        {
+          "name": "test_compose_publishes_workbench_on_loopback_only",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
         {
           "name": "test_local_first_smoke_flow_persists_metadata_across_workflows",
           "params": [
@@ -24467,16 +23969,17 @@
         }
       ],
       "exports": [
+        "test_compose_publishes_workbench_on_loopback_only",
         "_FakeClassifier",
         "test_local_first_smoke_flow_persists_metadata_across_workflows",
         "test_streamlit_config_disables_auto_sidebar_navigation"
       ],
-      "totalLines": 327,
+      "totalLines": 336,
       "hasStructuralAnalysis": true
     },
     "tests/test_ingestion.py": {
       "filePath": "tests/test_ingestion.py",
-      "contentHash": "4da5446710814bfa41c0db59c9e2cba0c51d8b47b0ad17c0e299718f8e3c904d",
+      "contentHash": "af1f25753f1b493d644b0b136e2cc720df4f2cace6e6be0474afd0555cab662f",
       "functions": [],
       "classes": [
         {
@@ -24518,13 +24021,13 @@
           "lineCount": 27
         },
         {
-          "name": "TestChunkedCSVReading",
+          "name": "TestBoundedCSVReading",
           "methods": [
-            "test_csv_loader_reads_in_chunks_and_stops_after_row_limit"
+            "test_csv_loader_passes_row_limit_to_pandas_parser"
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 45
+          "lineCount": 25
         },
         {
           "name": "TestFailures",
@@ -24621,15 +24124,15 @@
         "TestLocalFileLoaders",
         "TestRemoteLoaders",
         "TestDataFrameLoaderAndPreview",
-        "TestChunkedCSVReading",
+        "TestBoundedCSVReading",
         "TestFailures"
       ],
-      "totalLines": 376,
+      "totalLines": 356,
       "hasStructuralAnalysis": true
     },
     "tests/test_ingestion_async.py": {
       "filePath": "tests/test_ingestion_async.py",
-      "contentHash": "2ab45a6094abebc86460390dcbbb10c41ca6dbd5b4864a4e7f95be52edbda35e",
+      "contentHash": "079d6b2b9af61fc552030c1e20f7e479aa00d41b130b3b7151a4b5d1872c7380",
       "functions": [],
       "classes": [
         {
