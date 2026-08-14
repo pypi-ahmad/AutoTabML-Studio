@@ -31,6 +31,12 @@ def export_deployment_bundle(
 
     if not model_path.is_file() or not metadata_path.is_file():
         raise FileNotFoundError("Model and metadata files are required.")
+    try:
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Model metadata is not valid JSON: {exc}") from exc
+    if metadata.get("research_only") is True or metadata.get("deployable") is False:
+        raise ValueError("research-only model contexts cannot be exported for deployment.")
     output_path = output_path.with_suffix(".zip")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as temporary:

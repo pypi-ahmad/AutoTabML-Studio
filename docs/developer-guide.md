@@ -8,10 +8,11 @@ Use Python 3.11 or 3.12 for the full workflow including PyCaret experiments. Pyt
 uv sync --locked --extra dev
 ```
 
-Full local maintainer install:
+Broad local maintainer install (exclude TabFM because its upstream `typeguard`
+constraint conflicts with `ydata-profiling`):
 
 ```bash
-uv sync --locked --all-extras
+uv sync --locked --extra benchmark --extra experiment --extra flaml --extra profiling --extra timesfm
 ```
 
 Optional extras by workflow:
@@ -23,7 +24,13 @@ uv sync --locked --extra dev --extra benchmark
 uv sync --locked --extra dev --extra experiment
 uv sync --locked --extra dev --extra gpu
 uv sync --locked --extra dev --extra kaggle
+uv sync --locked --extra dev --extra tabfm
+uv sync --locked --extra dev --extra timesfm
 ```
+
+Run TabFM and profiling in separate environments: TabFM requires
+`typeguard<3`, while `ydata-profiling` requires `typeguard>=4`. The conflict is
+declared in `[tool.uv].conflicts` so the shared lockfile remains valid.
 
 Refresh the lockfile after dependency changes with:
 
@@ -60,6 +67,8 @@ tests in `tests/test_model_pricing.py` whenever a reference rate changes.
 uv run autotabml auto-run data/train.csv --target target --mode quick
 uv run autotabml job-list
 uv run autotabml drift-check data/current.csv --baseline artifacts/models/model_drift_baseline.json
+uv run autotabml tabfm-run data/train.csv --target target --accept-tabfm-license --allow-download
+uv run autotabml timesfm-forecast data/demand.csv --timestamp date --target demand --horizon 12 --allow-download
 ```
 
 Test Auto Run at public service, CLI, Streamlit, and end-to-end seams.
@@ -232,6 +241,9 @@ The repo emphasizes local, hermetic tests:
 - `tmp_path` for filesystem isolation
 - monkeypatched service boundaries for optional dependencies and network calls
 - tests marked `integration` are reserved for optional heavy-dependency checks and are intended for the manual CI integration job
+- foundation-model unit tests inject fake checkpoint/model boundaries and must
+  never download weights; real dependency/weight smoke tests stay opt-in
+  integration checks
 
 CSV ingestion passes the configured row limit directly to Pandas through
 `nrows`. Keep this bounded native path instead of accumulating chunks and
@@ -252,6 +264,9 @@ concatenate path (1.34x faster). Treat this as a regression baseline, not an SLA
 - new benchmark/experiment result handling: extend the service and artifact layers before touching pages
 - new prediction loaders: extend `app/prediction/loader.py`
 - new page entrypoints: register them in `app/pages/registry.py`
+- foundation-model adapters: keep model identity/revision in
+  `app/modeling/foundation/checkpoints.py`, services free of Streamlit, and raw
+  rows out of MLflow
 
 ## Local Troubleshooting
 

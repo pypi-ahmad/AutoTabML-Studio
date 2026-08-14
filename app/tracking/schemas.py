@@ -15,6 +15,8 @@ class RunType(str, Enum):
     BENCHMARK = "benchmark"
     EXPERIMENT = "experiment"
     FLAML = "flaml"
+    TABFM = "tabfm"
+    TIMESFM = "timesfm"
     UNKNOWN = "unknown"
 
 

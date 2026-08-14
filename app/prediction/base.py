@@ -14,7 +14,12 @@ from app.prediction.artifacts import write_prediction_artifacts
 from app.prediction.batch_predict import build_batch_prediction_result, resolve_batch_dataframe
 from app.prediction.errors import PredictionHistoryError
 from app.prediction.history import PredictionHistoryStore
-from app.prediction.loader import LocalFlamlModelLoader, LocalPyCaretModelLoader, MLflowModelLoader
+from app.prediction.loader import (
+    LocalFlamlModelLoader,
+    LocalPyCaretModelLoader,
+    LocalTabFMContextLoader,
+    MLflowModelLoader,
+)
 from app.prediction.schemas import (
     BatchPredictionRequest,
     BatchPredictionResult,
@@ -106,6 +111,9 @@ class PredictionService(BasePredictionService):
             model_dirs=local_model_dirs or [],
             metadata_dirs=local_metadata_dirs or [],
         )
+        self._tabfm_loader = LocalTabFMContextLoader(
+            metadata_dirs=list(dict.fromkeys((local_metadata_dirs or []) + (local_model_dirs or []))),
+        )
         self._mlflow_loader = MLflowModelLoader(
             tracking_uri=tracking_uri,
             registry_uri=registry_uri,
@@ -116,7 +124,8 @@ class PredictionService(BasePredictionService):
     def discover_local_models(self):  # noqa: ANN201
         pycaret_refs = self._local_loader.discover()
         flaml_refs = self._flaml_loader.discover()
-        return pycaret_refs + flaml_refs
+        tabfm_refs = self._tabfm_loader.discover()
+        return pycaret_refs + flaml_refs + tabfm_refs
 
     def list_registered_models(self):  # noqa: ANN201
         if not self._registry_enabled:
@@ -191,17 +200,28 @@ class PredictionService(BasePredictionService):
                     requested_run_id=request.run_id,
                 ) as span:
                     if request.source_type == ModelSourceType.LOCAL_SAVED_MODEL:
-                        # Check if this is a FLAML model by looking for a FLAML metadata sidecar
-                        flaml_refs = self._flaml_loader.discover()
-                        identifier = str(request.model_identifier or request.model_path or "")
-                        for ref in flaml_refs:
+                        identifier = str(request.metadata_path or request.model_identifier or request.model_path or "")
+                        tabfm_refs = self._tabfm_loader.discover()
+                        for ref in tabfm_refs:
                             if identifier and identifier.lower() in {
                                 ref.model_identifier.lower(),
                                 ref.display_name.lower(),
                                 ref.load_reference.lower(),
+                                str(ref.metadata_path or "").lower(),
                             }:
-                                loaded_model = self._flaml_loader.load(request)
+                                loaded_model = self._tabfm_loader.load(request)
                                 break
+                        # Check if this is a FLAML model by looking for a FLAML metadata sidecar
+                        if loaded_model is None:
+                            flaml_refs = self._flaml_loader.discover()
+                            for ref in flaml_refs:
+                                if identifier and identifier.lower() in {
+                                    ref.model_identifier.lower(),
+                                    ref.display_name.lower(),
+                                    ref.load_reference.lower(),
+                                }:
+                                    loaded_model = self._flaml_loader.load(request)
+                                    break
                         if loaded_model is None:
                             loaded_model = self._local_loader.load(request)
                     else:

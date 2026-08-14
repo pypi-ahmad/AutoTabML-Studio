@@ -7,6 +7,28 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- A single Foundation Models page and CLI commands for revision-pinned Google
+  TabFM 1.0 research evaluation and TimesFM 2.5 forecasting.
+- TabFM task inference, holdout metrics, explicit non-commercial license and
+  first-download consent, plus checksum-backed saved contexts reusable by
+  Predictions but blocked from registry/deployment.
+- TimesFM single/grouped forecasts, q10–q90 quantiles, frequency handling,
+  missing-value preparation, and final-horizon backtest metrics.
+- Local job history and aggregate-only MLflow summaries for both workflows.
+
+### Changed
+
+- Added optional `tabfm` and `timesfm` dependency extras and pinned exact model
+  revisions for reproducible checkpoint resolution.
+
+### Security
+
+- Foundation-model downloads are opt-in, local execution does not upload
+  datasets, and MLflow receives no raw rows, contexts, predictions, or forecast
+  tables from these workflows.
+
 ## [0.3.0] - 2026-08-14
 
 ### Added

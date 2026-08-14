@@ -61,6 +61,92 @@ class ModelLoader(ABC):
         """Load and normalize a model reference for prediction."""
 
 
+class LocalTabFMContextLoader(ModelLoader):
+    """Rehydrate checksum-backed TabFM research contexts for prediction."""
+
+    def __init__(self, *, metadata_dirs: list[Path], service=None) -> None:  # noqa: ANN001
+        from app.modeling.foundation import TabFMService
+
+        self._metadata_dirs = list(dict.fromkeys(metadata_dirs))
+        self._service = service or TabFMService()
+
+    def supports(self, source_type: ModelSourceType) -> bool:
+        return source_type == ModelSourceType.LOCAL_SAVED_MODEL
+
+    def discover(self) -> list[AvailableModelReference]:
+        references: list[AvailableModelReference] = []
+        seen: set[Path] = set()
+        for directory in self._metadata_dirs:
+            if not directory.is_dir():
+                continue
+            for metadata_path in directory.glob("*_tabfm_metadata.json"):
+                resolved = metadata_path.resolve()
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                try:
+                    payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+                    if payload.get("trusted_source") != "autotabml_tabfm_research_context_v1":
+                        continue
+                    task_type = coerce_prediction_task_type(payload.get("task_type"))
+                    context_path = metadata_path.parent / str(payload.get("context_file", ""))
+                    references.append(
+                        AvailableModelReference(
+                            source_type=ModelSourceType.LOCAL_SAVED_MODEL,
+                            display_name=metadata_path.stem.removesuffix("_tabfm_metadata"),
+                            model_identifier=str(metadata_path),
+                            load_reference=str(metadata_path),
+                            task_type=task_type or PredictionTaskType.UNKNOWN,
+                            description="TabFM research-only saved context",
+                            model_path=context_path,
+                            metadata_path=metadata_path,
+                            feature_columns=[str(value) for value in payload.get("feature_columns", [])],
+                            metadata=payload,
+                        )
+                    )
+                except (OSError, ValueError, json.JSONDecodeError):
+                    continue
+        return references
+
+    def load(self, request: PredictionRequest) -> LoadedModel:
+        references = self.discover()
+        identifier = str(request.metadata_path or request.model_identifier or request.model_path or "")
+        selected = next(
+            (
+                reference
+                for reference in references
+                if identifier.lower()
+                in {
+                    reference.model_identifier.lower(),
+                    reference.display_name.lower(),
+                    reference.load_reference.lower(),
+                }
+            ),
+            None,
+        )
+        metadata_path = request.metadata_path or (selected.metadata_path if selected else None)
+        if metadata_path is None:
+            raise ModelLoadError("Could not resolve a trusted TabFM research context.")
+        try:
+            loaded = self._service.load_context(metadata_path)
+        except Exception as exc:
+            raise ModelLoadError(f"Could not load TabFM research context: {exc}") from exc
+        task_type = coerce_prediction_task_type(loaded.task_type) or PredictionTaskType.UNKNOWN
+        return LoadedModel(
+            source_type=ModelSourceType.LOCAL_SAVED_MODEL,
+            task_type=task_type,
+            model_identifier=selected.display_name if selected else metadata_path.stem,
+            load_reference=str(metadata_path),
+            loader_name=self.__class__.__name__,
+            scorer_kind="sklearn_like",
+            supported_prediction_modes=[PredictionMode.SINGLE_ROW, PredictionMode.BATCH],
+            feature_columns=loaded.feature_columns,
+            target_column=loaded.target_column,
+            metadata={**loaded.metadata, "framework": "tabfm", "research_only": True, "deployable": False},
+            native_model=loaded.native_model,
+        )
+
+
 class LocalPyCaretModelLoader(ModelLoader):
     """Load local saved PyCaret model artifacts."""
 

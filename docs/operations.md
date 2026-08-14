@@ -37,6 +37,10 @@ following on-disk layout:
 └── tmp/                       # partial / failed artifacts
 ```
 
+Foundation-model run artifacts live under `experiments/foundation/`. Optional
+saved TabFM research contexts and their SHA256 sidecars live under `models/`.
+TimesFM does not save a model artifact.
+
 `<artifacts-root>` defaults to `./artifacts` (relative to the
 working directory). Override with `AUTOTABML_ARTIFACTS__ROOT_DIR`.
 
@@ -45,7 +49,7 @@ working directory). Override with `AUTOTABML_ARTIFACTS__ROOT_DIR`.
 After install, run:
 
 ```bash
-uv sync --locked --all-extras
+uv sync --locked --extra benchmark --extra experiment --extra flaml --extra profiling --extra timesfm
 uv run --no-sync autotabml init-local-storage
 uv run --no-sync autotabml doctor
 ```
@@ -148,6 +152,24 @@ uv sync --locked --extra benchmark
 uv sync --locked --extra flaml
 ```
 
+### "TabFM or TimesFM is unavailable"
+
+Use Python 3.11+ for TabFM, then install only the required workflow:
+
+```bash
+uv sync --locked --extra tabfm
+uv sync --locked --extra timesfm
+```
+
+The first run checks the local Hugging Face cache. If the exact pinned revision
+is absent, approve the download in the UI or pass `--allow-download`. TabFM also
+requires `--accept-tabfm-license`; its weights are non-commercial and
+non-production only.
+
+TabFM cannot be installed in the same uv environment as the profiling extra:
+their upstream `typeguard` requirements do not overlap. Keep a dedicated TabFM
+environment if you also need `ydata-profiling`.
+
 ### "Profiling page says 'ydata-profiling' is missing"
 
 Install the profiling extra. On Python 3.12+ also pin
@@ -232,6 +254,8 @@ What to back up:
    registry, run records.
 4. **`<artifacts-root>/models/*.pkl`** + `*.sha256` sidecars —
    the trained models.
+   Include `*_tabfm_context.json`, `*_tabfm_metadata.json`, and their sidecars
+   if you use saved TabFM research contexts.
 5. **`<artifacts-root>/predictions/history.jsonl`** —
    prediction audit log.
 
@@ -304,6 +328,11 @@ sqlite3 /app/artifacts/app/app_metadata.sqlite3 "SELECT COUNT(*) FROM jobs"
 ```
 
 ## Security operations
+
+- Foundation models execute locally. Their only required outbound connection
+  is an explicitly approved, revision-pinned Hugging Face checkpoint download.
+- Do not copy TabFM saved contexts into production systems; deployment export
+  rejects their research-only metadata.
 
 - **Rotate provider API keys** regularly. Set them via env vars
   at startup (`OPENAI_API_KEY=...`) and never write them to

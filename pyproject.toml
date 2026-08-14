@@ -81,6 +81,14 @@ flaml = [
     "lightgbm>=4.0",
     "xgboost>=2.0",
 ]
+tabfm = [
+    "tabfm[pytorch]>=1.0.1,<1.1; python_version >= '3.11'",
+    "huggingface-hub>=0.34,<2; python_version >= '3.11'",
+]
+timesfm = [
+    "timesfm[torch]>=2.0.2,<2.1",
+    "huggingface-hub>=0.34,<2",
+]
 gpu = [
     "xgboost>=2.0",
     "lightgbm>=4.0",
@@ -133,6 +141,12 @@ Changelog = "https://github.com/pypi-ahmad/AutoTabML-Studio/blob/main/CHANGELOG.
 [tool.uv]
 default-groups = ["dev"]
 managed = true
+conflicts = [
+    [
+        { extra = "tabfm" },
+        { extra = "profiling" },
+    ],
+]
 
 # ───────────────────────────────────────────────────────────────────────────
 # Hatchling — build backend

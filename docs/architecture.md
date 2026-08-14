@@ -25,15 +25,15 @@ satisfy four hard constraints:
    (UCI, Kaggle, a URL, an LLM provider). This is enforced by
    `app.security.safe_http` (SSRF guard) and the
    `gatherUsageStats = false` setting in `.streamlit/config.toml`.
-3. **Reproducible.** Every run is logged to MLflow with
-   parameters, metrics, and artifacts. The local SQLite store
+3. **Reproducible.** When MLflow is installed, runs log
+   parameters, aggregate metrics, and safe artifacts. The local SQLite store
    records jobs and the saved-model metadata. The lockfile
    (`uv.lock`) pins every dependency.
-4. **Three AutoML engines, shared data contracts.** LazyPredict for quick
-   screening, PyCaret for full experiments, and FLAML for
-   budgeted search expose consistent `BenchmarkResultBundle`
-   / `ExperimentResultBundle` / `FlamlResultBundle` shape, so
-   the History and Compare pages are engine-agnostic. A service remains
+4. **Purpose-specific engines, shared data contracts.** LazyPredict screens,
+   PyCaret and FLAML train, TabFM performs research-only in-context evaluation,
+   and TimesFM 2.5 forecasts regular single or grouped series. Existing AutoML
+   engines expose consistent result-bundle shapes, so History and Compare stay
+   engine-agnostic. A service remains
    concrete until a second implementation or a published extension contract
    creates a real polymorphic boundary.
 
@@ -43,7 +43,7 @@ satisfy four hard constraints:
 ┌──────────────────────────────────────────────────────────────┐
 │                  Streamlit UI (app/main.py)                  │
 │   Dashboard · Load · Validation · Profiling · Benchmark       │
-│   Train & Tune · FLAML · Predictions · Models · History      │
+│   Train & Tune · FLAML · Foundation Models · Predictions     │
 │   Compare · Notebook · Registry · Settings                   │
 └────────────────────────┬─────────────────────────────────────┘
                          │  thin entry points
@@ -55,6 +55,7 @@ satisfy four hard constraints:
 │  loaders    │  rules + GX  │  ydata-pro │  benchmark        │
 │  metadata   │  summary     │  (optional)│  pycaret          │
 │  hash       │  artifacts   │  artifacts │  flaml            │
+│             │              │            │  tabfm · timesfm  │
 │                                                              │
 │  Prediction │  Tracking    │  Registry  │  Observability    │
 │  ─────────  │  ────────    │  ────────  │  ────────────     │
@@ -83,6 +84,7 @@ satisfy four hard constraints:
 | `app/modeling/benchmark/`    | LazyPredict orchestration, ranking, MLflow logging. | `benchmark_dataset(df, config)`        |
 | `app/modeling/pycaret/`      | PyCaret compare → tune → evaluate → finalize → save pipeline. OOP API. | `PyCaretExperimentService`             |
 | `app/modeling/flaml/`        | FLAML AutoML service, search → save pipeline, leaderboard, MLflow. | `FlamlAutoMLService`                    |
+| `app/modeling/foundation/`   | Exact-revision checkpoint resolution, TabFM evaluation/context persistence, TimesFM grouped quantile forecasting, safe MLflow summaries. | `TabFMService`, `TimesFMService` |
 | `app/prediction/`            | Model discovery, secure loaders (pickle / skops with SHA + trust-root check), scoring. | `ModelLoader`, `LoadedModel`           |
 | `app/tracking/`              | MLflow queries, history, run comparison, description generator. | `HistoryService`                        |
 | `app/registry/`              | MLflow model registration and promotion (champion / candidate / archived). | `RegistryService`                       |
@@ -130,10 +132,12 @@ satisfy four hard constraints:
    (source type, model identifier, schema, task type hint).
 3. `app.prediction.loader.ModelLoader.load(request)` selects
    the correct loader (`LocalPyCaretModelLoader`,
-   `LocalFlamlModelLoader`, or `MLflowModelLoader`).
+   `LocalFlamlModelLoader`, `LocalTabFMContextLoader`, or
+   `MLflowModelLoader`).
 4. Local loaders call `verify_local_artifact(...)` first
    (path-in-trust-root + SHA256 sidecar check) before
-   `pickle.load` or `skops.io.load`. MLflow loaders call
+   `pickle.load` or `skops.io.load`. The TabFM loader verifies JSON/context
+   checksums and rehydrates the pinned model in memory. MLflow loaders call
    `mlflow.pyfunc.load_model`.
 5. The returned `LoadedModel` is passed to a scorer which
    reads the input CSV, validates schema, scores, and writes
@@ -179,6 +183,13 @@ prediction compares inputs with the saved baseline.
 - **Trusted-artifact guard** — `app.security.trusted_artifacts`
   enforces path-in-trust-root + SHA256 sidecar before
   unpickling.
+- **Foundation-model consent** — uncached pinned snapshots cannot be downloaded
+  until the user opts in. TabFM additionally requires acceptance of its
+  non-commercial/non-production weights license.
+- **Data and deployment boundary** — foundation-model execution is local;
+  MLflow receives no raw rows, sampled contexts, predictions, or forecast
+  tables. Saved TabFM contexts can be reused locally but deployment export
+  rejects them.
 - **Secret masking** — `app.security.masking.redact_key_in_text`
   scrubs common API key shapes from log output.
 - **Container hardening** — `Dockerfile` runs as non-root
@@ -191,7 +202,7 @@ prediction compares inputs with the saved baseline.
 ## Performance model
 
 - **Lazy loading** — all optional dependencies (PyCaret,
-  FLAML, ydata-profiling, Great Expectations) are imported
+  FLAML, TabFM, TimesFM, ydata-profiling, Great Expectations) are imported
   inside the function that uses them. Importing `app` does
   not load them.
 - **Sampling** — benchmarks over 100K rows and profiles

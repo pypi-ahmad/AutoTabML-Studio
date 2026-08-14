@@ -30,6 +30,7 @@ __all__ = [
     "LoadedModel",
     "LocalFlamlModelLoader",
     "LocalPyCaretModelLoader",
+    "LocalTabFMContextLoader",
     "MLflowModelLoader",
     "ModelLoader",
     "ModelSourceType",
@@ -58,12 +59,19 @@ def __getattr__(name: str):
             "PredictionService": module.PredictionService,
         }[name]
 
-    if name in {"LocalFlamlModelLoader", "LocalPyCaretModelLoader", "MLflowModelLoader", "ModelLoader"}:
+    if name in {
+        "LocalFlamlModelLoader",
+        "LocalPyCaretModelLoader",
+        "LocalTabFMContextLoader",
+        "MLflowModelLoader",
+        "ModelLoader",
+    }:
         module = importlib.import_module("app.prediction.loader")
 
         return {
             "LocalFlamlModelLoader": module.LocalFlamlModelLoader,
             "LocalPyCaretModelLoader": module.LocalPyCaretModelLoader,
+            "LocalTabFMContextLoader": module.LocalTabFMContextLoader,
             "MLflowModelLoader": module.MLflowModelLoader,
             "ModelLoader": module.ModelLoader,
         }[name]

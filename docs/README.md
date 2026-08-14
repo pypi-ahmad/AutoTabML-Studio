@@ -66,7 +66,8 @@ exists, how it works, and how to use or extend it.
 AutoTabML Studio is a **local-first automated machine-learning
 workbench** that takes you from a raw CSV to a trained,
 evaluated, and deployable model — entirely on your machine.
-Three AutoML engines (LazyPredict, PyCaret, FLAML), end-to-end
+Three AutoML engines (LazyPredict, PyCaret, FLAML), pinned local Google
+TabFM/TimesFM foundation-model workflows, end-to-end
 MLflow tracking, an MLflow-style model registry, AI-generated
 summaries (OpenAI, Anthropic, Gemini, Ollama), and a CLI that
 mirrors the Streamlit UI. v0.3.0 adds guided production
@@ -86,6 +87,8 @@ typing, testing, and documentation are first-class.
 - `app/` — the Python package. All business logic.
 - `app/main.py` — the Streamlit entry point.
 - `app/cli.py` — the CLI entry point.
+- `app/modeling/foundation/` — TabFM/TimesFM checkpoint, service, artifact,
+  persistence, and MLflow-summary boundaries.
 - `app/pages/` — Streamlit page entry points (thin wrappers
   around the service layer).
 - `app/ingestion/`, `app/validation/`, `app/profiling/`,

@@ -10,10 +10,10 @@ Go from a raw CSV to a trained, evaluated, and deployable model — entirely on
 your machine. The same service layer powers the Streamlit UI and the CLI, so
 results are always reproducible. No cloud account, no outbound telemetry.
 
-**What it is.** A single workspace that wraps the three most common tabular
-AutoML paths — quick LazyPredict benchmarks, full PyCaret experiments, and
-budgeted FLAML searches — with MLflow tracking, a local model registry, and
-quality/profiling guard-rails, behind a guided interface and a scriptable CLI.
+**What it is.** A single workspace that wraps three common tabular AutoML
+paths — LazyPredict, PyCaret, and FLAML — plus local Google TabFM research
+evaluation and TimesFM 2.5 forecasting, with MLflow tracking, a local model
+registry, and quality/profiling guard-rails.
 
 <br>
 
@@ -43,8 +43,9 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 
 - **Zero cloud dependency.** Data never leaves your machine. No default outbound telemetry or external uploads.
 - **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
-- **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
-- **716 unit tests at 77.32% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
+- **Foundation models.** Research-only TabFM classification/regression and TimesFM 2.5 point/quantile forecasting, both revision-pinned and local.
+- **End-to-end tracking.** When MLflow is installed, runs log aggregate metrics, parameters, and safe summary artifacts. Compare, version, and promote deployable models from one place.
+- **729 unit tests** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
 
 ---
 
@@ -67,6 +68,8 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 - **Quick Benchmark** — screen 30+ algorithms via LazyPredict in seconds
 - **Train & Tune** — full PyCaret pipeline (compare → tune → evaluate → finalize → save)
 - **FLAML AutoML** — Microsoft's fast, lightweight AutoML with time-budget control
+- **Google TabFM** — non-commercial research evaluation for mixed-type classification and regression
+- **Google TimesFM 2.5** — single/grouped time-series forecasts with q10–q90 uncertainty and holdout backtests
 - **Classification & Regression** task types
 
 </td>
@@ -116,12 +119,18 @@ uv sync --locked --extra dev --extra experiment  # PyCaret full pipeline (Python
 uv sync --locked --extra dev --extra flaml       # Microsoft FLAML AutoML
 uv sync --locked --extra dev --extra validation  # Great Expectations
 uv sync --locked --extra dev --extra profiling   # ydata-profiling EDA reports
+uv sync --locked --extra dev --extra tabfm       # Google TabFM (Python 3.11+; research-only weights)
+uv sync --locked --extra dev --extra timesfm     # Google TimesFM 2.5
 
-# Or sync everything in the lockfile:
-uv sync --locked --all-extras
+# Sync the extras you use together. TabFM and profiling require incompatible
+# upstream typeguard versions, so keep those two in separate environments.
 ```
 
 `uv` uses the committed lockfile and the repo's `.python-version` (`3.12`) by default. CI enforces `uv lock --check` and `uv sync --locked` so local installs and GitHub Actions resolve the same environment.
+
+The `tabfm` and `profiling` extras are intentionally declared as a uv conflict:
+Google TabFM currently requires `typeguard<3`, while `ydata-profiling` requires
+`typeguard>=4`. Use separate uv environments when you need both workflows.
 
 If dependency metadata changes, refresh pinned versions with `uv lock --python 3.12` and commit the updated `uv.lock`.
 
@@ -158,6 +167,7 @@ Load Data → Validate → Profile → Benchmark → Train / FLAML → Predict �
 | **Quick Benchmark** | Screen 30+ algorithms — ranked leaderboard in seconds |
 | **Train & Tune** | Fine-tune the best algorithm with PyCaret and save a production model |
 | **FLAML AutoML** | Run Microsoft FLAML with time-budget or iteration-budget constraints |
+| **Foundation Models** | Evaluate TabFM under its non-commercial weights license, or forecast single/grouped series with TimesFM 2.5 |
 | **Predict** | Score new data (single row or batch file) with any saved model |
 | **Compare & Register** | Review run history, compare results, promote models |
 
@@ -206,15 +216,14 @@ See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
 ┌─────────────────────────────────────────────────────┐
 │                   Streamlit UI                      │
 │  Dashboard · Load · Validate · Profile · Benchmark  │
-│  Train & Tune · FLAML · Predict · Models · History  │
+│  Train & Tune · FLAML · Foundation Models · Predict │
 │  Compare · Notebook · Registry · Settings           │
 ├─────────────────────────────────────────────────────┤
 │                   CLI (argparse)                    │
 ├──────────────┬──────────────┬───────────────────────┤
 │  Ingestion   │  Validation  │     Profiling         │
 ├──────────────┼──────────────┼───────────────────────┤
-│  LazyPredict │   PyCaret    │      FLAML            │
-│  (Benchmark) │ (Experiment) │    (AutoML)           │
+│ LazyPredict │ PyCaret │ FLAML │ TabFM │ TimesFM 2.5 │
 ├──────────────┴──────────────┴───────────────────────┤
 │  Prediction · Tracking · Registry · Observability   │
 │  Storage                                             │
@@ -237,6 +246,7 @@ Services with one runtime implementation stay concrete; shared base classes are 
 | `app/modeling/benchmark/` | LazyPredict orchestration, ranking, MLflow logging |
 | `app/modeling/pycaret/` | PyCaret compare, tune, evaluate, finalize, save |
 | `app/modeling/flaml/` | Microsoft FLAML AutoML service, artifacts, tracking |
+| `app/modeling/foundation/` | Pinned TabFM/TimesFM adapters, consent gates, artifacts, context persistence, MLflow summaries |
 | `app/prediction/` | Model discovery, loading, schema checks, scoring |
 | `app/tracking/` | MLflow queries, history, run comparison |
 | `app/registry/` | MLflow model registration and promotion |
@@ -258,12 +268,12 @@ Services with one runtime implementation stay concrete; shared base classes are 
 | **CLI** | argparse |
 | **Data** | pandas, Pydantic, pydantic-settings |
 | **Benchmarking** | LazyPredict, scikit-learn, XGBoost, LightGBM, CatBoost |
-| **Training** | PyCaret, Microsoft FLAML |
+| **Training / forecasting** | PyCaret, Microsoft FLAML, Google TabFM, Google TimesFM 2.5 |
 | **Tracking** | MLflow (local SQLite backend) |
 | **Observability** | JSON logging, metrics hooks, optional OpenTelemetry tracing |
 | **Metadata** | SQLite |
 | **AI Summaries** | OpenAI · Anthropic · Gemini · Ollama |
-| **Testing** | pytest (708 tests, 77.32% coverage), pytest-cov, pytest-asyncio, respx |
+| **Testing** | pytest (729 tests), pytest-cov, pytest-asyncio, respx |
 
 ---
 
@@ -296,6 +306,8 @@ autotabml benchmark data/train.csv --target target --task-type auto
 autotabml experiment-run data/train.csv --target target --task-type classification --n-select 3
 autotabml flaml-run data/train.csv --target target --task-type auto --time-budget 120
 autotabml flaml-save data/train.csv --target target --save-name best_model
+autotabml tabfm-run data/train.csv --target target --accept-tabfm-license --allow-download
+autotabml timesfm-forecast data/demand.csv --timestamp date --target demand --horizon 12 --allow-download
 
 # Operations
 autotabml predict-history --limit 10
@@ -368,6 +380,8 @@ Dependabot is configured for weekly dependency updates.
 | Constraint | Detail |
 | --- | --- |
 | PyCaret requires Python < 3.13 | All other features work on 3.10 – 3.13 |
+| TabFM weights | Separate `tabfm-non-commercial-v1.0` license; non-commercial, non-production research only; Python 3.11+ |
+| First model use | TabFM and TimesFM require explicit approval before downloading their pinned Hugging Face snapshots |
 | GPU training | Requires NVIDIA + CUDA; falls back to CPU automatically |
 | Large datasets | 100K+ rows trigger automatic sampling |
 | Kaggle | CLI-only; not exposed in the UI |
@@ -386,8 +400,8 @@ verification scripts on a fresh `.venv` with Python 3.12.10:
 | Check | Command | Result |
 | --- | --- | --- |
 | Lockfile consistency | `uv lock --check` | passes |
-| Unit tests | `pytest tests/ -q` | **708 passed**, 30 deselected |
-| Coverage gate | `pytest --cov=app --cov-fail-under=65` | **77.32%** (gate ≥ 65%) |
+| Unit tests | `pytest tests/ -q` | **729 passed**, 30 deselected |
+| Coverage gate | `pytest --cov=app --cov-fail-under=65` | CI gate ≥ 65% |
 | Lint | `ruff check app/ tests/ scripts/` | **All checks passed** |
 | Release metadata | `python -m app.release_metadata` | passes |
 
@@ -409,4 +423,7 @@ push, so a passing local run is a faithful predictor of a green PR.
 
 ## 📄 License
 
-Apache License 2.0 — see [LICENSE](LICENSE).
+AutoTabML Studio is Apache License 2.0 — see [LICENSE](LICENSE). Google TabFM
+pretrained weights retain their separate `tabfm-non-commercial-v1.0` license;
+the app requires explicit acceptance and blocks their saved contexts from
+registry/deployment export.

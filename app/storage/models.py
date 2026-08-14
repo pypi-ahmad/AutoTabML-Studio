@@ -18,6 +18,8 @@ class AppJobType(str, Enum):
     BENCHMARK = "benchmark"
     EXPERIMENT = "experiment"
     FLAML = "flaml"
+    TABFM = "tabfm"
+    TIMESFM = "timesfm"
     PREDICTION = "prediction"
 
 

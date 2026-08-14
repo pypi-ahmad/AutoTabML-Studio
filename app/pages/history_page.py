@@ -42,7 +42,17 @@ def render_history_page() -> None:
     with filter_col1:
         job_type_value = st.selectbox(
             "Workflow type",
-            options=["All", "Validation", "Profiling", "Benchmark", "Experiment", "FLAML", "Prediction"],
+            options=[
+                "All",
+                "Validation",
+                "Profiling",
+                "Benchmark",
+                "Experiment",
+                "FLAML",
+                "TabFM",
+                "TimesFM",
+                "Prediction",
+            ],
             index=0,
             key="hist_job_type",
             help="Filter by the type of workflow that was run.",

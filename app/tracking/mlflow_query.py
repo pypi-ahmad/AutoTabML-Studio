@@ -549,8 +549,16 @@ def _infer_run_type(
         return RunType.EXPERIMENT
     if effective_run_name.startswith("flaml-"):
         return RunType.FLAML
+    if effective_run_name.startswith("tabfm-"):
+        return RunType.TABFM
+    if effective_run_name.startswith("timesfm-"):
+        return RunType.TIMESFM
     if tags.get("framework") == "flaml":
         return RunType.FLAML
+    if tags.get("framework") == "tabfm":
+        return RunType.TABFM
+    if tags.get("framework") == "timesfm":
+        return RunType.TIMESFM
     return RunType.UNKNOWN
 
 

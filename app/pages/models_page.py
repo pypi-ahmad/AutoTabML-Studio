@@ -16,6 +16,7 @@ from app.pages.ui_labels import PREDICTION_TASK_TYPE_LABELS, format_enum_value, 
 from app.prediction import (
     PredictionTaskType,
 )
+from app.prediction.loader import LocalTabFMContextLoader
 from app.prediction.selectors import discover_flaml_saved_models, discover_local_saved_models
 from app.state.session import get_or_init_state
 from app.tracking.mlflow_query import is_mlflow_available
@@ -44,6 +45,13 @@ def render_models_page() -> None:
         model_dirs=[state.settings.flaml.models_dir],
         metadata_dirs=[state.settings.flaml.models_dir],
     )
+    tabfm_contexts = LocalTabFMContextLoader(
+        metadata_dirs=list(
+            dict.fromkeys(
+                prediction_settings.local_model_metadata_dirs + prediction_settings.supported_local_model_dirs
+            )
+        )
+    ).discover()
 
     # DB-tracked models (may overlap with discovered ones)
     # MLflow registry models
@@ -54,7 +62,7 @@ def render_models_page() -> None:
         except Exception as exc:
             log_ui_debug_exception(exc, operation="models.list_registered_models")
 
-    total = len(pycaret_refs) + len(benchmark_models) + len(flaml_models) + len(registry_models)
+    total = len(pycaret_refs) + len(benchmark_models) + len(flaml_models) + len(tabfm_contexts) + len(registry_models)
     st.metric("Total Models", total)
 
     if total == 0:
@@ -67,9 +75,9 @@ def render_models_page() -> None:
             "benchmark to find the best algorithm."
         )
         c1, c2, _ = st.columns([2, 2, 4])
-        if c1.button("📥 Load Data", key="models_goto_load", type="primary", use_container_width=True):
+        if c1.button("📥 Load Data", key="models_goto_load", type="primary", width="stretch"):
             go_to_page("Load Data")
-        if c2.button("🧪 Train & Tune", key="models_goto_experiment", use_container_width=True):
+        if c2.button("🧪 Train & Tune", key="models_goto_experiment", width="stretch"):
             go_to_page("Train & Tune")
         return
 
@@ -90,6 +98,11 @@ def render_models_page() -> None:
         st.subheader(f"🔥 FLAML AutoML Models ({len(flaml_models)})")
         for ref in flaml_models:
             _render_flaml_model_card(ref)
+
+    if tabfm_contexts:
+        st.subheader(f"🧠 TabFM Research Contexts ({len(tabfm_contexts)})")
+        for ref in tabfm_contexts:
+            _render_tabfm_context_card(ref)
 
     # ── MLflow Registry models ─────────────────────────────────────────
     if registry_models:
@@ -331,6 +344,20 @@ def _render_flaml_model_card(ref) -> None:  # noqa: ANN001
         if features:
             with st.expander("Input columns", expanded=False):
                 st.code(", ".join(features), language="text")
+
+
+def _render_tabfm_context_card(ref) -> None:  # noqa: ANN001
+    """Render a clearly restricted saved TabFM context."""
+
+    target = ref.metadata.get("target_column", "—")
+    with st.expander(f"**{ref.display_name}** — research only", expanded=False):
+        st.warning(
+            "This stores sampled in-context examples, not a trained model. It can be reused on Predictions, "
+            "but cannot be registered or exported for deployment."
+        )
+        st.caption(f"Task: **{ref.task_type.value}** · Target: **{target}** · Features: **{len(ref.feature_columns)}**")
+        if ref.feature_columns:
+            st.code(", ".join(ref.feature_columns), language="text")
 
 
 def _render_deployment_export(model_path: Path, metadata_path: Path, key: str) -> None:

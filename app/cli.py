@@ -1380,6 +1380,158 @@ def _build_prediction_request_kwargs(args: argparse.Namespace, settings) -> dict
     }
 
 
+def _record_foundation_job(store, *, job_type, dataset_name, dataset_key, result, title, mlflow_run_id=None):  # noqa: ANN001, ANN201
+    from uuid import uuid4
+
+    from app.storage import AppJobStatus, JobRecord
+
+    if store is None:
+        return None
+    record = JobRecord(
+        job_id=f"{job_type.value}-{uuid4().hex}",
+        job_type=job_type,
+        status=AppJobStatus.SUCCESS,
+        dataset_key=dataset_key,
+        dataset_name=dataset_name,
+        title=title,
+        mlflow_run_id=mlflow_run_id,
+        primary_artifact_path=result.artifacts.get("predictions") or result.artifacts.get("forecast"),
+        summary_path=result.artifacts.get("summary"),
+        metadata={"metrics": result.metrics, "framework": job_type.value},
+    )
+    store.record_job(record)
+    return record
+
+
+def cmd_tabfm_run(args: argparse.Namespace) -> None:
+    """Run a pinned, research-only TabFM holdout evaluation."""
+
+    from uuid import uuid4
+
+    from app.modeling.foundation import TabFMConfig, TabFMService
+    from app.modeling.foundation.tracking import log_foundation_run
+    from app.storage import AppJobType, SavedLocalModelRecord
+
+    settings = _load_runtime_settings()
+    store = build_metadata_store(settings)
+    try:
+        loaded, name = _load_cli_dataset(args.dataset, source_type=args.source_type)
+        _record_loaded_cli_dataset(store, loaded, name)
+        config = TabFMConfig(
+            target_column=args.target,
+            task_type=args.task_type,
+            context_rows=args.context_rows,
+            n_estimators=args.n_estimators,
+        )
+        output_dir = Path(args.artifacts_dir) if args.artifacts_dir else settings.artifacts.experiments_dir / "foundation"
+        service = TabFMService()
+        result = service.run(
+            loaded.dataframe,
+            config,
+            accept_license=args.accept_tabfm_license,
+            allow_download=args.allow_download,
+            output_dir=output_dir,
+        )
+        if args.save_context:
+            saved = service.save_context(result, name=args.save_context, output_dir=settings.artifacts.models_dir)
+            if store is not None:
+                store.upsert_saved_local_model(
+                    SavedLocalModelRecord(
+                        record_id=f"tabfm-{uuid4().hex}",
+                        model_name=args.save_context,
+                        model_path=saved.context_path,
+                        task_type=result.task_type,
+                        target_column=result.target_column,
+                        dataset_fingerprint=loaded.metadata.content_hash or loaded.metadata.schema_hash,
+                        metadata_path=saved.metadata_path,
+                        metadata={"framework": "tabfm", "research_only": True, "deployable": False},
+                    )
+                )
+        run_id, warning = log_foundation_run(
+            run_type="tabfm",
+            dataset_name=name,
+            params={**config.model_dump(mode="json"), "dataset_name": name},
+            metrics=result.metrics,
+            summary_path=result.artifacts["summary"],
+            tracking_uri=settings.tracking.tracking_uri,
+        )
+        _record_foundation_job(
+            store,
+            job_type=AppJobType.TABFM,
+            dataset_name=name,
+            dataset_key=loaded.metadata.content_hash or loaded.metadata.schema_hash,
+            result=result,
+            title=f"TabFM: {name}",
+            mlflow_run_id=run_id,
+        )
+    except Exception as exc:
+        _cli_error(exc)
+
+    print(f"\n=== TabFM: {name} ===")
+    print(f"Task: {result.task_type}  Target: {config.target_column}")
+    for metric, value in result.metrics.items():
+        print(f"{metric}: {value:.6f}")
+    print(f"Summary: {result.artifacts['summary']}")
+    if warning:
+        print(f"Warning: {warning}")
+
+
+def cmd_timesfm_forecast(args: argparse.Namespace) -> None:
+    """Run pinned TimesFM 2.5 point and quantile forecasts."""
+
+    from app.modeling.foundation import TimesFMConfig, TimesFMService
+    from app.modeling.foundation.tracking import log_foundation_run
+    from app.storage import AppJobType
+
+    settings = _load_runtime_settings()
+    store = build_metadata_store(settings)
+    try:
+        loaded, name = _load_cli_dataset(args.dataset, source_type=args.source_type)
+        _record_loaded_cli_dataset(store, loaded, name)
+        config = TimesFMConfig(
+            timestamp_column=args.timestamp,
+            target_column=args.target,
+            group_column=args.group,
+            horizon=args.horizon,
+            context_length=args.context_length,
+            frequency=args.frequency,
+            backtest=not args.no_backtest,
+        )
+        output_dir = Path(args.artifacts_dir) if args.artifacts_dir else settings.artifacts.experiments_dir / "foundation"
+        result = TimesFMService().run(
+            loaded.dataframe,
+            config,
+            allow_download=args.allow_download,
+            output_dir=output_dir,
+        )
+        run_id, warning = log_foundation_run(
+            run_type="timesfm",
+            dataset_name=name,
+            params={**config.model_dump(mode="json"), "dataset_name": name},
+            metrics=result.metrics,
+            summary_path=result.artifacts["summary"],
+            tracking_uri=settings.tracking.tracking_uri,
+        )
+        _record_foundation_job(
+            store,
+            job_type=AppJobType.TIMESFM,
+            dataset_name=name,
+            dataset_key=loaded.metadata.content_hash or loaded.metadata.schema_hash,
+            result=result,
+            title=f"TimesFM: {name}",
+            mlflow_run_id=run_id,
+        )
+    except Exception as exc:
+        _cli_error(exc)
+
+    print(f"\n=== TimesFM 2.5: {name} ===")
+    for metric, value in result.metrics.items():
+        print(f"{metric}: {value}")
+    print(f"Forecast: {result.artifacts['forecast']}")
+    for item in [*result.warnings, *([warning] if warning else [])]:
+        print(f"Warning: {item}")
+
+
 def _add_prediction_model_source_args(parser: argparse.ArgumentParser) -> None:
     """Add common model-source selection flags to a prediction parser."""
 
@@ -1728,6 +1880,35 @@ def main() -> None:
     )
     flaml_save_parser.add_argument("--save-name", default="flaml_best_model", help="Base name for saved model")
 
+    tabfm_parser = subparsers.add_parser("tabfm-run", help="Run Google TabFM for research evaluation")
+    tabfm_parser.add_argument("dataset", help="Dataset path or supported URL")
+    tabfm_parser.add_argument("--target", required=True, help="Target column name")
+    tabfm_parser.add_argument(
+        "--task-type",
+        choices=["auto", "classification", "regression"],
+        default="auto",
+    )
+    tabfm_parser.add_argument("--context-rows", type=int, default=100)
+    tabfm_parser.add_argument("--n-estimators", type=int, default=32)
+    tabfm_parser.add_argument("--allow-download", action="store_true")
+    tabfm_parser.add_argument("--accept-tabfm-license", action="store_true")
+    tabfm_parser.add_argument("--save-context", default=None, metavar="NAME")
+    tabfm_parser.add_argument("--source-type", choices=[item.value for item in IngestionSourceType], default=None)
+    tabfm_parser.add_argument("--artifacts-dir", default=None)
+
+    timesfm_parser = subparsers.add_parser("timesfm-forecast", help="Forecast with Google TimesFM 2.5")
+    timesfm_parser.add_argument("dataset", help="Dataset path or supported URL")
+    timesfm_parser.add_argument("--timestamp", required=True, help="Timestamp column name")
+    timesfm_parser.add_argument("--target", required=True, help="Numeric target column name")
+    timesfm_parser.add_argument("--group", default=None, help="Optional entity/group column")
+    timesfm_parser.add_argument("--horizon", type=int, default=12)
+    timesfm_parser.add_argument("--context-length", type=int, default=1024)
+    timesfm_parser.add_argument("--frequency", default=None, help="Optional pandas frequency override")
+    timesfm_parser.add_argument("--no-backtest", action="store_true")
+    timesfm_parser.add_argument("--allow-download", action="store_true")
+    timesfm_parser.add_argument("--source-type", choices=[item.value for item in IngestionSourceType], default=None)
+    timesfm_parser.add_argument("--artifacts-dir", default=None)
+
     predict_single_parser = subparsers.add_parser("predict-single", help="Run single-row prediction")
     _add_prediction_model_source_args(predict_single_parser)
     predict_single_parser.add_argument("--row-json", default=None, help="Single-row JSON object payload")
@@ -1763,7 +1944,7 @@ def main() -> None:
     hist_list_parser = subparsers.add_parser("history-list", help="List MLflow runs")
     hist_list_parser.add_argument(
         "--run-type",
-        choices=["all", "benchmark", "experiment", "flaml", "unknown"],
+        choices=["all", "benchmark", "experiment", "flaml", "tabfm", "timesfm", "unknown"],
         default="all",
         help="Filter by run type",
     )
@@ -1863,6 +2044,10 @@ def main() -> None:
         cmd_flaml_run(args)
     elif args.command == "flaml-save":
         cmd_flaml_save(args)
+    elif args.command == "tabfm-run":
+        cmd_tabfm_run(args)
+    elif args.command == "timesfm-forecast":
+        cmd_timesfm_forecast(args)
     elif args.command == "predict-single":
         cmd_predict_single(args)
     elif args.command == "predict-batch":

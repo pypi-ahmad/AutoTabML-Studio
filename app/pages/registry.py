@@ -89,6 +89,13 @@ _PAGES = [
         "render_flaml_automl_page",
         section="build",
     ),
+    PageSpec(
+        "Foundation Models",
+        "Research with Google TabFM or forecast time series with TimesFM 2.5.",
+        "app.pages.foundation_models_page",
+        "render_foundation_models_page",
+        section="build",
+    ),
     # ── Use ────────────────────────────────────────────────────────────
     PageSpec(
         "Predictions",
