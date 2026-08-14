@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from app.deployment import export_deployment_bundle
 from app.modeling.benchmark.persistence import discover_saved_benchmark_models
 from app.pages.dataset_workspace import go_to_page
 from app.pages.ui_cache import list_cached_registered_models
@@ -156,6 +157,8 @@ def _render_pycaret_model_card(ref) -> None:  # noqa: ANN001
                     file_name=_meta_p.name,
                     key=f"mdl_dlm_{ref.display_name}_{_meta_p.name}",
                 )
+            if _model_p.exists() and _meta_p and _meta_p.exists():
+                _render_deployment_export(_model_p, _meta_p, f"pycaret_{ref.display_name}")
 
         fingerprint = ref.metadata.get("dataset_fingerprint")
         if fingerprint:
@@ -165,7 +168,6 @@ def _render_pycaret_model_card(ref) -> None:  # noqa: ANN001
         if features:
             with st.expander("Input columns", expanded=False):
                 st.code(", ".join(features), language="text")
-
         dtypes = ref.metadata.get("feature_dtypes", {})
         if dtypes:
             with st.expander("Column types", expanded=False):
@@ -219,6 +221,7 @@ def _render_benchmark_model_card(meta: dict) -> None:
 
         with st.expander("Saved files", expanded=False):
             _bm_path = Path(str(meta.get("_model_path", "N/A")))
+            _bm_meta = Path(str(meta.get("_metadata_path", "")))
             st.caption(f"Model file: **{_bm_path.name}**")
             if _bm_path.exists():
                 st.download_button(
@@ -227,6 +230,8 @@ def _render_benchmark_model_card(meta: dict) -> None:
                     file_name=_bm_path.name,
                     key=f"bmdl_dl_{model_name}_{_bm_path.name}",
                 )
+            if _bm_path.exists() and _bm_meta.exists():
+                _render_deployment_export(_bm_path, _bm_meta, f"benchmark_{model_name}")
 
         split_test = meta.get("split_test_size")
         split_seed = meta.get("split_random_state")
@@ -241,6 +246,14 @@ def _render_benchmark_model_card(meta: dict) -> None:
         if features:
             with st.expander("Input columns", expanded=False):
                 st.code(", ".join(features), language="text")
+        dtypes = meta.get("feature_dtypes", {})
+        if dtypes:
+            with st.expander("Column types", expanded=False):
+                st.dataframe(
+                    pd.DataFrame([{"Feature": k, "Type": v} for k, v in dtypes.items()]),
+                    width="stretch",
+                    hide_index=True,
+                )
 
 
 def _render_registry_model_card(model) -> None:  # noqa: ANN001
@@ -303,6 +316,10 @@ def _render_flaml_model_card(ref) -> None:  # noqa: ANN001
             feature_count=len(features),
             source_label="FLAML AutoML",
         )
+        model_path = Path(str(ref.model_path)) if ref.model_path else None
+        metadata_path = Path(str(ref.metadata_path)) if ref.metadata_path else None
+        if model_path and metadata_path and model_path.exists() and metadata_path.exists():
+            _render_deployment_export(model_path, metadata_path, f"flaml_{model_name}")
         if _purpose:
             st.caption(f"🎯 {_purpose}.")
         st.caption(
@@ -315,11 +332,23 @@ def _render_flaml_model_card(ref) -> None:  # noqa: ANN001
             with st.expander("Input columns", expanded=False):
                 st.code(", ".join(features), language="text")
 
-        dtypes = meta.get("feature_dtypes", {})
-        if dtypes:
-            with st.expander("Column types", expanded=False):
-                st.dataframe(
-                    pd.DataFrame([{"Feature": k, "Type": v} for k, v in dtypes.items()]),
-                    width="stretch",
-                    hide_index=True,
-                )
+
+def _render_deployment_export(model_path: Path, metadata_path: Path, key: str) -> None:
+    state = get_or_init_state()
+    output = state.settings.artifacts.root_dir / "deployments" / f"{model_path.stem}-deployment.zip"
+    if st.button("Build deployment bundle", key=f"deploy_{key}"):
+        with st.spinner("Building API, CLI, and Docker bundle…"):
+            bundle = export_deployment_bundle(
+                model_path=model_path,
+                metadata_path=metadata_path,
+                output_path=output,
+            )
+        st.session_state[f"deployment_{key}"] = bundle.archive_path
+    archive = st.session_state.get(f"deployment_{key}")
+    if archive and Path(archive).is_file():
+        st.download_button(
+            "Download deployment ZIP",
+            data=Path(archive).read_bytes(),
+            file_name=Path(archive).name,
+            key=f"download_deploy_{key}",
+        )

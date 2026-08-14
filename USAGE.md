@@ -121,6 +121,14 @@ Every workflow available in the UI also has a CLI equivalent. See
 
 ## Core Workflow
 
+### Recommended: Auto Run
+
+Load a dataset, open **Auto Run**, confirm the target and inferred task, then
+launch. Training runs in a local subprocess; SQLite-backed status survives
+navigation and browser refreshes. Completion produces a saved model, untouched
+holdout metrics, explanations, provenance, and a drift baseline. One training
+job runs at a time.
+
 AutoTabML Studio follows a five-step workflow. Steps 2a and 2b are optional:
 
 ```
@@ -411,6 +419,20 @@ directly to the provider you configure.
 ---
 
 ## CLI Reference
+
+```bash
+autotabml auto-run data/train.csv --target target --mode balanced --time-budget 120
+autotabml job-list --limit 20
+autotabml job-status <job-id>
+autotabml job-cancel <job-id>
+autotabml explain artifacts/autorun/<job-id>/explanation.json
+autotabml drift-check data/current.csv --baseline artifacts/models/model_drift_baseline.json
+autotabml deploy-export --model artifacts/models/model.pkl --metadata artifacts/models/model_metadata.json --output artifacts/deployments/model
+```
+
+Deployment ZIPs provide FastAPI `/health`, `/metadata`, and `/predict`
+endpoints, a standalone prediction command, and a non-root Dockerfile. Add
+authentication and TLS before public exposure.
 
 All operations available in the UI can also be run from the command line.
 

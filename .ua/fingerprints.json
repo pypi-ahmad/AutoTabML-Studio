@@ -1,8 +1,38 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "f7fd0337134828cebb93c76700e9a71a7f302491",
-  "generatedAt": "2026-08-14T06:43:01.303Z",
+  "gitCommitHash": "adce20a064aafd7390e7dbcc464a048ee9a08432",
+  "generatedAt": "2026-08-14T09:08:26.898Z",
   "files": {
+    ".codebase-memory/.gitattributes": {
+      "filePath": ".codebase-memory/.gitattributes",
+      "contentHash": "171dff1f95b0159fc8f862c6f62b9bda4318017d59878efe018662b463d3c370",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    ".codebase-memory/artifact.json": {
+      "filePath": ".codebase-memory/artifact.json",
+      "contentHash": "6df7b179c8d10c9984085222a93ab343004a8a7c3342683adc72668352c4d8f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": true
+    },
+    ".codebase-memory/graph.db.zst": {
+      "filePath": ".codebase-memory/graph.db.zst",
+      "contentHash": "de799d260ab53f0cd3d0efc321f0be21dc53ff16c0e62968c75b6b2059edd246",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13476,
+      "hasStructuralAnalysis": false
+    },
     ".dockerignore": {
       "filePath": ".dockerignore",
       "contentHash": "c11c38651bbaaf898716fd2421159ed541b4e1c9267fff6f4b099e64276c29cd",
@@ -75,7 +105,7 @@
     },
     ".github/workflows/ci.yml": {
       "filePath": ".github/workflows/ci.yml",
-      "contentHash": "277103e7f4c0706bcdef4db084e340aa7db368c304dc121e0c169ef0baae4d4c",
+      "contentHash": "904a6f21c8558564b8765179ce0129f72d54addcb510e138cec46199ca59e0eb",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -85,7 +115,7 @@
     },
     ".github/workflows/release-readiness.yml": {
       "filePath": ".github/workflows/release-readiness.yml",
-      "contentHash": "f68e1cf1efae2a4f10a34a5dd3506e0c3fdb3b7c6a9182e9588d4d60cf0ad0c9",
+      "contentHash": "7caebe496e277c00a1c9eae079f30d7d0d354d3d11293b2df92a607eb56492ce",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -95,7 +125,7 @@
     },
     ".github/workflows/security.yml": {
       "filePath": ".github/workflows/security.yml",
-      "contentHash": "6a12c39d43efd1a5f7d2f120aec9a18a9146dc96cf0d549b76d594c29b02f42f",
+      "contentHash": "9720f0eb6f4d37eb258d2ce77d68d74d362ff23cbd38e4a5e5df12d11eab059c",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -145,12 +175,12 @@
     },
     "CHANGELOG.md": {
       "filePath": "CHANGELOG.md",
-      "contentHash": "619f3c7a65ae5e355aee061024dc577f27e1dc644fa58e7d82aea42b26cc608d",
+      "contentHash": "88d3a35f894eb6cc92cae60f35ef73e2ed087566dc609fb0b2ae79fb0c375543",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 209,
+      "totalLines": 216,
       "hasStructuralAnalysis": true
     },
     "CODE_OF_CONDUCT.md": {
@@ -195,12 +225,12 @@
     },
     "README.md": {
       "filePath": "README.md",
-      "contentHash": "f3980fbd01e64a82d0462d35bfe3d5129f2a2c25d2c58b22d4b6ba44d2bb0628",
+      "contentHash": "3af6408069cae5a074ba6aae344dab723a0a932e231bcd2a301188817d78af18",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 388,
+      "totalLines": 403,
       "hasStructuralAnalysis": true
     },
     "RELEASE_NOTES_v0.2.0.md": {
@@ -235,12 +265,12 @@
     },
     "USAGE.md": {
       "filePath": "USAGE.md",
-      "contentHash": "c53d71dbc598a677c6bd6e309886597933abcae959b2640fea1c6fd5091d2e30",
+      "contentHash": "f1bc6cd38f906d998533882fb61dca916a0d584e6c3e51f702f7f279ea161455",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 651,
+      "totalLines": 673,
       "hasStructuralAnalysis": true
     },
     "app/__init__.py": {
@@ -370,6 +400,300 @@
         "LocalArtifactManager"
       ],
       "totalLines": 174,
+      "hasStructuralAnalysis": true
+    },
+    "app/autorun.py": {
+      "filePath": "app/autorun.py",
+      "contentHash": "9933b4b1e2eee8249e32702fab1b8eacf206e392b04c0e2d5d2c6d5a150f99b6",
+      "functions": [
+        {
+          "name": "suggest_targets",
+          "params": [
+            "dataframe"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "plan_auto_run",
+          "params": [
+            "dataframe",
+            "config"
+          ],
+          "returnType": "AutoRunPlan",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "run_auto_run",
+          "params": [
+            "dataframe",
+            "config",
+            "artifacts_dir",
+            "models_dir",
+            "job_id"
+          ],
+          "returnType": "AutoRunResult",
+          "exported": true,
+          "lineCount": 100
+        },
+        {
+          "name": "_write_json",
+          "params": [
+            "path",
+            "payload"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "AutoRunMode",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "AutoRunConfig",
+          "methods": [],
+          "properties": [
+            "target_column",
+            "task_type",
+            "mode",
+            "time_budget",
+            "random_seed",
+            "model_name"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "AutoRunPlan",
+          "methods": [],
+          "properties": [
+            "target_column",
+            "task_type",
+            "engine",
+            "primary_metric",
+            "reasons",
+            "warnings"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "AutoRunResult",
+          "methods": [],
+          "properties": [
+            "plan",
+            "model_path",
+            "metadata_path",
+            "evaluation",
+            "explanation",
+            "provenance",
+            "artifact_paths"
+          ],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "enum",
+          "specifiers": [
+            "Enum"
+          ]
+        },
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        },
+        {
+          "source": "app.drift",
+          "specifiers": [
+            "build_drift_baseline"
+          ]
+        },
+        {
+          "source": "app.evaluation",
+          "specifiers": [
+            "EvaluationReport",
+            "evaluate_model"
+          ]
+        },
+        {
+          "source": "app.explainability",
+          "specifiers": [
+            "ModelExplanation",
+            "explain_global"
+          ]
+        },
+        {
+          "source": "app.modeling.flaml.schemas",
+          "specifiers": [
+            "FlamlConfig",
+            "FlamlSearchConfig",
+            "FlamlTaskType"
+          ]
+        },
+        {
+          "source": "app.modeling.flaml.service",
+          "specifiers": [
+            "FlamlAutoMLService"
+          ]
+        },
+        {
+          "source": "app.modeling.flaml.setup_runner",
+          "specifiers": [
+            "is_flaml_available"
+          ]
+        },
+        {
+          "source": "app.provenance",
+          "specifiers": [
+            "ProvenanceManifest",
+            "build_provenance",
+            "write_provenance"
+          ]
+        }
+      ],
+      "exports": [
+        "AutoRunMode",
+        "AutoRunConfig",
+        "AutoRunPlan",
+        "AutoRunResult",
+        "suggest_targets",
+        "plan_auto_run",
+        "run_auto_run",
+        "_write_json"
+      ],
+      "totalLines": 214,
+      "hasStructuralAnalysis": true
+    },
+    "app/autorun_worker.py": {
+      "filePath": "app/autorun_worker.py",
+      "contentHash": "20d2463bde9d0e3e05931953b6e5f62a463c3ed59d59e3367a5a2d2d27e8cb20",
+      "functions": [
+        {
+          "name": "main",
+          "params": [
+            "request_path"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "_update",
+          "params": [
+            "store",
+            "record",
+            "progress",
+            "stage"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "app.autorun",
+          "specifiers": [
+            "AutoRunConfig",
+            "run_auto_run"
+          ]
+        },
+        {
+          "source": "app.config.settings",
+          "specifiers": [
+            "load_settings"
+          ]
+        },
+        {
+          "source": "app.storage",
+          "specifiers": [
+            "AppJobStatus",
+            "AppJobType",
+            "JobRecord",
+            "build_metadata_store"
+          ]
+        }
+      ],
+      "exports": [
+        "main",
+        "_update"
+      ],
+      "totalLines": 73,
       "hasStructuralAnalysis": true
     },
     "app/backends/__init__.py": {
@@ -594,10 +918,169 @@
       "totalLines": 32,
       "hasStructuralAnalysis": true
     },
+    "app/background_jobs.py": {
+      "filePath": "app/background_jobs.py",
+      "contentHash": "76c9a292e6da5261061297eb8f2776f89f6bcafe660614e4ebce6bfdad965213",
+      "functions": [],
+      "classes": [
+        {
+          "name": "BackgroundJobService",
+          "methods": [
+            "__init__",
+            "submit_auto_run",
+            "get",
+            "cancel"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 76
+        }
+      ],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "signal",
+          "specifiers": [
+            "signal"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "uuid",
+          "specifiers": [
+            "uuid4"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "app.autorun",
+          "specifiers": [
+            "AutoRunConfig"
+          ]
+        },
+        {
+          "source": "app.storage",
+          "specifiers": [
+            "AppJobStatus",
+            "AppJobType",
+            "AppMetadataStore",
+            "JobRecord"
+          ]
+        }
+      ],
+      "exports": [
+        "BackgroundJobService"
+      ],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
     "app/cli.py": {
       "filePath": "app/cli.py",
-      "contentHash": "68725ccd3ff2540e11d2ada45fc6362f4e78e598125fb23d717af5b4b1f2f3c6",
+      "contentHash": "4d4f7d3b5d47245705dff8575c8d449db04ca35e272cd7f4744a29cc65dbf4df",
       "functions": [
+        {
+          "name": "cmd_auto_run",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "cmd_job_list",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "cmd_job_status",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "cmd_job_cancel",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "cmd_deploy_export",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "cmd_drift_check",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "cmd_explain",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
         {
           "name": "_cli_error",
           "params": [
@@ -941,7 +1424,7 @@
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 426
+          "lineCount": 470
         },
         {
           "name": "_build_pycaret_service",
@@ -1061,6 +1544,19 @@
           ]
         },
         {
+          "source": "app.autorun",
+          "specifiers": [
+            "AutoRunConfig",
+            "AutoRunMode"
+          ]
+        },
+        {
+          "source": "app.background_jobs",
+          "specifiers": [
+            "BackgroundJobService"
+          ]
+        },
+        {
           "source": "app.config.settings",
           "specifiers": [
             "load_settings",
@@ -1141,6 +1637,13 @@
         }
       ],
       "exports": [
+        "cmd_auto_run",
+        "cmd_job_list",
+        "cmd_job_status",
+        "cmd_job_cancel",
+        "cmd_deploy_export",
+        "cmd_drift_check",
+        "cmd_explain",
         "_cli_error",
         "_print_local_model_trust_notice",
         "_load_runtime_settings",
@@ -1187,7 +1690,7 @@
         "cmd_flaml_run",
         "cmd_flaml_save"
       ],
-      "totalLines": 1971,
+      "totalLines": 2103,
       "hasStructuralAnalysis": true
     },
     "app/concurrency.py": {
@@ -1736,6 +2239,284 @@
       "totalLines": 111,
       "hasStructuralAnalysis": true
     },
+    "app/deployment.py": {
+      "filePath": "app/deployment.py",
+      "contentHash": "33b9b87f98595e51abb00704079f9ae499410817fd84199b698cd205a15df19f",
+      "functions": [
+        {
+          "name": "export_deployment_bundle",
+          "params": [
+            "model_path",
+            "metadata_path",
+            "output_path",
+            "provenance_path"
+          ],
+          "returnType": "DeploymentBundle",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "_sha256",
+          "params": [
+            "path"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_build_current_wheel",
+          "params": [
+            "output_dir"
+          ],
+          "returnType": "Path | None",
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [
+        {
+          "name": "DeploymentBundle",
+          "methods": [],
+          "properties": [
+            "archive_path",
+            "model_name",
+            "sha256"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "tempfile",
+          "specifiers": [
+            "tempfile"
+          ]
+        },
+        {
+          "source": "zipfile",
+          "specifiers": [
+            "zipfile"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel"
+          ]
+        }
+      ],
+      "exports": [
+        "DeploymentBundle",
+        "export_deployment_bundle",
+        "_sha256",
+        "_build_current_wheel"
+      ],
+      "totalLines": 171,
+      "hasStructuralAnalysis": true
+    },
+    "app/drift.py": {
+      "filePath": "app/drift.py",
+      "contentHash": "a0494f743b6b0aa4dbed55c418265a033c7e92b68f342cb4895222acc5571733",
+      "functions": [
+        {
+          "name": "build_drift_baseline",
+          "params": [
+            "dataframe",
+            "max_rows"
+          ],
+          "returnType": "DriftBaseline",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "compare_drift",
+          "params": [
+            "baseline",
+            "dataframe"
+          ],
+          "returnType": "DriftReport",
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "_numeric_proportions",
+          "params": [
+            "series",
+            "bins"
+          ],
+          "returnType": "list[float]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_categorical_proportions",
+          "params": [
+            "series",
+            "categories"
+          ],
+          "returnType": "list[float]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_psi",
+          "params": [
+            "expected",
+            "actual"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_level",
+          "params": [
+            "psi"
+          ],
+          "returnType": "DriftLevel",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [
+        {
+          "name": "DriftLevel",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "FeatureBaseline",
+          "methods": [],
+          "properties": [
+            "kind",
+            "missing_rate",
+            "bins",
+            "proportions",
+            "categories"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "DriftBaseline",
+          "methods": [],
+          "properties": [
+            "row_count",
+            "features"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "FeatureDrift",
+          "methods": [],
+          "properties": [
+            "feature",
+            "psi",
+            "missing_rate_delta",
+            "level",
+            "message"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "DriftReport",
+          "methods": [],
+          "properties": [
+            "level",
+            "row_count",
+            "features",
+            "missing_columns",
+            "unexpected_columns"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "enum",
+          "specifiers": [
+            "Enum"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        }
+      ],
+      "exports": [
+        "DriftLevel",
+        "FeatureBaseline",
+        "DriftBaseline",
+        "FeatureDrift",
+        "DriftReport",
+        "build_drift_baseline",
+        "compare_drift",
+        "_numeric_proportions",
+        "_categorical_proportions",
+        "_psi",
+        "_level"
+      ],
+      "totalLines": 152,
+      "hasStructuralAnalysis": true
+    },
     "app/errors.py": {
       "filePath": "app/errors.py",
       "contentHash": "6408611fbf70ce5ff5e3da547a5412c482797a2dc10d9888f06eec172ef49563",
@@ -1806,6 +2587,181 @@
         "log_and_wrap"
       ],
       "totalLines": 96,
+      "hasStructuralAnalysis": true
+    },
+    "app/evaluation.py": {
+      "filePath": "app/evaluation.py",
+      "contentHash": "3c4eea83838779b34144e9e4a0b931d95b27276bad8c626370e2589d661e92d9",
+      "functions": [
+        {
+          "name": "evaluate_model",
+          "params": [
+            "model",
+            "features",
+            "target",
+            "task_type"
+          ],
+          "returnType": "EvaluationReport",
+          "exported": true,
+          "lineCount": 40
+        }
+      ],
+      "classes": [
+        {
+          "name": "EvaluationReport",
+          "methods": [],
+          "properties": [
+            "task_type",
+            "row_count",
+            "metrics",
+            "warnings",
+            "calibration"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        }
+      ],
+      "exports": [
+        "EvaluationReport",
+        "evaluate_model"
+      ],
+      "totalLines": 63,
+      "hasStructuralAnalysis": true
+    },
+    "app/explainability.py": {
+      "filePath": "app/explainability.py",
+      "contentHash": "af05c2a27aff8526a75984fdd98dc6a131eeb5772ca428ea0ce8d501c99097f3",
+      "functions": [
+        {
+          "name": "explain_global",
+          "params": [
+            "model",
+            "features",
+            "target",
+            "max_rows"
+          ],
+          "returnType": "ModelExplanation",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "_shap_importance",
+          "params": [
+            "model",
+            "sample"
+          ],
+          "returnType": "np.ndarray | None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "explain_prediction",
+          "params": [
+            "model",
+            "row",
+            "reference"
+          ],
+          "returnType": "ModelExplanation",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "_score",
+          "params": [
+            "model",
+            "frame"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [
+        {
+          "name": "FeatureContribution",
+          "methods": [],
+          "properties": [
+            "feature",
+            "value"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "ModelExplanation",
+          "methods": [],
+          "properties": [
+            "method",
+            "contributions",
+            "warnings"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        }
+      ],
+      "exports": [
+        "FeatureContribution",
+        "ModelExplanation",
+        "explain_global",
+        "_shap_importance",
+        "explain_prediction",
+        "_score"
+      ],
+      "totalLines": 113,
       "hasStructuralAnalysis": true
     },
     "app/gpu.py": {
@@ -3452,7 +4408,7 @@
     },
     "app/main.py": {
       "filePath": "app/main.py",
-      "contentHash": "fd4f49bd71ceebc6caee40fae82885b80d9ad2af70526f7c5e8efc207368a316",
+      "contentHash": "f406cf75ac27e2e5cdf781a362c0ffb3008de9f9e89a2cd5fe32cebcc310f5f3",
       "functions": [],
       "classes": [],
       "imports": [
@@ -3489,11 +4445,7 @@
         {
           "source": "app.pages.registry",
           "specifiers": [
-            "default_page_label",
-            "get_nav_sections",
-            "get_page_by_label",
-            "get_page_registry",
-            "render_registered_page"
+            "build_streamlit_navigation"
           ]
         },
         {
@@ -3523,7 +4475,7 @@
         }
       ],
       "exports": [],
-      "totalLines": 113,
+      "totalLines": 65,
       "hasStructuralAnalysis": true
     },
     "app/modeling/__init__.py": {
@@ -8424,6 +9376,89 @@
       "totalLines": 1,
       "hasStructuralAnalysis": true
     },
+    "app/pages/autorun_page.py": {
+      "filePath": "app/pages/autorun_page.py",
+      "contentHash": "b5a6d9964acbfcddab2bc03b3d42827c01ead3f0c26f6edf31e318308f5c9da7",
+      "functions": [
+        {
+          "name": "render_autorun_page",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 51
+        },
+        {
+          "name": "_render_active_job",
+          "params": [
+            "store"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "app.autorun",
+          "specifiers": [
+            "AutoRunConfig",
+            "AutoRunMode",
+            "plan_auto_run",
+            "suggest_targets"
+          ]
+        },
+        {
+          "source": "app.background_jobs",
+          "specifiers": [
+            "BackgroundJobService"
+          ]
+        },
+        {
+          "source": "app.pages.dataset_workspace",
+          "specifiers": [
+            "get_active_loaded_dataset",
+            "go_to_page"
+          ]
+        },
+        {
+          "source": "app.pages.ui_cache",
+          "specifiers": [
+            "get_metadata_store"
+          ]
+        },
+        {
+          "source": "app.state.session",
+          "specifiers": [
+            "get_or_init_state"
+          ]
+        },
+        {
+          "source": "app.storage",
+          "specifiers": [
+            "AppJobStatus"
+          ]
+        }
+      ],
+      "exports": [
+        "render_autorun_page",
+        "_render_active_job"
+      ],
+      "totalLines": 89,
+      "hasStructuralAnalysis": true
+    },
     "app/pages/benchmark_page.py": {
       "filePath": "app/pages/benchmark_page.py",
       "contentHash": "e89fcc116820ae9661ba0ecd01e53b439527c6325ddb0a3157f049918e08cae9",
@@ -8957,7 +9992,7 @@
     },
     "app/pages/dataset_workspace.py": {
       "filePath": "app/pages/dataset_workspace.py",
-      "contentHash": "833427720edf30fdb3a807721ebc3a1c73b051b212b59a6d979bea19b61c870b",
+      "contentHash": "6c7d4c005e3ee9dac933cd3fad4fe3ac866d6e88b5a365c1dd12d39985975f1f",
       "functions": [
         {
           "name": "infer_local_source_type",
@@ -9031,7 +10066,7 @@
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 5
+          "lineCount": 8
         },
         {
           "name": "render_dataset_header",
@@ -9301,7 +10336,7 @@
         "_clear_dataset_results",
         "_normalize_dataset_name"
       ],
-      "totalLines": 716,
+      "totalLines": 719,
       "hasStructuralAnalysis": true
     },
     "app/pages/experiment_page.py": {
@@ -10004,7 +11039,7 @@
     },
     "app/pages/models_page.py": {
       "filePath": "app/pages/models_page.py",
-      "contentHash": "e8169a470e5e46a153abcdcc37629e73facdb0a16322db95da835cc31e87f88f",
+      "contentHash": "2d5049ad4751aa593cac179e60cf25e501449e777d28a9bdec221224ddfdf9f0",
       "functions": [
         {
           "name": "render_models_page",
@@ -10020,7 +11055,7 @@
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 74
+          "lineCount": 75
         },
         {
           "name": "_render_benchmark_model_card",
@@ -10029,7 +11064,7 @@
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 65
+          "lineCount": 76
         },
         {
           "name": "_render_registry_model_card",
@@ -10047,7 +11082,18 @@
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 53
+          "lineCount": 48
+        },
+        {
+          "name": "_render_deployment_export",
+          "params": [
+            "model_path",
+            "metadata_path",
+            "key"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 19
         }
       ],
       "classes": [],
@@ -10068,6 +11114,12 @@
           "source": "streamlit",
           "specifiers": [
             "st"
+          ]
+        },
+        {
+          "source": "app.deployment",
+          "specifiers": [
+            "export_deployment_bundle"
           ]
         },
         {
@@ -10133,9 +11185,10 @@
         "_render_pycaret_model_card",
         "_render_benchmark_model_card",
         "_render_registry_model_card",
-        "_render_flaml_model_card"
+        "_render_flaml_model_card",
+        "_render_deployment_export"
       ],
-      "totalLines": 326,
+      "totalLines": 355,
       "hasStructuralAnalysis": true
     },
     "app/pages/notebook_page.py": {
@@ -10679,7 +11732,7 @@
     },
     "app/pages/registry.py": {
       "filePath": "app/pages/registry.py",
-      "contentHash": "79de54aa1549bf3eafa1e2b58f50ac5de3b56f8fd37167ab7cca00e535e0502c",
+      "contentHash": "cbda55a3270e4ec8135da2185c29060ea0898db5f5b2320c69acabc861851d61",
       "functions": [
         {
           "name": "get_page_registry",
@@ -10721,6 +11774,14 @@
           "returnType": "None",
           "exported": true,
           "lineCount": 6
+        },
+        {
+          "name": "build_streamlit_navigation",
+          "params": [
+            "workspace_mode"
+          ],
+          "exported": true,
+          "lineCount": 28
         }
       ],
       "classes": [
@@ -10764,9 +11825,10 @@
         "get_nav_sections",
         "default_page_label",
         "get_page_by_label",
-        "render_registered_page"
+        "render_registered_page",
+        "build_streamlit_navigation"
       ],
-      "totalLines": 189,
+      "totalLines": 226,
       "hasStructuralAnalysis": true
     },
     "app/pages/registry_page.py": {
@@ -12442,7 +13504,7 @@
     },
     "app/prediction/base.py": {
       "filePath": "app/prediction/base.py",
-      "contentHash": "9fe2225e6898f5680f1077f541dd8293e034258fa008e733da4e91cf0c3c7839",
+      "contentHash": "b91380615e129b34481740164e36ee1fd20082861b88e7f783b69189c582812b",
       "functions": [],
       "classes": [
         {
@@ -12476,7 +13538,7 @@
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 558
+          "lineCount": 569
         }
       ],
       "imports": [
@@ -12624,7 +13686,7 @@
         "BasePredictionService",
         "PredictionService"
       ],
-      "totalLines": 632,
+      "totalLines": 643,
       "hasStructuralAnalysis": true
     },
     "app/prediction/batch_predict.py": {
@@ -12847,7 +13909,7 @@
     },
     "app/prediction/loader.py": {
       "filePath": "app/prediction/loader.py",
-      "contentHash": "20d0ed41f1ed62c6d4fb69c8673b1c5115e6c58993bf6a2cc4d37605e991e535",
+      "contentHash": "eced6a09db7f7432b5cb8e514abf2c09deed474bf4d31c6238e78d0b127004e8",
       "functions": [],
       "classes": [
         {
@@ -12884,7 +13946,7 @@
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 107
+          "lineCount": 113
         },
         {
           "name": "MLflowModelLoader",
@@ -13043,7 +14105,7 @@
         "LocalFlamlModelLoader",
         "MLflowModelLoader"
       ],
-      "totalLines": 468,
+      "totalLines": 474,
       "hasStructuralAnalysis": true
     },
     "app/prediction/schemas.py": {
@@ -14582,6 +15644,200 @@
         "YDataProfilingService"
       ],
       "totalLines": 204,
+      "hasStructuralAnalysis": true
+    },
+    "app/provenance.py": {
+      "filePath": "app/provenance.py",
+      "contentHash": "c68e0dd60d5d2e89ee8da81cdb8ef73c54d2654362572cb5b2846fc4604a99bd",
+      "functions": [
+        {
+          "name": "sha256_file",
+          "params": [
+            "path"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "build_provenance",
+          "params": [
+            "engine",
+            "task_type",
+            "target_column",
+            "dataset_fingerprint",
+            "row_count",
+            "column_count",
+            "random_seed",
+            "configuration",
+            "dataset_schema_hash",
+            "job_id",
+            "model_path",
+            "repo_root"
+          ],
+          "returnType": "ProvenanceManifest",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "write_provenance",
+          "params": [
+            "manifest",
+            "path"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_package_version",
+          "params": [
+            "name"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_engine_packages",
+          "params": [
+            "engine"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_git_value",
+          "params": [
+            "repo_root",
+            "args"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_git_dirty",
+          "params": [
+            "repo_root"
+          ],
+          "returnType": "bool | None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_json_safe",
+          "params": [
+            "value"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_sanitize",
+          "params": [
+            "value"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [
+        {
+          "name": "ProvenanceManifest",
+          "methods": [],
+          "properties": [
+            "schema_version",
+            "created_at",
+            "app_version",
+            "git_commit",
+            "git_dirty",
+            "job_id",
+            "engine",
+            "task_type",
+            "target_column",
+            "dataset_fingerprint",
+            "dataset_schema_hash",
+            "row_count",
+            "column_count",
+            "random_seed",
+            "configuration",
+            "package_versions",
+            "model_sha256"
+          ],
+          "exported": true,
+          "lineCount": 20
+        }
+      ],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "importlib.metadata",
+          "specifiers": [
+            "PackageNotFoundError",
+            "version"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        }
+      ],
+      "exports": [
+        "ProvenanceManifest",
+        "sha256_file",
+        "build_provenance",
+        "write_provenance",
+        "_package_version",
+        "_engine_packages",
+        "_git_value",
+        "_git_dirty",
+        "_json_safe",
+        "_sanitize"
+      ],
+      "totalLines": 140,
       "hasStructuralAnalysis": true
     },
     "app/providers/__init__.py": {
@@ -16577,7 +17833,7 @@
     },
     "app/storage/models.py": {
       "filePath": "app/storage/models.py",
-      "contentHash": "96afe7c1640a3192768dd9053b1c73ed1e6fdf2b5c88ffd8a7e588b0fb124cde",
+      "contentHash": "1cc683796b21b73c316600c2b8ef0800fbdbca66e2f1e67f7bce8b3a0e08254b",
       "functions": [],
       "classes": [
         {
@@ -16592,7 +17848,7 @@
           "methods": [],
           "properties": [],
           "exported": true,
-          "lineCount": 5
+          "lineCount": 9
         },
         {
           "name": "ProjectRecord",
@@ -16776,7 +18032,7 @@
         "BatchRunRecord",
         "BatchRunItemRecord"
       ],
-      "totalLines": 151,
+      "totalLines": 155,
       "hasStructuralAnalysis": true
     },
     "app/storage/recorders.py": {
@@ -17166,20 +18422,21 @@
     },
     "app/storage/repositories/jobs.py": {
       "filePath": "app/storage/repositories/jobs.py",
-      "contentHash": "625d8e7d12ac435b89656791071227ff7c49625278239b37dea66106d5ae0633",
+      "contentHash": "bede6cddd7fed9c99570c83604329258dd30c298322fb56a5a9e53c1e18dd990",
       "functions": [],
       "classes": [
         {
           "name": "JobRepository",
           "methods": [
             "record",
+            "get",
             "list_recent",
             "_upsert_row",
             "_from_row"
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 81
+          "lineCount": 88
         }
       ],
       "imports": [
@@ -17213,7 +18470,7 @@
       "exports": [
         "JobRepository"
       ],
-      "totalLines": 98,
+      "totalLines": 105,
       "hasStructuralAnalysis": true
     },
     "app/storage/repositories/projects.py": {
@@ -17404,7 +18661,7 @@
     },
     "app/storage/store.py": {
       "filePath": "app/storage/store.py",
-      "contentHash": "e85ecb735b3b3ba442a20a2c0df2b1b457d5cc85585d20951f12a0932e623e73",
+      "contentHash": "02efac861c7aa6ab65d81397c8841aaa585be3be06ed3a98529c81a8a2f9c39b",
       "functions": [],
       "classes": [
         {
@@ -17421,6 +18678,7 @@
             "upsert_dataset_from_loaded",
             "list_recent_datasets",
             "record_job",
+            "get_job",
             "list_recent_jobs",
             "upsert_saved_local_model",
             "upsert_saved_model_metadata",
@@ -17433,7 +18691,7 @@
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 142
+          "lineCount": 145
         }
       ],
       "imports": [
@@ -17506,7 +18764,7 @@
       "exports": [
         "AppMetadataStore"
       ],
-      "totalLines": 189,
+      "totalLines": 192,
       "hasStructuralAnalysis": true
     },
     "app/tracking/__init__.py": {
@@ -19752,22 +21010,22 @@
     },
     "docs/README.md": {
       "filePath": "docs/README.md",
-      "contentHash": "269fb8ad636af0939ea844a43e5577e3d30aa5d9291da410480641f1a7d674f7",
+      "contentHash": "b04f0cbe1496382232b04917038bf38dad29e081617900b690046067c1a4a189",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 98,
+      "totalLines": 103,
       "hasStructuralAnalysis": true
     },
     "docs/architecture.md": {
       "filePath": "docs/architecture.md",
-      "contentHash": "780d0fcac2cce7a89317c4e40b7a4b18ccc2d0b0f5ba9f73b13a1f7711df4b7f",
+      "contentHash": "8a3296e68c99a5eae1887bb8823dbd5d290ce51b7bd0b408dee2a94fa275299e",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 221,
+      "totalLines": 235,
       "hasStructuralAnalysis": true
     },
     "docs/assets/demo/README.md": {
@@ -19792,32 +21050,32 @@
     },
     "docs/developer-guide.md": {
       "filePath": "docs/developer-guide.md",
-      "contentHash": "6ffb0c848b77cafc7b536cf728c78d6930f162519dc0705e14d2f5810843d728",
+      "contentHash": "b7a98c9b1b23c800ec8744da16996096d515091f390024d23782da647f90e433",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 259,
+      "totalLines": 271,
       "hasStructuralAnalysis": true
     },
     "docs/operations.md": {
       "filePath": "docs/operations.md",
-      "contentHash": "5a34b877e809a660adc08112eba408b77b07ec16ace450d5e9996bcea55c7a88",
+      "contentHash": "0c8748dd8b43da7d078c39c2b3c31fddde291029124d9b72297e65965d956793",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 316,
+      "totalLines": 329,
       "hasStructuralAnalysis": true
     },
     "pyproject.toml": {
       "filePath": "pyproject.toml",
-      "contentHash": "356561f1dfb9999725ec22e141c19a327b83324af3fc3f9c9e967d339dfe85b5",
+      "contentHash": "e17fc2c6591fa73b402a281b62a3e6e171b95d69862c33c2e35f82670a109bfc",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 331,
+      "totalLines": 339,
       "hasStructuralAnalysis": true
     },
     "pyrightconfig.json": {
@@ -20710,6 +21968,32 @@
         "runtime_state"
       ],
       "totalLines": 19,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_app_navigation.py": {
+      "filePath": "tests/test_app_navigation.py",
+      "contentHash": "492d805dea2b8704db73737c244eb6dc1b7b0b4c0b7a1476f5f164f24b6070ee",
+      "functions": [
+        {
+          "name": "test_main_navigation_renders_without_streamlit_errors",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "streamlit.testing.v1",
+          "specifiers": [
+            "AppTest"
+          ]
+        }
+      ],
+      "exports": [
+        "test_main_navigation_renders_without_streamlit_errors"
+      ],
+      "totalLines": 8,
       "hasStructuralAnalysis": true
     },
     "tests/test_artifact_manager.py": {
@@ -25084,6 +26368,163 @@
         "TestPredictionWorkflowService"
       ],
       "totalLines": 214,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_product_improvements.py": {
+      "filePath": "tests/test_product_improvements.py",
+      "contentHash": "ae3bf1c71d3fe1a9d575fde11ece157d902513ee03fd26c7dd8cb4cadcef7e04",
+      "functions": [
+        {
+          "name": "test_drift_baseline_detects_shift_without_storing_rows",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_auto_run_plan_requires_confirmation_ready_target",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_background_job_cancel_is_persisted",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "test_evaluation_and_explanations_cover_classification",
+          "params": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_evaluation_covers_regression",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_provenance_and_deployment_bundle_are_portable",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "test_auto_run_saves_reloads_and_predicts",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 41
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "zipfile",
+          "specifiers": [
+            "zipfile"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app.autorun",
+          "specifiers": [
+            "AutoRunConfig",
+            "plan_auto_run",
+            "suggest_targets"
+          ]
+        },
+        {
+          "source": "app.background_jobs",
+          "specifiers": [
+            "BackgroundJobService"
+          ]
+        },
+        {
+          "source": "app.config.models",
+          "specifiers": [
+            "AppSettings"
+          ]
+        },
+        {
+          "source": "app.deployment",
+          "specifiers": [
+            "export_deployment_bundle"
+          ]
+        },
+        {
+          "source": "app.drift",
+          "specifiers": [
+            "DriftLevel",
+            "build_drift_baseline",
+            "compare_drift"
+          ]
+        },
+        {
+          "source": "app.evaluation",
+          "specifiers": [
+            "evaluate_model"
+          ]
+        },
+        {
+          "source": "app.explainability",
+          "specifiers": [
+            "explain_global",
+            "explain_prediction"
+          ]
+        },
+        {
+          "source": "app.provenance",
+          "specifiers": [
+            "build_provenance",
+            "write_provenance"
+          ]
+        },
+        {
+          "source": "app.storage",
+          "specifiers": [
+            "AppJobStatus",
+            "AppJobType",
+            "JobRecord",
+            "build_metadata_store"
+          ]
+        }
+      ],
+      "exports": [
+        "test_drift_baseline_detects_shift_without_storing_rows",
+        "test_auto_run_plan_requires_confirmation_ready_target",
+        "test_background_job_cancel_is_persisted",
+        "test_evaluation_and_explanations_cover_classification",
+        "test_evaluation_covers_regression",
+        "test_provenance_and_deployment_bundle_are_portable",
+        "test_auto_run_saves_reloads_and_predicts"
+      ],
+      "totalLines": 148,
       "hasStructuralAnalysis": true
     },
     "tests/test_profiling.py": {

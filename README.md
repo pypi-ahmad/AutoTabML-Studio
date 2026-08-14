@@ -44,7 +44,7 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 - **Zero cloud dependency.** Data never leaves your machine. No default outbound telemetry or external uploads.
 - **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
 - **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
-- **683 unit tests at 81.65% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
+- **707 unit tests at 77.32% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
 
 ---
 
@@ -135,6 +135,10 @@ uv run streamlit run app/main.py      # Launch the UI
 ---
 
 ## 🧭 Workflow
+
+The recommended path is now **Auto Run**: confirm a target, review the inferred
+task and FLAML plan, then launch a cancellable background job. It saves the
+model, holdout evaluation, explanation, provenance, and row-free drift baseline.
 
 ```
 Load Data → Validate → Profile → Benchmark → Train / FLAML → Predict → Compare → Register
@@ -250,11 +254,20 @@ Streamlit pages are **thin entry points**. All business logic lives in the servi
 | **Observability** | JSON logging, metrics hooks, optional OpenTelemetry tracing |
 | **Metadata** | SQLite |
 | **AI Summaries** | OpenAI · Anthropic · Gemini · Ollama |
-| **Testing** | pytest (683 tests, 81.65% coverage), pytest-cov, pytest-asyncio, respx |
+| **Testing** | pytest (707 tests, 77.32% coverage), pytest-cov, pytest-asyncio, respx |
 
 ---
 
 ## 💻 CLI
+
+```bash
+autotabml auto-run data/train.csv --target target --mode auto --time-budget 120
+autotabml job-list
+autotabml job-status <job-id>
+autotabml job-cancel <job-id>
+autotabml drift-check data/new.csv --baseline artifacts/models/model_drift_baseline.json
+autotabml deploy-export --model artifacts/models/model.pkl --metadata artifacts/models/model.json --output deploy/model
+```
 
 Examples below assume the synced `.venv` is active. If you are not activating it, prefix commands with `uv run`.
 
@@ -350,6 +363,8 @@ Dependabot is configured for weekly dependency updates.
 | Large datasets | 100K+ rows trigger automatic sampling |
 | Kaggle | CLI-only; not exposed in the UI |
 | Single-user | Designed for individual local use |
+| Background concurrency | One training job runs at a time |
+| Drift meaning | Input-distribution drift only; not target/concept drift |
 | AI summaries | Require an API key or local Ollama |
 
 ---
@@ -362,8 +377,8 @@ verification scripts on a fresh `.venv` with Python 3.12.10:
 | Check | Command | Result |
 | --- | --- | --- |
 | Lockfile consistency | `uv lock --check` | passes |
-| Unit tests | `pytest tests/ -q` | **683 passed**, 29 deselected |
-| Coverage gate | `pytest --cov=app --cov-fail-under=65` | **81.65%** (gate ≥ 65%) |
+| Unit tests | `pytest tests/ -q` | **707 passed**, 30 deselected |
+| Coverage gate | `pytest --cov=app --cov-fail-under=65` | **77.32%** (gate ≥ 65%) |
 | Lint | `ruff check app/ tests/ scripts/` | **All checks passed** |
 | Release metadata | `python -m app.release_metadata` | passes |
 

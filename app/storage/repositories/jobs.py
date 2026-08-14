@@ -15,6 +15,13 @@ class JobRepository(BaseRepository):
     def record(self, job: JobRecord) -> str:
         return self._write(lambda connection: self._upsert_row(connection, job))
 
+    def get(self, job_id: str) -> JobRecord | None:
+        def _read(connection: sqlite3.Connection) -> JobRecord | None:
+            row = connection.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
+            return self._from_row(row) if row is not None else None
+
+        return self._read(_read)
+
     def list_recent(
         self,
         *,

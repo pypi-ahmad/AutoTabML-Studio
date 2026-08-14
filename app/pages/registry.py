@@ -21,7 +21,7 @@ class PageSpec:
 
 # ── Sections keep the sidebar organised by stage ──────────────────────
 NAV_SECTIONS: list[tuple[str, str]] = [
-    ("start", "Start"),
+    ("start", ""),
     ("prepare", "① Prepare"),
     ("build", "② Build"),
     ("use", "③ Use"),
@@ -36,6 +36,13 @@ _PAGES = [
         "Your local-first workspace dashboard — see recent activity and jump to any workflow.",
         "app.pages.dashboard_page",
         "render_dashboard_page",
+        section="start",
+    ),
+    PageSpec(
+        "Auto Run",
+        "Guided target selection, training, evaluation, explanation, and model saving.",
+        "app.pages.autorun_page",
+        "render_autorun_page",
         section="start",
     ),
     # ── Prepare ────────────────────────────────────────────────────────
@@ -88,7 +95,7 @@ _PAGES = [
         "Make predictions on new data, or test a model against ground truth.",
         "app.pages.predictions_page",
         "render_predictions_page",
-        section="use",
+        section="start",
     ),
     # ── Review ─────────────────────────────────────────────────────────
     PageSpec(
@@ -96,7 +103,7 @@ _PAGES = [
         "Browse all your saved models in one place.",
         "app.pages.models_page",
         "render_models_page",
-        section="review",
+        section="start",
     ),
     PageSpec(
         "History",
@@ -186,3 +193,33 @@ def render_registered_page(label: str) -> None:
     page = get_page_by_label(label)
     module = importlib.import_module(page.module_path)
     getattr(module, page.render_function)()
+
+
+def build_streamlit_navigation(workspace_mode: WorkspaceMode):
+    """Build callable Streamlit pages while preserving the central registry."""
+
+    import streamlit as st
+
+    default_label = default_page_label(workspace_mode)
+    icons = {
+        "Home": ":material/home:",
+        "Auto Run": ":material/auto_awesome:",
+        "Predictions": ":material/online_prediction:",
+        "Models": ":material/inventory_2:",
+        "Settings": ":material/settings:",
+    }
+    page_objects = {
+        spec.label: st.Page(
+            lambda label=spec.label: render_registered_page(label),
+            title=spec.label,
+            icon=icons.get(spec.label),
+            url_path=spec.label.lower().replace(" & ", "-").replace(" ", "-"),
+            default=spec.label == default_label,
+        )
+        for spec in _PAGES
+    }
+    sections = {
+        title: [page_objects[spec.label] for spec in pages]
+        for title, pages in get_nav_sections()
+    }
+    return sections, page_objects

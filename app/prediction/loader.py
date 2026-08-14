@@ -264,6 +264,12 @@ class LocalFlamlModelLoader(ModelLoader):
                 "trained_at": flaml_metadata.trained_at,
                 "artifact_format": flaml_metadata.artifact_format,
                 "trusted_source": flaml_metadata.trusted_source,
+                "drift_baseline_path": str(
+                    flaml_metadata.model_path.with_name(f"{flaml_metadata.model_path.stem}_drift_baseline.json")
+                ),
+                "provenance_path": str(
+                    flaml_metadata.model_path.with_name(f"{flaml_metadata.model_path.stem}_provenance.json")
+                ),
             }
         )
 

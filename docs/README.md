@@ -55,6 +55,11 @@ exists, how it works, and how to use or extend it.
 
 ## What is in this release?
 
+- Guided background Auto Run with cancellation.
+- Holdout evaluation, explanations, provenance, and prediction drift.
+- FastAPI, CLI, and Docker deployment bundles.
+- Simplified navigation with advanced workflows retained.
+
 AutoTabML Studio is a **local-first automated machine-learning
 workbench** that takes you from a raw CSV to a trained,
 evaluated, and deployable model — entirely on your machine.

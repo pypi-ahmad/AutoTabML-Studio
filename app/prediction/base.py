@@ -463,6 +463,17 @@ class PredictionService(BasePredictionService):
                             ].to_list()
 
                         warnings = list(validation.warnings)
+                        baseline_path = loaded_model.metadata.get("drift_baseline_path")
+                        if baseline_path and Path(str(baseline_path)).is_file():
+                            from app.drift import DriftBaseline, DriftLevel, compare_drift
+
+                            baseline = DriftBaseline.model_validate_json(
+                                Path(str(baseline_path)).read_text(encoding="utf-8")
+                            )
+                            drift_report = compare_drift(baseline, normalized_frame)
+                            loaded_model.metadata["drift_report"] = drift_report.model_dump(mode="json")
+                            if drift_report.level != DriftLevel.STABLE:
+                                warnings.append(f"Input data drift is {drift_report.level.value}.")
                         summary = build_prediction_summary(
                             mode=PredictionMode.BATCH,
                             loaded_model=loaded_model,

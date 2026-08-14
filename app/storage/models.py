@@ -24,6 +24,10 @@ class AppJobType(str, Enum):
 class AppJobStatus(str, Enum):
     """Coarse local execution status."""
 
+    QUEUED = "queued"
+    RUNNING = "running"
+    CANCEL_REQUESTED = "cancel_requested"
+    CANCELLED = "cancelled"
     SUCCESS = "success"
     FAILED = "failed"
 

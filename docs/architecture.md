@@ -139,6 +139,15 @@ satisfy four hard constraints:
 6. The scorer appends a `PredictionHistoryEntry` to
    `~/.autotabml/predictions/history.jsonl` (JSONL, append-only).
 
+## Data flow — guided Auto Run
+
+The planner confirms a target and task. `BackgroundJobService` snapshots the
+dataframe, persists job state, and starts `app.autorun_worker`. The worker keeps
+an untouched 20% holdout, trains and saves with FLAML, then writes evaluation,
+explanation, provenance, and aggregate drift-baseline artifacts. Streamlit polls
+SQLite from a fragment, so browser refreshes do not stop training. Batch
+prediction compares inputs with the saved baseline.
+
 ## Reliability model
 
 - **Retries** — `app.security.safe_fetch` retries on transient
@@ -204,6 +213,11 @@ satisfy four hard constraints:
 | Prediction history | `artifacts/predictions/history.jsonl`           | `AUTOTABML_PREDICTION__HISTORY_PATH` |
 
 ## Extension points
+
+- `app.autorun` and `app.background_jobs` own orchestration and execution.
+- `app.evaluation`, `app.explainability`, `app.provenance`, and `app.drift`
+  provide engine-neutral contracts.
+- `app.deployment` builds API/CLI/Docker bundles.
 
 - **New ingestion source** — add a loader under
   `app/ingestion/` and register it in

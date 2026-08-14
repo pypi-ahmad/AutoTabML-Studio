@@ -45,6 +45,8 @@ import sys
 from urllib.parse import urlparse
 
 from app import APP_NAME, CLI_ENTRYPOINT, DIST_NAME, STREAMLIT_ENTRYPOINT, __version__
+from app.autorun import AutoRunConfig, AutoRunMode
+from app.background_jobs import BackgroundJobService
 from app.config.settings import load_settings, save_settings
 from app.errors import log_exception
 from app.gpu import cuda_summary
@@ -59,6 +61,92 @@ from app.startup import format_startup_issues, initialize_local_runtime
 from app.storage import BatchItemStatus, build_metadata_store, ensure_dataset_record
 
 logger = logging.getLogger(__name__)
+
+
+def cmd_auto_run(args: argparse.Namespace) -> None:
+    settings = load_settings()
+    loaded = load_dataset(_build_input_spec(args.dataset, args.source_type))
+    store = build_metadata_store(settings)
+    if store is None:
+        _cli_error(RuntimeError("Metadata storage is unavailable."))
+    config = AutoRunConfig(
+        target_column=args.target,
+        task_type=args.task_type,
+        mode=AutoRunMode(args.mode),
+        time_budget=args.time_budget,
+        model_name=args.save_name,
+    )
+    try:
+        record = BackgroundJobService(
+            store=store,
+            jobs_dir=settings.artifacts.root_dir / "jobs",
+        ).submit_auto_run(loaded.dataframe, config)
+    except Exception as exc:
+        _cli_error(exc)
+    print(record.job_id)
+
+
+def cmd_job_list(args: argparse.Namespace) -> None:
+    store = build_metadata_store(load_settings())
+    if store is None:
+        _cli_error(RuntimeError("Metadata storage is unavailable."))
+    for job in store.list_recent_jobs(limit=args.limit):
+        print(f"{job.job_id}\t{job.status.value}\t{job.metadata.get('progress', 0)}%\t{job.title or ''}")
+
+
+def cmd_job_status(args: argparse.Namespace) -> None:
+    store = build_metadata_store(load_settings())
+    job = store.get_job(args.job_id) if store else None
+    if job is None:
+        _cli_error(KeyError(args.job_id))
+    print(job.model_dump_json(indent=2))
+
+
+def cmd_job_cancel(args: argparse.Namespace) -> None:
+    settings = load_settings()
+    store = build_metadata_store(settings)
+    if store is None:
+        _cli_error(RuntimeError("Metadata storage is unavailable."))
+    try:
+        job = BackgroundJobService(store=store, jobs_dir=settings.artifacts.root_dir / "jobs").cancel(args.job_id)
+    except Exception as exc:
+        _cli_error(exc)
+    print(f"{job.job_id}\t{job.status.value}")
+
+
+def cmd_deploy_export(args: argparse.Namespace) -> None:
+    from app.deployment import export_deployment_bundle
+
+    try:
+        bundle = export_deployment_bundle(
+            model_path=Path(args.model),
+            metadata_path=Path(args.metadata),
+            provenance_path=Path(args.provenance) if args.provenance else None,
+            output_path=Path(args.output),
+        )
+    except Exception as exc:
+        _cli_error(exc)
+    print(bundle.archive_path)
+
+
+def cmd_drift_check(args: argparse.Namespace) -> None:
+    from app.drift import DriftBaseline, compare_drift
+
+    try:
+        baseline = DriftBaseline.model_validate_json(Path(args.baseline).read_text(encoding="utf-8"))
+        loaded = load_dataset(_build_input_spec(args.dataset, args.source_type))
+        report = compare_drift(baseline, loaded.dataframe)
+    except Exception as exc:
+        _cli_error(exc)
+    print(report.model_dump_json(indent=2))
+
+
+def cmd_explain(args: argparse.Namespace) -> None:
+    try:
+        payload = json.loads(Path(args.artifact).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        _cli_error(exc)
+    print(json.dumps(payload, indent=2))
 
 
 def _cli_error(exc: Exception, *, operation: str | None = None) -> None:
@@ -1349,6 +1437,36 @@ def main() -> None:
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command")
 
+    auto_parser = subparsers.add_parser("auto-run", help="Launch guided AutoML as a background job")
+    auto_parser.add_argument("dataset", help="Dataset path or supported URL")
+    auto_parser.add_argument("--target", required=True, help="Target column")
+    auto_parser.add_argument("--task-type", choices=["auto", "classification", "regression"], default="auto")
+    auto_parser.add_argument("--mode", choices=[item.value for item in AutoRunMode], default="auto")
+    auto_parser.add_argument("--time-budget", type=int, default=120)
+    auto_parser.add_argument("--save-name", default="autorun-model")
+    auto_parser.add_argument("--source-type", choices=[item.value for item in IngestionSourceType], default=None)
+
+    job_list_parser = subparsers.add_parser("job-list", help="List local jobs")
+    job_list_parser.add_argument("--limit", type=int, default=20)
+    job_status_parser = subparsers.add_parser("job-status", help="Show one local job")
+    job_status_parser.add_argument("job_id")
+    job_cancel_parser = subparsers.add_parser("job-cancel", help="Cancel one active local job")
+    job_cancel_parser.add_argument("job_id")
+
+    deploy_parser = subparsers.add_parser("deploy-export", help="Export API, CLI, and Docker deployment bundle")
+    deploy_parser.add_argument("--model", required=True)
+    deploy_parser.add_argument("--metadata", required=True)
+    deploy_parser.add_argument("--provenance", default=None)
+    deploy_parser.add_argument("--output", required=True)
+
+    drift_parser = subparsers.add_parser("drift-check", help="Compare a dataset with a saved drift baseline")
+    drift_parser.add_argument("dataset")
+    drift_parser.add_argument("--baseline", required=True)
+    drift_parser.add_argument("--source-type", choices=[item.value for item in IngestionSourceType], default=None)
+
+    explain_parser = subparsers.add_parser("explain", help="Print a saved model explanation")
+    explain_parser.add_argument("artifact")
+
     info_parser = subparsers.add_parser("info", help="Show app version and local runtime defaults")
     info_parser.set_defaults()
 
@@ -1713,7 +1831,21 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    if args.command == "info":
+    if args.command == "auto-run":
+        cmd_auto_run(args)
+    elif args.command == "job-list":
+        cmd_job_list(args)
+    elif args.command == "job-status":
+        cmd_job_status(args)
+    elif args.command == "job-cancel":
+        cmd_job_cancel(args)
+    elif args.command == "deploy-export":
+        cmd_deploy_export(args)
+    elif args.command == "drift-check":
+        cmd_drift_check(args)
+    elif args.command == "explain":
+        cmd_explain(args)
+    elif args.command == "info":
         cmd_info(args)
     elif args.command == "uci-list":
         cmd_uci_list(args)

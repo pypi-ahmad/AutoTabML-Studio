@@ -150,6 +150,9 @@ def set_active_dataset(
 def go_to_page(page_label: str) -> None:
     """Navigate to another registered page within the Streamlit app."""
 
+    pages = st.session_state.get("_page_objects", {})
+    if page_label in pages:
+        st.switch_page(pages[page_label])
     st.session_state["_pending_nav"] = page_label
     st.rerun()
 

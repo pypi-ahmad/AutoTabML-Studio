@@ -142,6 +142,9 @@ class AppMetadataStore:
     def record_job(self, job: JobRecord) -> str:
         return self.jobs.record(job)
 
+    def get_job(self, job_id: str) -> JobRecord | None:
+        return self.jobs.get(job_id)
+
     def list_recent_jobs(
         self,
         *,

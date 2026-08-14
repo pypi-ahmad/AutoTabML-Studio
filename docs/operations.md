@@ -64,6 +64,19 @@ uv run --no-sync autotabml doctor
 
 ## Day-2 monitoring
 
+### Background Auto Run jobs
+
+```bash
+uv run autotabml job-list
+uv run autotabml job-status <job-id>
+uv run autotabml job-cancel <job-id>
+```
+
+Job state and logs live under `artifacts/jobs/<job-id>/`; final reports live
+under `artifacts/autorun/<job-id>/`. Browser refresh is safe. Before exposing a
+generated FastAPI container, add authentication, TLS, request limits, and
+network policy.
+
 The workbench has no built-in remote telemetry. To monitor it:
 
 - **Logs** — the workbench emits structured JSON to stderr when

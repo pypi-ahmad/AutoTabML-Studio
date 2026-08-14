@@ -48,6 +48,14 @@ These defaults were last verified against the current vendor model documentation
 
 ## Common Commands
 
+```bash
+uv run autotabml auto-run data/train.csv --target target --mode quick
+uv run autotabml job-list
+uv run autotabml drift-check data/current.csv --baseline artifacts/models/model_drift_baseline.json
+```
+
+Test Auto Run at public service, CLI, Streamlit, and end-to-end seams.
+
 ### Local runtime setup
 
 ```bash
@@ -215,6 +223,10 @@ The repo emphasizes local, hermetic tests:
 - tests marked `integration` are reserved for optional heavy-dependency checks and are intended for the manual CI integration job
 
 ## Extension Points
+
+- Add engines behind `AutoRunPlan` without changing the UI.
+- Preserve explanation method/caveat labels.
+- Never persist source rows in drift baselines.
 
 - new ingestion sources: add loaders under `app/ingestion/`
 - new validation rules: extend `app/validation/rules.py` and supporting schemas/builders as needed
