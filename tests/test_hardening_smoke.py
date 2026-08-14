@@ -46,6 +46,15 @@ from app.validation.schemas import ValidationRuleConfig
 from app.validation.service import validate_dataset
 
 
+def test_compose_publishes_workbench_on_loopback_only():
+    compose = (Path(__file__).resolve().parents[1] / "docker-compose.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert '"127.0.0.1:8501:8501"' in compose
+    assert '"8501:8501"' not in compose
+
+
 class _FakeClassifier:
     classes_ = ["no", "yes"]
 

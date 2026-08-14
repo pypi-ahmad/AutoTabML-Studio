@@ -6,7 +6,7 @@
 #   docker build -t autotabml-studio:0.2.0 .
 #
 # Run (Streamlit UI):
-#   docker run --rm -p 8501:8501 \
+#   docker run --rm -p 127.0.0.1:8501:8501 \
 #     -v $(pwd)/artifacts:/app/artifacts \
 #     -e AUTOTABML_LOG_FORMAT=json \
 #     autotabml-studio:0.2.0

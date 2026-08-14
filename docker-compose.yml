@@ -22,7 +22,7 @@ services:
     container_name: autotabml-studio
     restart: unless-stopped
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     environment:
       AUTOTABML_LOG_FORMAT: json
       AUTOTABML_LOG_LEVEL: INFO

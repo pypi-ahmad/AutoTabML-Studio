@@ -281,6 +281,10 @@ docker compose logs -f autotabml
 docker compose exec autotabml autotabml --version
 ```
 
+The bundled Compose stack publishes the unauthenticated local workbench only
+on `127.0.0.1:8501`. Keep that loopback binding for local use. Shared or remote
+access requires an authenticated TLS reverse proxy in front of the application.
+
 ### Run a one-shot CLI command
 
 ```bash
