@@ -101,8 +101,13 @@ directories, and reports any startup issues.
 
 ### Streamlit UI (Interactive)
 
+On Windows, double-click **`Launch AutoTabML Studio.cmd`** in the repository
+folder. It starts the app through the project's `uv` environment.
+
+From a terminal:
+
 ```bash
-streamlit run app/main.py
+uv run streamlit run app/main.py
 ```
 
 Opens in your browser at `http://localhost:8501`. The sidebar provides guided

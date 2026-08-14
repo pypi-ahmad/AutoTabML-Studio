@@ -127,6 +127,11 @@ If dependency metadata changes, refresh pinned versions with `uv lock --python 3
 
 ### Run
 
+On Windows, double-click **`Launch AutoTabML Studio.cmd`** in the repository
+folder. The launcher uses `uv` and opens the Streamlit UI in your browser.
+
+Or launch it from a terminal:
+
 ```bash
 uv run autotabml init-local-storage   # Initialize SQLite + artifact dirs
 uv run autotabml doctor               # Verify runtime dependencies

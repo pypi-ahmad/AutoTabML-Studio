@@ -65,8 +65,11 @@ autotabml doctor
 
 ### Run the UI
 
+On Windows, double-click **`Launch AutoTabML Studio.cmd`** from the repository
+root. For terminal-based development, run:
+
 ```bash
-streamlit run app/main.py
+uv run streamlit run app/main.py
 ```
 
 ### Run tests

@@ -73,7 +73,7 @@ satisfy four hard constraints:
 
 | Module                       | Responsibility                                     | Public surface                          |
 | ---------------------------- | -------------------------------------------------- | ---------------------------------------- |
-| `app/main.py`                | Streamlit entry point. Initializes state, renders the sectioned sidebar, dispatches to page registry. | `streamlit run app/main.py`             |
+| `app/main.py`                | Streamlit entry point. Initializes state, renders the sectioned sidebar, dispatches to page registry. | `uv run streamlit run app/main.py`      |
 | `app/cli.py`                 | Argparse CLI. Same service calls as the UI. | `autotabml` console script              |
 | `app/startup.py`             | Local-runtime init: artifact dirs, metadata DB, MLflow URI, optional Ollama reachability, optional Colab MCP prereqs. | `init_local_runtime(settings)`          |
 | `app/config/`                | Pydantic `AppSettings` with 12 nested sections (artifacts, database, validation, profiling, benchmark, pycaret, flaml, mlflow, prediction, provider, ui, execution). | `AppSettings`                          |
