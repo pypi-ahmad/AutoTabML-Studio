@@ -18,6 +18,9 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Removed single-implementation service interfaces, obsolete prototype scripts,
+  and unused development/documentation dependencies.
+
 ### Fixed
 
 ## [0.2.0] - 2026-06-22

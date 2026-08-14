@@ -1,6 +1,6 @@
 # Architecture Guide
 
-> **Status:** v0.2.0 architecture. Last reviewed: 2026-06-22.
+> **Status:** v0.2.0 architecture. Last reviewed: 2026-08-14.
 
 AutoTabML Studio is a **local-first ML workbench** with two faces
 (Streamlit UI + CLI) backed by the same service layer. This document
@@ -29,11 +29,13 @@ satisfy four hard constraints:
    parameters, metrics, and artifacts. The local SQLite store
    records jobs and the saved-model metadata. The lockfile
    (`uv.lock`) pins every dependency.
-4. **Three AutoML engines, one interface.** LazyPredict for quick
+4. **Three AutoML engines, shared data contracts.** LazyPredict for quick
    screening, PyCaret for full experiments, and FLAML for
-   budgeted search all expose the same `BenchmarkResultBundle`
+   budgeted search expose consistent `BenchmarkResultBundle`
    / `ExperimentResultBundle` / `FlamlResultBundle` shape, so
-   the History and Compare pages are engine-agnostic.
+   the History and Compare pages are engine-agnostic. A service remains
+   concrete until a second implementation or a published extension contract
+   creates a real polymorphic boundary.
 
 ## High-level diagram
 

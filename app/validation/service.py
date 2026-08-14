@@ -10,7 +10,6 @@ import pandas as pd
 from app.ingestion.schemas import LoadedDataset
 from app.storage import AppMetadataStore, record_validation_job
 from app.validation.artifacts import write_artifacts
-from app.validation.base import BaseValidationService
 from app.validation.gx_context import is_gx_available
 from app.validation.gx_runner import run_gx_validation
 from app.validation.rules import run_app_rules
@@ -24,7 +23,7 @@ from app.validation.summary import build_summary
 logger = logging.getLogger(__name__)
 
 
-class GreatExpectationsValidationService(BaseValidationService):
+class GreatExpectationsValidationService:
     """Validation service combining app-level rules and GX expectations."""
 
     def validate(

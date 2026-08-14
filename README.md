@@ -219,6 +219,7 @@ See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
 ```
 
 Streamlit pages are **thin entry points**. All business logic lives in the service layer.
+Services with one runtime implementation stay concrete; shared base classes are reserved for real multi-implementation or published extension boundaries.
 
 <details>
 <summary>Module map</summary>

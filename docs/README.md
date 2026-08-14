@@ -92,7 +92,7 @@ typing, testing, and documentation are first-class.
   `app/config/` — feature modules.
 - `tests/` — 700 tests, ≥ 81% coverage.
 - `docs/` — this handbook.
-- `scripts/` — developer-facing utility scripts.
+- `scripts/` — maintained UCI batch runners, screenshot capture, and optional-dependency verification.
 - `Dockerfile` + `docker-compose.yml` — container packaging.
 - `.github/workflows/` — CI, security, release-readiness.
 - `pyproject.toml` + `uv.lock` — the single source of truth

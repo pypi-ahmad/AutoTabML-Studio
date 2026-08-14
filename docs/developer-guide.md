@@ -231,6 +231,7 @@ concatenate path (1.34x faster). Treat this as a regression baseline, not an SLA
 
 ## Extension Points
 
+- Keep an internal service concrete until another implementation or a published extension API needs a shared contract.
 - Add engines behind `AutoRunPlan` without changing the UI.
 - Preserve explanation method/caveat labels.
 - Never persist source rows in drift baselines.

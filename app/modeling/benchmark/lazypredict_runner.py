@@ -14,8 +14,8 @@ import pandas as pd
 from app.config.enums import ExecutionBackend, WorkspaceMode
 from app.errors import log_and_wrap
 from app.gpu import is_cuda_available
+from app.modeling.base import BaseService
 from app.modeling.benchmark.artifacts import write_benchmark_artifacts
-from app.modeling.benchmark.base import BaseBenchmarkService
 from app.modeling.benchmark.errors import (
     BenchmarkConfigurationError,
     BenchmarkDependencyError,
@@ -81,7 +81,7 @@ def _train_test_split(*args: Any, **kwargs: Any) -> tuple[Any, Any, Any, Any]:
     return train_test_split(*args, **kwargs)  # pyright: ignore[reportArgumentType,reportReturnType,reportUnknownVariableType]  # sklearn/pandas-stubs overload narrowing
 
 
-class LazyPredictBenchmarkService(BaseBenchmarkService):
+class LazyPredictBenchmarkService(BaseService):
     """Benchmark service backed by LazyClassifier/LazyRegressor."""
 
     def __init__(

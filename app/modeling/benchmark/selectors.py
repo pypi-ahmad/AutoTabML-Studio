@@ -149,10 +149,6 @@ def collect_nested_object_columns(feature_frame: pd.DataFrame) -> list[str]:
     nested_columns: list[str] = []
     for column in feature_frame.select_dtypes(include=["object", "string"]).columns:
         sample = feature_frame[column].dropna().head(100)
-        if any(_is_nested_value(value) for value in sample):
+        if any(isinstance(value, (dict, list, tuple, set)) for value in sample):
             nested_columns.append(str(column))
     return nested_columns
-
-
-def _is_nested_value(value: object) -> bool:
-    return isinstance(value, (dict, list, tuple, set))

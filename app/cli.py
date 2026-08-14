@@ -190,9 +190,10 @@ def _build_input_spec(locator: str, source_type: str | None = None) -> DatasetIn
         except ValueError:
             return DatasetInputSpec(source_type=IngestionSourceType.UCI_REPO, uci_name=uci_value)
 
+    is_url = urlparse(locator).scheme in {"http", "https"}
     if source_type is not None:
         resolved_type = IngestionSourceType(source_type)
-    elif _is_url(locator):
+    elif is_url:
         resolved_type = IngestionSourceType.URL_FILE
     else:
         path = Path(locator)
@@ -206,15 +207,10 @@ def _build_input_spec(locator: str, source_type: str | None = None) -> DatasetIn
         else:
             raise ValueError(f"unsupported file type: {suffix}")
 
-    if _is_url(locator):
+    if is_url:
         return DatasetInputSpec(source_type=resolved_type, url=locator)
 
     return DatasetInputSpec(source_type=resolved_type, path=Path(locator))
-
-
-def _is_url(locator: str) -> bool:
-    parsed = urlparse(locator)
-    return parsed.scheme in {"http", "https"}
 
 
 def _load_cli_dataset(locator: str, source_type: str | None = None):  # noqa: ANN201

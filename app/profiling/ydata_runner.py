@@ -19,7 +19,6 @@ import pandas as pd
 from app.artifacts import ArtifactKind, LocalArtifactManager
 from app.config.models import ProfilingMode
 from app.errors import log_and_wrap, log_exception
-from app.profiling.base import BaseProfilingService
 from app.profiling.errors import ProfilingError, ProfilingSetupError
 from app.profiling.schemas import ProfilingArtifactBundle, ProfilingConfig, ProfilingResultSummary
 from app.profiling.selectors import maybe_sample, select_profiling_mode
@@ -90,7 +89,7 @@ def is_ydata_available() -> bool:
     return _YDATA_AVAILABLE
 
 
-class YDataProfilingService(BaseProfilingService):
+class YDataProfilingService:
     """Profiling service backed by ydata-profiling."""
 
     def __init__(self, artifacts_dir: Path | None = None) -> None:

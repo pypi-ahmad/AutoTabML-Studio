@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -157,11 +157,14 @@ class CSVLoader(BaseLoader):
                         delimiter,
                         read_kwargs,
                     )
-                    dataframe = await asyncio.to_thread(
-                        pd.read_csv,
-                        downloaded.path,
-                        nrows=row_limit,
-                        **read_kwargs,
+                    dataframe = cast(
+                        pd.DataFrame,
+                        await asyncio.to_thread(
+                            pd.read_csv,
+                            downloaded.path,
+                            nrows=row_limit,
+                            **read_kwargs,
+                        ),
                     )
                     source_details = {
                         "source_kind": "url",

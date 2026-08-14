@@ -110,22 +110,16 @@ dev = [
     "pytest-cov>=5.0",
     "pytest-asyncio>=0.23",
     "respx>=0.21",
-    "freezegun>=1.5",
     "hypothesis>=6.100",
     "ruff>=0.15,<1",
     "mypy>=1.10",
     "pyright>=1.1",
-    "types-requests",
     "tomli>=2.0; python_version < '3.11'",
 ]
 security = [
     "bandit[toml]>=1.7",
     "pip-audit>=2.7",
 ]
-docs = [
-    "mkdocs-material>=9.5",
-]
-
 [project.scripts]
 autotabml = "app.cli:main"
 

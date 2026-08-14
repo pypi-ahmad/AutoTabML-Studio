@@ -13,7 +13,6 @@ from app.modeling.pycaret.schemas import (
     MLflowTrackingMode,
     ModelSelectionSpec,
 )
-from app.modeling.pycaret.service import PyCaretExperimentService
 from app.modeling.pycaret.setup_runner import is_pycaret_available, pycaret_install_guidance
 from app.modeling.pycaret.summary import leaderboard_to_dataframe
 from app.pages.dataset_workspace import (
@@ -311,7 +310,7 @@ def render_experiment_page() -> None:
     bundles = st.session_state.setdefault("experiment_bundles", {})
 
     if st.button("Start Training", key="exp_run_compare"):
-        service = _build_service(state.settings, metadata_store=metadata_store)
+        service = get_pycaret_experiment_service(state.settings)
         workflow = get_experiment_workflow_service()
         form_values = ExperimentFormValues(
             target_column=target_column,
@@ -483,7 +482,7 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
             rank=selected_row.rank,
         )
 
-        service = _build_service(get_or_init_state().settings)
+        service = get_pycaret_experiment_service(get_or_init_state().settings)
         tune_col, eval_col, save_col, save_all_col = st.columns(4)
         if tune_col.button(
             "🎯 Tune",
@@ -666,7 +665,3 @@ def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
         with st.expander("Warnings"):
             for warning in bundle.warnings:
                 st.warning(warning)
-
-
-def _build_service(app_settings, *, metadata_store=None) -> PyCaretExperimentService:  # noqa: ANN001
-    return get_pycaret_experiment_service(app_settings)

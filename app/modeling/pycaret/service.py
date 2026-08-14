@@ -10,9 +10,9 @@ import pandas as pd
 
 from app.config.enums import ExecutionBackend, WorkspaceMode
 from app.errors import log_and_wrap, log_exception
+from app.modeling.base import BaseService
 from app.modeling.pycaret import setup_runner
 from app.modeling.pycaret.artifacts import write_experiment_artifacts
-from app.modeling.pycaret.base import BaseExperimentService
 from app.modeling.pycaret.compare_runner import create_model, run_compare_models
 from app.modeling.pycaret.errors import (
     PyCaretDependencyError,
@@ -43,7 +43,7 @@ from app.storage import AppMetadataStore, record_experiment_job
 logger = logging.getLogger(__name__)
 
 
-class PyCaretExperimentService(BaseExperimentService):
+class PyCaretExperimentService(BaseService):
     """PyCaret-backed experiment service using the OOP API."""
 
     def __init__(

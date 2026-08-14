@@ -14,7 +14,6 @@ from app.modeling.flaml.schemas import (
     FlamlSearchConfig,
     FlamlTaskType,
 )
-from app.modeling.flaml.service import FlamlAutoMLService
 from app.modeling.flaml.setup_runner import flaml_install_guidance, is_flaml_available
 from app.pages.dataset_workspace import (
     go_to_page,
@@ -253,7 +252,7 @@ def render_flaml_automl_page() -> None:
     flaml_bundles = st.session_state.setdefault("flaml_bundles", {})
 
     if st.button("🔍 Start FLAML Search", key="flaml_run_search", type="primary"):
-        service = _build_service(state.settings, metadata_store=metadata_store)
+        service = get_flaml_automl_service(state.settings)
         config = FlamlConfig(
             target_column=target_column,
             task_type=task_type,
@@ -367,7 +366,7 @@ def _render_flaml_results(bundle, app_settings, metadata_store) -> None:  # noqa
         type="primary",
         help="Save the best model so you can load it on the Predictions page.",
     ):
-        service = _build_service(app_settings, metadata_store=metadata_store)
+        service = get_flaml_automl_service(app_settings)
         _save_name = model_save_name(bundle.dataset_name, summary.best_estimator or "flaml_best")
         try:
             updated = service.save_best_model(bundle, save_name=_save_name)
@@ -415,7 +414,3 @@ def _render_flaml_results(bundle, app_settings, metadata_store) -> None:  # noqa
         with st.expander("Warnings"):
             for warning in bundle.warnings:
                 st.warning(warning)
-
-
-def _build_service(app_settings, *, metadata_store=None) -> FlamlAutoMLService:  # noqa: ANN001
-    return get_flaml_automl_service(app_settings)

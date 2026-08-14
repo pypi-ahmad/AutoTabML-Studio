@@ -227,7 +227,6 @@ class TestPackagingMetadata:
         groups = data["dependency-groups"]
         assert "dev" in groups
         assert "security" in groups
-        assert "docs" in groups
 
     def test_pyproject_marks_package_typed(self):
         data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
