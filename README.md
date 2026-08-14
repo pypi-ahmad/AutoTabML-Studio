@@ -194,6 +194,8 @@ See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
 
 ## 🏗️ Architecture
 
+[Open the interactive architecture map](docs/autotabml-studio-architecture.html) to explore guided views, trace relationships, search components, and export the diagram.
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                   Streamlit UI                      │
@@ -392,6 +394,7 @@ push, so a passing local run is a faithful predictor of a green PR.
 | Resource | Description |
 | --- | --- |
 | [USAGE.md](USAGE.md) | Complete usage guide with step-by-step instructions |
+| [Interactive Architecture](docs/autotabml-studio-architecture.html) | Explorable system map with guided views and source evidence |
 | [Developer Guide](docs/developer-guide.md) | Implementation notes and development workflow |
 | [Contributing](CONTRIBUTING.md) | Contribution guidelines |
 

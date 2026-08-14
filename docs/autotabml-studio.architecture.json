@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "AutoTabML Studio",
+    "subtitle": "Local-first tabular ML workbench — ingestion, experimentation, prediction, and delivery",
+    "output": "autotabml-studio-architecture.html",
+    "visual_preset": "blueprint",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/pypi-ahmad/AutoTabML-Studio",
+      "revision": "10bb83079a98050017d068789d22de2d4ce33029"
+    },
+    "views": [
+      {
+        "id": "model-journey",
+        "label": "Model journey",
+        "focus": ["operator", "streamlit", "ingestion", "modeling", "prediction", "artifacts"],
+        "note": "Follow a dataset from the local workbench through training, prediction, and trusted artifacts."
+      },
+      {
+        "id": "data-controls",
+        "label": "Data controls",
+        "focus": ["ingestion", "quality", "metadata", "artifacts"],
+        "note": "See the validation, metadata, and durable artifact boundaries around tabular data."
+      },
+      {
+        "id": "execution-options",
+        "label": "Execution options",
+        "focus": ["streamlit", "jobs", "modeling", "providers"],
+        "note": "Explore local background execution, AutoML engines, and optional external providers."
+      },
+      {
+        "id": "delivery-path",
+        "label": "Delivery path",
+        "focus": ["prediction", "artifacts", "deployment"],
+        "note": "Trace trained artifacts into batch prediction and portable deployment bundles."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "ML Practitioner",
+      "sublabel": "local browser + CLI",
+      "pos": [40, 304],
+      "size": [150, 68]
+    },
+    {
+      "id": "streamlit",
+      "type": "frontend",
+      "label": "Studio Workbench",
+      "sublabel": "Streamlit pages + workflows",
+      "tag": "localhost :8501",
+      "sources": [
+        {"path": "app/main.py", "label": "entrypoint"},
+        {"path": "app/pages/dataset_workspace.py", "label": "workflows"}
+      ],
+      "pos": [250, 300],
+      "size": [170, 76]
+    },
+    {
+      "id": "ingestion",
+      "type": "backend",
+      "label": "Dataset Ingestion",
+      "sublabel": "CSV · Excel · URL · Kaggle · UCI",
+      "tag": "bounded remote fetch",
+      "sources": [{"path": "app/ingestion/url_loader.py", "label": "loaders"}],
+      "pos": [500, 300],
+      "size": [180, 76]
+    },
+    {
+      "id": "modeling",
+      "type": "backend",
+      "label": "AutoML Modeling",
+      "sublabel": "PyCaret · FLAML · benchmark",
+      "tag": "local / Colab MCP",
+      "sources": [{"path": "app/modeling/pycaret/service.py", "label": "engines"}],
+      "pos": [760, 300],
+      "size": [180, 76]
+    },
+    {
+      "id": "prediction",
+      "type": "backend",
+      "label": "Prediction Service",
+      "sublabel": "model loading · schema checks · batch",
+      "sources": [{"path": "app/prediction/loader.py", "label": "prediction"}],
+      "pos": [1020, 300],
+      "size": [184, 76]
+    },
+    {
+      "id": "artifacts",
+      "type": "database",
+      "label": "Trusted Artifacts",
+      "sublabel": "models · reports · predictions",
+      "tag": "SHA-256 sidecars",
+      "sources": [
+        {"path": "app/artifacts/manager.py", "label": "storage"},
+        {"path": "app/security/trusted_artifacts.py", "label": "integrity"}
+      ],
+      "pos": [1280, 300],
+      "size": [180, 76]
+    },
+    {
+      "id": "quality",
+      "type": "security",
+      "label": "Data Quality",
+      "sublabel": "profiling · validation · drift",
+      "sources": [
+        {"path": "app/profiling/service.py", "label": "profiling"},
+        {"path": "app/validation/service.py", "label": "validation"}
+      ],
+      "pos": [500, 100],
+      "size": [180, 72]
+    },
+    {
+      "id": "jobs",
+      "type": "messagebus",
+      "label": "Background Jobs",
+      "sublabel": "subprocess worker lifecycle",
+      "sources": [
+        {"path": "app/background_jobs.py", "label": "orchestration"},
+        {"path": "app/autorun_worker.py", "label": "worker"}
+      ],
+      "pos": [760, 100],
+      "size": [180, 72]
+    },
+    {
+      "id": "metadata",
+      "type": "database",
+      "label": "Metadata Store",
+      "sublabel": "SQLite experiments + jobs",
+      "sources": [{"path": "app/storage/store.py", "label": "persistence"}],
+      "pos": [760, 500],
+      "size": [180, 72]
+    },
+    {
+      "id": "providers",
+      "type": "cloud",
+      "label": "External Providers",
+      "sublabel": "LLMs · MLflow · dataset services",
+      "tag": "optional network boundary",
+      "sources": [{"path": "app/providers/base.py", "label": "LLM adapters"}],
+      "pos": [250, 500],
+      "size": [184, 72]
+    },
+    {
+      "id": "deployment",
+      "type": "cloud",
+      "label": "Deployment Bundle",
+      "sublabel": "FastAPI + container export",
+      "sources": [{"path": "app/deployment.py", "label": "export"}],
+      "pos": [1280, 500],
+      "size": [180, 72]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Local-first AutoTabML runtime",
+      "wraps": ["streamlit", "ingestion", "quality", "jobs", "modeling", "metadata", "prediction", "artifacts", "deployment"],
+      "pad": 26
+    },
+    {
+      "kind": "security-group",
+      "label": "Optional external network",
+      "wraps": ["providers"],
+      "pad": 18
+    }
+  ],
+  "connections": [
+    {"id": "open-workbench", "from": "operator", "to": "streamlit", "label": "interact", "variant": "emphasis", "route": "straight"},
+    {"id": "load-dataset", "from": "streamlit", "to": "ingestion", "label": "load"},
+    {"id": "train-models", "from": "ingestion", "to": "modeling", "label": "dataframe", "variant": "emphasis"},
+    {"id": "run-prediction", "from": "modeling", "to": "prediction", "label": "trained model", "variant": "emphasis"},
+    {"id": "persist-output", "from": "prediction", "to": "artifacts", "label": "save", "variant": "emphasis"},
+    {"id": "inspect-quality", "from": "ingestion", "to": "quality", "label": "profile"},
+    {"id": "execute-training", "from": "jobs", "to": "modeling"},
+    {"id": "record-runs", "from": "modeling", "to": "metadata"},
+    {"id": "provider-calls", "from": "streamlit", "to": "providers", "label": "optional APIs", "variant": "dashed", "fromSide": "bottom", "toSide": "top"},
+    {"id": "export-bundle", "from": "artifacts", "to": "deployment", "variant": "dashed"}
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Primary journey",
+      "items": ["Load tabular data", "Train and compare AutoML models", "Validate predictions and persist artifacts"]
+    },
+    {
+      "dot": "emerald",
+      "title": "Local-first state",
+      "items": ["SQLite tracks runs and jobs", "Artifacts remain on local storage", "Compose publishes the UI on loopback by default"]
+    },
+    {
+      "dot": "rose",
+      "title": "Trust boundaries",
+      "items": ["Remote downloads use guarded HTTP", "Model artifacts require integrity sidecars", "External providers are optional integrations"]
+    }
+  ]
+}
