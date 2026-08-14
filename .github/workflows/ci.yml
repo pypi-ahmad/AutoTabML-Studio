@@ -106,7 +106,7 @@ jobs:
       - name: Install dependencies (locked)
         # TabFM and profiling require incompatible typeguard major versions, so
         # the research-model extras are validated in their own environments.
-        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra experiment --extra uci --extra flaml --extra colab --extra providers --extra explain --extra serve
+        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra experiment --extra kaggle --extra uci --extra flaml --extra colab --extra providers --extra explain --extra serve
 
       - name: Run Pyright
         run: uv run --no-sync pyright app/
