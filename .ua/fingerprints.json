@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "1aa120114a83e5ff82e714d6752b0285a14af29b",
-  "generatedAt": "2026-08-14T12:48:29.275Z",
+  "gitCommitHash": "7f1304054858c5603bd23d22bf0ed79efce3e118",
+  "generatedAt": "2026-08-14T12:51:59.934Z",
   "files": {
     ".code-review-graph/graph.db": {
       "filePath": ".code-review-graph/graph.db",
@@ -125,7 +125,7 @@
     },
     ".github/workflows/ci.yml": {
       "filePath": ".github/workflows/ci.yml",
-      "contentHash": "05a26a32a7cc4082f38036c3401faf2f444a0a0703ade823c86af8e4117c81fe",
+      "contentHash": "bfe93c3ca6041c8781b42507a5a86d77aae5a9d70c339bd0069a6576277545dd",
       "functions": [],
       "classes": [],
       "imports": [],

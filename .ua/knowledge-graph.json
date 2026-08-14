@@ -23,8 +23,8 @@
       "Pytest"
     ],
     "description": "Local-first automated machine learning workbench for tabular data with Streamlit UI and CLI.",
-    "analyzedAt": "2026-08-14T12:48:28.116Z",
-    "gitCommitHash": "1aa120114a83e5ff82e714d6752b0285a14af29b"
+    "analyzedAt": "2026-08-14T12:51:58.869Z",
+    "gitCommitHash": "7f1304054858c5603bd23d22bf0ed79efce3e118"
   },
   "nodes": [
     {
@@ -27283,11 +27283,11 @@
       "type": "pipeline",
       "name": "ci.yml",
       "filePath": ".github/workflows/ci.yml",
-      "summary": "GitHub Actions workflow that automates continuous integration, release readiness, or security checks.",
+      "summary": "GitHub Actions continuous-integration workflow that installs locked development and product extras, including Kaggle support, before running project checks.",
       "tags": [
         "ci-cd",
-        "automation",
-        "github-actions"
+        "github-actions",
+        "dependency-management"
       ],
       "complexity": "moderate"
     },
