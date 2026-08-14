@@ -74,9 +74,13 @@
       "id": "modeling",
       "type": "backend",
       "label": "AutoML Modeling",
-      "sublabel": "PyCaret · FLAML · benchmark",
+      "sublabel": "PyCaret · FLAML · TabFM · TimesFM",
       "tag": "local / Colab MCP",
-      "sources": [{"path": "app/modeling/pycaret/service.py", "label": "engines"}],
+      "sources": [
+        {"path": "app/modeling/pycaret/service.py", "label": "PyCaret workflows"},
+        {"path": "app/modeling/foundation/tabfm.py", "label": "TabFM evaluation"},
+        {"path": "app/modeling/foundation/timesfm.py", "label": "TimesFM forecasting"}
+      ],
       "pos": [760, 300],
       "size": [180, 76]
     },

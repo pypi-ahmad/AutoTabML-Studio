@@ -11,6 +11,7 @@ exists, how it works, and how to use or extend it.
 | Get a 5-minute overview                                | [README.md](../README.md)                                              |
 | Install and run for the first time                    | [README.md](../README.md#-quick-start) → [USAGE.md](../USAGE.md)        |
 | Build a complete model and inspect the leaderboard    | [USAGE.md](../USAGE.md#core-workflow)                                   |
+| Evaluate TabFM or forecast with TimesFM               | [USAGE.md](../USAGE.md#foundation-models)                               |
 | Run a headless benchmark, profile, or experiment       | [USAGE.md](../USAGE.md#cli-reference)                                   |
 | Upgrade from a previous version                       | [UPGRADE_SUMMARY.md](../UPGRADE_SUMMARY.md) → [MIGRATION_GUIDE.md](../MIGRATION_GUIDE.md) |
 | Understand the system architecture                    | [architecture.md](architecture.md)                                     |
@@ -31,17 +32,18 @@ exists, how it works, and how to use or extend it.
 - [CHANGELOG.md](../CHANGELOG.md) — chronological list of
   changes (Keep-a-Changelog format).
 - [MIGRATION_GUIDE.md](../MIGRATION_GUIDE.md) — step-by-step
-  upgrade from 0.1.x to 0.2.0.
+  upgrades across supported release lines.
 - [UPGRADE_SUMMARY.md](../UPGRADE_SUMMARY.md) — one-page
   upgrade cheat sheet.
 - [RELEASE_NOTES_v0.3.0.md](../RELEASE_NOTES_v0.3.0.md) — the
-  current v0.3.0 release announcement.
+  v0.3.0 release announcement; [CHANGELOG.md](../CHANGELOG.md#unreleased)
+  tracks newer work on `main`.
 - [RELEASE_NOTES_v0.2.0.md](../RELEASE_NOTES_v0.2.0.md) — the
   historical v0.2.0 release announcement.
 - [SECURITY.md](../SECURITY.md) — supported versions,
   disclosure channel, response SLA, hardening guide.
-- [CONTRIBUTING.md](../CONTRIBUTING.md) — how to contribute
-  (if present in the repo).
+- [CONTRIBUTING.md](../CONTRIBUTING.md) — development setup, verification gates,
+  documentation expectations, and pull-request guidance.
 
 ### `docs/`
 
@@ -55,12 +57,14 @@ exists, how it works, and how to use or extend it.
   common commands, release hygiene, test strategy, extension
   points, troubleshooting.
 
-## What is in this release?
+## What is on current `main`?
 
 - Guided background Auto Run with cancellation.
 - Holdout evaluation, explanations, provenance, and prediction drift.
 - FastAPI, CLI, and Docker deployment bundles.
 - Windows double-click launching and hosted-model cost estimates.
+- Local, revision-pinned TabFM research evaluation and TimesFM 2.5 forecasting.
+- Streamlit and container access on `http://localhost:8561`.
 - Simplified navigation with advanced workflows retained.
 
 AutoTabML Studio is a **local-first automated machine-learning
@@ -70,9 +74,9 @@ Three AutoML engines (LazyPredict, PyCaret, FLAML), pinned local Google
 TabFM/TimesFM foundation-model workflows, end-to-end
 MLflow tracking, an MLflow-style model registry, AI-generated
 summaries (OpenAI, Anthropic, Gemini, Ollama), and a CLI that
-mirrors the Streamlit UI. v0.3.0 adds guided production
-workflows, evaluation and deployment artifacts, desktop launch
-tooling, and model-cost planning on the hardened v0.2 foundation.
+mirrors the Streamlit UI. Current `main` includes the v0.3.0 guided production,
+deployment, desktop-launch, and cost-planning work plus the unreleased
+foundation-model workflows listed in the changelog.
 
 ## What is the philosophy?
 
@@ -96,7 +100,8 @@ typing, testing, and documentation are first-class.
   `app/registry/`, `app/observability/`, `app/storage/`,
   `app/providers/`, `app/notebooks/`, `app/security/`,
   `app/config/` — feature modules.
-- `tests/` — 700 tests, ≥ 81% coverage.
+- `tests/` — 729 selected unit tests (759 collected), with a CI-enforced ≥ 65%
+  coverage gate.
 - `docs/` — this handbook.
 - `scripts/` — maintained UCI batch runners, screenshot capture, and optional-dependency verification.
 - `Dockerfile` + `docker-compose.yml` — container packaging.

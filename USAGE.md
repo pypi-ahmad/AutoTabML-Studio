@@ -21,6 +21,8 @@ trained, evaluated, and deployable model — without writing code.
   - [Data Profiling](#data-profiling)
   - [Quick Benchmark](#quick-benchmark)
   - [Train & Tune](#train--tune)
+  - [FLAML AutoML](#flaml-automl)
+  - [Foundation Models](#foundation-models)
   - [Predictions](#predictions)
   - [Test & Evaluate](#test--evaluate)
   - [Models](#models)
@@ -58,7 +60,7 @@ No cloud account is required. No data is uploaded to external servers.
 |-------------|---------|
 | **Python**  | 3.10, 3.11, 3.12, or 3.13 |
 | **OS**      | Windows, macOS, or Linux |
-| **Install** | `pip install -e ".[benchmark,experiment]"` (minimum for full modeling) |
+| **Install** | `uv sync --locked --extra benchmark --extra experiment` (standard modeling workflows) |
 
 Install only the features you need:
 
@@ -72,14 +74,18 @@ pip install -e ".[profiling]"      # ydata-profiling EDA reports
 pip install -e ".[benchmark]"      # LazyPredict algorithm screening
 pip install -e ".[experiment]"     # PyCaret model training (Python < 3.13)
 pip install -e ".[flaml]"          # Microsoft FLAML AutoML
+pip install -e ".[tabfm]"          # Google TabFM (Python 3.11+; research only)
+pip install -e ".[timesfm]"        # Google TimesFM 2.5 forecasting
 pip install -e ".[gpu]"            # GPU-accelerated training (XGBoost, LightGBM, CatBoost)
 
-# Everything at once
-pip install -e ".[validation,profiling,benchmark,experiment,flaml,gpu]"
+# Combine only the extras you need. Keep TabFM and profiling in separate environments.
+pip install -e ".[validation,profiling,benchmark,experiment,flaml,gpu,timesfm]"
 ```
 
 > **Note:** The `experiment` group requires Python < 3.13 due to a PyCaret dependency
-> constraint. All other features work on 3.10–3.13.
+> constraint. TabFM requires Python 3.11+ and conflicts with the `profiling` extra
+> because their upstream `typeguard` requirements do not overlap. Other features
+> support Python 3.10–3.13.
 
 ### First-Time Setup
 
@@ -119,7 +125,8 @@ navigation through every step.
 autotabml --help
 ```
 
-Every workflow available in the UI also has a CLI equivalent. See
+Core data, modeling, prediction, tracking, and registry workflows also have CLI
+equivalents. See
 [CLI Reference](#cli-reference) below.
 
 ---
@@ -152,6 +159,8 @@ Each page shows a workflow banner indicating your current step and progress.
 | **5** | Predictions | Score new data with your saved model |
 
 You can skip optional steps and jump directly from Load Data to Quick Benchmark.
+The **FLAML AutoML** and **Foundation Models** pages are alternative modeling paths,
+not required steps in the five-step guided workflow.
 
 ---
 
@@ -307,6 +316,34 @@ autotabml flaml-save data/train.csv --target target --task-type classification -
 
 > Requires the `flaml` optional dependency: `pip install -e ".[flaml]"`
 
+### Foundation Models
+
+**Title:** Foundation Models
+
+Run one of two local, revision-pinned Google model workflows against the active
+dataset:
+
+- **TabFM 1.0** evaluates tabular classification or regression from a sampled
+  context. You choose the target, task type, context-row count, and ensemble size.
+  It requires explicit acceptance of the non-commercial weights license and
+  separate consent before the first model download. An optional saved context can
+  be reused by Predictions, but cannot be registered, exported, or used in
+  production.
+- **TimesFM 2.5** produces point forecasts and q10–q90 uncertainty for a single
+  series or grouped series. You choose timestamp, numeric target, optional group,
+  horizon, context length, and frequency override. Optional final-horizon
+  backtesting reports aggregate error metrics.
+
+Both workflows execute on the local machine even when the Colab MCP backend is
+selected. The first approved download is about 1 GB; later runs reuse the pinned
+Hugging Face cache. Run artifacts are written under
+`artifacts/experiments/foundation/` and only aggregate metrics are sent to MLflow.
+
+```bash
+uv sync --locked --extra tabfm       # dedicated environment; do not combine with profiling
+uv sync --locked --extra timesfm
+```
+
 ### Predictions
 
 **Title:** 🔮 Predictions
@@ -325,6 +362,7 @@ Score new data using a saved model. Two tabs:
 
 **Model sources:**
 - Saved models from Train & Tune, FLAML AutoML, or Quick Benchmark (auto-discovered)
+- Saved TabFM contexts (research-only, prediction-only)
 - Manual file path
 - MLflow registry (if configured)
 
@@ -349,6 +387,7 @@ Browse every model you have trained or registered:
 
 - 🔬 Models from Train & Tune
 - 🏁 Models from Quick Benchmark
+- Research-only saved TabFM contexts
 - 📦 Models from the Model Registry (if configured)
 
 Each model card shows metadata: task type, dataset, creation date, and source.
@@ -357,7 +396,8 @@ Each model card shows metadata: task type, dataset, creation date, and source.
 
 **Title:** 📋 History
 
-Every workflow run — validation, profiling, benchmark, experiment, or prediction — is
+Every workflow run — validation, profiling, benchmark, experiment, foundation-model,
+or prediction — is
 recorded here.
 
 **Filters:**
@@ -537,6 +577,34 @@ autotabml flaml-run data.csv --target price --task-type regression \
 Key flags: `--time-budget`, `--max-iter`, `--metric`, `--n-splits`, `--seed`,
 `--ensemble`, `--early-stop`, `--estimator`.
 
+### Foundation Models
+
+```bash
+# TabFM classification/regression research evaluation
+autotabml tabfm-run data/train.csv \
+  --target target \
+  --task-type auto \
+  --accept-tabfm-license \
+  --allow-download
+
+# Save a prediction-only research context
+autotabml tabfm-run data/train.csv \
+  --target target \
+  --accept-tabfm-license \
+  --save-context tabfm_research_context
+
+# TimesFM single or grouped forecast with a final-horizon backtest
+autotabml timesfm-forecast data/demand.csv \
+  --timestamp date \
+  --target demand \
+  --group store_id \
+  --horizon 12 \
+  --allow-download
+```
+
+The `--allow-download` flag is required only until the pinned checkpoint is in the
+local Hugging Face cache. TabFM always requires `--accept-tabfm-license`.
+
 ### Prediction
 
 ```bash
@@ -594,7 +662,10 @@ All settings can be overridden with environment variables. Copy `.env.example` t
 | `AUTOTABML_MLFLOW__TRACKING_URI` | `sqlite:///artifacts/mlflow/mlflow.db` | MLflow tracking server URI |
 | `AUTOTABML_MLFLOW__REGISTRY_URI` | `sqlite:///artifacts/mlflow/mlflow.db` | MLflow model registry URI |
 | `AUTOTABML_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server for local AI summaries |
+| `AUTOTABML_PROVIDER__BASE_URL` | *(none)* | Optional base-URL override for the selected hosted provider |
 | `AUTOTABML_LOG_LEVEL` | `INFO` | Logging verbosity |
+| `AUTOTABML_LOG_FORMAT` | `text` | Log encoding (`text` or newline-delimited `json`) |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Direct Ollama-provider fallback URL |
 | `OPENAI_API_KEY` | *(none)* | OpenAI API key for AI-generated summaries |
 | `ANTHROPIC_API_KEY` | *(none)* | Anthropic API key for AI-generated summaries |
 | `GEMINI_API_KEY` | *(none)* | Google Gemini API key for AI-generated summaries |
@@ -609,10 +680,17 @@ Nested settings use double underscores: `AUTOTABML_MLFLOW__TRACKING_URI`.
 | `profiling` | ydata-profiling EDA reports | `pip install -e ".[profiling]"` |
 | `benchmark` | LazyPredict algorithm screening | `pip install -e ".[benchmark]"` |
 | `experiment` | PyCaret model training (Python < 3.13) | `pip install -e ".[experiment]"` |
+| `flaml` | Time-budgeted Microsoft FLAML AutoML | `pip install -e ".[flaml]"` |
+| `tabfm` | Google TabFM research evaluation (Python 3.11+) | `pip install -e ".[tabfm]"` |
+| `timesfm` | Google TimesFM 2.5 forecasting | `pip install -e ".[timesfm]"` |
 | `gpu` | GPU-accelerated XGBoost, LightGBM, CatBoost | `pip install -e ".[gpu]"` |
 | `kaggle` | Kaggle dataset downloads (CLI only) | `pip install -e ".[kaggle]"` |
+| `uci` | UCI repository search and loading | `pip install -e ".[uci]"` |
 | `colab` | Google Colab MCP backend | `pip install -e ".[colab]"` |
-| `dev` | pytest, build tools | `pip install -e ".[dev]"` |
+| `providers` | OpenAI, Anthropic, Gemini, and Ollama summaries | `pip install -e ".[providers]"` |
+| `explain` | SHAP model explanations | `pip install -e ".[explain]"` |
+| `serve` | FastAPI and Uvicorn deployment runtime | `pip install -e ".[serve]"` |
+| `dev` group | pytest, build, lint, and type tools | `uv sync --locked --group dev` |
 
 Pages that require optional dependencies show a guided message when the dependency
 is missing, with the exact install command.
@@ -639,8 +717,12 @@ artifacts/
 ├── app/                  # Metadata database
 │   └── app_metadata.sqlite3
 ├── benchmark/            # Benchmark results and leaderboards
+├── autorun/              # Completed Auto Run reports, explanations, and baselines
+├── jobs/                 # Background-job requests, status, and logs
 ├── comparisons/          # Side-by-side run comparisons
+├── deployments/          # Exported FastAPI/CLI/Docker bundles
 ├── experiments/          # Experiment runs and snapshots
+│   ├── foundation/       # TabFM and TimesFM run artifacts
 │   └── snapshots/
 ├── mlflow/               # MLflow tracking database
 │   └── mlflow.db
@@ -664,6 +746,8 @@ classification tasks with confidence).
 | "Train & Tune" page shows missing dependency | `pycaret` not installed | `pip install -e ".[experiment]"` |
 | "Quick Benchmark" page shows missing dependency | `lazypredict` not installed | `pip install -e ".[benchmark]"` |
 | Profiling page shows missing dependency | `ydata-profiling` not installed | `pip install -e ".[profiling]"` |
+| Foundation Models page shows missing TabFM/TimesFM dependency | Selected model extra is not installed | Install `.[tabfm]` or `.[timesfm]` and restart |
+| `profiling` and `tabfm` cannot resolve together | Their upstream `typeguard` constraints conflict | Keep them in separate virtual environments |
 | `autotabml doctor` reports no CUDA | GPU drivers not installed or no NVIDIA GPU | Install CUDA toolkit, or use CPU (default) |
 | Model Registry page is empty | MLflow tracking not initialized | Run `autotabml init-local-storage` |
 | Benchmark stalls on large datasets | Dataset exceeds sampling threshold | Use "Quick" run mode or set `--sample-rows` |
@@ -678,7 +762,13 @@ connectivity, artifact directories, and stale temporary files.
 
 ## Limitations
 
-- **PyCaret experiments require Python < 3.13.** All other features work on 3.10–3.13.
+- **PyCaret experiments require Python < 3.13.** TabFM requires Python 3.11+.
+- **TabFM is research-only.** Its weights are non-commercial and its saved contexts
+  cannot be registered or deployment-exported.
+- **TabFM and profiling require separate environments** because their upstream
+  `typeguard` constraints conflict.
+- **TimesFM covariates and fine-tuning are not enabled.** The integration provides
+  point/quantile forecasting and optional holdout backtesting.
 - **GPU acceleration** requires compatible NVIDIA hardware and CUDA drivers. The app
   falls back to CPU automatically when GPU is unavailable.
 - **Kaggle integration** is available as an optional CLI dependency but is not exposed

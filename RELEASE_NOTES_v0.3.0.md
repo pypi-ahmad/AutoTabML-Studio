@@ -64,10 +64,14 @@ faster, simpler internal implementation.
 
 ```bash
 git pull
-uv sync --locked --all-extras
+uv sync --locked
 uv run autotabml --version   # 0.3.0
 uv run autotabml doctor
 ```
+
+On current `main`, add only the optional extras you use. The newer `tabfm` and
+`profiling` extras are intentionally incompatible and require separate
+environments; see the root README for current install commands.
 
 No SQLite, MLflow, settings, or artifact migration is required. Existing 0.2.x
 workspaces continue to work.

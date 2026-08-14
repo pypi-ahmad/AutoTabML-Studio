@@ -111,16 +111,16 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 
 ```bash
 # 1. Sync the lockfile into a local environment
-uv sync --locked --extra dev
+uv sync --locked --group dev
 
 # 2. Add optional extras as needed
-uv sync --locked --extra dev --extra benchmark   # LazyPredict + boosted baselines
-uv sync --locked --extra dev --extra experiment  # PyCaret full pipeline (Python 3.11/3.12)
-uv sync --locked --extra dev --extra flaml       # Microsoft FLAML AutoML
-uv sync --locked --extra dev --extra validation  # Great Expectations
-uv sync --locked --extra dev --extra profiling   # ydata-profiling EDA reports
-uv sync --locked --extra dev --extra tabfm       # Google TabFM (Python 3.11+; research-only weights)
-uv sync --locked --extra dev --extra timesfm     # Google TimesFM 2.5
+uv sync --locked --group dev --extra benchmark   # LazyPredict + boosted baselines
+uv sync --locked --group dev --extra experiment  # PyCaret full pipeline (Python 3.11/3.12)
+uv sync --locked --group dev --extra flaml       # Microsoft FLAML AutoML
+uv sync --locked --group dev --extra validation  # Great Expectations
+uv sync --locked --group dev --extra profiling   # ydata-profiling EDA reports
+uv sync --locked --group dev --extra tabfm       # Google TabFM (Python 3.11+; research-only weights)
+uv sync --locked --group dev --extra timesfm     # Google TimesFM 2.5
 
 # Sync the extras you use together. TabFM and profiling require incompatible
 # upstream typeguard versions, so keep those two in separate environments.

@@ -5,7 +5,7 @@
 Use Python 3.11 or 3.12 for the full workflow including PyCaret experiments. Python 3.13 works for everything except PyCaret.
 
 ```bash
-uv sync --locked --extra dev
+uv sync --locked --group dev
 ```
 
 Broad local maintainer install (exclude TabFM because its upstream `typeguard`
@@ -18,14 +18,14 @@ uv sync --locked --extra benchmark --extra experiment --extra flaml --extra prof
 Optional extras by workflow:
 
 ```bash
-uv sync --locked --extra dev --extra validation
-uv sync --locked --extra dev --extra profiling
-uv sync --locked --extra dev --extra benchmark
-uv sync --locked --extra dev --extra experiment
-uv sync --locked --extra dev --extra gpu
-uv sync --locked --extra dev --extra kaggle
-uv sync --locked --extra dev --extra tabfm
-uv sync --locked --extra dev --extra timesfm
+uv sync --locked --group dev --extra validation
+uv sync --locked --group dev --extra profiling
+uv sync --locked --group dev --extra benchmark
+uv sync --locked --group dev --extra experiment
+uv sync --locked --group dev --extra gpu
+uv sync --locked --group dev --extra kaggle
+uv sync --locked --group dev --extra tabfm
+uv sync --locked --group dev --extra timesfm
 ```
 
 Run TabFM and profiling in separate environments: TabFM requires
@@ -151,7 +151,7 @@ autotabml benchmark artifacts/tmp/smoke_iris.csv --target target \
   --task-type classification \
   --include-model DummyClassifier --include-model DecisionTreeClassifier
 
-# 5. Experiment (requires Python ≤3.12 + uv sync --locked --extra dev --extra experiment)
+# 5. Experiment (requires Python ≤3.12 + uv sync --locked --group dev --extra experiment)
 autotabml experiment-run artifacts/tmp/smoke_iris.csv --target target \
   --task-type classification --n-select 1 --fold 3
 
@@ -205,18 +205,22 @@ The `Makefile` at the repo root documents every command. Most
 useful:
 
 ```bash
-make install        # uv venv --python 3.12.10 + uv sync --locked --all-groups --all-extras
 make sync           # uv sync --locked --all-groups
+uv sync --locked --all-groups --extra benchmark --extra experiment --extra flaml --extra profiling --extra timesfm
 make test           # run unit tests
 make test-cov       # run with coverage gate (>= 65%)
 make lint           # ruff check
 make format         # ruff format (writes changes)
-make type-check     # pyright app/
+make type-check     # mypy app/
 make security       # bandit + pip-audit
 make build          # python -m build
 make clean          # remove build artifacts
 make doctor         # autotabml doctor
 ```
+
+Do not use `make install` on current `main`: that legacy target requests every
+extra, but `tabfm` and `profiling` are intentionally incompatible. Use `make sync`
+plus the explicit compatible extras above.
 
 The pre-commit hook set runs `ruff check --fix`, `ruff format`,
 and `mypy` on every commit. Install once with
@@ -275,7 +279,7 @@ concatenate path (1.34x faster). Treat this as a regression baseline, not an SLA
 Install the profiling extra:
 
 ```bash
-uv sync --locked --extra dev --extra profiling
+uv sync --locked --group dev --extra profiling
 ```
 
 If the import still fails in a fresh environment, pin `setuptools<82` because `ydata-profiling` imports `pkg_resources` at runtime and `setuptools` 82 removed it.
@@ -285,8 +289,8 @@ If the import still fails in a fresh environment, pin `setuptools<82` because `y
 Install the matching extras:
 
 ```bash
-uv sync --locked --extra dev --extra benchmark
-uv sync --locked --extra dev --extra experiment
+uv sync --locked --group dev --extra benchmark
+uv sync --locked --group dev --extra experiment
 ```
 
 Observed on this execution pass: PyCaret-backed experiment workflows did not install successfully on Python 3.13 in this environment. Use a PyCaret-compatible interpreter for experiment/save/local-saved-model flows until upstream support lands.

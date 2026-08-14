@@ -14,11 +14,15 @@ compatible. No data migration is required.
 
 ```bash
 git pull
-uv sync --locked --all-extras
+uv sync --locked --all-groups
 uv run autotabml --version   # 0.3.0
 uv run autotabml doctor
-uv run pytest tests/ -q      # 716 tests
+uv run pytest tests/ -q      # 729 selected; 30 optional tests deselected
 ```
+
+Install only the optional extras you use. Current `main` declares `tabfm` and
+`profiling` as incompatible because their upstream `typeguard` ranges do not
+overlap; keep those two workflows in separate environments.
 
 ### What is new?
 
@@ -28,6 +32,8 @@ uv run pytest tests/ -q      # 716 tests
 | Delivery | FastAPI, standalone CLI, and non-root Docker deployment bundles |
 | Desktop | Windows double-click launcher for the Streamlit UI |
 | AI tooling | Six-tier hosted-model cost calculator with exact token arithmetic and pricing notes |
+| Foundation models (`main`) | Revision-pinned TabFM research evaluation and TimesFM 2.5 forecasting with explicit download consent |
+| Local UI (`main`) | Streamlit, Docker, and Compose now use `http://localhost:8561` |
 | Performance | Lower-allocation CSV ingestion and simpler delimiter handling |
 | Maintainability | Removed unused abstractions and prototypes; refreshed architecture and knowledge graphs |
 | Security | Loopback-bound local services plus stronger URL, artifact, and log safeguards |

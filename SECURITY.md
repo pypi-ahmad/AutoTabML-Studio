@@ -58,6 +58,17 @@ and extends it. The following controls are active by default.
 - **Scanned** on every push via the `security.yml` workflow using
   `detect-secrets`, `gitleaks`, `bandit`, and `pip-audit`.
 
+### Foundation Models
+
+- **Explicit download consent:** TabFM and TimesFM checkpoints are pinned to exact
+  Hugging Face revisions and are not downloaded until the user opts in.
+- **License gate:** TabFM additionally requires acceptance of its
+  `tabfm-non-commercial-v1.0` weights license. Saved TabFM contexts are marked
+  research-only and are rejected by registry and deployment-export workflows.
+- **Local data boundary:** foundation-model inference remains local. MLflow receives
+  aggregate parameters and metrics, never raw rows, sampled contexts, predictions,
+  or forecast tables.
+
 ### Build & Distribution
 
 - **PEP 517 isolated build** via hatchling; the build runs in a
@@ -94,8 +105,8 @@ soon as the fix is verified.
 1. **Triage** — the maintainer confirms reproduction, assesses
    severity (CVSS-style), and assigns a target version.
 2. **Patch** — a fix is developed on a private branch.
-3. **Verify** — the fix passes the full test suite (700 tests,
-   81%+ coverage) and the security scan is clean.
+3. **Verify** — the fix passes the full test suite, the CI coverage gate, and the
+   security scan.
 4. **Disclose** — once a patch is released, the advisory is
    published with full impact, fix version, and mitigation
    notes.

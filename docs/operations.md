@@ -23,12 +23,16 @@ following on-disk layout:
 ├── validation/                # validation artifacts
 ├── profiling/                 # profiling artifacts
 ├── benchmark/                 # benchmark artifacts
+├── autorun/                   # completed Auto Run reports and baselines
+├── jobs/                      # background-job requests, status, and logs
 ├── experiments/               # experiment artifacts
+│   ├── foundation/            # TabFM and TimesFM run artifacts
 │   └── snapshots/             # PyCaret experiment snapshots
 ├── models/                    # local model artifacts
 │   └── <name>.sha256          # SHA256 sidecars
 ├── flaml/                     # FLAML artifacts
 ├── comparisons/               # comparison artifacts
+├── deployments/               # FastAPI/CLI/Docker export bundles
 ├── predictions/
 │   ├── history.jsonl          # append-only prediction log
 │   └── <run>/                 # per-run output CSVs
@@ -37,9 +41,8 @@ following on-disk layout:
 └── tmp/                       # partial / failed artifacts
 ```
 
-Foundation-model run artifacts live under `experiments/foundation/`. Optional
-saved TabFM research contexts and their SHA256 sidecars live under `models/`.
-TimesFM does not save a model artifact.
+Optional saved TabFM research contexts and their SHA256 sidecars live under
+`models/`. TimesFM does not save a model artifact.
 
 `<artifacts-root>` defaults to `./artifacts` (relative to the
 working directory). Override with `AUTOTABML_ARTIFACTS__ROOT_DIR`.

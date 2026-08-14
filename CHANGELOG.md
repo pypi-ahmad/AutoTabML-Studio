@@ -27,6 +27,9 @@ and aims to follow [Semantic Versioning](https://semver.org/).
   fixed-argv subprocess calls for Bandit.
 - Added optional `tabfm` and `timesfm` dependency extras and pinned exact model
   revisions for reproducible checkpoint resolution.
+- Synchronized the README, usage, upgrade, security, developer, operations, and
+  architecture documentation with current CLI commands, dependency conflicts,
+  test inventory, foundation-model behavior, and port `8561`.
 
 ### Security
 
