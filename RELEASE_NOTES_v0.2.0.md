@@ -125,7 +125,7 @@ uv sync --locked --extra providers
 - PYTHONUNBUFFERED, PYTHONDONTWRITEBYTECODE,
   `AUTOTABML_LOG_FORMAT=json` are runtime defaults.
 - Container-level healthcheck against
-  `http://localhost:8501/_stcore/health`.
+  `http://localhost:8561/_stcore/health`.
 - New `docker-compose.yml` for one-line local stack bring-up
   with optional MLflow sidecar (commented out by default).
 - New `.dockerignore` for fast, cache-friendly builds.

@@ -110,7 +110,7 @@ From a terminal:
 uv run streamlit run app/main.py
 ```
 
-Opens in your browser at `http://localhost:8501`. The sidebar provides guided
+Opens in your browser at `http://localhost:8561`. The sidebar provides guided
 navigation through every step.
 
 ### CLI (Scripted / Headless)

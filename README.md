@@ -138,6 +138,7 @@ If dependency metadata changes, refresh pinned versions with `uv lock --python 3
 
 On Windows, double-click **`Launch AutoTabML Studio.cmd`** in the repository
 folder. The launcher uses `uv` and opens the Streamlit UI in your browser.
+The local UI is served at `http://localhost:8561`.
 
 Or launch it from a terminal:
 

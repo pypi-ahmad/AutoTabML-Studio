@@ -22,7 +22,7 @@ services:
     container_name: autotabml-studio
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8501:8501"
+      - "127.0.0.1:8561:8561"
     environment:
       AUTOTABML_LOG_FORMAT: json
       AUTOTABML_LOG_LEVEL: INFO
@@ -33,7 +33,7 @@ services:
       - autotabml-artifacts:/app/artifacts
       - autotabml-mlruns:/app/mlruns
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=2).read()"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8561/_stcore/health', timeout=2).read()"]
       interval: 30s
       timeout: 5s
       retries: 3

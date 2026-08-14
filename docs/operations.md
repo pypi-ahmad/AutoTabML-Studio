@@ -230,7 +230,7 @@ export AUTOTABML_MLFLOW__REGISTRY_URI=sqlite:///artifacts/mlflow/mlflow.db
 Check the streamlit health endpoint:
 
 ```bash
-curl -fsS http://localhost:8501/_stcore/health
+curl -fsS http://localhost:8561/_stcore/health
 # expected: {"status": "ok"}
 ```
 
@@ -306,7 +306,7 @@ docker compose exec autotabml autotabml --version
 ```
 
 The bundled Compose stack publishes the unauthenticated local workbench only
-on `127.0.0.1:8501`. Keep that loopback binding for local use. Shared or remote
+on `127.0.0.1:8561`. Keep that loopback binding for local use. Shared or remote
 access requires an authenticated TLS reverse proxy in front of the application.
 
 ### Run a one-shot CLI command

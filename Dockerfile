@@ -6,7 +6,7 @@
 #   docker build -t autotabml-studio:0.3.0 .
 #
 # Run (Streamlit UI):
-#   docker run --rm -p 127.0.0.1:8501:8501 \
+#   docker run --rm -p 127.0.0.1:8561:8561 \
 #     -v $(pwd)/artifacts:/app/artifacts \
 #     -e AUTOTABML_LOG_FORMAT=json \
 #     autotabml-studio:0.3.0
@@ -71,17 +71,17 @@ RUN mkdir -p /app/artifacts && chown -R autotabml:autotabml /app
 
 USER autotabml
 
-EXPOSE 8501
+EXPOSE 8561
 
 # Default command: start the Streamlit UI. Override to "autotabml ..."
 # for headless CLI workflows.
 CMD ["streamlit", "run", "app/main.py", \
      "--server.address=0.0.0.0", \
-     "--server.port=8501", \
+     "--server.port=8561", \
      "--server.headless=true", \
      "--browser.gatherUsageStats=false"]
 
 # Container-level healthcheck.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=2).read()" \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8561/_stcore/health', timeout=2).read()" \
     || exit 1

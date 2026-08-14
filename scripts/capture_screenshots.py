@@ -5,7 +5,7 @@ benchmark, then captures screenshots of every major page.
 
 Usage:
     # 1. Start the Streamlit app in another terminal:
-    #    streamlit run app/main.py --server.headless true --server.port 8501
+    #    streamlit run app/main.py --server.headless true --server.port 8561
     #
     # 2. Run this script:
     #    python scripts/capture_screenshots.py
@@ -27,7 +27,7 @@ import time
 from playwright.sync_api import Page, sync_playwright
 
 SCREENSHOTS_DIR = Path(__file__).resolve().parent.parent / "docs" / "assets" / "screenshots"
-APP_URL = "http://localhost:8501"
+APP_URL = "http://localhost:8561"
 VIEWPORT = {"width": 1280, "height": 800}
 
 
@@ -146,7 +146,7 @@ def run_benchmark(page: Page) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Capture AutoTabML Studio screenshots")
     parser.add_argument("--launch", action="store_true", help="Auto-launch Streamlit server")
-    parser.add_argument("--port", type=int, default=8501, help="Streamlit port")
+    parser.add_argument("--port", type=int, default=8561, help="Streamlit port")
     parser.add_argument("--dataset", type=str, default=None, help="Path to CSV dataset to load")
     parser.add_argument("--skip-workflows", action="store_true", help="Skip validation/profiling/benchmark runs")
     args = parser.parse_args()

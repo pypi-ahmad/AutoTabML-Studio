@@ -47,10 +47,16 @@ from app.validation.service import validate_dataset
 
 
 def test_compose_publishes_workbench_on_loopback_only():
-    compose = (Path(__file__).resolve().parents[1] / "docker-compose.yml").read_text(encoding="utf-8")
+    root = Path(__file__).resolve().parents[1]
+    compose = (root / "docker-compose.yml").read_text(encoding="utf-8")
+    dockerfile = (root / "Dockerfile").read_text(encoding="utf-8")
+    streamlit_config = (root / ".streamlit" / "config.toml").read_text(encoding="utf-8")
 
-    assert '"127.0.0.1:8501:8501"' in compose
-    assert '"8501:8501"' not in compose
+    assert '"127.0.0.1:8561:8561"' in compose
+    assert '"8561:8561"' not in compose
+    assert "EXPOSE 8561" in dockerfile
+    assert "--server.port=8561" in dockerfile
+    assert "port = 8561" in streamlit_config
 
 
 class _FakeClassifier:

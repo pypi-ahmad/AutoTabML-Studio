@@ -52,7 +52,7 @@
       "type": "frontend",
       "label": "Studio Workbench",
       "sublabel": "Streamlit pages + workflows",
-      "tag": "localhost :8501",
+      "tag": "localhost :8561",
       "sources": [
         {"path": "app/main.py", "label": "entrypoint"},
         {"path": "app/pages/dataset_workspace.py", "label": "workflows"}

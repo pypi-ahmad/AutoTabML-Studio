@@ -20,6 +20,8 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The Streamlit UI, Docker image, Compose service, health checks, screenshot tooling,
+  and documentation now use port `8561` instead of `8501`.
 - CI now validates mutually incompatible optional extras in separate environments,
   avoids a pipefail false failure in secret scanning, and documents reviewed
   fixed-argv subprocess calls for Bandit.
@@ -136,7 +138,7 @@ upgrade for all 0.1.x users.
 - `PYTHONUNBUFFERED`, `PYTHONDONTWRITEBYTECODE`,
   `AUTOTABML_LOG_FORMAT=json` are runtime defaults.
 - Container-level healthcheck against
-  `http://localhost:8501/_stcore/health`.
+  `http://localhost:8561/_stcore/health`.
 - `docker-compose.yml` for one-line local stack bring-up.
 - `.dockerignore` for fast, cache-friendly builds.
 
