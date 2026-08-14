@@ -11,7 +11,7 @@ import pandas as pd
 from app.ingestion.base import BaseLoader
 from app.ingestion.errors import ParseFailureError, RemoteAccessError, UnsupportedSourceError
 from app.ingestion.schemas import DatasetInputSpec
-from app.ingestion.types import DELIMITED_FILE_SUFFIXES, IngestionSourceType
+from app.ingestion.types import IngestionSourceType
 from app.ingestion.url_loader import (
     async_fetch_url_to_temp_file,
     ensure_local_file_size_guard,
@@ -203,8 +203,6 @@ class CSVLoader(BaseLoader):
             return "\t"
         if locator.endswith(".csv"):
             return ","
-        if any(locator.endswith(suffix) for suffix in DELIMITED_FILE_SUFFIXES):
-            return None
         return None
 
     def _update_delimiter_from_sample(

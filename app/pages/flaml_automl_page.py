@@ -346,15 +346,14 @@ def _render_flaml_results(bundle, app_settings) -> None:  # noqa: ANN001
     # ── Leaderboard ───────────────────────────────────────────────────
     if search and search.leaderboard:
         st.subheader("Leaderboard")
-        lb_data = []
-        for row in search.leaderboard:
-            lb_data.append(
-                {
-                    "Rank": row.rank,
-                    "Algorithm": ESTIMATOR_LABELS.get(row.estimator_name, row.estimator_name),
-                    "Best Loss": f"{row.best_loss:.4f}" if row.best_loss is not None else "N/A",
-                }
-            )
+        lb_data = [
+            {
+                "Rank": row.rank,
+                "Algorithm": ESTIMATOR_LABELS.get(row.estimator_name, row.estimator_name),
+                "Best Loss": f"{row.best_loss:.4f}" if row.best_loss is not None else "N/A",
+            }
+            for row in search.leaderboard
+        ]
         st.dataframe(pd.DataFrame(lb_data), width="stretch")
 
     # ── Save ──────────────────────────────────────────────────────────

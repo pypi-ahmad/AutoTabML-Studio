@@ -628,15 +628,14 @@ def _render_bundle(bundle) -> None:  # noqa: ANN001
     if bundle.saved_model_artifacts:
         st.subheader("Models Ready for Predictions")
         st.caption("These models have been saved and can be loaded on the **Predictions** page.")
-        saved_rows = []
-        for artifact in bundle.saved_model_artifacts:
-            saved_rows.append(
-                {
-                    "Model": artifact.metadata.model_name,
-                    "Task": format_enum_value(artifact.metadata.task_type.value),
-                    "Target": artifact.metadata.target_column,
-                }
-            )
+        saved_rows = [
+            {
+                "Model": artifact.metadata.model_name,
+                "Task": format_enum_value(artifact.metadata.task_type.value),
+                "Target": artifact.metadata.target_column,
+            }
+            for artifact in bundle.saved_model_artifacts
+        ]
         st.dataframe(pd.DataFrame(saved_rows), width="stretch")
         if st.button("Open Predictions", key="exp_open_prediction"):
             go_to_page("Predictions")

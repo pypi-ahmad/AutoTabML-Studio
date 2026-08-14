@@ -21,6 +21,7 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 - Removed single-implementation service interfaces, obsolete prototype scripts,
   and unused development/documentation dependencies.
 - Removed unused parameters from private experiment result renderers.
+- Simplified CSV delimiter resolution and result-table row construction.
 
 ### Fixed
 
