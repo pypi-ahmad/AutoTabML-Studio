@@ -429,3 +429,5 @@ AutoTabML Studio is Apache License 2.0 — see [LICENSE](LICENSE). Google TabFM
 pretrained weights retain their separate `tabfm-non-commercial-v1.0` license;
 the app requires explicit acceptance and blocks their saved contexts from
 registry/deployment export.
+
+<p align="center">Made with ❤️ by Ahmad Mujtaba</p>
