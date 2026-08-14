@@ -88,7 +88,7 @@ satisfy four hard constraints:
 | `app/registry/`              | MLflow model registration and promotion (champion / candidate / archived). | `RegistryService`                       |
 | `app/observability/`         | Structured JSON logging, correlation context, metrics hooks, optional OpenTelemetry tracing. | `configure_observability_logging()`     |
 | `app/storage/`               | SQLite metadata store with repositories pattern. | `AppMetadataStore`                      |
-| `app/providers/`             | LLM provider abstractions on top of the official SDKs (openai, anthropic, google-genai, ollama). | `BaseProvider`, `ModelItem`             |
+| `app/providers/`             | LLM provider abstractions on top of the official SDKs, plus reference token pricing and deterministic cost estimates. | `BaseProvider`, `ModelItem`, `calculate_model_cost` |
 | `app/notebooks/`             | Jupyter notebook generation from a run's metadata (no string interpolation; all user values embedded as JSON literals). | `generate_job_notebook(...)`            |
 | `app/security/`              | SSRF-resistant HTTP, CSV/Excel formula-injection guard, trusted-artifact checks, secret masking, error types. | `safe_fetch`, `sanitize_csv_dataframe`, `verify_local_artifact` |
 | `app/pages/`                 | Streamlit page entry points. Thin wrappers around the service layer. | `dashboard_page`, `benchmark_page`, ... |

@@ -27,6 +27,7 @@ from app.providers.catalog_service import (
     get_allowed_providers,
     resolve_default_model,
 )
+from app.providers.model_pricing import MODEL_PRICING, calculate_model_cost, get_model_pricing
 from app.security.masking import (
     MSG_DEFAULT_MODEL_UNAVAILABLE,
     MSG_EMPTY_OLLAMA_CATALOG,
@@ -79,6 +80,7 @@ def render_settings_page() -> None:
         _section_provider(state)
         _section_credentials(state)
         _section_models(state)
+        _section_model_cost_calculator()
         _section_mlflow_descriptions(state)
         _section_cache_controls()
         _section_save(state, key_suffix="_advanced")
@@ -354,6 +356,51 @@ def _section_models(state: RuntimeState) -> None:
         key="model_select",
     )
     state.selected_model_id = selected_id
+
+
+def _section_model_cost_calculator() -> None:
+    st.header("💰 Model Cost Calculator")
+    st.caption("Estimate standard API token costs in USD using the supplied per-million-token prices.")
+
+    with st.container(border=True):
+        model_name = st.selectbox(
+            "Pricing model",
+            options=[pricing.name for pricing in MODEL_PRICING],
+            key="cost_model_select",
+        )
+
+        input_column, output_column = st.columns(2)
+        with input_column:
+            input_tokens = st.number_input(
+                "Input tokens",
+                min_value=0,
+                value=1_000,
+                step=1_000,
+                key="cost_input_tokens",
+            )
+        with output_column:
+            output_tokens = st.number_input(
+                "Output tokens",
+                min_value=0,
+                value=500,
+                step=500,
+                key="cost_output_tokens",
+            )
+
+        pricing = get_model_pricing(model_name)
+        estimate = calculate_model_cost(model_name, input_tokens, output_tokens)
+        st.caption(
+            f"Standard rates: **${pricing.input_price:.2f} input** / "
+            f"**${pricing.output_price:.2f} output** per 1M tokens"
+        )
+
+        with st.container(horizontal=True):
+            st.metric("Input cost", f"${estimate.input_cost:,.6f}", border=True)
+            st.metric("Output cost", f"${estimate.output_cost:,.6f}", border=True)
+            st.metric("Estimated total", f"${estimate.total_cost:,.6f}", border=True)
+
+        st.info(pricing.details)
+        st.caption("Estimate only. Discounts, cache pricing, fast modes, and long-context tiers may change the final bill.")
 
 
 def _section_mlflow_descriptions(state: RuntimeState) -> None:

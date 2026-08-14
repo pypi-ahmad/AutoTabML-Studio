@@ -415,8 +415,24 @@ Two tabs:
 - Execution backend (Local or Colab MCP)
 - GPU configuration
 - LLM provider and credentials (OpenAI, Anthropic, Gemini, Ollama)
+- Model cost calculator for input/output token estimates and pricing-tier notes
 - Model directory paths
 - Tracking server configuration
+
+The calculator uses these standard USD prices per 1M tokens:
+
+| Model | Input | Output |
+| --- | ---: | ---: |
+| Sonnet 5 | $2.00 | $10.00 |
+| Gemini Flash 3.7 | $0.75 | $3.75 |
+| Gemini 3.5 Flash Lite | $0.30 | $2.50 |
+| GPT 5.6 Luna | $0.20 | $1.20 |
+| GPT 5.6 Terra | $2.00 | $12.00 |
+| Grok 4.6 | $2.00 | $6.00 |
+
+Select a model and enter the expected input and output token counts. The result
+shows each component and the estimated total; the pricing note identifies batch,
+cache, fast-mode, promotional, or long-context conditions that may change the bill.
 
 API keys are stored locally and never sent to AutoTabML Studio servers — they go
 directly to the provider you configure.

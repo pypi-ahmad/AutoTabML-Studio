@@ -44,7 +44,7 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 - **Zero cloud dependency.** Data never leaves your machine. No default outbound telemetry or external uploads.
 - **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
 - **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
-- **708 unit tests at 77.32% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
+- **716 unit tests at 77.32% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
 
 ---
 
@@ -242,7 +242,7 @@ Services with one runtime implementation stay concrete; shared base classes are 
 | `app/registry/` | MLflow model registration and promotion |
 | `app/observability/` | Structured logging, correlation context, metrics hooks, optional tracing |
 | `app/storage/` | SQLite metadata store |
-| `app/providers/` | LLM integrations (OpenAI, Anthropic, Gemini, Ollama) |
+| `app/providers/` | LLM integrations plus reference token pricing and cost estimates |
 | `app/notebooks/` | Jupyter notebook generation |
 | `app/config/` | Pydantic settings, enums, environment binding |
 | `app/pages/` | Streamlit page entry points |

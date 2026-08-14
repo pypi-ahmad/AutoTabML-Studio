@@ -10,6 +10,7 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Windows double-click launcher for the Streamlit UI.
+- Model token-cost calculator in Advanced Settings with six reference pricing tiers.
 - Guided Auto Run page/CLI with persistent progress and cancellation.
 - Holdout evaluation, SHAP/native/permutation explanations, provenance, and drift.
 - FastAPI, standalone CLI, and non-root Docker deployment ZIPs.

@@ -46,6 +46,14 @@ When a provider catalog cannot be fetched, the app falls back to verified stable
 
 These defaults were last verified against the current vendor model documentation during the April 2026 production-readiness pass.
 
+## Model Cost Calculator
+
+The Advanced Settings tab estimates hosted-model costs from input and output token
+counts. Pricing data and pure Decimal-based arithmetic live in
+`app/providers/model_pricing.py`; the Streamlit page only collects values and
+renders the resulting input, output, and total costs. Update the pricing contract
+tests in `tests/test_model_pricing.py` whenever a reference rate changes.
+
 ## Common Commands
 
 ```bash
