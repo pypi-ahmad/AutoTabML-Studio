@@ -205,6 +205,7 @@ The `Makefile` at the repo root documents every command. Most
 useful:
 
 ```bash
+make install        # broad compatible environment; intentionally excludes TabFM
 make sync           # uv sync --locked --all-groups
 uv sync --locked --all-groups --extra benchmark --extra experiment --extra flaml --extra profiling --extra timesfm
 make test           # run unit tests
@@ -218,9 +219,8 @@ make clean          # remove build artifacts
 make doctor         # autotabml doctor
 ```
 
-Do not use `make install` on current `main`: that legacy target requests every
-extra, but `tabfm` and `profiling` are intentionally incompatible. Use `make sync`
-plus the explicit compatible extras above.
+`make install` includes the broad compatible extra set and intentionally excludes
+TabFM. Use a separate environment with `--extra tabfm` for that research workflow.
 
 The pre-commit hook set runs `ruff check --fix`, `ruff format`,
 and `mypy` on every commit. Install once with

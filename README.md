@@ -419,6 +419,7 @@ push, so a passing local run is a faithful predictor of a green PR.
 | [Interactive Architecture](docs/autotabml-studio-architecture.html) | Explorable system map with guided views and source evidence |
 | [Developer Guide](docs/developer-guide.md) | Implementation notes and development workflow |
 | [Contributing](CONTRIBUTING.md) | Contribution guidelines |
+| [Release Notes v0.4.0](RELEASE_NOTES_v0.4.0.md) | Current release highlights and upgrade steps |
 
 ---
 

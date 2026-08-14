@@ -7,6 +7,8 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-14
+
 ### Added
 
 - A single Foundation Models page and CLI commands for revision-pinned Google
@@ -30,6 +32,12 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 - Synchronized the README, usage, upgrade, security, developer, operations, and
   architecture documentation with current CLI commands, dependency conflicts,
   test inventory, foundation-model behavior, and port `8561`.
+
+### Fixed
+
+- Docker and `make install` now select the broad compatible optional-dependency
+  set instead of requesting the intentionally incompatible TabFM and profiling
+  extras together.
 
 ### Security
 
@@ -254,7 +262,8 @@ upgrade for all 0.1.x users.
 
 - OSS companion documentation initialized (license, contributing, security, conduct, changelog).
 
-[Unreleased]: https://github.com/pypi-ahmad/AutoTabML-Studio/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/pypi-ahmad/AutoTabML-Studio/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/pypi-ahmad/AutoTabML-Studio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pypi-ahmad/AutoTabML-Studio/releases/tag/v0.3.0
 [0.2.0]: https://github.com/pypi-ahmad/AutoTabML-Studio/releases/tag/v0.2.0
 [2026-06-13]: https://github.com/pypi-ahmad/AutoTabML-Studio/releases/tag/v0.1.0

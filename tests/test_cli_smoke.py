@@ -37,7 +37,7 @@ def _run(*args: str, env: dict[str, str] | None = None) -> subprocess.CompletedP
 def test_version_exits_zero() -> None:
     result = _run("--version")
     assert result.returncode == 0, f"stderr: {result.stderr}"
-    assert "0.3.0" in result.stdout, f"stdout: {result.stdout}"
+    assert "0.4.0" in result.stdout, f"stdout: {result.stdout}"
 
 
 def test_help_exits_zero_and_lists_subcommands() -> None:

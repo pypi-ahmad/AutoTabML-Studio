@@ -3,20 +3,20 @@
 # AutoTabML Studio — production-grade multi-stage image.
 #
 # Build:
-#   docker build -t autotabml-studio:0.3.0 .
+#   docker build -t autotabml-studio:0.4.0 .
 #
 # Run (Streamlit UI):
 #   docker run --rm -p 127.0.0.1:8561:8561 \
 #     -v $(pwd)/artifacts:/app/artifacts \
 #     -e AUTOTABML_LOG_FORMAT=json \
-#     autotabml-studio:0.3.0
+#     autotabml-studio:0.4.0
 #
 # Run (CLI):
-#   docker run --rm -it autotabml-studio:0.3.0 autotabml --help
+#   docker run --rm -it autotabml-studio:0.4.0 autotabml --help
 #   docker run --rm -it \
 #     -v $(pwd)/data:/data:ro \
 #     -v $(pwd)/artifacts:/app/artifacts \
-#     autotabml-studio:0.3.0 \
+#     autotabml-studio:0.4.0 \
 #     autotabml benchmark /data/train.csv --target label
 
 ARG PYTHON_VERSION=3.12
@@ -38,11 +38,17 @@ ENV UV_LINK_MODE=copy \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_PYTHON_DOWNLOADS=never \
     UV_PYTHON_PREFERENCE=only-system
-RUN uv sync --locked --no-install-project --group dev --all-extras
+RUN uv sync --locked --no-install-project --group dev \
+    --extra kaggle --extra uci --extra validation --extra profiling \
+    --extra benchmark --extra experiment --extra flaml --extra timesfm \
+    --extra gpu --extra colab --extra providers --extra explain --extra serve
 
 # Now copy the rest and install the project itself.
 COPY . /build
-RUN uv sync --locked --group dev --all-extras
+RUN uv sync --locked --group dev \
+    --extra kaggle --extra uci --extra validation --extra profiling \
+    --extra benchmark --extra experiment --extra flaml --extra timesfm \
+    --extra gpu --extra colab --extra providers --extra explain --extra serve
 
 # ─── Stage 2: runtime ──────────────────────────────────────────────────────
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime

@@ -18,7 +18,7 @@ exists, how it works, and how to use or extend it.
 | Operate, monitor, troubleshoot                         | [operations.md](operations.md)                                         |
 | Set up the dev environment and run the test suite     | [developer-guide.md](developer-guide.md)                               |
 | Report a security issue                                | [SECURITY.md](../SECURITY.md)                                          |
-| Read release notes                                    | [RELEASE_NOTES_v0.3.0.md](../RELEASE_NOTES_v0.3.0.md) → [CHANGELOG.md](../CHANGELOG.md) |
+| Read release notes                                    | [RELEASE_NOTES_v0.4.0.md](../RELEASE_NOTES_v0.4.0.md) → [CHANGELOG.md](../CHANGELOG.md) |
 
 ## Document map
 
@@ -35,9 +35,11 @@ exists, how it works, and how to use or extend it.
   upgrades across supported release lines.
 - [UPGRADE_SUMMARY.md](../UPGRADE_SUMMARY.md) — one-page
   upgrade cheat sheet.
-- [RELEASE_NOTES_v0.3.0.md](../RELEASE_NOTES_v0.3.0.md) — the
-  v0.3.0 release announcement; [CHANGELOG.md](../CHANGELOG.md#unreleased)
+- [RELEASE_NOTES_v0.4.0.md](../RELEASE_NOTES_v0.4.0.md) — the
+  current v0.4.0 release announcement; [CHANGELOG.md](../CHANGELOG.md#unreleased)
   tracks newer work on `main`.
+- [RELEASE_NOTES_v0.3.0.md](../RELEASE_NOTES_v0.3.0.md) — the
+  historical v0.3.0 release announcement.
 - [RELEASE_NOTES_v0.2.0.md](../RELEASE_NOTES_v0.2.0.md) — the
   historical v0.2.0 release announcement.
 - [SECURITY.md](../SECURITY.md) — supported versions,
@@ -74,9 +76,9 @@ Three AutoML engines (LazyPredict, PyCaret, FLAML), pinned local Google
 TabFM/TimesFM foundation-model workflows, end-to-end
 MLflow tracking, an MLflow-style model registry, AI-generated
 summaries (OpenAI, Anthropic, Gemini, Ollama), and a CLI that
-mirrors the Streamlit UI. Current `main` includes the v0.3.0 guided production,
-deployment, desktop-launch, and cost-planning work plus the unreleased
-foundation-model workflows listed in the changelog.
+mirrors the Streamlit UI. Version 0.4.0 combines the v0.3.0 guided production,
+deployment, desktop-launch, and cost-planning work with local foundation-model
+workflows.
 
 ## What is the philosophy?
 

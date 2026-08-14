@@ -9,7 +9,7 @@ PYTHON ?= 3.12.10
 
 help:
 	@echo "AutoTabML Studio - common dev commands"
-	@echo "  make install      Create venv and sync all extras"
+	@echo "  make install      Create venv and sync compatible extras (TabFM separate)"
 	@echo "  make sync         uv sync --locked with default + dev groups"
 	@echo "  make test         Run unit tests (excludes integration)"
 	@echo "  make test-cov     Run unit tests with coverage gate (>=65%)"
@@ -23,7 +23,7 @@ help:
 
 install:
 	uv venv --python $(PYTHON)
-	uv sync --locked --all-groups --all-extras
+	uv sync --locked --all-groups --extra kaggle --extra uci --extra validation --extra profiling --extra benchmark --extra experiment --extra flaml --extra timesfm --extra gpu --extra colab --extra providers --extra explain --extra serve
 
 sync:
 	uv sync --locked --all-groups

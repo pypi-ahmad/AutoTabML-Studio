@@ -1,7 +1,24 @@
 # MIGRATION_GUIDE.md
 
 > Upgrade notes between major AutoTabML Studio versions. The
-> current release line is **0.3.x**.
+> current release line is **0.4.x**.
+
+## Upgrading from 0.3.x → 0.4.0
+
+```bash
+git pull
+uv sync --locked --all-groups
+uv run --no-sync autotabml --version   # should print 0.4.0
+uv run --no-sync autotabml doctor
+```
+
+No data or configuration migration is required. Version 0.4.0 adds local TabFM
+research evaluation, TimesFM 2.5 forecasting, and port `8561` while preserving
+the existing CLI, metadata database, MLflow layout, settings file, and artifact
+tree. Install only the workflows you need; `tabfm` and `profiling` must use
+separate environments because their upstream `typeguard` requirements conflict.
+
+See `RELEASE_NOTES_v0.4.0.md` for the complete feature summary.
 
 ## Upgrading from 0.2.x → 0.3.0
 
@@ -17,10 +34,6 @@ No data or configuration migration is required. Version 0.3.0 preserves the
 The release adds guided Auto Run, richer evaluation and deployment artifacts,
 Windows launching, model-cost estimates, and internal performance/security
 improvements.
-
-Current `main` also adds TabFM and TimesFM extras. Install only the workflows you
-need; `tabfm` and `profiling` must use separate environments because their
-upstream `typeguard` requirements conflict.
 
 See `RELEASE_NOTES_v0.3.0.md` for the complete feature summary.
 

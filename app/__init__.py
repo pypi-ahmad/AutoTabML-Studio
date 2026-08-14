@@ -6,7 +6,7 @@ APP_NAME = "AutoTabML Studio"
 DIST_NAME = "autotabml-studio"
 CLI_ENTRYPOINT = "autotabml"
 STREAMLIT_ENTRYPOINT = "app/main.py"
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "APP_NAME",

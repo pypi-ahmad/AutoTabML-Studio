@@ -57,7 +57,7 @@ def export_deployment_bundle(
         package_requirement = (
             f"./wheels/{wheel.name}[benchmark,experiment,flaml,serve]"
             if wheel is not None
-            else "autotabml-studio[benchmark,experiment,flaml,serve]>=0.3.0"
+            else "autotabml-studio[benchmark,experiment,flaml,serve]>=0.4.0"
         )
         (root / "requirements.txt").write_text(f"{package_requirement}\n", encoding="utf-8")
         (root / "README.md").write_text(_README, encoding="utf-8")

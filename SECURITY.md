@@ -4,17 +4,18 @@
 
 | Version | Supported |
 | ------- | --------- |
-| 0.3.x   | ✅ Yes    |
-| 0.2.x   | ⚠️ Best-effort (legacy) |
-| < 0.1   | ❌ No     |
+| 0.4.x   | ✅ Yes    |
+| 0.3.x   | ⚠️ Best-effort (legacy) |
+| < 0.3   | ❌ No     |
 
-The current release line is **0.3.x**. Security fixes land on `main`
+The current release line is **0.4.x**. Security fixes land on `main`
 and are released as patch or minor versions as the severity warrants.
 
-## Security Posture — v0.3.0
+## Security Posture — v0.4.0
 
-The v0.2.0 release established the hardened foundation, and v0.3.0 retains
-and extends it. The following controls are active by default.
+The v0.2.0 release established the hardened foundation; v0.3.0 extended it, and
+v0.4.0 adds consent-gated local foundation models. The following controls are
+active by default.
 
 ### Ingestion
 
