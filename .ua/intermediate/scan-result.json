@@ -1,7 +1,13 @@
 {
   "scriptCompleted": true,
-  "contentDigest": "2a86585b7c7b7963833293cce1944f3b89b488875f5b32ac63e02f0403f6c229",
+  "contentDigest": "a5dc403e2d34be8d2108c34821066b7a12df7a3726e3b5b202af26c0dfd19cd5",
   "files": [
+    {
+      "path": ".code-review-graph/graph.db",
+      "language": "db",
+      "sizeLines": 64133,
+      "fileCategory": "code"
+    },
     {
       "path": ".codebase-memory/.gitattributes",
       "language": "unknown",
@@ -18,6 +24,12 @@
       "path": ".codebase-memory/graph.db.zst",
       "language": "zst",
       "sizeLines": 13475,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".codegraph/codegraph.db",
+      "language": "db",
+      "sizeLines": 57327,
       "fileCategory": "code"
     },
     {
@@ -107,7 +119,7 @@
     {
       "path": "CHANGELOG.md",
       "language": "markdown",
-      "sizeLines": 215,
+      "sizeLines": 252,
       "fileCategory": "docs"
     },
     {
@@ -123,9 +135,15 @@
       "fileCategory": "infra"
     },
     {
+      "path": "Launch AutoTabML Studio.cmd",
+      "language": "batch",
+      "sizeLines": 25,
+      "fileCategory": "script"
+    },
+    {
       "path": "MIGRATION_GUIDE.md",
       "language": "markdown",
-      "sizeLines": 199,
+      "sizeLines": 216,
       "fileCategory": "docs"
     },
     {
@@ -137,13 +155,19 @@
     {
       "path": "README.md",
       "language": "markdown",
-      "sizeLines": 402,
+      "sizeLines": 429,
       "fileCategory": "docs"
     },
     {
       "path": "RELEASE_NOTES_v0.2.0.md",
       "language": "markdown",
       "sizeLines": 217,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "RELEASE_NOTES_v0.3.0.md",
+      "language": "markdown",
+      "sizeLines": 77,
       "fileCategory": "docs"
     },
     {
@@ -155,13 +179,13 @@
     {
       "path": "UPGRADE_SUMMARY.md",
       "language": "markdown",
-      "sizeLines": 66,
+      "sizeLines": 40,
       "fileCategory": "docs"
     },
     {
       "path": "USAGE.md",
       "language": "markdown",
-      "sizeLines": 672,
+      "sizeLines": 693,
       "fileCategory": "docs"
     },
     {
@@ -227,7 +251,7 @@
     {
       "path": "app/cli.py",
       "language": "python",
-      "sizeLines": 2102,
+      "sizeLines": 2283,
       "fileCategory": "code"
     },
     {
@@ -263,7 +287,7 @@
     {
       "path": "app/deployment.py",
       "language": "python",
-      "sizeLines": 170,
+      "sizeLines": 176,
       "fileCategory": "code"
     },
     {
@@ -311,7 +335,7 @@
     {
       "path": "app/ingestion/csv_loader.py",
       "language": "python",
-      "sizeLines": 257,
+      "sizeLines": 227,
       "fileCategory": "code"
     },
     {
@@ -425,13 +449,7 @@
     {
       "path": "app/modeling/benchmark/artifacts.py",
       "language": "python",
-      "sizeLines": 189,
-      "fileCategory": "code"
-    },
-    {
-      "path": "app/modeling/benchmark/base.py",
-      "language": "python",
-      "sizeLines": 28,
+      "sizeLines": 190,
       "fileCategory": "code"
     },
     {
@@ -473,7 +491,7 @@
     {
       "path": "app/modeling/benchmark/selectors.py",
       "language": "python",
-      "sizeLines": 158,
+      "sizeLines": 154,
       "fileCategory": "code"
     },
     {
@@ -485,7 +503,7 @@
     {
       "path": "app/modeling/benchmark/summary.py",
       "language": "python",
-      "sizeLines": 133,
+      "sizeLines": 129,
       "fileCategory": "code"
     },
     {
@@ -531,6 +549,36 @@
       "fileCategory": "code"
     },
     {
+      "path": "app/modeling/foundation/__init__.py",
+      "language": "python",
+      "sizeLines": 33,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/modeling/foundation/checkpoints.py",
+      "language": "python",
+      "sizeLines": 68,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/modeling/foundation/tabfm.py",
+      "language": "python",
+      "sizeLines": 322,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/modeling/foundation/timesfm.py",
+      "language": "python",
+      "sizeLines": 250,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/modeling/foundation/tracking.py",
+      "language": "python",
+      "sizeLines": 39,
+      "fileCategory": "code"
+    },
+    {
       "path": "app/modeling/pycaret/__init__.py",
       "language": "python",
       "sizeLines": 32,
@@ -540,12 +588,6 @@
       "path": "app/modeling/pycaret/artifacts.py",
       "language": "python",
       "sizeLines": 135,
-      "fileCategory": "code"
-    },
-    {
-      "path": "app/modeling/pycaret/base.py",
-      "language": "python",
-      "sizeLines": 41,
       "fileCategory": "code"
     },
     {
@@ -611,7 +653,7 @@
     {
       "path": "app/modeling/pycaret/summary.py",
       "language": "python",
-      "sizeLines": 254,
+      "sizeLines": 253,
       "fileCategory": "code"
     },
     {
@@ -707,13 +749,19 @@
     {
       "path": "app/pages/experiment_page.py",
       "language": "python",
-      "sizeLines": 672,
+      "sizeLines": 666,
       "fileCategory": "code"
     },
     {
       "path": "app/pages/flaml_automl_page.py",
       "language": "python",
-      "sizeLines": 421,
+      "sizeLines": 415,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/pages/foundation_models_page.py",
+      "language": "python",
+      "sizeLines": 276,
       "fileCategory": "code"
     },
     {
@@ -725,7 +773,7 @@
     {
       "path": "app/pages/history_page.py",
       "language": "python",
-      "sizeLines": 408,
+      "sizeLines": 418,
       "fileCategory": "code"
     },
     {
@@ -737,7 +785,7 @@
     {
       "path": "app/pages/models_page.py",
       "language": "python",
-      "sizeLines": 354,
+      "sizeLines": 381,
       "fileCategory": "code"
     },
     {
@@ -767,7 +815,7 @@
     {
       "path": "app/pages/registry.py",
       "language": "python",
-      "sizeLines": 225,
+      "sizeLines": 232,
       "fileCategory": "code"
     },
     {
@@ -797,7 +845,7 @@
     {
       "path": "app/pages/settings_page.py",
       "language": "python",
-      "sizeLines": 492,
+      "sizeLines": 539,
       "fileCategory": "code"
     },
     {
@@ -845,7 +893,7 @@
     {
       "path": "app/prediction/__init__.py",
       "language": "python",
-      "sizeLines": 71,
+      "sizeLines": 79,
       "fileCategory": "code"
     },
     {
@@ -857,7 +905,7 @@
     {
       "path": "app/prediction/base.py",
       "language": "python",
-      "sizeLines": 642,
+      "sizeLines": 662,
       "fileCategory": "code"
     },
     {
@@ -881,7 +929,7 @@
     {
       "path": "app/prediction/loader.py",
       "language": "python",
-      "sizeLines": 473,
+      "sizeLines": 559,
       "fileCategory": "code"
     },
     {
@@ -939,12 +987,6 @@
       "fileCategory": "code"
     },
     {
-      "path": "app/profiling/base.py",
-      "language": "python",
-      "sizeLines": 23,
-      "fileCategory": "code"
-    },
-    {
       "path": "app/profiling/errors.py",
       "language": "python",
       "sizeLines": 11,
@@ -977,7 +1019,7 @@
     {
       "path": "app/profiling/ydata_runner.py",
       "language": "python",
-      "sizeLines": 203,
+      "sizeLines": 202,
       "fileCategory": "code"
     },
     {
@@ -1014,6 +1056,12 @@
       "path": "app/providers/gemini_provider.py",
       "language": "python",
       "sizeLines": 109,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/providers/model_pricing.py",
+      "language": "python",
+      "sizeLines": 90,
       "fileCategory": "code"
     },
     {
@@ -1133,7 +1181,7 @@
     {
       "path": "app/storage/models.py",
       "language": "python",
-      "sizeLines": 154,
+      "sizeLines": 156,
       "fileCategory": "code"
     },
     {
@@ -1241,13 +1289,13 @@
     {
       "path": "app/tracking/mlflow_query.py",
       "language": "python",
-      "sizeLines": 806,
+      "sizeLines": 814,
       "fileCategory": "code"
     },
     {
       "path": "app/tracking/schemas.py",
       "language": "python",
-      "sizeLines": 102,
+      "sizeLines": 104,
       "fileCategory": "code"
     },
     {
@@ -1266,12 +1314,6 @@
       "path": "app/validation/artifacts.py",
       "language": "python",
       "sizeLines": 76,
-      "fileCategory": "code"
-    },
-    {
-      "path": "app/validation/base.py",
-      "language": "python",
-      "sizeLines": 23,
       "fileCategory": "code"
     },
     {
@@ -1313,7 +1355,7 @@
     {
       "path": "app/validation/service.py",
       "language": "python",
-      "sizeLines": 80,
+      "sizeLines": 79,
       "fileCategory": "code"
     },
     {
@@ -1331,13 +1373,13 @@
     {
       "path": "docs/README.md",
       "language": "markdown",
-      "sizeLines": 102,
+      "sizeLines": 108,
       "fileCategory": "docs"
     },
     {
       "path": "docs/architecture.md",
       "language": "markdown",
-      "sizeLines": 234,
+      "sizeLines": 247,
       "fileCategory": "docs"
     },
     {
@@ -1353,21 +1395,33 @@
       "fileCategory": "markup"
     },
     {
+      "path": "docs/autotabml-studio-architecture.html",
+      "language": "html",
+      "sizeLines": 13246,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "docs/autotabml-studio.architecture.json",
+      "language": "json",
+      "sizeLines": 201,
+      "fileCategory": "config"
+    },
+    {
       "path": "docs/developer-guide.md",
       "language": "markdown",
-      "sizeLines": 270,
+      "sizeLines": 304,
       "fileCategory": "docs"
     },
     {
       "path": "docs/operations.md",
       "language": "markdown",
-      "sizeLines": 328,
+      "sizeLines": 361,
       "fileCategory": "docs"
     },
     {
       "path": "pyproject.toml",
       "language": "toml",
-      "sizeLines": 338,
+      "sizeLines": 346,
       "fileCategory": "config"
     },
     {
@@ -1375,12 +1429,6 @@
       "language": "json",
       "sizeLines": 47,
       "fileCategory": "config"
-    },
-    {
-      "path": "scripts/_fetch_uci_meta.py",
-      "language": "python",
-      "sizeLines": 114,
-      "fileCategory": "code"
     },
     {
       "path": "scripts/batch_uci_runner.py",
@@ -1398,24 +1446,6 @@
       "path": "scripts/capture_screenshots.py",
       "language": "python",
       "sizeLines": 309,
-      "fileCategory": "code"
-    },
-    {
-      "path": "scripts/colab_mcp_spike.py",
-      "language": "python",
-      "sizeLines": 167,
-      "fileCategory": "code"
-    },
-    {
-      "path": "scripts/fetch_remaining_sklearn.py",
-      "language": "python",
-      "sizeLines": 84,
-      "fileCategory": "code"
-    },
-    {
-      "path": "scripts/save_remaining_sklearn.py",
-      "language": "python",
-      "sizeLines": 71,
       "fileCategory": "code"
     },
     {
@@ -1499,7 +1529,7 @@
     {
       "path": "tests/test_config.py",
       "language": "python",
-      "sizeLines": 262,
+      "sizeLines": 261,
       "fileCategory": "code"
     },
     {
@@ -1533,6 +1563,18 @@
       "fileCategory": "code"
     },
     {
+      "path": "tests/test_foundation_integration.py",
+      "language": "python",
+      "sizeLines": 167,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_foundation_models.py",
+      "language": "python",
+      "sizeLines": 206,
+      "fileCategory": "code"
+    },
+    {
       "path": "tests/test_gpu.py",
       "language": "python",
       "sizeLines": 73,
@@ -1541,13 +1583,13 @@
     {
       "path": "tests/test_hardening_smoke.py",
       "language": "python",
-      "sizeLines": 326,
+      "sizeLines": 335,
       "fileCategory": "code"
     },
     {
       "path": "tests/test_ingestion.py",
       "language": "python",
-      "sizeLines": 375,
+      "sizeLines": 355,
       "fileCategory": "code"
     },
     {
@@ -1578,6 +1620,12 @@
       "path": "tests/test_mlflow_query_batch.py",
       "language": "python",
       "sizeLines": 266,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_model_pricing.py",
+      "language": "python",
+      "sizeLines": 41,
       "fileCategory": "code"
     },
     {
@@ -1697,7 +1745,7 @@
     {
       "path": "tests/test_settings_page.py",
       "language": "python",
-      "sizeLines": 39,
+      "sizeLines": 60,
       "fileCategory": "code"
     },
     {
@@ -1761,31 +1809,1392 @@
       "fileCategory": "code"
     }
   ],
-  "totalFiles": 293,
-  "filteredByIgnore": 321,
+  "totalFiles": 301,
+  "filteredByIgnore": 370,
   "estimatedComplexity": "large",
   "stats": {
-    "filesScanned": 293,
+    "filesScanned": 301,
     "byCategory": {
-      "code": 262,
-      "config": 10,
+      "code": 266,
+      "config": 11,
       "infra": 7,
-      "docs": 13,
-      "markup": 1
+      "docs": 14,
+      "script": 1,
+      "markup": 2
     },
     "byLanguage": {
+      "db": 2,
       "unknown": 5,
-      "json": 2,
+      "json": 3,
       "zst": 1,
       "config": 1,
       "yaml": 8,
       "toml": 3,
-      "markdown": 13,
+      "markdown": 14,
       "dockerfile": 1,
+      "batch": 1,
       "makefile": 1,
-      "python": 256,
+      "python": 258,
       "typed": 1,
-      "html": 1
+      "html": 2
     }
+  },
+  "importMap": {
+    ".code-review-graph/graph.db": [],
+    ".codebase-memory/.gitattributes": [],
+    ".codebase-memory/artifact.json": [],
+    ".codebase-memory/graph.db.zst": [],
+    ".codegraph/codegraph.db": [],
+    ".dockerignore": [],
+    ".env.example": [],
+    ".gitattributes": [],
+    ".github/CODEOWNERS": [],
+    ".github/ISSUE_TEMPLATE/bug_report.yml": [],
+    ".github/ISSUE_TEMPLATE/feature_request.yml": [],
+    ".github/dependabot.yml": [],
+    ".github/workflows/ci.yml": [],
+    ".github/workflows/release-readiness.yml": [],
+    ".github/workflows/security.yml": [],
+    ".gitleaks.toml": [],
+    ".pre-commit-config.yaml": [],
+    ".python-version": [],
+    ".streamlit/config.toml": [],
+    "CHANGELOG.md": [],
+    "CODE_OF_CONDUCT.md": [],
+    "Dockerfile": [],
+    "Launch AutoTabML Studio.cmd": [],
+    "MIGRATION_GUIDE.md": [],
+    "Makefile": [],
+    "README.md": [],
+    "RELEASE_NOTES_v0.2.0.md": [],
+    "RELEASE_NOTES_v0.3.0.md": [],
+    "SECURITY.md": [],
+    "UPGRADE_SUMMARY.md": [],
+    "USAGE.md": [],
+    "app/__init__.py": [],
+    "app/artifacts/__init__.py": [
+      "app/artifacts/manager.py"
+    ],
+    "app/artifacts/manager.py": [
+      "app/config/models.py",
+      "app/path_utils.py",
+      "app/security/safe_csv.py"
+    ],
+    "app/autorun.py": [
+      "app/drift.py",
+      "app/evaluation.py",
+      "app/explainability.py",
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/flaml/service.py",
+      "app/modeling/flaml/setup_runner.py",
+      "app/provenance.py"
+    ],
+    "app/autorun_worker.py": [
+      "app/autorun.py",
+      "app/config/settings.py",
+      "app/storage/__init__.py"
+    ],
+    "app/backends/__init__.py": [
+      "app/backends/base.py",
+      "app/backends/colab_mcp_backend.py",
+      "app/backends/local_backend.py",
+      "app/config/enums.py"
+    ],
+    "app/backends/base.py": [
+      "app/config/enums.py"
+    ],
+    "app/backends/colab_mcp_backend.py": [
+      "app/backends/base.py",
+      "app/config/enums.py",
+      "app/errors.py"
+    ],
+    "app/backends/local_backend.py": [
+      "app/backends/base.py",
+      "app/config/enums.py"
+    ],
+    "app/background_jobs.py": [
+      "app/autorun.py",
+      "app/storage/__init__.py"
+    ],
+    "app/cli.py": [
+      "app/__init__.py",
+      "app/autorun.py",
+      "app/background_jobs.py",
+      "app/config/settings.py",
+      "app/errors.py",
+      "app/gpu.py",
+      "app/ingestion/__init__.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/types.py",
+      "app/ingestion/uci_loader.py",
+      "app/logging_config.py",
+      "app/modeling/pycaret/service.py",
+      "app/security/masking.py",
+      "app/startup.py",
+      "app/storage/__init__.py"
+    ],
+    "app/concurrency.py": [],
+    "app/config/__init__.py": [],
+    "app/config/enums.py": [],
+    "app/config/models.py": [
+      "app/config/enums.py"
+    ],
+    "app/config/settings.py": [
+      "app/config/models.py",
+      "app/errors.py"
+    ],
+    "app/deployment.py": [],
+    "app/drift.py": [],
+    "app/errors.py": [],
+    "app/evaluation.py": [],
+    "app/explainability.py": [],
+    "app/gpu.py": [],
+    "app/ingestion/__init__.py": [
+      "app/ingestion/factory.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/base.py": [
+      "app/ingestion/errors.py",
+      "app/ingestion/metadata.py",
+      "app/ingestion/normalizer.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/csv_loader.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/ingestion/url_loader.py",
+      "app/ingestion/utils.py"
+    ],
+    "app/ingestion/dataframe_loader.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/errors.py": [],
+    "app/ingestion/excel_loader.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/ingestion/url_loader.py"
+    ],
+    "app/ingestion/factory.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/html_table_loader.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/ingestion/url_loader.py"
+    ],
+    "app/ingestion/kaggle_loader.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/metadata.py": [
+      "app/ingestion/schemas.py"
+    ],
+    "app/ingestion/normalizer.py": [
+      "app/ingestion/errors.py"
+    ],
+    "app/ingestion/schemas.py": [
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/types.py": [],
+    "app/ingestion/uci_loader.py": [
+      "app/errors.py",
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "app/ingestion/url_loader.py": [
+      "app/ingestion/base.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/security/safe_http.py"
+    ],
+    "app/ingestion/utils.py": [],
+    "app/logging_config.py": [
+      "app/observability/logging_setup.py"
+    ],
+    "app/main.py": [
+      "app/errors.py",
+      "app/logging_config.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/glossary.py",
+      "app/pages/registry.py",
+      "app/security/masking.py",
+      "app/startup.py",
+      "app/state/session.py"
+    ],
+    "app/modeling/__init__.py": [],
+    "app/modeling/base.py": [
+      "app/artifacts/__init__.py",
+      "app/errors.py"
+    ],
+    "app/modeling/benchmark/__init__.py": [
+      "app/modeling/benchmark/lazypredict_runner.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/service.py"
+    ],
+    "app/modeling/benchmark/artifacts.py": [
+      "app/artifacts/__init__.py",
+      "app/modeling/base.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/summary.py"
+    ],
+    "app/modeling/benchmark/errors.py": [],
+    "app/modeling/benchmark/lazypredict_runner.py": [
+      "app/config/enums.py",
+      "app/errors.py",
+      "app/gpu.py",
+      "app/modeling/base.py",
+      "app/modeling/benchmark/artifacts.py",
+      "app/modeling/benchmark/errors.py",
+      "app/modeling/benchmark/mlflow_tracking.py",
+      "app/modeling/benchmark/ranker.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/selectors.py",
+      "app/modeling/benchmark/summary.py"
+    ],
+    "app/modeling/benchmark/mlflow_tracking.py": [
+      "app/modeling/base.py",
+      "app/modeling/benchmark/schemas.py"
+    ],
+    "app/modeling/benchmark/persistence.py": [
+      "app/errors.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/security/errors.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "app/modeling/benchmark/ranker.py": [
+      "app/modeling/benchmark/errors.py",
+      "app/modeling/benchmark/schemas.py"
+    ],
+    "app/modeling/benchmark/schemas.py": [
+      "app/config/enums.py"
+    ],
+    "app/modeling/benchmark/selectors.py": [
+      "app/modeling/benchmark/errors.py",
+      "app/modeling/benchmark/schemas.py"
+    ],
+    "app/modeling/benchmark/service.py": [
+      "app/config/enums.py",
+      "app/ingestion/schemas.py",
+      "app/modeling/benchmark/lazypredict_runner.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/storage/__init__.py"
+    ],
+    "app/modeling/benchmark/summary.py": [
+      "app/config/enums.py",
+      "app/modeling/benchmark/schemas.py"
+    ],
+    "app/modeling/flaml/__init__.py": [
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/flaml/service.py"
+    ],
+    "app/modeling/flaml/artifacts.py": [
+      "app/artifacts/__init__.py",
+      "app/modeling/base.py",
+      "app/modeling/flaml/schemas.py"
+    ],
+    "app/modeling/flaml/errors.py": [],
+    "app/modeling/flaml/mlflow_tracking.py": [
+      "app/modeling/base.py",
+      "app/modeling/flaml/schemas.py"
+    ],
+    "app/modeling/flaml/schemas.py": [
+      "app/config/enums.py"
+    ],
+    "app/modeling/flaml/service.py": [
+      "app/config/enums.py",
+      "app/errors.py",
+      "app/modeling/base.py",
+      "app/modeling/flaml/artifacts.py",
+      "app/modeling/flaml/errors.py",
+      "app/modeling/flaml/mlflow_tracking.py",
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/flaml/setup_runner.py",
+      "app/path_utils.py",
+      "app/security/trusted_artifacts.py",
+      "app/storage/__init__.py"
+    ],
+    "app/modeling/flaml/setup_runner.py": [
+      "app/errors.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/selectors.py",
+      "app/modeling/flaml/errors.py",
+      "app/modeling/flaml/schemas.py"
+    ],
+    "app/modeling/foundation/__init__.py": [
+      "app/modeling/foundation/checkpoints.py",
+      "app/modeling/foundation/tabfm.py",
+      "app/modeling/foundation/timesfm.py"
+    ],
+    "app/modeling/foundation/checkpoints.py": [],
+    "app/modeling/foundation/tabfm.py": [
+      "app/artifacts/manager.py",
+      "app/modeling/foundation/checkpoints.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "app/modeling/foundation/timesfm.py": [
+      "app/artifacts/manager.py",
+      "app/modeling/foundation/checkpoints.py"
+    ],
+    "app/modeling/foundation/tracking.py": [],
+    "app/modeling/pycaret/__init__.py": [
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "app/modeling/pycaret/artifacts.py": [
+      "app/artifacts/__init__.py",
+      "app/modeling/base.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/summary.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "app/modeling/pycaret/compare_runner.py": [
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "app/modeling/pycaret/errors.py": [],
+    "app/modeling/pycaret/evaluate_runner.py": [
+      "app/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/selectors.py",
+      "app/path_utils.py"
+    ],
+    "app/modeling/pycaret/metrics_runner.py": [
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/summary.py"
+    ],
+    "app/modeling/pycaret/mlflow_tracking.py": [
+      "app/modeling/base.py",
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "app/modeling/pycaret/persistence.py": [
+      "app/artifacts/__init__.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/setup_runner.py",
+      "app/path_utils.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "app/modeling/pycaret/schemas.py": [
+      "app/config/enums.py"
+    ],
+    "app/modeling/pycaret/selectors.py": [
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/selectors.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "app/modeling/pycaret/service.py": [
+      "app/config/enums.py",
+      "app/errors.py",
+      "app/modeling/base.py",
+      "app/modeling/pycaret/__init__.py",
+      "app/modeling/pycaret/artifacts.py",
+      "app/modeling/pycaret/compare_runner.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/evaluate_runner.py",
+      "app/modeling/pycaret/metrics_runner.py",
+      "app/modeling/pycaret/mlflow_tracking.py",
+      "app/modeling/pycaret/persistence.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/selectors.py",
+      "app/modeling/pycaret/setup_runner.py",
+      "app/modeling/pycaret/summary.py",
+      "app/path_utils.py",
+      "app/storage/__init__.py"
+    ],
+    "app/modeling/pycaret/setup_runner.py": [
+      "app/errors.py",
+      "app/gpu.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "app/modeling/pycaret/summary.py": [
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/selectors.py"
+    ],
+    "app/modeling/pycaret/tune_runner.py": [
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "app/notebooks/__init__.py": [],
+    "app/notebooks/generator.py": [],
+    "app/observability/__init__.py": [
+      "app/observability/context.py",
+      "app/observability/logging_setup.py",
+      "app/observability/metrics.py",
+      "app/observability/tracing.py"
+    ],
+    "app/observability/context.py": [],
+    "app/observability/logging_setup.py": [
+      "app/observability/context.py",
+      "app/security/masking.py"
+    ],
+    "app/observability/metrics.py": [
+      "app/observability/context.py"
+    ],
+    "app/observability/tracing.py": [
+      "app/observability/context.py"
+    ],
+    "app/pages/__init__.py": [],
+    "app/pages/autorun_page.py": [
+      "app/autorun.py",
+      "app/background_jobs.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/state/session.py",
+      "app/storage/__init__.py"
+    ],
+    "app/pages/benchmark_page.py": [
+      "app/gpu.py",
+      "app/modeling/benchmark/errors.py",
+      "app/modeling/benchmark/lazypredict_runner.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/service.py",
+      "app/modeling/benchmark/summary.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/shared_history.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/workflow_guide.py",
+      "app/path_utils.py",
+      "app/security/masking.py",
+      "app/security/trusted_artifacts.py",
+      "app/state/session.py",
+      "app/storage/models.py"
+    ],
+    "app/pages/compare_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/security/masking.py",
+      "app/security/safe_csv.py",
+      "app/state/session.py",
+      "app/storage/models.py"
+    ],
+    "app/pages/dashboard_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_labels.py",
+      "app/pages/workflow_guide.py",
+      "app/state/session.py"
+    ],
+    "app/pages/dataset_intake_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_labels.py",
+      "app/pages/workflow_guide.py",
+      "app/state/session.py"
+    ],
+    "app/pages/dataset_workspace.py": [
+      "app/artifacts/__init__.py",
+      "app/ingestion/__init__.py",
+      "app/ingestion/types.py",
+      "app/ingestion/uci_loader.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/storage/__init__.py"
+    ],
+    "app/pages/experiment_page.py": [
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/setup_runner.py",
+      "app/modeling/pycaret/summary.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/services/experiment_workflow.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/workflow_guide.py",
+      "app/path_utils.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/storage/__init__.py"
+    ],
+    "app/pages/flaml_automl_page.py": [
+      "app/modeling/flaml/errors.py",
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/flaml/setup_runner.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/workflow_guide.py",
+      "app/path_utils.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/storage/__init__.py"
+    ],
+    "app/pages/foundation_models_page.py": [
+      "app/errors.py",
+      "app/modeling/foundation/__init__.py",
+      "app/modeling/foundation/tracking.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/storage/__init__.py"
+    ],
+    "app/pages/glossary.py": [],
+    "app/pages/history_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/security/masking.py",
+      "app/security/safe_csv.py",
+      "app/state/session.py",
+      "app/storage/models.py",
+      "app/tracking/description_generator.py"
+    ],
+    "app/pages/model_testing_page.py": [
+      "app/modeling/benchmark/persistence.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/security/masking.py",
+      "app/security/safe_csv.py",
+      "app/state/session.py"
+    ],
+    "app/pages/models_page.py": [
+      "app/deployment.py",
+      "app/modeling/benchmark/persistence.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/prediction/__init__.py",
+      "app/prediction/loader.py",
+      "app/prediction/selectors.py",
+      "app/state/session.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "app/pages/notebook_page.py": [
+      "app/backends/__init__.py",
+      "app/config/enums.py",
+      "app/notebooks/generator.py",
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_labels.py",
+      "app/state/session.py",
+      "app/storage/models.py"
+    ],
+    "app/pages/prediction_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/pages/workflow_guide.py",
+      "app/prediction/__init__.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "app/pages/predictions_page.py": [
+      "app/pages/workflow_guide.py"
+    ],
+    "app/pages/profiling_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/shared_history.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/pages/workflow_guide.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/storage/models.py"
+    ],
+    "app/pages/registry.py": [
+      "app/config/enums.py"
+    ],
+    "app/pages/registry_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/shared_history.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/security/masking.py",
+      "app/state/session.py",
+      "app/storage/models.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "app/pages/services/__init__.py": [
+      "app/pages/services/prediction_workflow.py"
+    ],
+    "app/pages/services/experiment_workflow.py": [
+      "app/errors.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/observability/__init__.py"
+    ],
+    "app/pages/services/prediction_workflow.py": [
+      "app/modeling/benchmark/persistence.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/prediction/__init__.py"
+    ],
+    "app/pages/settings_page.py": [
+      "app/config/enums.py",
+      "app/gpu.py",
+      "app/pages/ui_cache.py",
+      "app/providers/base.py",
+      "app/providers/catalog_service.py",
+      "app/providers/model_pricing.py",
+      "app/security/masking.py",
+      "app/state/session.py"
+    ],
+    "app/pages/shared_history.py": [
+      "app/pages/ui_errors.py",
+      "app/pages/ui_labels.py",
+      "app/storage/models.py"
+    ],
+    "app/pages/ui_cache.py": [
+      "app/ingestion/__init__.py",
+      "app/modeling/flaml/service.py",
+      "app/modeling/pycaret/service.py",
+      "app/pages/services/experiment_workflow.py",
+      "app/pages/services/prediction_workflow.py",
+      "app/prediction/__init__.py",
+      "app/registry/registry_service.py",
+      "app/storage/store.py",
+      "app/tracking/__init__.py",
+      "app/tracking/history_service.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "app/pages/ui_errors.py": [
+      "app/errors.py"
+    ],
+    "app/pages/ui_labels.py": [
+      "app/pages/ui_errors.py"
+    ],
+    "app/pages/validation_page.py": [
+      "app/pages/dataset_workspace.py",
+      "app/pages/ui_cache.py",
+      "app/pages/ui_labels.py",
+      "app/pages/workflow_guide.py",
+      "app/state/session.py"
+    ],
+    "app/pages/workflow_guide.py": [
+      "app/pages/dataset_workspace.py"
+    ],
+    "app/path_utils.py": [],
+    "app/prediction/__init__.py": [
+      "app/prediction/schemas.py"
+    ],
+    "app/prediction/artifacts.py": [
+      "app/artifacts/__init__.py",
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py"
+    ],
+    "app/prediction/base.py": [
+      "app/errors.py",
+      "app/observability/__init__.py",
+      "app/prediction/artifacts.py",
+      "app/prediction/batch_predict.py",
+      "app/prediction/errors.py",
+      "app/prediction/history.py",
+      "app/prediction/loader.py",
+      "app/prediction/schemas.py",
+      "app/prediction/scorer.py",
+      "app/prediction/single_row_predict.py",
+      "app/prediction/summary.py",
+      "app/prediction/validators.py",
+      "app/registry/registry_service.py",
+      "app/storage/__init__.py"
+    ],
+    "app/prediction/batch_predict.py": [
+      "app/ingestion/__init__.py",
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py"
+    ],
+    "app/prediction/errors.py": [
+      "app/security/errors.py"
+    ],
+    "app/prediction/history.py": [
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py"
+    ],
+    "app/prediction/loader.py": [
+      "app/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py",
+      "app/prediction/selectors.py",
+      "app/registry/errors.py",
+      "app/registry/registry_service.py",
+      "app/security/errors.py",
+      "app/security/trusted_artifacts.py",
+      "app/tracking/errors.py",
+      "app/tracking/history_service.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "app/prediction/schemas.py": [
+      "app/ingestion/schemas.py"
+    ],
+    "app/prediction/scorer.py": [
+      "app/errors.py",
+      "app/modeling/pycaret/setup_runner.py",
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py",
+      "app/prediction/selectors.py"
+    ],
+    "app/prediction/secure_loader.py": [
+      "app/security/trusted_artifacts.py"
+    ],
+    "app/prediction/selectors.py": [
+      "app/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py",
+      "app/security/errors.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "app/prediction/single_row_predict.py": [
+      "app/prediction/schemas.py"
+    ],
+    "app/prediction/summary.py": [
+      "app/path_utils.py",
+      "app/prediction/schemas.py"
+    ],
+    "app/prediction/validators.py": [
+      "app/prediction/errors.py",
+      "app/prediction/schemas.py"
+    ],
+    "app/profiling/__init__.py": [
+      "app/profiling/errors.py",
+      "app/profiling/schemas.py",
+      "app/profiling/service.py"
+    ],
+    "app/profiling/artifacts.py": [
+      "app/profiling/schemas.py"
+    ],
+    "app/profiling/errors.py": [],
+    "app/profiling/schemas.py": [
+      "app/config/models.py"
+    ],
+    "app/profiling/selectors.py": [
+      "app/config/models.py",
+      "app/profiling/schemas.py"
+    ],
+    "app/profiling/service.py": [
+      "app/config/models.py",
+      "app/ingestion/schemas.py",
+      "app/profiling/schemas.py",
+      "app/profiling/ydata_runner.py",
+      "app/storage/__init__.py"
+    ],
+    "app/profiling/summary.py": [
+      "app/config/models.py",
+      "app/profiling/schemas.py"
+    ],
+    "app/profiling/ydata_runner.py": [
+      "app/artifacts/__init__.py",
+      "app/config/models.py",
+      "app/errors.py",
+      "app/profiling/errors.py",
+      "app/profiling/schemas.py",
+      "app/profiling/selectors.py",
+      "app/profiling/summary.py"
+    ],
+    "app/provenance.py": [],
+    "app/providers/__init__.py": [],
+    "app/providers/anthropic_provider.py": [
+      "app/config/enums.py",
+      "app/providers/base.py"
+    ],
+    "app/providers/base.py": [
+      "app/config/enums.py"
+    ],
+    "app/providers/catalog_service.py": [
+      "app/config/enums.py",
+      "app/providers/anthropic_provider.py",
+      "app/providers/base.py",
+      "app/providers/gemini_provider.py",
+      "app/providers/ollama_provider.py",
+      "app/providers/openai_provider.py"
+    ],
+    "app/providers/gemini_provider.py": [
+      "app/config/enums.py",
+      "app/providers/base.py"
+    ],
+    "app/providers/model_pricing.py": [],
+    "app/providers/ollama_provider.py": [
+      "app/config/enums.py",
+      "app/providers/base.py"
+    ],
+    "app/providers/openai_provider.py": [
+      "app/config/enums.py",
+      "app/providers/base.py"
+    ],
+    "app/py.typed": [],
+    "app/registry/__init__.py": [
+      "app/registry/registry_service.py",
+      "app/registry/schemas.py"
+    ],
+    "app/registry/errors.py": [],
+    "app/registry/registry_service.py": [
+      "app/errors.py",
+      "app/registry/errors.py",
+      "app/registry/schemas.py",
+      "app/tracking/__init__.py",
+      "app/tracking/errors.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "app/registry/schemas.py": [],
+    "app/release_metadata.py": [],
+    "app/security/__init__.py": [],
+    "app/security/errors.py": [],
+    "app/security/masking.py": [],
+    "app/security/safe_csv.py": [],
+    "app/security/safe_http.py": [],
+    "app/security/trusted_artifacts.py": [
+      "app/security/errors.py"
+    ],
+    "app/startup.py": [
+      "app/artifacts/__init__.py",
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/errors.py",
+      "app/storage/__init__.py"
+    ],
+    "app/state/__init__.py": [],
+    "app/state/session.py": [
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/config/settings.py",
+      "app/providers/base.py"
+    ],
+    "app/storage/__init__.py": [
+      "app/config/models.py",
+      "app/storage/models.py",
+      "app/storage/recorders.py",
+      "app/storage/store.py"
+    ],
+    "app/storage/migrations.py": [],
+    "app/storage/models.py": [],
+    "app/storage/recorders.py": [
+      "app/ingestion/schemas.py",
+      "app/storage/models.py",
+      "app/storage/store.py"
+    ],
+    "app/storage/repositories/__init__.py": [
+      "app/storage/repositories/base.py",
+      "app/storage/repositories/batch_runs.py",
+      "app/storage/repositories/datasets.py",
+      "app/storage/repositories/jobs.py",
+      "app/storage/repositories/projects.py",
+      "app/storage/repositories/saved_models.py"
+    ],
+    "app/storage/repositories/base.py": [
+      "app/storage/sqlite_connector.py"
+    ],
+    "app/storage/repositories/batch_runs.py": [
+      "app/storage/models.py",
+      "app/storage/repositories/base.py"
+    ],
+    "app/storage/repositories/datasets.py": [
+      "app/ingestion/schemas.py",
+      "app/storage/models.py",
+      "app/storage/repositories/base.py"
+    ],
+    "app/storage/repositories/jobs.py": [
+      "app/storage/models.py",
+      "app/storage/repositories/base.py"
+    ],
+    "app/storage/repositories/projects.py": [
+      "app/storage/models.py",
+      "app/storage/repositories/base.py"
+    ],
+    "app/storage/repositories/saved_models.py": [
+      "app/storage/models.py",
+      "app/storage/repositories/base.py"
+    ],
+    "app/storage/sqlite_connector.py": [
+      "app/errors.py"
+    ],
+    "app/storage/store.py": [
+      "app/ingestion/schemas.py",
+      "app/storage/migrations.py",
+      "app/storage/models.py",
+      "app/storage/repositories/__init__.py",
+      "app/storage/sqlite_connector.py"
+    ],
+    "app/tracking/__init__.py": [
+      "app/tracking/compare_service.py",
+      "app/tracking/history_service.py",
+      "app/tracking/mlflow_query.py",
+      "app/tracking/schemas.py"
+    ],
+    "app/tracking/artifacts.py": [
+      "app/artifacts/__init__.py",
+      "app/tracking/schemas.py"
+    ],
+    "app/tracking/compare_service.py": [
+      "app/tracking/schemas.py"
+    ],
+    "app/tracking/description_generator.py": [
+      "app/errors.py",
+      "app/storage/models.py"
+    ],
+    "app/tracking/errors.py": [],
+    "app/tracking/filters.py": [
+      "app/tracking/schemas.py"
+    ],
+    "app/tracking/history_service.py": [
+      "app/errors.py",
+      "app/tracking/__init__.py",
+      "app/tracking/errors.py",
+      "app/tracking/filters.py",
+      "app/tracking/mlflow_query.py",
+      "app/tracking/schemas.py"
+    ],
+    "app/tracking/mlflow_query.py": [
+      "app/errors.py",
+      "app/registry/errors.py",
+      "app/registry/schemas.py",
+      "app/tracking/errors.py",
+      "app/tracking/schemas.py"
+    ],
+    "app/tracking/schemas.py": [],
+    "app/tracking/summary.py": [
+      "app/tracking/schemas.py"
+    ],
+    "app/validation/__init__.py": [
+      "app/validation/errors.py",
+      "app/validation/schemas.py",
+      "app/validation/service.py"
+    ],
+    "app/validation/artifacts.py": [
+      "app/artifacts/__init__.py",
+      "app/validation/schemas.py"
+    ],
+    "app/validation/errors.py": [],
+    "app/validation/gx_builders.py": [
+      "app/validation/schemas.py"
+    ],
+    "app/validation/gx_context.py": [],
+    "app/validation/gx_runner.py": [
+      "app/errors.py",
+      "app/validation/errors.py",
+      "app/validation/gx_builders.py",
+      "app/validation/gx_context.py",
+      "app/validation/schemas.py"
+    ],
+    "app/validation/rules.py": [
+      "app/validation/schemas.py"
+    ],
+    "app/validation/schemas.py": [],
+    "app/validation/service.py": [
+      "app/ingestion/schemas.py",
+      "app/storage/__init__.py",
+      "app/validation/artifacts.py",
+      "app/validation/gx_context.py",
+      "app/validation/gx_runner.py",
+      "app/validation/rules.py",
+      "app/validation/schemas.py",
+      "app/validation/summary.py"
+    ],
+    "app/validation/summary.py": [
+      "app/validation/schemas.py"
+    ],
+    "docker-compose.yml": [],
+    "docs/README.md": [],
+    "docs/architecture.md": [],
+    "docs/assets/demo/README.md": [],
+    "docs/assets/social-preview/autotabml-social-preview.html": [],
+    "docs/autotabml-studio-architecture.html": [],
+    "docs/autotabml-studio.architecture.json": [],
+    "docs/developer-guide.md": [],
+    "docs/operations.md": [],
+    "pyproject.toml": [],
+    "pyrightconfig.json": [],
+    "scripts/batch_uci_runner.py": [
+      "app/config/settings.py",
+      "app/ingestion/__init__.py",
+      "app/logging_config.py",
+      "app/storage/__init__.py",
+      "app/storage/models.py"
+    ],
+    "scripts/batch_uci_runner_200.py": [
+      "scripts/batch_uci_runner.py"
+    ],
+    "scripts/capture_screenshots.py": [],
+    "scripts/verify_optional_deps.py": [],
+    "tests/__init__.py": [],
+    "tests/conftest.py": [
+      "app/config/models.py",
+      "app/state/session.py"
+    ],
+    "tests/test_app_navigation.py": [],
+    "tests/test_artifact_manager.py": [
+      "app/artifacts/__init__.py",
+      "app/config/models.py"
+    ],
+    "tests/test_batch_runner.py": [
+      "app/storage/models.py"
+    ],
+    "tests/test_benchmark.py": [
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/modeling/benchmark/artifacts.py",
+      "app/modeling/benchmark/errors.py",
+      "app/modeling/benchmark/lazypredict_runner.py",
+      "app/modeling/benchmark/mlflow_tracking.py",
+      "app/modeling/benchmark/ranker.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/summary.py",
+      "app/pages/benchmark_page.py"
+    ],
+    "tests/test_benchmark_persistence.py": [
+      "app/modeling/benchmark/persistence.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "tests/test_cli.py": [
+      "app/__init__.py",
+      "app/cli.py",
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/ingestion/types.py",
+      "app/startup.py",
+      "app/storage/models.py"
+    ],
+    "tests/test_cli_smoke.py": [],
+    "tests/test_colab_mcp_backend.py": [
+      "app/backends/__init__.py",
+      "app/backends/colab_mcp_backend.py",
+      "app/backends/local_backend.py",
+      "app/config/enums.py",
+      "app/config/models.py"
+    ],
+    "tests/test_colab_mcp_real.py": [
+      "app/backends/colab_mcp_backend.py"
+    ],
+    "tests/test_concurrency.py": [
+      "app/concurrency.py"
+    ],
+    "tests/test_config.py": [
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/config/settings.py"
+    ],
+    "tests/test_dataset_workspace.py": [
+      "app/ingestion/__init__.py",
+      "app/pages/__init__.py",
+      "app/pages/dataset_workspace.py",
+      "app/storage/__init__.py"
+    ],
+    "tests/test_e2e_local_smoke.py": [
+      "app/config/models.py",
+      "app/ingestion/__init__.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/profiling/service.py",
+      "app/startup.py",
+      "app/storage/__init__.py",
+      "app/validation/schemas.py",
+      "app/validation/service.py"
+    ],
+    "tests/test_errors.py": [
+      "app/errors.py"
+    ],
+    "tests/test_experiment_workflow_service.py": [
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/observability/__init__.py",
+      "app/pages/services/experiment_workflow.py"
+    ],
+    "tests/test_flaml_automl.py": [
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/modeling/flaml/errors.py",
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/flaml/service.py",
+      "app/modeling/flaml/setup_runner.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "tests/test_foundation_integration.py": [
+      "app/deployment.py",
+      "app/modeling/foundation/__init__.py",
+      "app/modeling/foundation/tracking.py",
+      "app/prediction/__init__.py",
+      "app/prediction/loader.py",
+      "app/storage/models.py",
+      "app/tracking/schemas.py"
+    ],
+    "tests/test_foundation_models.py": [
+      "app/modeling/foundation/__init__.py"
+    ],
+    "tests/test_gpu.py": [
+      "app/gpu.py"
+    ],
+    "tests/test_hardening_smoke.py": [
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/ingestion/__init__.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/service.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/service.py",
+      "app/prediction/__init__.py",
+      "app/profiling/schemas.py",
+      "app/profiling/service.py",
+      "app/storage/__init__.py",
+      "app/validation/schemas.py",
+      "app/validation/service.py"
+    ],
+    "tests/test_ingestion.py": [
+      "app/ingestion/csv_loader.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/excel_loader.py",
+      "app/ingestion/factory.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "tests/test_ingestion_async.py": [
+      "app/ingestion/factory.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/ingestion/uci_loader.py"
+    ],
+    "tests/test_ingestion_utils.py": [
+      "app/ingestion/csv_loader.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/metadata.py",
+      "app/ingestion/normalizer.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py"
+    ],
+    "tests/test_integration_optional_deps.py": [
+      "app/config/models.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/service.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/setup_runner.py",
+      "app/profiling/service.py",
+      "app/validation/schemas.py",
+      "app/validation/service.py"
+    ],
+    "tests/test_logging_config.py": [],
+    "tests/test_mlflow_query_batch.py": [
+      "app/tracking/__init__.py",
+      "app/tracking/mlflow_query.py"
+    ],
+    "tests/test_model_pricing.py": [
+      "app/providers/model_pricing.py"
+    ],
+    "tests/test_modeling_architecture.py": [
+      "app/config/enums.py",
+      "app/modeling/base.py",
+      "app/modeling/benchmark/artifacts.py",
+      "app/modeling/benchmark/mlflow_tracking.py",
+      "app/modeling/benchmark/ranker.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/summary.py",
+      "app/modeling/flaml/mlflow_tracking.py",
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/pycaret/artifacts.py",
+      "app/modeling/pycaret/mlflow_tracking.py",
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "tests/test_modeling_exception_handling.py": [
+      "app/config/enums.py",
+      "app/modeling/benchmark/errors.py",
+      "app/modeling/benchmark/lazypredict_runner.py",
+      "app/modeling/benchmark/mlflow_tracking.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/flaml/mlflow_tracking.py",
+      "app/modeling/flaml/schemas.py",
+      "app/modeling/pycaret/evaluate_runner.py",
+      "app/modeling/pycaret/mlflow_tracking.py",
+      "app/modeling/pycaret/schemas.py"
+    ],
+    "tests/test_notebook_generator.py": [
+      "app/notebooks/generator.py"
+    ],
+    "tests/test_observability.py": [
+      "app/observability/__init__.py"
+    ],
+    "tests/test_page_registry.py": [
+      "app/config/enums.py",
+      "app/pages/registry.py"
+    ],
+    "tests/test_prediction.py": [
+      "app/config/models.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/observability/__init__.py",
+      "app/prediction/__init__.py",
+      "app/prediction/artifacts.py",
+      "app/prediction/errors.py",
+      "app/prediction/history.py",
+      "app/prediction/schemas.py",
+      "app/prediction/selectors.py",
+      "app/prediction/validators.py",
+      "app/security/errors.py",
+      "app/security/trusted_artifacts.py"
+    ],
+    "tests/test_prediction_workflow_service.py": [
+      "app/pages/services/prediction_workflow.py",
+      "app/prediction/__init__.py"
+    ],
+    "tests/test_product_improvements.py": [
+      "app/autorun.py",
+      "app/background_jobs.py",
+      "app/config/models.py",
+      "app/deployment.py",
+      "app/drift.py",
+      "app/evaluation.py",
+      "app/explainability.py",
+      "app/provenance.py",
+      "app/storage/__init__.py"
+    ],
+    "tests/test_profiling.py": [
+      "app/config/models.py",
+      "app/profiling/schemas.py",
+      "app/profiling/selectors.py",
+      "app/profiling/ydata_runner.py"
+    ],
+    "tests/test_providers.py": [
+      "app/config/enums.py",
+      "app/providers/anthropic_provider.py",
+      "app/providers/base.py",
+      "app/providers/catalog_service.py",
+      "app/providers/gemini_provider.py",
+      "app/providers/ollama_provider.py",
+      "app/providers/openai_provider.py"
+    ],
+    "tests/test_pycaret_experiment.py": [
+      "app/config/enums.py",
+      "app/config/models.py",
+      "app/modeling/pycaret/artifacts.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/mlflow_tracking.py",
+      "app/modeling/pycaret/persistence.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/modeling/pycaret/service.py",
+      "app/pages/experiment_page.py"
+    ],
+    "tests/test_pycaret_setup_runner.py": [
+      "app/modeling/pycaret/__init__.py",
+      "app/modeling/pycaret/errors.py",
+      "app/modeling/pycaret/setup_runner.py"
+    ],
+    "tests/test_registry.py": [
+      "app/config/models.py",
+      "app/registry/errors.py",
+      "app/registry/registry_service.py",
+      "app/registry/schemas.py",
+      "app/tracking/__init__.py"
+    ],
+    "tests/test_release_metadata.py": [
+      "app/release_metadata.py"
+    ],
+    "tests/test_safe_csv.py": [
+      "app/security/safe_csv.py"
+    ],
+    "tests/test_safe_csv_properties.py": [
+      "app/security/safe_csv.py"
+    ],
+    "tests/test_safe_http.py": [
+      "app/ingestion/errors.py",
+      "app/ingestion/url_loader.py",
+      "app/security/safe_http.py"
+    ],
+    "tests/test_safe_http_async.py": [
+      "app/security/safe_http.py"
+    ],
+    "tests/test_security.py": [
+      "app/logging_config.py",
+      "app/security/masking.py"
+    ],
+    "tests/test_settings_page.py": [
+      "app/config/enums.py",
+      "app/pages/settings_page.py",
+      "app/providers/base.py"
+    ],
+    "tests/test_startup.py": [
+      "app/config/models.py",
+      "app/startup.py"
+    ],
+    "tests/test_state.py": [
+      "app/config/enums.py",
+      "app/providers/base.py"
+    ],
+    "tests/test_storage.py": [
+      "app/config/models.py",
+      "app/modeling/pycaret/schemas.py",
+      "app/storage/__init__.py",
+      "app/storage/models.py",
+      "app/storage/recorders.py",
+      "app/storage/sqlite_connector.py"
+    ],
+    "tests/test_storage_repositories.py": [
+      "app/storage/models.py",
+      "app/storage/repositories/__init__.py",
+      "app/storage/sqlite_connector.py",
+      "app/storage/store.py"
+    ],
+    "tests/test_tracking.py": [
+      "app/config/models.py",
+      "app/tracking/artifacts.py",
+      "app/tracking/compare_service.py",
+      "app/tracking/filters.py",
+      "app/tracking/history_service.py",
+      "app/tracking/schemas.py",
+      "app/tracking/summary.py"
+    ],
+    "tests/test_uci_loader.py": [
+      "app/cli.py",
+      "app/ingestion/errors.py",
+      "app/ingestion/factory.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/ingestion/uci_loader.py"
+    ],
+    "tests/test_uci_real_datasets.py": [
+      "app/config/models.py",
+      "app/ingestion/factory.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/modeling/benchmark/schemas.py",
+      "app/modeling/benchmark/service.py",
+      "app/profiling/service.py",
+      "app/validation/schemas.py",
+      "app/validation/service.py"
+    ],
+    "tests/test_ui_cache.py": [
+      "app/config/models.py",
+      "app/ingestion/schemas.py",
+      "app/ingestion/types.py",
+      "app/pages/__init__.py",
+      "app/pages/ui_cache.py",
+      "app/registry/schemas.py"
+    ],
+    "tests/test_ui_helpers.py": [
+      "app/pages/ui_labels.py",
+      "app/storage/models.py",
+      "app/tracking/description_generator.py"
+    ],
+    "tests/test_validation.py": [
+      "app/validation/rules.py",
+      "app/validation/schemas.py",
+      "app/validation/service.py",
+      "app/validation/summary.py"
+    ]
   }
 }

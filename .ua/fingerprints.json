@@ -1,8 +1,18 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "e9a6773d9501bb37ca0de41acdf033511c87a95c",
-  "generatedAt": "2026-08-14T11:13:18.414Z",
+  "gitCommitHash": "347ebb24914b7acd0a085e09402a1ce01fe3f4de",
+  "generatedAt": "2026-08-14T12:34:13.006Z",
   "files": {
+    ".code-review-graph/graph.db": {
+      "filePath": ".code-review-graph/graph.db",
+      "contentHash": "fad033a8eacc5976520fd84975a8ee81b9a067b07125f3324a3f0051bacef3cb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64134,
+      "hasStructuralAnalysis": false
+    },
     ".codebase-memory/.gitattributes": {
       "filePath": ".codebase-memory/.gitattributes",
       "contentHash": "171dff1f95b0159fc8f862c6f62b9bda4318017d59878efe018662b463d3c370",
@@ -31,6 +41,16 @@
       "imports": [],
       "exports": [],
       "totalLines": 13476,
+      "hasStructuralAnalysis": false
+    },
+    ".codegraph/codegraph.db": {
+      "filePath": ".codegraph/codegraph.db",
+      "contentHash": "ffbbee6ca1de0d2dad2cbd6573cc4fce9ae9d3c963cbbf85d0b87baed0b910c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 57328,
       "hasStructuralAnalysis": false
     },
     ".dockerignore": {
@@ -175,12 +195,12 @@
     },
     "CHANGELOG.md": {
       "filePath": "CHANGELOG.md",
-      "contentHash": "15feb41624d8f52ba7795fa8d6073718f96cddfc577603e0a6f940c7b5c1ddda",
+      "contentHash": "aa1f829d22937cb4d1c7de66d7e99ae246c5279aafc265a7b55bf4a1cb5ddf57",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 222,
+      "totalLines": 253,
       "hasStructuralAnalysis": true
     },
     "CODE_OF_CONDUCT.md": {
@@ -195,7 +215,7 @@
     },
     "Dockerfile": {
       "filePath": "Dockerfile",
-      "contentHash": "da6da44217cdc490a99d7f58c212c2bdf7dc039db6bf0ecf8475d6d07e2e774b",
+      "contentHash": "466094087cbea4d5714f08fd08e6815ef242c684c5cf4f485bc404fcfea97d6c",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -203,14 +223,24 @@
       "totalLines": 88,
       "hasStructuralAnalysis": true
     },
-    "MIGRATION_GUIDE.md": {
-      "filePath": "MIGRATION_GUIDE.md",
-      "contentHash": "42ecd629920e0b01b14fb5918c0311fada0d62d4cd1ceefe7201d0e1e6007df8",
+    "Launch AutoTabML Studio.cmd": {
+      "filePath": "Launch AutoTabML Studio.cmd",
+      "contentHash": "83d964d881d1be8febad67934fac4dc772b300b9c4102c200b2333990e7670c1",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 200,
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "MIGRATION_GUIDE.md": {
+      "filePath": "MIGRATION_GUIDE.md",
+      "contentHash": "c0c4d3335200157a3811cc8689f0e3f7fc2dfaeb8fa3d04fdda98318adffccea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 217,
       "hasStructuralAnalysis": true
     },
     "Makefile": {
@@ -225,12 +255,12 @@
     },
     "README.md": {
       "filePath": "README.md",
-      "contentHash": "b0d2b8f1a0647ee4edae188f8b1afff60611486575df1456ac2b5801b5cc480b",
+      "contentHash": "a3e5e009610030561c614e193c6129a13b038ecdd7760aedd5572410a6d491ac",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 408,
+      "totalLines": 430,
       "hasStructuralAnalysis": true
     },
     "RELEASE_NOTES_v0.2.0.md": {
@@ -243,9 +273,19 @@
       "totalLines": 218,
       "hasStructuralAnalysis": true
     },
+    "RELEASE_NOTES_v0.3.0.md": {
+      "filePath": "RELEASE_NOTES_v0.3.0.md",
+      "contentHash": "72bc3af9d29691fb817e2346ebfecef038eb1f002a78126ffa8d61da27c88088",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": true
+    },
     "SECURITY.md": {
       "filePath": "SECURITY.md",
-      "contentHash": "68c2e5cbeb21ce88211e2fbe2f5ab0c8bdd00efdf8ed4704657cd6815e3a189c",
+      "contentHash": "2aa912450b8bbc28e7acb3fe5a01a3e7224ec1d1c890f08c3779f3f6ec25e985",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -255,27 +295,27 @@
     },
     "UPGRADE_SUMMARY.md": {
       "filePath": "UPGRADE_SUMMARY.md",
-      "contentHash": "cf20a75fd770917a3af1e7fc68b80d2e40c707506392422a285a5979c83d7c4a",
+      "contentHash": "bcb083173176b24ff9a107480c98f3f9eaf5f827c7c1fd614be2c337c18f957a",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 67,
+      "totalLines": 41,
       "hasStructuralAnalysis": true
     },
     "USAGE.md": {
       "filePath": "USAGE.md",
-      "contentHash": "f1bc6cd38f906d998533882fb61dca916a0d584e6c3e51f702f7f279ea161455",
+      "contentHash": "528952de7a97d05b778c847d10ebf41d89b7df4ec66a2bda4153041bbaba8d15",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 673,
+      "totalLines": 694,
       "hasStructuralAnalysis": true
     },
     "app/__init__.py": {
       "filePath": "app/__init__.py",
-      "contentHash": "6ecd3ce80f63ee3104d6ffa51bfcb54ec377a2e7e5ea4a3e9535429cb9558fb4",
+      "contentHash": "b9939f253f7dd5c2c669165caa54810c773a8feab466d50275d3d84d8e28299c",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -1016,7 +1056,7 @@
     },
     "app/cli.py": {
       "filePath": "app/cli.py",
-      "contentHash": "3dfbb4a0f38da1fd6c282a201c372f790c02bc685ed315d0050d81c5da0dfa33",
+      "contentHash": "486b710ede6b991a9a84bcf7a40339631d4f83b5913856be75ad57fc58d6ef48",
       "functions": [
         {
           "name": "cmd_auto_run",
@@ -1402,6 +1442,38 @@
           "lineCount": 23
         },
         {
+          "name": "_record_foundation_job",
+          "params": [
+            "store",
+            "job_type",
+            "dataset_name",
+            "dataset_key",
+            "result",
+            "title",
+            "mlflow_run_id"
+          ],
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "cmd_tabfm_run",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 71
+        },
+        {
+          "name": "cmd_timesfm_forecast",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 54
+        },
+        {
           "name": "_add_prediction_model_source_args",
           "params": [
             "parser"
@@ -1415,7 +1487,7 @@
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 470
+          "lineCount": 503
         },
         {
           "name": "_build_pycaret_service",
@@ -1670,6 +1742,9 @@
         "_validate_prediction_source_requirements",
         "_build_prediction_service",
         "_build_prediction_request_kwargs",
+        "_record_foundation_job",
+        "cmd_tabfm_run",
+        "cmd_timesfm_forecast",
         "_add_prediction_model_source_args",
         "main",
         "_build_pycaret_service",
@@ -1680,7 +1755,7 @@
         "cmd_flaml_run",
         "cmd_flaml_save"
       ],
-      "totalLines": 2099,
+      "totalLines": 2284,
       "hasStructuralAnalysis": true
     },
     "app/concurrency.py": {
@@ -2231,7 +2306,7 @@
     },
     "app/deployment.py": {
       "filePath": "app/deployment.py",
-      "contentHash": "33b9b87f98595e51abb00704079f9ae499410817fd84199b698cd205a15df19f",
+      "contentHash": "95fe56fa5911e2a3746c61ce61d17de0bcd933e95a8acd4ac15aa33984b37eda",
       "functions": [
         {
           "name": "export_deployment_bundle",
@@ -2243,7 +2318,7 @@
           ],
           "returnType": "DeploymentBundle",
           "exported": true,
-          "lineCount": 48
+          "lineCount": 54
         },
         {
           "name": "_sha256",
@@ -2339,7 +2414,7 @@
         "_sha256",
         "_build_current_wheel"
       ],
-      "totalLines": 171,
+      "totalLines": 177,
       "hasStructuralAnalysis": true
     },
     "app/drift.py": {
@@ -6664,6 +6739,588 @@
       "totalLines": 111,
       "hasStructuralAnalysis": true
     },
+    "app/modeling/foundation/__init__.py": {
+      "filePath": "app/modeling/foundation/__init__.py",
+      "contentHash": "aa70da0fb1d5e5355be64322a3de798fe4959a8ae7ddbe5890dd8178056c1a9c",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "app.modeling.foundation.checkpoints",
+          "specifiers": [
+            "TABFM_CHECKPOINT",
+            "TIMESFM_CHECKPOINT",
+            "CheckpointResolver",
+            "CheckpointSpec",
+            "ModelDownloadRequiredError"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation.tabfm",
+          "specifiers": [
+            "TabFMConfig",
+            "TabFMLoadedContext",
+            "TabFMResult",
+            "TabFMSavedContext",
+            "TabFMService"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation.timesfm",
+          "specifiers": [
+            "TimesFMConfig",
+            "TimesFMResult",
+            "TimesFMService"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "app/modeling/foundation/checkpoints.py": {
+      "filePath": "app/modeling/foundation/checkpoints.py",
+      "contentHash": "f8546c5e8bee90ff2ce2296fdb78c1ff1adcfca2b612ff5459d5f043a48337d8",
+      "functions": [
+        {
+          "name": "_snapshot_download",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [
+        {
+          "name": "CheckpointSpec",
+          "methods": [],
+          "properties": [
+            "repo_id",
+            "revision"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "ModelDownloadRequiredError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "CheckpointResolver",
+          "methods": [
+            "__init__",
+            "resolve"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Callable"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "importlib",
+          "specifiers": [
+            "import_module"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        }
+      ],
+      "exports": [
+        "CheckpointSpec",
+        "ModelDownloadRequiredError",
+        "CheckpointResolver",
+        "_snapshot_download"
+      ],
+      "totalLines": 69,
+      "hasStructuralAnalysis": true
+    },
+    "app/modeling/foundation/tabfm.py": {
+      "filePath": "app/modeling/foundation/tabfm.py",
+      "contentHash": "8f906dd1742418f6f43304b5b8f80319b1a1b7a128c34039145bcfb0541e3089",
+      "functions": [
+        {
+          "name": "_resolve_task_type",
+          "params": [
+            "series",
+            "configured"
+          ],
+          "returnType": "Literal[\"classification\", \"regression\"]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_score_predictions",
+          "params": [
+            "estimator",
+            "task_type",
+            "X_test",
+            "y_test",
+            "predicted"
+          ],
+          "returnType": "tuple[dict[str, float], pd.DataFrame]",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "_build_estimator",
+          "params": [
+            "checkpoint_path",
+            "task_type",
+            "config"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "_safe_stem",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "TabFMConfig",
+          "methods": [],
+          "properties": [
+            "target_column",
+            "task_type",
+            "test_size",
+            "random_state",
+            "context_rows",
+            "n_estimators"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "TabFMResult",
+          "methods": [],
+          "properties": [
+            "task_type",
+            "metrics",
+            "predictions",
+            "context",
+            "feature_columns",
+            "target_column",
+            "native_model",
+            "checkpoint_path",
+            "config",
+            "artifacts"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "TabFMSavedContext",
+          "methods": [],
+          "properties": [
+            "metadata_path",
+            "context_path",
+            "checksum_path"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "TabFMLoadedContext",
+          "methods": [],
+          "properties": [
+            "native_model",
+            "task_type",
+            "feature_columns",
+            "target_column",
+            "metadata"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "TabFMService",
+          "methods": [
+            "__init__",
+            "run",
+            "save_context",
+            "load_context",
+            "_write_run_artifacts"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 190
+        }
+      ],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Callable"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "io",
+          "specifiers": [
+            "StringIO"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Literal"
+          ]
+        },
+        {
+          "source": "uuid",
+          "specifiers": [
+            "uuid4"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        },
+        {
+          "source": "app.artifacts.manager",
+          "specifiers": [
+            "LocalArtifactManager"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation.checkpoints",
+          "specifiers": [
+            "TABFM_CHECKPOINT",
+            "CheckpointResolver"
+          ]
+        },
+        {
+          "source": "app.security.trusted_artifacts",
+          "specifiers": [
+            "compute_sha256",
+            "verify_local_artifact",
+            "write_checksum_file"
+          ]
+        }
+      ],
+      "exports": [
+        "TabFMConfig",
+        "TabFMResult",
+        "TabFMSavedContext",
+        "TabFMLoadedContext",
+        "TabFMService",
+        "_resolve_task_type",
+        "_score_predictions",
+        "_build_estimator",
+        "_safe_stem"
+      ],
+      "totalLines": 323,
+      "hasStructuralAnalysis": true
+    },
+    "app/modeling/foundation/timesfm.py": {
+      "filePath": "app/modeling/foundation/timesfm.py",
+      "contentHash": "fff2288d0dafa122b7743e43d833fd1ffaff692db22517eb66a3fbff3b15b817",
+      "functions": [
+        {
+          "name": "_prepare_series",
+          "params": [
+            "group",
+            "config"
+          ],
+          "returnType": "tuple[pd.Series, pd.tseries.offsets.BaseOffset]",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "_forecast_group",
+          "params": [
+            "model",
+            "series",
+            "offset",
+            "config",
+            "group_name"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "_backtest_group",
+          "params": [
+            "model",
+            "series",
+            "config",
+            "group_name"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "_output_frame",
+          "params": [
+            "index",
+            "point",
+            "quantiles",
+            "timestamp"
+          ],
+          "returnType": "pd.DataFrame",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "_backtest_metrics",
+          "params": [
+            "backtest"
+          ],
+          "returnType": "dict[str, float]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_build_model",
+          "params": [
+            "checkpoint_path",
+            "config"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [
+        {
+          "name": "TimesFMConfig",
+          "methods": [],
+          "properties": [
+            "timestamp_column",
+            "target_column",
+            "group_column",
+            "horizon",
+            "context_length",
+            "frequency",
+            "backtest",
+            "min_context",
+            "normalize_inputs",
+            "force_flip_invariance",
+            "infer_is_positive",
+            "fix_quantile_crossing"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "TimesFMResult",
+          "methods": [],
+          "properties": [
+            "forecast",
+            "backtest",
+            "metrics",
+            "warnings",
+            "checkpoint_path",
+            "artifacts"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "TimesFMService",
+          "methods": [
+            "__init__",
+            "run",
+            "_write_artifacts"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 97
+        }
+      ],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Callable"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "uuid",
+          "specifiers": [
+            "uuid4"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        },
+        {
+          "source": "app.artifacts.manager",
+          "specifiers": [
+            "LocalArtifactManager"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation.checkpoints",
+          "specifiers": [
+            "TIMESFM_CHECKPOINT",
+            "CheckpointResolver"
+          ]
+        }
+      ],
+      "exports": [
+        "TimesFMConfig",
+        "TimesFMResult",
+        "TimesFMService",
+        "_prepare_series",
+        "_forecast_group",
+        "_backtest_group",
+        "_output_frame",
+        "_backtest_metrics",
+        "_build_model"
+      ],
+      "totalLines": 251,
+      "hasStructuralAnalysis": true
+    },
+    "app/modeling/foundation/tracking.py": {
+      "filePath": "app/modeling/foundation/tracking.py",
+      "contentHash": "c31fb3e2eb5a02b6630c3ccc9a54e5ce5a62f5a1021f70e0cffb8693f16dd37d",
+      "functions": [
+        {
+          "name": "log_foundation_run",
+          "params": [
+            "run_type",
+            "dataset_name",
+            "params",
+            "metrics",
+            "summary_path",
+            "tracking_uri"
+          ],
+          "returnType": "tuple[str | None, str | None]",
+          "exported": true,
+          "lineCount": 28
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        }
+      ],
+      "exports": [
+        "log_foundation_run"
+      ],
+      "totalLines": 40,
+      "hasStructuralAnalysis": true
+    },
     "app/modeling/pycaret/__init__.py": {
       "filePath": "app/modeling/pycaret/__init__.py",
       "contentHash": "17edc3722fb95ac64070857395d3a3ae32ec946d852f60323b4230d952297db7",
@@ -10540,6 +11197,200 @@
       "totalLines": 416,
       "hasStructuralAnalysis": true
     },
+    "app/pages/foundation_models_page.py": {
+      "filePath": "app/pages/foundation_models_page.py",
+      "contentHash": "1789549f30bd617ad8d1a8da44b837d56884f9e299a53a0d6e831257b49e04ae",
+      "functions": [
+        {
+          "name": "_tabfm_service",
+          "params": [],
+          "returnType": "TabFMService",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_timesfm_service",
+          "params": [],
+          "returnType": "TimesFMService",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "render_foundation_models_page",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "_render_tabfm",
+          "params": [
+            "dataset_name",
+            "loaded",
+            "settings",
+            "store"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 79
+        },
+        {
+          "name": "_render_timesfm",
+          "params": [
+            "dataset_name",
+            "loaded",
+            "settings",
+            "store"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 86
+        },
+        {
+          "name": "_record_job",
+          "params": [
+            "store",
+            "job_type",
+            "dataset_name",
+            "loaded",
+            "result",
+            "run_id"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_dependency_status",
+          "params": [
+            "module",
+            "install_command"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_render_metrics",
+          "params": [
+            "metrics"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_download_artifacts",
+          "params": [
+            "artifacts"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "importlib.util",
+          "specifiers": [
+            "importlib.util"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "uuid",
+          "specifiers": [
+            "uuid4"
+          ]
+        },
+        {
+          "source": "altair",
+          "specifiers": [
+            "alt"
+          ]
+        },
+        {
+          "source": "streamlit",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "app.errors",
+          "specifiers": [
+            "log_exception"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation",
+          "specifiers": [
+            "TabFMConfig",
+            "TabFMService",
+            "TimesFMConfig",
+            "TimesFMService"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation.tracking",
+          "specifiers": [
+            "log_foundation_run"
+          ]
+        },
+        {
+          "source": "app.pages.dataset_workspace",
+          "specifiers": [
+            "render_dataset_header"
+          ]
+        },
+        {
+          "source": "app.pages.ui_cache",
+          "specifiers": [
+            "get_metadata_store"
+          ]
+        },
+        {
+          "source": "app.security.masking",
+          "specifiers": [
+            "safe_error_message"
+          ]
+        },
+        {
+          "source": "app.state.session",
+          "specifiers": [
+            "get_or_init_state"
+          ]
+        },
+        {
+          "source": "app.storage",
+          "specifiers": [
+            "AppJobStatus",
+            "AppJobType",
+            "JobRecord",
+            "SavedLocalModelRecord",
+            "ensure_dataset_record"
+          ]
+        }
+      ],
+      "exports": [
+        "_tabfm_service",
+        "_timesfm_service",
+        "render_foundation_models_page",
+        "_render_tabfm",
+        "_render_timesfm",
+        "_record_job",
+        "_dependency_status",
+        "_render_metrics",
+        "_download_artifacts"
+      ],
+      "totalLines": 277,
+      "hasStructuralAnalysis": true
+    },
     "app/pages/glossary.py": {
       "filePath": "app/pages/glossary.py",
       "contentHash": "2760e5e517e54e07fedad183bed78a96b65cd7d8d11f839a737f9465226c9132",
@@ -10610,14 +11461,14 @@
     },
     "app/pages/history_page.py": {
       "filePath": "app/pages/history_page.py",
-      "contentHash": "380b74bdfe28634a6639dd81edc0fbd6c743702f0149189df6815f4c5d2f4600",
+      "contentHash": "0379944a7a895068afdec8e4c2d9155cbf1417548c0c27e32f73bd08cfcb3f21",
       "functions": [
         {
           "name": "render_history_page",
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 172
+          "lineCount": 182
         },
         {
           "name": "_render_job_description",
@@ -10761,7 +11612,7 @@
         "_status_badge",
         "_status_icon"
       ],
-      "totalLines": 409,
+      "totalLines": 419,
       "hasStructuralAnalysis": true
     },
     "app/pages/model_testing_page.py": {
@@ -10869,14 +11720,14 @@
     },
     "app/pages/models_page.py": {
       "filePath": "app/pages/models_page.py",
-      "contentHash": "2d5049ad4751aa593cac179e60cf25e501449e777d28a9bdec221224ddfdf9f0",
+      "contentHash": "6246ce1a06dae235a9fbb188e633da660468a0f7e655e3e2bfe1f388ea79e6ab",
       "functions": [
         {
           "name": "render_models_page",
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 75
+          "lineCount": 87
         },
         {
           "name": "_render_pycaret_model_card",
@@ -10913,6 +11764,15 @@
           "returnType": "None",
           "exported": true,
           "lineCount": 48
+        },
+        {
+          "name": "_render_tabfm_context_card",
+          "params": [
+            "ref"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
         },
         {
           "name": "_render_deployment_export",
@@ -10991,6 +11851,12 @@
           ]
         },
         {
+          "source": "app.prediction.loader",
+          "specifiers": [
+            "LocalTabFMContextLoader"
+          ]
+        },
+        {
           "source": "app.prediction.selectors",
           "specifiers": [
             "discover_flaml_saved_models",
@@ -11016,9 +11882,10 @@
         "_render_benchmark_model_card",
         "_render_registry_model_card",
         "_render_flaml_model_card",
+        "_render_tabfm_context_card",
         "_render_deployment_export"
       ],
-      "totalLines": 355,
+      "totalLines": 382,
       "hasStructuralAnalysis": true
     },
     "app/pages/notebook_page.py": {
@@ -11562,7 +12429,7 @@
     },
     "app/pages/registry.py": {
       "filePath": "app/pages/registry.py",
-      "contentHash": "cbda55a3270e4ec8135da2185c29060ea0898db5f5b2320c69acabc861851d61",
+      "contentHash": "596c485b36dd1ee6fbc036f5cb37d697336d796f40ea3a098ef4ec5075ff9256",
       "functions": [
         {
           "name": "get_page_registry",
@@ -11658,7 +12525,7 @@
         "render_registered_page",
         "build_streamlit_navigation"
       ],
-      "totalLines": 226,
+      "totalLines": 233,
       "hasStructuralAnalysis": true
     },
     "app/pages/registry_page.py": {
@@ -12074,7 +12941,7 @@
     },
     "app/pages/settings_page.py": {
       "filePath": "app/pages/settings_page.py",
-      "contentHash": "12c9b67d4f71e632844c414f6acdcd3afccb8cc0e606649a5f1289a8283fd1f3",
+      "contentHash": "40add7766a1a41ae83f681c7f1958d9c95cd34d587a194c35379d778708ffdf4",
       "functions": [
         {
           "name": "_run_async",
@@ -12089,7 +12956,7 @@
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 23
+          "lineCount": 24
         },
         {
           "name": "_section_privacy_summary",
@@ -12169,6 +13036,13 @@
           "returnType": "None",
           "exported": true,
           "lineCount": 39
+        },
+        {
+          "name": "_section_model_cost_calculator",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 43
         },
         {
           "name": "_section_mlflow_descriptions",
@@ -12266,6 +13140,14 @@
           ]
         },
         {
+          "source": "app.providers.model_pricing",
+          "specifiers": [
+            "MODEL_PRICING",
+            "calculate_model_cost",
+            "get_model_pricing"
+          ]
+        },
+        {
           "source": "app.security.masking",
           "specifiers": [
             "MSG_DEFAULT_MODEL_UNAVAILABLE",
@@ -12296,12 +13178,13 @@
         "_section_provider",
         "_section_credentials",
         "_section_models",
+        "_section_model_cost_calculator",
         "_section_mlflow_descriptions",
         "_section_cache_controls",
         "_section_save",
         "_fetch_models"
       ],
-      "totalLines": 493,
+      "totalLines": 540,
       "hasStructuralAnalysis": true
     },
     "app/pages/shared_history.py": {
@@ -13212,7 +14095,7 @@
     },
     "app/prediction/__init__.py": {
       "filePath": "app/prediction/__init__.py",
-      "contentHash": "8b4fe5dd1a4d6d8acdeaf4a881ee29bf6a34fe290772fd0fc7774b834bcc45de",
+      "contentHash": "45ededa71d91baa23c784f9645e3c3510014605811495929c4239ba419585392",
       "functions": [
         {
           "name": "__getattr__",
@@ -13220,7 +14103,7 @@
             "name"
           ],
           "exported": true,
-          "lineCount": 20
+          "lineCount": 27
         }
       ],
       "classes": [],
@@ -13257,7 +14140,7 @@
       "exports": [
         "__getattr__"
       ],
-      "totalLines": 72,
+      "totalLines": 80,
       "hasStructuralAnalysis": true
     },
     "app/prediction/artifacts.py": {
@@ -13334,7 +14217,7 @@
     },
     "app/prediction/base.py": {
       "filePath": "app/prediction/base.py",
-      "contentHash": "b91380615e129b34481740164e36ee1fd20082861b88e7f783b69189c582812b",
+      "contentHash": "0a3eff86e120f0bc52f57ea08b19788f4cf6657c2aa0e4572fe5cd77558023b4",
       "functions": [],
       "classes": [
         {
@@ -13368,7 +14251,7 @@
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 569
+          "lineCount": 584
         }
       ],
       "imports": [
@@ -13448,6 +14331,7 @@
           "specifiers": [
             "LocalFlamlModelLoader",
             "LocalPyCaretModelLoader",
+            "LocalTabFMContextLoader",
             "MLflowModelLoader"
           ]
         },
@@ -13516,7 +14400,7 @@
         "BasePredictionService",
         "PredictionService"
       ],
-      "totalLines": 643,
+      "totalLines": 663,
       "hasStructuralAnalysis": true
     },
     "app/prediction/batch_predict.py": {
@@ -13739,7 +14623,7 @@
     },
     "app/prediction/loader.py": {
       "filePath": "app/prediction/loader.py",
-      "contentHash": "eced6a09db7f7432b5cb8e514abf2c09deed474bf4d31c6238e78d0b127004e8",
+      "contentHash": "fec6cca94b98d4bf6176f32f96727df7d8f75c8db5bc7bc65d9f94b4b022a6c3",
       "functions": [],
       "classes": [
         {
@@ -13751,6 +14635,18 @@
           "properties": [],
           "exported": true,
           "lineCount": 10
+        },
+        {
+          "name": "LocalTabFMContextLoader",
+          "methods": [
+            "__init__",
+            "supports",
+            "discover",
+            "load"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 84
         },
         {
           "name": "LocalPyCaretModelLoader",
@@ -13931,11 +14827,12 @@
       ],
       "exports": [
         "ModelLoader",
+        "LocalTabFMContextLoader",
         "LocalPyCaretModelLoader",
         "LocalFlamlModelLoader",
         "MLflowModelLoader"
       ],
-      "totalLines": 474,
+      "totalLines": 560,
       "hasStructuralAnalysis": true
     },
     "app/prediction/schemas.py": {
@@ -15924,6 +16821,79 @@
       "totalLines": 110,
       "hasStructuralAnalysis": true
     },
+    "app/providers/model_pricing.py": {
+      "filePath": "app/providers/model_pricing.py",
+      "contentHash": "f009f858d1ad1fe915998c72cc4e7e3cf5b722eec6f5864c4bf9712bad51049c",
+      "functions": [
+        {
+          "name": "get_model_pricing",
+          "params": [
+            "model_name"
+          ],
+          "returnType": "ModelPricing",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "calculate_model_cost",
+          "params": [
+            "model_name",
+            "input_tokens",
+            "output_tokens"
+          ],
+          "returnType": "ModelCostEstimate",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [
+        {
+          "name": "ModelPricing",
+          "methods": [],
+          "properties": [
+            "name",
+            "input_price",
+            "output_price",
+            "details"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "ModelCostEstimate",
+          "methods": [],
+          "properties": [
+            "input_cost",
+            "output_cost",
+            "total_cost"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        }
+      ],
+      "exports": [
+        "ModelPricing",
+        "ModelCostEstimate",
+        "get_model_pricing",
+        "calculate_model_cost"
+      ],
+      "totalLines": 91,
+      "hasStructuralAnalysis": true
+    },
     "app/providers/ollama_provider.py": {
       "filePath": "app/providers/ollama_provider.py",
       "contentHash": "bd8d545c1099bf409b2df43305873a56078011d0eb9aa9690c2acdf9ac8f375c",
@@ -17614,7 +18584,7 @@
     },
     "app/storage/models.py": {
       "filePath": "app/storage/models.py",
-      "contentHash": "1cc683796b21b73c316600c2b8ef0800fbdbca66e2f1e67f7bce8b3a0e08254b",
+      "contentHash": "299959834643ba52d9cc383d4e8560a56565d6444edce69c399a82c5142130f9",
       "functions": [],
       "classes": [
         {
@@ -17622,7 +18592,7 @@
           "methods": [],
           "properties": [],
           "exported": true,
-          "lineCount": 9
+          "lineCount": 11
         },
         {
           "name": "AppJobStatus",
@@ -17813,7 +18783,7 @@
         "BatchRunRecord",
         "BatchRunItemRecord"
       ],
-      "totalLines": 155,
+      "totalLines": 157,
       "hasStructuralAnalysis": true
     },
     "app/storage/recorders.py": {
@@ -19159,7 +20129,7 @@
     },
     "app/tracking/mlflow_query.py": {
       "filePath": "app/tracking/mlflow_query.py",
-      "contentHash": "540f2fd3f730a36aef2b243ba4b4f78e17cd770116d61ecd15cc0172c9e34830",
+      "contentHash": "b63a4f15975e814e6642c9164d0921002e73a55d8753c418a5ac521097861c7b",
       "functions": [
         {
           "name": "_mlflow_exception_types",
@@ -19428,7 +20398,7 @@
           ],
           "returnType": "RunType",
           "exported": true,
-          "lineCount": 24
+          "lineCount": 32
         },
         {
           "name": "_safe_run_status",
@@ -19670,12 +20640,12 @@
         "_write_registry_cache",
         "_safe_version_number"
       ],
-      "totalLines": 807,
+      "totalLines": 815,
       "hasStructuralAnalysis": true
     },
     "app/tracking/schemas.py": {
       "filePath": "app/tracking/schemas.py",
-      "contentHash": "354fc21da6e98a8eb5efb968403b4d30ff4ad1a45927adab6ce12d98a328f52d",
+      "contentHash": "80586c9b2885a72ebd86236297623ec99450ec6ef56ecf2ac8e23d38ffbd0fce",
       "functions": [],
       "classes": [
         {
@@ -19683,7 +20653,7 @@
           "methods": [],
           "properties": [],
           "exported": true,
-          "lineCount": 7
+          "lineCount": 9
         },
         {
           "name": "RunStatus",
@@ -19822,7 +20792,7 @@
         "ConfigDifference",
         "ComparisonBundle"
       ],
-      "totalLines": 103,
+      "totalLines": 105,
       "hasStructuralAnalysis": true
     },
     "app/tracking/summary.py": {
@@ -20733,7 +21703,7 @@
     },
     "docker-compose.yml": {
       "filePath": "docker-compose.yml",
-      "contentHash": "bbcc1217b5c9dbc35ea8355cc5bb773f2814d34f06682f8e873aeb08ed985b55",
+      "contentHash": "8e30cf5638497da78a40c424b7deef4fc75854565df24bca413a7fb8f22e5b0e",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -20743,22 +21713,22 @@
     },
     "docs/README.md": {
       "filePath": "docs/README.md",
-      "contentHash": "84f133c1d2221b723ae9f3f08627ce8ea0531305511e6f5d436e3e265d1fea57",
+      "contentHash": "e586081adc2d208756b59461834c3a7452f5ab1de3a80b96937349f01e5ca083",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 103,
+      "totalLines": 109,
       "hasStructuralAnalysis": true
     },
     "docs/architecture.md": {
       "filePath": "docs/architecture.md",
-      "contentHash": "93b1d9f9961926c49aa4a6e7f19b99cc3f5c476bdc7bdfe3c8e8d8bed9134d72",
+      "contentHash": "86762d2041b87b3e4e82e248d21eca6fe0209e94b78ee1327b1d16798b82cb3e",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 237,
+      "totalLines": 248,
       "hasStructuralAnalysis": true
     },
     "docs/assets/demo/README.md": {
@@ -20781,34 +21751,54 @@
       "totalLines": 205,
       "hasStructuralAnalysis": false
     },
-    "docs/developer-guide.md": {
-      "filePath": "docs/developer-guide.md",
-      "contentHash": "2b5f1089f899abc7e89f028c8a40a254173d68fd2985731d3df62d9c516b4e72",
+    "docs/autotabml-studio-architecture.html": {
+      "filePath": "docs/autotabml-studio-architecture.html",
+      "contentHash": "c6c8d37f8a5c72149be083a5b57913e22fb799fd632974e09aaa6618e3978228",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 279,
+      "totalLines": 13247,
+      "hasStructuralAnalysis": false
+    },
+    "docs/autotabml-studio.architecture.json": {
+      "filePath": "docs/autotabml-studio.architecture.json",
+      "contentHash": "f7302cd7e813446906e212abd3977e8d8fd165e167e7f757431a6f5f821046b0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 202,
+      "hasStructuralAnalysis": true
+    },
+    "docs/developer-guide.md": {
+      "filePath": "docs/developer-guide.md",
+      "contentHash": "0dfd625b689d81e0ce238d1996338f810c8d4d55a2d42f732a68442ae7d1c044",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 305,
       "hasStructuralAnalysis": true
     },
     "docs/operations.md": {
       "filePath": "docs/operations.md",
-      "contentHash": "11fdc55efb6d5c44e6825b9a59c89ee2e4f30719484490fbeac21646f13d8eb4",
+      "contentHash": "db3fbf698c502ad49b7e9a29413311ece1ca5851e4562e2a0c61844397794165",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 333,
+      "totalLines": 362,
       "hasStructuralAnalysis": true
     },
     "pyproject.toml": {
       "filePath": "pyproject.toml",
-      "contentHash": "b9ccfc24f8a9c1b28bf40f24d08cac66474ad660b502dee2a2e5460adf95b1df",
+      "contentHash": "9ef5ab0e3c0a5f8051834137c152b26b8071e52cf40be4e44ba5e3cade6d343f",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 333,
+      "totalLines": 347,
       "hasStructuralAnalysis": true
     },
     "pyrightconfig.json": {
@@ -22356,7 +23346,7 @@
     },
     "tests/test_cli_smoke.py": {
       "filePath": "tests/test_cli_smoke.py",
-      "contentHash": "3844bacfb11ce5449e9a9239aeccc512ee9e5c296c0ac7d5ab09cdb6447bc34e",
+      "contentHash": "11849a91fa090001fd52e0ee7ad99b6b9f4432d74aa7086d076f106290f8954b",
       "functions": [
         {
           "name": "_run",
@@ -23736,6 +24726,312 @@
       "totalLines": 853,
       "hasStructuralAnalysis": true
     },
+    "tests/test_foundation_integration.py": {
+      "filePath": "tests/test_foundation_integration.py",
+      "contentHash": "6991fb4bf6103ea462b250b1c3e08fca13cfab7f5d96384b29e3f8af02ee47ba",
+      "functions": [
+        {
+          "name": "_write_context_metadata",
+          "params": [
+            "directory"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_foundation_job_and_run_types_are_first_class",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_tabfm_context_loader_discovers_and_normalizes_context",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_deployment_export_rejects_research_only_tabfm_context",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_cli_parses_tabfm_and_timesfm_commands",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "test_foundation_tracking_logs_only_summary_artifact",
+          "params": [
+            "monkeypatch",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 35
+        }
+      ],
+      "classes": [
+        {
+          "name": "_ContextService",
+          "methods": [
+            "load_context"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "imports": [
+        {
+          "source": "contextlib",
+          "specifiers": [
+            "contextmanager"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "types",
+          "specifiers": [
+            "SimpleNamespace"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app.deployment",
+          "specifiers": [
+            "export_deployment_bundle"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation",
+          "specifiers": [
+            "TabFMLoadedContext"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation.tracking",
+          "specifiers": [
+            "log_foundation_run"
+          ]
+        },
+        {
+          "source": "app.prediction",
+          "specifiers": [
+            "ModelSourceType",
+            "PredictionRequest",
+            "PredictionTaskType"
+          ]
+        },
+        {
+          "source": "app.prediction.loader",
+          "specifiers": [
+            "LocalTabFMContextLoader"
+          ]
+        },
+        {
+          "source": "app.storage.models",
+          "specifiers": [
+            "AppJobType"
+          ]
+        },
+        {
+          "source": "app.tracking.schemas",
+          "specifiers": [
+            "RunType"
+          ]
+        }
+      ],
+      "exports": [
+        "_ContextService",
+        "_write_context_metadata",
+        "test_foundation_job_and_run_types_are_first_class",
+        "test_tabfm_context_loader_discovers_and_normalizes_context",
+        "test_deployment_export_rejects_research_only_tabfm_context",
+        "test_cli_parses_tabfm_and_timesfm_commands",
+        "test_foundation_tracking_logs_only_summary_artifact"
+      ],
+      "totalLines": 168,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_foundation_models.py": {
+      "filePath": "tests/test_foundation_models.py",
+      "contentHash": "39eb652a6b57b008808f5b783cbba920c9e6ef6ce25b0056cd35d2862f883166",
+      "functions": [
+        {
+          "name": "_cached_resolver",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "CheckpointResolver",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_checkpoint_resolver_requires_confirmation_before_download",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_tabfm_classification_run_is_licensed_sampled_and_revision_pinned",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "test_tabfm_rejects_more_than_ten_classes",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_tabfm_context_round_trip_has_checksums",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "test_timesfm_grouped_forecast_quantiles_backtest_and_revision",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "test_timesfm_rejects_duplicate_timestamps",
+          "params": [
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [
+        {
+          "name": "_Classifier",
+          "methods": [
+            "fit",
+            "predict",
+            "predict_proba"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "_Regressor",
+          "methods": [
+            "fit",
+            "predict"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_TimesModel",
+          "methods": [
+            "forecast"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "numpy",
+          "specifiers": [
+            "np"
+          ]
+        },
+        {
+          "source": "pandas",
+          "specifiers": [
+            "pd"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app.modeling.foundation",
+          "specifiers": [
+            "TABFM_CHECKPOINT",
+            "TIMESFM_CHECKPOINT",
+            "CheckpointResolver",
+            "ModelDownloadRequiredError",
+            "TabFMConfig",
+            "TabFMService",
+            "TimesFMConfig",
+            "TimesFMService"
+          ]
+        }
+      ],
+      "exports": [
+        "_Classifier",
+        "_Regressor",
+        "_TimesModel",
+        "_cached_resolver",
+        "test_checkpoint_resolver_requires_confirmation_before_download",
+        "test_tabfm_classification_run_is_licensed_sampled_and_revision_pinned",
+        "test_tabfm_rejects_more_than_ten_classes",
+        "test_tabfm_context_round_trip_has_checksums",
+        "test_timesfm_grouped_forecast_quantiles_backtest_and_revision",
+        "test_timesfm_rejects_duplicate_timestamps"
+      ],
+      "totalLines": 207,
+      "hasStructuralAnalysis": true
+    },
     "tests/test_gpu.py": {
       "filePath": "tests/test_gpu.py",
       "contentHash": "ac9954959275cf426a25b3fe6f21afc327a01c587cb66f7309fa822b76d52a0e",
@@ -24670,6 +25966,58 @@
         "test_list_registered_models_batched_is_faster_than_unbatched_baseline"
       ],
       "totalLines": 267,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_model_pricing.py": {
+      "filePath": "tests/test_model_pricing.py",
+      "contentHash": "687c20c7d8e9f6657cf992a450fb78a62a6138be7d1bdaf50c1a6b1b7b0d9c33",
+      "functions": [
+        {
+          "name": "test_model_pricing_matches_reference_rates",
+          "params": [
+            "model_name",
+            "input_price",
+            "output_price"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_calculate_model_cost_prorates_input_and_output_tokens",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app.providers.model_pricing",
+          "specifiers": [
+            "calculate_model_cost",
+            "get_model_pricing"
+          ]
+        }
+      ],
+      "exports": [
+        "test_model_pricing_matches_reference_rates",
+        "test_calculate_model_cost_prorates_input_and_output_tokens"
+      ],
+      "totalLines": 42,
       "hasStructuralAnalysis": true
     },
     "tests/test_modeling_architecture.py": {
@@ -27474,8 +28822,16 @@
     },
     "tests/test_settings_page.py": {
       "filePath": "tests/test_settings_page.py",
-      "contentHash": "130ae6cb886c6c6725577a64b957ffca2c656cf694c66a6ef2f6f145c35c5bd0",
-      "functions": [],
+      "contentHash": "4d283ae350700731e75d362e5698392ee2a469b6e6eff9b924074f3dd1a14165",
+      "functions": [
+        {
+          "name": "test_model_cost_calculator_renders_reference_estimate",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
       "classes": [
         {
           "name": "_FakeOllamaProvider",
@@ -27506,6 +28862,12 @@
           ]
         },
         {
+          "source": "streamlit.testing.v1",
+          "specifiers": [
+            "AppTest"
+          ]
+        },
+        {
           "source": "app.config.enums",
           "specifiers": [
             "LLMProvider"
@@ -27526,9 +28888,10 @@
       ],
       "exports": [
         "_FakeOllamaProvider",
-        "TestFetchModels"
+        "TestFetchModels",
+        "test_model_cost_calculator_renders_reference_estimate"
       ],
-      "totalLines": 40,
+      "totalLines": 61,
       "hasStructuralAnalysis": true
     },
     "tests/test_startup.py": {

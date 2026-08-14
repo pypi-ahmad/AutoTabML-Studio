@@ -1,197 +1,220 @@
-# Graph Report - .  (2026-08-14)
+# Graph Report - AutoTabML-Studio  (2026-08-14)
 
 ## Corpus Check
-- Large corpus: 525 files · ~1,330,942 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder.
+- 557 files · ~1,606,411 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4447 nodes · 12713 edges · 190 communities (165 shown, 25 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 1189 edges (avg confidence: 0.52)
+- 4621 nodes · 13137 edges · 208 communities (182 shown, 26 thin omitted)
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 1193 edges (avg confidence: 0.51)
 - Token cost: 0 input · 0 output
 
+## Graph Freshness
+- Built from commit: `347ebb24`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
+
 ## Community Hubs (Navigation)
-- PyCaret Experiment Tests
-- Benchmark Schemas
-- CLI Application
-- FLAML Automl Tests
-- Profiling Tests
-- FLAML Schemas
-- Prediction Schemas
-- Providers Base
-- Benchmark Tests
-- Config Models
-- UCI Loader Tests
-- Security Trusted Artifacts
-- Dataset Workspace
-- History Page
-- Ingestion URL Loader
-- Services Prediction Workflow
-- Tracking MLflow Query
-- Notebook Page
-- Validation Tests
-- Notebooks Generator
-- UCI Real Datasets Tests
-- Storage Models
-- Prediction Tests
-- Ingestion Base
-- Pyrightconfig Configuration
-- CLI Tests
-- Validation GX Runner
-- Registry Tests
-- Backends Colab MCP Backend
-- PyCaret Service
-- Prediction Base
-- Prediction Selectors
-- Storage Repositories Tests
-- Repositories Base
-- Benchmark MLflow Tracking
-- Batch UCI Runner Scripts
-- CLI Smoke Tests
-- UI Labels
-- PyCaret Selectors
-- PyCaret Summary
-- UI Cache
-- Architecture Documentation
-- CLI Tests
-- Startup Components
-- PyCaret Errors
-- Gpu Tests
-- Ingestion UCI Loader
-- Security Safe HTTP
-- Storage SQLite Connector
-- Registry Errors
-- Tracking Description Generator
-- Validation Schemas
-- Prediction Page
-- Experiment Workflow Service Tests
-- Prediction Errors
-- Validation Rules
-- Base Components
-- Providers Tests
-- MLflow Query Batch Tests
-- Settings Page
-- Errors Tests
-- Prediction Tests
-- Observability Context
-- Observability Metrics
-- Registry Components
-- Safe HTTP Async Tests
-- Safe HTTP Tests
-- Tracking Schemas
-- Tracking Filters
-- Tracking Tests
-- Ingestion Metadata
-- PyCaret MLflow Tracking
-- Release Metadata
-- Safe CSV Properties Tests
-- Ingestion Tests
-- Experiment Page
-- Observability Metrics
-- UA Analysis Artifacts
-- Compare Page
-- Repositories Batch Runs
-- Tracking Tests
-- Capture Screenshots Scripts
-- Verify Optional Deps Scripts
-- Observability Tests
-- Prediction Loader
-- Artifacts Manager
-- Autorun Components
-- CLI Tests
-- CLI Tests
-- Config Tests
-- Tracking Compare Service
-- Autorun Components
-- Ingestion Kaggle Loader
-- Security Safe HTTP
-- Drift Components
-- Tracking Errors
-- Ingestion HTML Table Loader
-- Security Tests
-- Tracking Tests
-- Explainability Components
-- State Session
-- Ingestion Async Tests
-- Providers Anthropic Provider
-- Repositories Saved Models
-- E2E Local Smoke Tests
-- Storage Migrations
-- Repositories Projects
-- Logging Config
-- Providers Tests
-- UI Cache
-- Provenance Components
-- Modeling Architecture Tests
-- Predictions Page
-- Registry Tests
-- Tracking Tests
-- Autotabml Social Preview Documentation
-- Integration Optional Deps Tests
-- UA Analysis Artifacts
-- Base Components
-- Providers Ollama Provider
-- Code Of Conduct
-- Autotabml Studio Architecture Documentation
-- UA Analysis Artifacts
-- Artifacts Manager
-- Observability Tracing
-- Providers Tests
-- UA Analysis Artifacts
-- Deployment Components
-- Safe HTTP Tests
-- FLAML Setup Runner
-- Security Tests
-- Benchmark Leaderboard Documentation
-- History View Documentation
-- Profiling Report Documentation
-- Settings View Documentation
-- Artifact Manager Tests
-- Modeling Architecture Tests
-- Experiment Lab Documentation
-- Validation Summary Documentation
-- CLI Tests
-- CLI Tests
-- UI Helpers Tests
-- Observability Logging Setup
-- Security Safe HTTP
-- Compare View Documentation
-- Dashboard Overview Documentation
-- Dataset Intake Documentation
-- Prediction Center Documentation
-- Registry View Documentation
-- Colab MCP Backend Tests
-- UA Analysis Artifacts
-- UA Analysis Artifacts
-- PyCaret Init
-- Conftest Tests
-- UA Analysis Artifacts
-- Security Safe HTTP
-- Safe CSV Properties Tests
-- Dataset Intake Documentation
-- Prediction Center Documentation
-- Release Notes V0 2 0
-- Config Models
-- PyCaret Compare Runner
-- PyCaret Tune Runner
-- Safe HTTP Tests
-- UA Analysis Artifacts
-- Init Components
-- Init Components
-- Registry Service
-- Registry Service
-- Registry Service
-- Benchmark Leaderboard Documentation
-- UA Analysis Artifacts
-- UA Analysis Artifacts
-- Readme Documentation
-- Autotabml Social Preview Documentation
-- Autotabml Studio Architecture Documentation
-- Dependabot Configuration
-- Bug Report Configuration
-- Feature Request Configuration
-- Pyproject Configuration
-- Pre Commit Config Configuration
-- Security Components
-- UA Analysis Artifacts
+- ExecutionBackend
+- BenchmarkConfig
+- main
+- test_flaml_automl.py
+- ProfilingMode
+- flaml/service.py
+- test_prediction.py
+- LLMProvider
+- test_benchmark.py
+- test_colab_mcp_backend.py
+- DatasetInputSpec
+- SavedModelMetadata
+- dataset_workspace.py
+- benchmark_page.py
+- url_loader.py
+- PredictionWorkflowService
+- mlflow_query.py
+- go_to_page
+- ValidationRuleConfig
+- generate_job_notebook
+- test_uci_real_datasets.py
+- JobRecord
+- PredictionHistoryStore
+- IngestionSourceType
+- pyrightconfig.json
+- AppSettings
+- gx_runner.py
+- RegistryService
+- ColabMCPExecutionBackend
+- ExperimentResultBundle
+- PredictionService
+- loader.py
+- AppMetadataStore
+- storage/models.py
+- test_modeling_exception_handling.py
+- batch_uci_runner.py
+- gather_with_concurrency
+- models_page.py
+- ExperimentTaskType
+- pycaret/summary.py
+- ui_cache.py
+- Architecture Guide
+- test_cli.py
+- app/errors.py
+- pycaret/errors.py
+- cuda_summary
+- UCIRepoLoader
+- safe_http.py
+- SQLiteConnector
+- test_registry.py
+- AppJobType
+- validate_dataset
+- safe_error_message
+- ExperimentWorkflowService
+- test_hardening_smoke.py
+- run_app_rules
+- BaseTracker
+- FlamlConfig
+- list_registered_models
+- CheckpointResolver
+- log_exception
+- TabFMConfig
+- observability/__init__.py
+- InMemoryMetricsBackend
+- registry.py
+- safe_fetch_async
+- SafeFetchPolicy
+- RunHistoryItem
+- test_tracking.py
+- HistoryService
+- test_ingestion_utils.py
+- ProfilingResultSummary
+- validate_public_release_metadata
+- history_page.py
+- ExcelLoader
+- experiment_page.py
+- metrics.py
+- update-graph.cjs
+- compare_page.py
+- BatchRunRecord
+- ComparisonService
+- capture_screenshots.py
+- verify_optional_deps.py
+- test_observability.py
+- PredictionRequest
+- LocalArtifactManager
+- autorun.py
+- ._make_args
+- Path
+- Path
+- RunHistoryFilter
+- test_product_improvements.py
+- _FakeExperimentBase
+- _cli_error
+- drift.py
+- tracking/errors.py
+- CSVLoader
+- redact_key_in_text
+- TestFlamlRunType
+- explain_global
+- TimesFMConfig
+- load_dataset_async
+- foundation_models_page.py
+- SavedLocalModelRecord
+- test_e2e_local_smoke.py
+- migrations.py
+- ProjectRecord
+- configure_logging
+- cli.py
+- test_list_cached_registered_models_uses_cache_until_invalidated
+- build_provenance
+- _FakeMLflow
+- model_testing_page.py
+- ArtifactKind
+- RunHistorySort
+- AutoTabML Studio Social Preview
+- profile_dataset
+- build-batches-10-18.cjs
+- log_ui_exception
+- test_dataset_workspace.py
+- Code of Conduct
+- AutoML Modeling
+- build-batches-6-9.cjs
+- manager.py
+- start_span
+- Namespace
+- ua-assemble.cjs
+- export_deployment_bundle
+- fetch_url_bytes
+- run_auto_run
+- mask_secret
+- Benchmark
+- History view
+- EDA / Profiling Dashboard
+- Settings view
+- calculate_model_cost
+- _DummyTracker
+- Benchmark configuration form
+- Data Validation
+- TestCmdRegistryGates
+- TestCliOutputEncoding
+- TestLabelMaps
+- store.py
+- cmd_experiment_run
+- MLflow run comparison view
+- Dashboard
+- Loaded dataset 'diabetes'
+- Prediction Center Interface
+- e2e-demo-classifier
+- IngestionError
+- extract-ua-batches-10-13.cjs
+- process-ua-batches-19-26.cjs
+- notebook_page.py
+- recorders.py
+- ua-fingerprint-input.cjs
+- _is_blocked_ip
+- BatchRunItemRecord
+- Load Dataset Sources
+- Recent Prediction Jobs
+- AutoTabML Studio v0.2.0
+- ProfilingSettings
+- FlamlAutoMLService
+- TestRuntimeState
+- .run
+- .trash-1786689789/tmp/ua-arch-analyze.js
+- app/__init__.py
+- modeling/__init__.py
+- Highlights
+- ua-arch-write-layers.js
+- profiling/__init__.py
+- Leaderboard results
+- .trash-1786689789/tmp/ua-inline-validate.cjs
+- ua-tour-analyze.js
+- Demo assets documentation
+- AutoTabML social preview
+- AutoTabML Studio Architecture Diagram
+- Dependabot dependency update policy
+- Bug Report issue template
+- Feature Request issue template
+- autotabml-studio
+- Pre-commit quality hooks
+- Security Policy
+- Changed Working Tree Record
+- TestFlamlSchemas
+- BackgroundJobService
+- FlamlSearchConfig
+- ExperimentInfo
+- evaluate_model
+- .load_raw_dataframe
+- get_page_registry
+- .prepare_session
+- TestMetricSortDirection
+- TestFlamlPageHelpers
+- TestRunSummary
+- TestDefaultModels
+- DataFrame
+- .trash-1786706008/tmp/ua-arch-analyze.js
+- .preview
+- _clear_registry_cache
+- .trash-1786706008/tmp/ua-inline-validate.cjs
 
 ## God Nodes (most connected - your core abstractions)
 1. `ExecutionBackend` - 210 edges
@@ -200,10 +223,10 @@
 4. `WorkspaceMode` - 161 edges
 5. `IngestionSourceType` - 91 edges
 6. `AppMetadataStore` - 83 edges
-7. `log_exception()` - 77 edges
+7. `log_exception()` - 80 edges
 8. `ProfilingMode` - 66 edges
 9. `LLMProvider` - 65 edges
-10. `ValidationRuleConfig` - 58 edges
+10. `RegistryService` - 58 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Coverage Gate` --semantically_similar_to--> `Hermetic Test Strategy`  [INFERRED] [semantically similar]
@@ -212,9 +235,9 @@
   docs/architecture.md → README.md
 - `Shared Service Layer Architecture` --semantically_similar_to--> `Shared UI and CLI Service Layer`  [INFERRED] [semantically similar]
   docs/architecture.md → README.md
+- `main()` --calls--> `Counter`  [INFERRED]
+  .ua/.trash-1786706008/tmp/ua-tour-analyze.py → app/observability/metrics.py
 - `TestBuildBackend` --uses--> `ColabMCPExecutionBackend`  [INFERRED]
-  tests/test_colab_mcp_backend.py → app/backends/colab_mcp_backend.py
-- `TestDefaultBackendIsColabMCP` --uses--> `ColabMCPExecutionBackend`  [INFERRED]
   tests/test_colab_mcp_backend.py → app/backends/colab_mcp_backend.py
 
 ## Import Cycles
@@ -228,654 +251,718 @@
 - **Local-First Workbench Documentation** — readme_local_first_workbench, docs_architecture_local_first, docs_operations_local_runtime_layout [INFERRED 0.85]
 - **Primary AutoTabML Journey** — docs_autotabml_studio_architecture_studio_workbench, docs_autotabml_studio_architecture_dataset_ingestion, docs_autotabml_studio_architecture_automl_modeling, docs_autotabml_studio_architecture_prediction_service, docs_autotabml_studio_architecture_trusted_artifacts [EXTRACTED 1.00]
 
-## Communities (190 total, 25 thin omitted)
+## Communities (208 total, 26 thin omitted)
 
-### Community 0 - "PyCaret Experiment Tests"
+### Community 0 - "ExecutionBackend"
 Cohesion: 0.03
-Nodes (99): ExecutionBackend, str, Execution backends – where ML jobs actually run., First-class workspace modes., WorkspaceMode, PyCaretExperimentSettings, Configuration for deeper PyCaret experiment workflows., benchmark_dataset() (+91 more)
+Nodes (113): ExecutionBackend, str, Execution backends – where ML jobs actually run., First-class workspace modes., WorkspaceMode, ArtifactSettings, DatabaseSettings, MLflowSettings (+105 more)
 
-### Community 1 - "Benchmark Schemas"
+### Community 1 - "BenchmarkConfig"
 Cohesion: 0.04
-Nodes (97): BaseService, Common modeling-service configuration and helpers., Return a configured tracker instance when MLflow tracking is enabled., BenchmarkArtifactsWriter, Path, Artifact generation for benchmark runs., Shared-path artifact writer for benchmark result bundles., Write benchmark artifacts to disk and return their paths. (+89 more)
+Nodes (85): BaseService, Common modeling-service configuration and helpers., Return a configured tracker instance when MLflow tracking is enabled., BenchmarkConfigurationError, BenchmarkDependencyError, BenchmarkError, BenchmarkExecutionError, BenchmarkTargetError (+77 more)
 
-### Community 2 - "CLI Application"
-Cohesion: 0.05
-Nodes (107): BackgroundJobService, Path, Submit and control one local training process at a time., _add_prediction_model_source_args(), _build_flaml_service(), _build_prediction_request_kwargs(), _build_prediction_service(), _build_pycaret_service() (+99 more)
+### Community 2 - "main"
+Cohesion: 0.13
+Nodes (25): _add_prediction_model_source_args(), cmd_compare_runs(), cmd_doctor(), cmd_history_show(), cmd_info(), cmd_init_local_storage(), cmd_registry_list(), cmd_registry_promote() (+17 more)
 
-### Community 3 - "FLAML Automl Tests"
-Cohesion: 0.05
-Nodes (42): FlamlSettings, Configuration for FLAML AutoML workflows., FlamlConfig, Top-level FLAML AutoML configuration., FlamlAutoMLService, metric_sort_direction(), Path, Return the expected ordering direction for a metric name. (+34 more)
+### Community 3 - "test_flaml_automl.py"
+Cohesion: 0.12
+Nodes (21): FlamlSettings, Configuration for FLAML AutoML workflows., LocalFlamlModelLoader, Load local saved FLAML model artifacts., PredictionScorer, Normalize scoring across local PyCaret and MLflow / sklearn-like models., Tests for the FLAML AutoML integration., Verify the CLI history-list parser accepts 'flaml' as a run type. (+13 more)
 
-### Community 4 - "Profiling Tests"
-Cohesion: 0.05
-Nodes (57): Profiling artifact generation helpers., ProfilingError, ProfilingSetupError, Exception, Custom exceptions for the profiling layer., Raised when the profiling library cannot be initialized., Base exception for profiling failures., Automated profiling layer for AutoTabML Studio. (+49 more)
+### Community 4 - "ProfilingMode"
+Cohesion: 0.10
+Nodes (31): ProfilingMode, str, Profiling report modes., ProfilingConfig, Pydantic schemas for profiling inputs and outputs., User-facing configuration for a profiling run., maybe_sample(), DataFrame (+23 more)
 
-### Community 5 - "FLAML Schemas"
-Cohesion: 0.05
-Nodes (61): FlamlArtifactsWriter, Path, Artifact generation for FLAML AutoML runs., Shared-path artifact writer for FLAML result bundles., Write FLAML artifacts to disk and return their paths., write_flaml_artifacts(), FlamlAutoMLError, FlamlConfigurationError (+53 more)
+### Community 5 - "flaml/service.py"
+Cohesion: 0.04
+Nodes (70): FlamlArtifactsWriter, Path, Artifact generation for FLAML AutoML runs., Shared-path artifact writer for FLAML result bundles., Write FLAML artifacts to disk and return their paths., write_flaml_artifacts(), FlamlAutoMLError, FlamlConfigurationError (+62 more)
 
-### Community 6 - "Prediction Schemas"
+### Community 6 - "test_prediction.py"
 Cohesion: 0.06
-Nodes (64): DataFrame, Path, Artifact generation for prediction jobs., Persist prediction artifacts and return their paths., _render_markdown(), write_prediction_artifacts(), Prediction service facade., build_batch_prediction_result() (+56 more)
+Nodes (67): Artifact generation for prediction jobs., Prediction service facade., Run one-row prediction., Run batch prediction., build_batch_prediction_result(), infer_input_source_type(), DataFrame, Batch prediction helpers. (+59 more)
 
-### Community 7 - "Providers Base"
+### Community 7 - "LLMProvider"
+Cohesion: 0.03
+Nodes (86): BaseExecutionBackend, Abstract execution backend interface., Common interface for all execution backends., Check that the backend is reachable / properly configured., _find_uvx(), Colab MCP execution backend – connects to Google Colab via MCP. This backend…, Return the path to ``uvx`` if it is installed, else *None*., Execution backend package – factory for backend instances. (+78 more)
+
+### Community 8 - "test_benchmark.py"
+Cohesion: 0.10
+Nodes (32): BenchmarkSettings, Configuration for baseline model benchmarking., LazyPredictBenchmarkService, Path, Benchmark service backed by LazyClassifier/LazyRegressor., MLflowBenchmarkTracker, Lightweight MLflow tracking wrapper for benchmark runs., classification_df() (+24 more)
+
+### Community 9 - "test_colab_mcp_backend.py"
+Cohesion: 0.11
+Nodes (14): build_backend(), Create the execution backend instance for the given enum value., LocalExecutionBackend, Any, ExecutionSettings, Settings related to the execution backend., Path, Tests for Colab MCP backend and notebook infrastructure. (+6 more)
+
+### Community 10 - "DatasetInputSpec"
+Cohesion: 0.08
+Nodes (26): load_dataset(), Public entry point for full dataset loading., DatasetInputSpec, model_validator, Canonical input contract for all supported ingestion paths., Return the human-readable locator for lineage and logging., Validate source-specific input requirements., _dataset_cache_signature() (+18 more)
+
+### Community 11 - "SavedModelMetadata"
 Cohesion: 0.05
-Nodes (37): LLMProvider, Enum, Enumerations for AutoTabML Studio configuration., Supported LLM providers., _section_provider(), Anthropic provider — model discovery and text generation via the official SDK.…, BaseProvider, ModelItem (+29 more)
+Nodes (66): discover_saved_benchmark_models(), load_saved_benchmark_model(), load_saved_benchmark_model_metadata_file(), Path, Trusted benchmark model discovery and loading helpers., Parse a benchmark saved-model metadata file, returning None when invalid., Discover trusted benchmark models from checksum-backed metadata sidecars., Load a trusted benchmark model from a skops artifact. (+58 more)
 
-### Community 8 - "Benchmark Tests"
+### Community 12 - "dataset_workspace.py"
 Cohesion: 0.06
-Nodes (47): BenchmarkSettings, Configuration for baseline model benchmarking., LazyPredictBenchmarkService, Path, Benchmark service backed by LazyClassifier/LazyRegressor., MLflowBenchmarkTracker, Lightweight MLflow tracking wrapper for benchmark runs., Backward-compatible benchmark tracker entrypoint. (+39 more)
+Nodes (59): Guided Auto Run page., _render_active_job(), render_autorun_page(), _detect_completed_steps(), _friendly_job_name(), _load_example_dataset(), Dashboard page – professional workspace home., Return the highest *completed* step number (0 = nothing done yet). Heuristic… (+51 more)
 
-### Community 9 - "Config Models"
-Cohesion: 0.05
-Nodes (48): BaseExecutionBackend, Any, Abstract execution backend interface., Common interface for all execution backends., Check that the backend is reachable / properly configured., Prepare any runtime context needed before a job runs., Execute a job payload and return results. Concrete implementations will be…, Colab MCP execution backend – connects to Google Colab via MCP. This backend… (+40 more)
+### Community 13 - "benchmark_page.py"
+Cohesion: 0.13
+Nodes (18): build_benchmark_run_key(), default_ranking_metric_for_task(), Streamlit page for LazyPredict benchmark execution and results., Return a stable session-state key for benchmark results., Resolve a LazyPredict model name to its sklearn-compatible estimator class., Render controls to retrain and save the best model from benchmark results., Return the default ranking metric to prefill in the UI., render_benchmark_page() (+10 more)
 
-### Community 10 - "UCI Loader Tests"
+### Community 14 - "url_loader.py"
+Cohesion: 0.10
+Nodes (33): Raised when a remote resource cannot be reached or inspected safely., RemoteAccessError, async_fetch_url_bytes(), async_fetch_url_to_temp_file(), DownloadedURLFile, _fetch_sniff_sample(), _fetch_sniff_sample_async(), fetch_url_text() (+25 more)
+
+### Community 15 - "PredictionWorkflowService"
 Cohesion: 0.08
-Nodes (25): load_dataset(), Public entry point for full dataset loading., DatasetInputSpec, model_validator, Canonical input contract for all supported ingestion paths., Return the human-readable locator for lineage and logging., Validate source-specific input requirements., Fetch a dataset from the UCI ML Repository by ID or name. (+17 more)
+Nodes (20): Page-layer services that keep Streamlit pages focused on rendering., ModelTestingEvaluation, ModelTestingRunResult, ModelTestingSelection, PredictionExecutionConfig, PredictionWorkflowService, Any, DataFrame (+12 more)
 
-### Community 11 - "Security Trusted Artifacts"
+### Community 16 - "mlflow_query.py"
 Cohesion: 0.07
-Nodes (56): discover_saved_benchmark_models(), load_saved_benchmark_model(), load_saved_benchmark_model_metadata_file(), Path, Trusted benchmark model discovery and loading helpers., Parse a benchmark saved-model metadata file, returning None when invalid., Discover trusted benchmark models from checksum-backed metadata sidecars., Load a trusted benchmark model from a skops artifact. (+48 more)
+Nodes (54): Raised when the MLflow model registry backend is not available., Raised when a model version cannot be found., RegistryUnavailableError, VersionNotFoundError, create_model_version(), create_registered_model(), delete_model_alias(), delete_model_version_tag() (+46 more)
 
-### Community 12 - "Dataset Workspace"
-Cohesion: 0.07
-Nodes (48): AutoTabML Studio – Streamlit entry point., build_local_path_input_spec(), build_url_input_spec(), _clear_dataset_results(), clear_loaded_datasets(), _dataset_identity_key(), get_active_dataset_name(), get_active_loaded_dataset() (+40 more)
+### Community 17 - "go_to_page"
+Cohesion: 0.10
+Nodes (35): _build_schema_frame(), DataFrame, Dedicated Streamlit page for dataset intake and active selection., render_dataset_intake_page(), _render_uci_source_details(), go_to_page(), Navigate to another registered page within the Streamlit app., Streamlit profiling / EDA page – run and view dataset profiling results. (+27 more)
 
-### Community 13 - "History Page"
-Cohesion: 0.07
-Nodes (54): Streamlit page for LazyPredict benchmark execution and results., Resolve a LazyPredict model name to its sklearn-compatible estimator class., Render controls to retrain and save the best model from benchmark results., render_benchmark_page(), _render_result_bundle(), _render_save_best_model(), _resolve_estimator_class(), Streamlit page for job and dataset run history. (+46 more)
-
-### Community 14 - "Ingestion URL Loader"
-Cohesion: 0.09
-Nodes (46): Base abstractions shared by all ingestion loaders., CSV and delimiter-aware text loader., In-memory pandas DataFrame loader., ParseFailureError, Custom exceptions for dataset ingestion., Raised when a source type or locator is unsupported., Raised when a remote resource cannot be reached or inspected safely., Raised when a source is reachable but could not be parsed. (+38 more)
-
-### Community 15 - "Services Prediction Workflow"
-Cohesion: 0.07
-Nodes (23): Page-layer services that keep Streamlit pages focused on rendering., ModelTestingEvaluation, ModelTestingRunResult, ModelTestingSelection, PredictionExecutionConfig, PredictionWorkflowService, Any, DataFrame (+15 more)
-
-### Community 16 - "Tracking MLflow Query"
+### Community 18 - "ValidationRuleConfig"
 Cohesion: 0.08
-Nodes (55): Raised when the MLflow model registry backend is not available., RegistryUnavailableError, Normalized MLflow model version metadata., RegistryVersionSummary, create_model_version(), create_registered_model(), delete_model_alias(), delete_model_version_tag() (+47 more)
+Nodes (28): Configuration for the data validation layer., ValidationSettings, User-facing configuration for a validation run., ValidationRuleConfig, constant_df(), duplicate_rows_df(), empty_df(), good_df() (+20 more)
 
-### Community 17 - "Notebook Page"
-Cohesion: 0.08
-Nodes (48): Guided Auto Run page., _render_active_job(), render_autorun_page(), _detect_completed_steps(), _friendly_job_name(), _load_example_dataset(), Dashboard page – professional workspace home., Return the highest *completed* step number (0 = nothing done yet). Heuristic… (+40 more)
-
-### Community 18 - "Validation Tests"
-Cohesion: 0.08
-Nodes (26): User-facing configuration for a validation run., ValidationRuleConfig, constant_df(), duplicate_rows_df(), empty_df(), good_df(), null_heavy_df(), DataFrame (+18 more)
-
-### Community 19 - "Notebooks Generator"
+### Community 19 - "generate_job_notebook"
 Cohesion: 0.09
 Nodes (38): _benchmark_cells(), _experiment_cells(), _flaml_cells(), generate_job_notebook(), _json_literal(), _json_string(), _markdown_cell(), NotebookGenerationError (+30 more)
 
-### Community 20 - "UCI Real Datasets Tests"
+### Community 20 - "test_uci_real_datasets.py"
+Cohesion: 0.11
+Nodes (26): auto_mpg_dataset(), _fetch_uci(), heart_disease_dataset(), iris_dataset(), DataFrame, fixture, Path, Real-dataset integration tests using UCI ML Repository. These tests fetch… (+18 more)
+
+### Community 21 - "JobRecord"
+Cohesion: 0.20
+Nodes (6): JobRecord, Local app job record used for dashboard/history convenience., JobRepository, Connection, Row, CRUD operations for job rows.
+
+### Community 22 - "PredictionHistoryStore"
+Cohesion: 0.12
+Nodes (12): PredictionHistoryStore, Path, Persist and query recent prediction jobs via newline-delimited JSON., Append one prediction-history record to disk., Return recent prediction jobs ordered newest-first., _FakeClassifier, _FakeRegressor, _make_loaded_model() (+4 more)
+
+### Community 23 - "IngestionSourceType"
 Cohesion: 0.08
-Nodes (36): profile_dataset(), DataFrame, Path, Convenience function: profile a DataFrame and optionally write artifacts., Path, Convenience function: validate and optionally write artifacts. Returns…, validate_dataset(), Exercise non-trivial rule config — uniqueness, range, category checks. (+28 more)
+Nodes (42): BaseLoader, Base abstractions shared by all ingestion loaders., Common load lifecycle for all dataset sources., Load, normalize, and enrich a dataset from the supplied input spec., Async counterpart of :meth:`load` for I/O-heavy loader implementations., Load only a preview slice where the underlying loader supports it., Async counterpart of :meth:`preview`., Ensure the loader is being used for a compatible source type. (+34 more)
 
-### Community 21 - "Storage Models"
-Cohesion: 0.10
-Nodes (35): main(), Path, Subprocess entry point for persistent Auto Run jobs., _update(), Persistent local subprocess jobs for long-running AutoML work., Local metadata storage exports., AppJobStatus, AppJobType (+27 more)
-
-### Community 22 - "Prediction Tests"
-Cohesion: 0.07
-Nodes (27): DataFrame, Resolve one batch request into a normalized dataframe and source label., resolve_batch_dataframe(), PredictionHistoryError, Raised when prediction history cannot be persisted or queried., PredictionHistoryStore, Path, Lightweight local prediction-history storage. (+19 more)
-
-### Community 23 - "Ingestion Base"
-Cohesion: 0.07
-Nodes (33): BaseLoader, Any, DataFrame, Return a raw DataFrame and source details before normalization., Async counterpart of :meth:`load_raw_dataframe`. Loaders with native async I/O…, Common load lifecycle for all dataset sources., Load, normalize, and enrich a dataset from the supplied input spec., Async counterpart of :meth:`load` for I/O-heavy loader implementations. (+25 more)
-
-### Community 24 - "Pyrightconfig Configuration"
+### Community 24 - "pyrightconfig.json"
 Cohesion: 0.04
 Nodes (45): exclude, ignore, include, pythonPlatform, pythonVersion, reportArgumentType, reportAttributeAccessIssue, reportCallIssue (+37 more)
 
-### Community 25 - "CLI Tests"
-Cohesion: 0.07
-Nodes (12): AppSettings, model_validator, Top-level application configuration with safe defaults., Return the verified stable fallback model id for the given (or current)…, Direct functional tests for cmd_predict_history., Direct functional tests for cmd_registry_show., Tests that exercise argparse parsing through main()., TestCmdPredictHistory (+4 more)
+### Community 25 - "AppSettings"
+Cohesion: 0.06
+Nodes (19): AppSettings, model_validator, setter, Top-level application configuration with safe defaults., Backward-compatible alias for the canonical MLflow settings section., Return the verified stable fallback model id for the given (or current)…, default_settings(), fixture (+11 more)
 
-### Community 26 - "Validation GX Runner"
-Cohesion: 0.07
-Nodes (37): Exception, Custom exceptions for the validation layer., Raised when the validation infrastructure cannot be initialized., Raised when a validation rule configuration is invalid., Base exception for validation failures., RuleConfigError, ValidationError, ValidationSetupError (+29 more)
+### Community 26 - "gx_runner.py"
+Cohesion: 0.08
+Nodes (35): Exception, Custom exceptions for the validation layer., Raised when the validation infrastructure cannot be initialized., Raised when a validation rule configuration is invalid., Base exception for validation failures., RuleConfigError, ValidationError, ValidationSetupError (+27 more)
 
-### Community 27 - "Registry Tests"
+### Community 27 - "RegistryService"
 Cohesion: 0.12
 Nodes (16): Execute a promotion action on a model version., High-level service for MLflow model registry operations., Get a single registered model by name., List all versions for a registered model., RegistryService, PromotionRequest, Request to promote a model version., _FakeModelVersion (+8 more)
 
-### Community 28 - "Backends Colab MCP Backend"
+### Community 28 - "ColabMCPExecutionBackend"
 Cohesion: 0.09
 Nodes (15): ColabMCPExecutionBackend, Any, Execute a job by calling Colab MCP tools. ``job_payload`` must include a…, Call ``open_colab_browser_connection`` to link to a Colab notebook., Return the currently available MCP tool names., Tear down the MCP session and server subprocess., Execution backend that delegates work to a Google Colab runtime via MCP., Check that ``uvx`` is installed and the MCP SDK is importable. (+7 more)
 
-### Community 29 - "PyCaret Service"
-Cohesion: 0.16
-Nodes (15): PyCaretExecutionError, Raised when a PyCaret operation fails., list_available_metrics(), Return normalized metric rows from the active experiment., ExperimentResultBundle, ModelSelectionSpec, Stable user-facing model selection reference., Complete experiment package for UI, CLI, tracking, and persistence. (+7 more)
+### Community 29 - "ExperimentResultBundle"
+Cohesion: 0.13
+Nodes (18): PyCaretExecutionError, Raised when a PyCaret operation fails., list_available_metrics(), Return normalized metric rows from the active experiment., _build_metrics(), _build_run_name(), Backward-compatible experiment tracker entrypoint., ExperimentResultBundle (+10 more)
 
-### Community 30 - "Prediction Base"
+### Community 30 - "PredictionService"
 Cohesion: 0.09
-Nodes (23): DriftBaseline, Open a span named ``name`` and yield a :class:`SpanLike`. When OpenTelemetry is…, start_span(), BasePredictionService, PredictionService, ABC, Path, Abstract prediction service contract. (+15 more)
+Nodes (33): DriftBaseline, DataFrame, Path, Persist prediction artifacts and return their paths., _render_markdown(), write_prediction_artifacts(), PredictionService, Path (+25 more)
 
-### Community 31 - "Prediction Selectors"
-Cohesion: 0.10
-Nodes (29): ModelLoader, ABC, Model-loading wrappers for prediction flows., Abstract model loader contract., Return True when the loader supports the requested source type., AvailableModelReference, Normalized model reference shown in discovery and selection UIs., build_mlflow_registered_model_uri() (+21 more)
+### Community 31 - "loader.py"
+Cohesion: 0.07
+Nodes (43): load_model_artifact(), Load a saved model artifact without rebuilding a full setup run., ModelDiscoveryError, ModelLoadError, Raised when a model source cannot be discovered or resolved cleanly., Raised when a prediction model cannot be loaded., Raised when a model artifact fails trust-boundary validation., TrustedArtifactError (+35 more)
 
-### Community 32 - "Storage Repositories Tests"
-Cohesion: 0.10
+### Community 32 - "AppMetadataStore"
+Cohesion: 0.11
 Nodes (18): AppMetadataStore, Path, Repository facade for local workspace metadata. The store composes the per-…, _dataset(), _job(), _now(), datetime, fixture (+10 more)
 
-### Community 33 - "Repositories Base"
-Cohesion: 0.08
-Nodes (16): DatasetRecord, Locally persisted dataset lineage record., BaseRepository, datetime, Path, Shared base utilities for storage repositories., Bundle of shared dependencies passed to every repository. The context holds the…, Common access patterns shared by every domain repository. Subclasses focus on… (+8 more)
+### Community 33 - "storage/models.py"
+Cohesion: 0.10
+Nodes (20): Local metadata storage exports., AppJobStatus, BatchItemStatus, BatchRunStatus, Enum, str, Typed records for the local app metadata database., Overall batch run status. (+12 more)
 
-### Community 34 - "Benchmark MLflow Tracking"
-Cohesion: 0.08
-Nodes (27): get_mlflow_module(), is_mlflow_available(), mlflow_exception_types(), BaseException, Shared base classes for modeling services, trackers, and artifact writers., Return True when mlflow is importable., Import and return the mlflow module., Return common MLflow exception types plus generic boundary failures. (+19 more)
+### Community 34 - "test_modeling_exception_handling.py"
+Cohesion: 0.07
+Nodes (37): get_mlflow_module(), is_mlflow_available(), mlflow_exception_types(), BaseException, Shared base classes for modeling services, trackers, and artifact writers., Return True when mlflow is importable., Import and return the mlflow module., Return common MLflow exception types plus generic boundary failures. (+29 more)
 
-### Community 35 - "Batch UCI Runner Scripts"
-Cohesion: 0.09
-Nodes (34): Counter, Monotonically increasing counter., BatchRunItemRecord, Tracks a single dataset within a batch run through validate/profile/benchmark., build_200_dataset_list(), main(), Batch UCI dataset runner – runs validate → profile → benchmark for 200 NEW UCI…, Combine the new UCI datasets + extra re-framed datasets to get 200. (+26 more)
+### Community 35 - "batch_uci_runner.py"
+Cohesion: 0.11
+Nodes (25): build_200_dataset_list(), main(), Batch UCI dataset runner – runs validate → profile → benchmark for 200 NEW UCI…, Combine the new UCI datasets + extra re-framed datasets to get 200., _build_resume_state(), _declared_target_from_item(), _detect_target_and_task(), main() (+17 more)
 
-### Community 36 - "CLI Smoke Tests"
+### Community 36 - "gather_with_concurrency"
 Cohesion: 0.10
 Nodes (25): gather_with_concurrency(), Any, BaseException, T, Small async concurrency helpers used across the app. These helpers exist so…, Run awaitables concurrently with at most ``limit`` running at a time. ``limit``…, Run a blocking ``func`` over many argument batches concurrently in threads.…, to_thread_many() (+17 more)
 
-### Community 37 - "UI Labels"
-Cohesion: 0.09
-Nodes (30): Path, Streamlit page for browsing all saved models with details., Render an expander card for a PyCaret experiment model., Render an expander card for a benchmark-saved model., Render an expander card for an MLflow registry model., Render an expander card for a FLAML-saved model., _render_benchmark_model_card(), _render_deployment_export() (+22 more)
+### Community 37 - "models_page.py"
+Cohesion: 0.16
+Nodes (20): Path, Streamlit page for browsing all saved models with details., Render an expander card for a PyCaret experiment model., Render an expander card for a benchmark-saved model., Render an expander card for an MLflow registry model., Render an expander card for a FLAML-saved model., Render a clearly restricted saved TabFM context., _render_benchmark_model_card() (+12 more)
 
-### Community 38 - "PyCaret Selectors"
-Cohesion: 0.09
-Nodes (29): infer_task_type(), Series, Infer a benchmark task type from the target values., Validate a target series for the requested benchmark task., validate_target(), generate_evaluation_plots(), pushd(), Path (+21 more)
-
-### Community 39 - "PyCaret Summary"
+### Community 38 - "ExperimentTaskType"
 Cohesion: 0.11
-Nodes (32): PyCaretConfigurationError, Raised when experiment configuration is invalid., add_custom_metric(), Metric catalog inspection and safe custom metric registration., Register a custom metric on the active experiment., Remove a previously registered custom metric., remove_custom_metric(), metric_sort_direction() (+24 more)
+Nodes (18): generate_evaluation_plots(), pushd(), Path, Evaluation helpers for plots and optional interactive evaluation., Temporarily change the working directory., Generate evaluation plot artifacts and continue past unsupported plots., _resolve_plot_path(), ExperimentTaskType (+10 more)
 
-### Community 40 - "UI Cache"
-Cohesion: 0.10
-Nodes (30): _build_flaml_run_key(), _metric_options_for_task(), Streamlit page for the FLAML AutoML workflow., render_flaml_automl_page(), _render_flaml_results(), _get_experiment_workflow_service_resource(), get_flaml_automl_service(), _get_flaml_automl_service_resource() (+22 more)
+### Community 39 - "pycaret/summary.py"
+Cohesion: 0.13
+Nodes (28): ExperimentSortDirection, Metric ordering direction., metric_sort_direction(), Return the expected ordering direction for a metric name., _coerce_bool(), coerce_float(), extract_mean_metrics(), _first_existing_column() (+20 more)
 
-### Community 41 - "Architecture Documentation"
+### Community 40 - "ui_cache.py"
+Cohesion: 0.11
+Nodes (32): Streamlit page for the model registry., Render the manual model registration form., _render_register_section(), render_registry_page(), _section_cache_controls(), _get_experiment_workflow_service_resource(), _get_flaml_automl_service_resource(), get_history_service() (+24 more)
+
+### Community 41 - "Architecture Guide"
 Cohesion: 0.06
 Nodes (35): Changelog, AutoTabML Container Service, Docker Compose Stack, Architecture Guide, Architecture Diagram HTML, Local-First Architecture, Reproducible Runs, Security Model (+27 more)
 
-### Community 42 - "CLI Tests"
+### Community 42 - "test_cli.py"
 Cohesion: 0.07
-Nodes (21): ProfilingMode, Profiling report modes., Tests for CLI helpers and default wiring., Direct functional tests for cmd_history_show., Direct functional tests for cmd_registry_register., Direct functional tests for cmd_registry_promote., Direct functional tests for cmd_compare_runs., Direct functional tests for cmd_experiment_run. (+13 more)
+Nodes (23): BaseModel, One startup diagnostic item., Initialization result for local app runtime resources., StartupIssue, StartupStatus, Tests for CLI helpers and default wiring., Direct functional tests for cmd_history_show., Direct functional tests for cmd_registry_register. (+15 more)
 
-### Community 43 - "Startup Components"
+### Community 43 - "app/errors.py"
+Cohesion: 0.08
+Nodes (27): Cross-cutting error-handling utilities. This module provides: *…, AutoTabML Studio – Streamlit entry point., glossary_definition(), metric_explanation(), Shared glossary, metric explainers, and inline term helpers. Provides plain-…, Return a plain-English explanation for a metric, or None if unknown., Return a plain-English definition for a glossary term, or None if unknown., Render a collapsible glossary in the sidebar. (+19 more)
+
+### Community 44 - "pycaret/errors.py"
+Cohesion: 0.21
+Nodes (12): Exception, PyCaretDependencyError, PyCaretExperimentError, PyCaretTargetError, PyCaretTrackingError, Custom exceptions for the PyCaret experiment layer., Raised when the optional PyCaret dependency is unavailable., Raised when the selected target column cannot be used. (+4 more)
+
+### Community 45 - "cuda_summary"
+Cohesion: 0.11
+Nodes (20): cuda_device_name(), cuda_summary(), _driver_probe(), is_cuda_available(), CUDA / GPU detection utilities for AutoTabML Studio., Lightweight probe for the NVIDIA driver library without importing torch. Loads…, Return True when a CUDA-capable GPU is reachable from the current Python…, Return the name of the first CUDA device, or None. (+12 more)
+
+### Community 46 - "UCIRepoLoader"
 Cohesion: 0.10
-Nodes (18): initialize_local_runtime(), BaseModel, Startup checks and local-runtime initialization for AutoTabML Studio., Report missing prerequisites for the Colab MCP backend., One startup diagnostic item., Initialization result for local app runtime resources., Prepare conservative local runtime resources and collect actionable diagnostics., StartupIssue (+10 more)
+Nodes (22): _import_ucimlrepo(), list_available_uci_datasets(), list_available_uci_datasets_async(), _parse_catalog_output(), Any, DataFrame, UCI ML Repository dataset loader via the ``ucimlrepo`` package., Fetch a dataset from the UCI ML Repository by ID or name. (+14 more)
 
-### Community 44 - "PyCaret Errors"
-Cohesion: 0.10
-Nodes (27): Cross-cutting error-handling utilities. This module provides: *…, Exception, PyCaretDependencyError, PyCaretExperimentError, PyCaretTargetError, PyCaretTrackingError, Custom exceptions for the PyCaret experiment layer., Raised when the optional PyCaret dependency is unavailable. (+19 more)
-
-### Community 45 - "Gpu Tests"
-Cohesion: 0.10
-Nodes (21): cuda_device_name(), cuda_summary(), _driver_probe(), is_cuda_available(), CUDA / GPU detection utilities for AutoTabML Studio., Lightweight probe for the NVIDIA driver library without importing torch. Loads…, Return True when a CUDA-capable GPU is reachable from the current Python…, Return the name of the first CUDA device, or None. (+13 more)
-
-### Community 46 - "Ingestion UCI Loader"
-Cohesion: 0.10
-Nodes (25): EmptyDatasetError, IngestionError, Exception, Raised when a loaded dataset has no usable rows or columns., Base exception for user-facing ingestion failures., normalize_duplicate_column_names(), normalize_to_pandas(), DataFrame (+17 more)
-
-### Community 47 - "Security Safe HTTP"
+### Community 47 - "safe_http.py"
 Cohesion: 0.15
 Nodes (30): _attempt_download_to_path(), _attempt_download_to_path_async(), _attempt_fetch(), _attempt_fetch_async(), _check_advertised_size(), _check_response_headers(), _normalize_content_type(), Path (+22 more)
 
-### Community 48 - "Storage SQLite Connector"
+### Community 48 - "SQLiteConnector"
 Cohesion: 0.10
-Nodes (15): Connection, Path, T, Reusable SQLite connector with safe defaults for local metadata storage., Open SQLite connections with consistent PRAGMAs and atomic write helpers., Yield a configured connection for read operations., Run a read-only callback using a configured connection., Run a write callback in an atomic transaction with lock retries. (+7 more)
+Nodes (16): Connection, Path, T, Reusable SQLite connector with safe defaults for local metadata storage., Open SQLite connections with consistent PRAGMAs and atomic write helpers., Yield a configured connection for read operations., Run a read-only callback using a configured connection., Run a write callback in an atomic transaction with lock retries. (+8 more)
 
-### Community 49 - "Registry Errors"
-Cohesion: 0.12
-Nodes (24): ModelNotFoundError, PromotionError, Exception, Custom exceptions for the model registry layer., Raised when a registered model cannot be found., Raised when a model version cannot be found., Raised when a promotion action cannot be completed., Base exception for registry failures. (+16 more)
+### Community 49 - "test_registry.py"
+Cohesion: 0.08
+Nodes (29): ModelNotFoundError, PromotionError, Exception, Custom exceptions for the model registry layer., Raised when a registered model cannot be found., Raised when a promotion action cannot be completed., Base exception for registry failures., RegistryError (+21 more)
 
-### Community 50 - "Tracking Description Generator"
-Cohesion: 0.11
-Nodes (15): _build_footer(), _build_llm_prompt(), generate_llm_description(), generate_template_description(), _generic_template(), _job_icon(), Any, Generate professional run descriptions for job runs. Two modes: - **Template**… (+7 more)
+### Community 50 - "AppJobType"
+Cohesion: 0.10
+Nodes (18): AppJobType, Local app job categories stored outside MLflow., _build_footer(), _build_llm_prompt(), generate_llm_description(), generate_template_description(), _generic_template(), _job_icon() (+10 more)
 
-### Community 51 - "Validation Schemas"
-Cohesion: 0.12
-Nodes (21): Path, Produce validation artifacts: JSON summary, Markdown report., Write validation artifacts to disk and return the bundle., _render_markdown(), write_artifacts(), Data validation layer for AutoTabML Studio., CheckSeverity, BaseModel (+13 more)
+### Community 51 - "validate_dataset"
+Cohesion: 0.10
+Nodes (28): record_validation_job(), Path, Produce validation artifacts: JSON summary, Markdown report., Write validation artifacts to disk and return the bundle., _render_markdown(), write_artifacts(), Data validation layer for AutoTabML Studio., CheckSeverity (+20 more)
 
-### Community 52 - "Prediction Page"
+### Community 52 - "safe_error_message"
 Cohesion: 0.14
-Nodes (23): Persist one uploaded file to the app temp area and return an input spec., uploaded_file_to_input_spec(), _prediction_task_type_input(), Streamlit page for local-first prediction workflows., Render the default saved-model browser. Advanced sources (manual path, MLflow)…, Render per-column inputs and return the row payload dict., _render_artifacts(), _render_batch_panel() (+15 more)
+Nodes (23): _prediction_task_type_input(), Streamlit page for local-first prediction workflows., Render the default saved-model browser. Advanced sources (manual path, MLflow)…, Render manual-path, MLflow run, and MLflow registry options inside a collapsed…, Render per-column inputs and return the row payload dict., _render_advanced_model_sources(), _render_artifacts(), _render_batch_panel() (+15 more)
 
-### Community 53 - "Experiment Workflow Service Tests"
+### Community 53 - "ExperimentWorkflowService"
 Cohesion: 0.16
 Nodes (14): ExperimentFormValues, ExperimentWorkflowService, Page-facing workflow service for the Train & Tune (PyCaret) page., User-entered form values from the experiment page., Verdict for a tuned-vs-baseline metric comparison., Encapsulate Train & Tune page orchestration., TuningInterpretation, _form_values() (+6 more)
 
-### Community 54 - "Prediction Errors"
-Cohesion: 0.15
-Nodes (25): ModelDiscoveryError, PredictionArtifactError, PredictionError, PredictionScoringError, PredictionValidationError, Exception, Prediction-layer errors for inference workflows., Raised when a model source cannot be discovered or resolved cleanly. (+17 more)
+### Community 54 - "test_hardening_smoke.py"
+Cohesion: 0.09
+Nodes (29): Benchmarking foundation for AutoTabML Studio., _build_metrics(), _build_run_name(), _log_artifacts(), Path, Backward-compatible benchmark tracker entrypoint., BenchmarkArtifactBundle, BenchmarkResultBundle (+21 more)
 
-### Community 55 - "Validation Rules"
+### Community 55 - "run_app_rules"
 Cohesion: 0.28
 Nodes (27): _check_allowed_categories(), _check_constant_columns(), _check_dtype_summary(), _check_duplicate_column_names(), _check_duplicate_rows(), _check_fully_null_columns(), _check_id_columns(), _check_leakage_heuristics() (+19 more)
 
-### Community 56 - "Base Components"
-Cohesion: 0.13
-Nodes (14): BaseTracker, Any, Logger, Shared MLflow tracking lifecycle for modeling bundles., Log params, metrics, and artifacts for one modeling bundle., Return True if the subclass-specific MLflow boundary is available., Return the subclass-specific MLflow module handle., Return the operation label used for structured error logging. (+6 more)
+### Community 56 - "BaseTracker"
+Cohesion: 0.09
+Nodes (19): BaseArtifacts, BaseTracker, Any, Logger, Path, Shared MLflow tracking lifecycle for modeling bundles., Log params, metrics, and artifacts for one modeling bundle., Return True if the subclass-specific MLflow boundary is available. (+11 more)
 
-### Community 57 - "Providers Tests"
-Cohesion: 0.11
-Nodes (7): GeminiProvider, Any, OpenAIProvider, Any, As of v0.2.0 the Gemini provider uses the official google-genai SDK which…, TestAllowedProviders, TestModelNormalization
-
-### Community 58 - "MLflow Query Batch Tests"
-Cohesion: 0.21
-Nodes (19): list_registered_models(), Return all registered models from the MLflow model registry. Uses paginated…, _clear_cache(), _CountingClient, _FakeRegisteredModel, _FakeVersion, _patch_client(), fixture (+11 more)
-
-### Community 59 - "Settings Page"
-Cohesion: 0.13
-Nodes (25): _find_uvx(), Return the path to ``uvx`` if it is installed, else *None*., Settings / Runtime configuration page for Streamlit., Lightweight GPU status for the Essentials tab — no controls., Simple on/off for run descriptions on the Essentials tab., Render the full Settings page., Always-visible privacy reminder at the top of Essentials., render_settings_page() (+17 more)
-
-### Community 60 - "Errors Tests"
-Cohesion: 0.11
-Nodes (23): AutoTabMLError, log_and_wrap(), log_exception(), Any, BaseException, Exception, Logger, Opt-in umbrella base class for application-level domain errors. (+15 more)
-
-### Community 61 - "Prediction Tests"
-Cohesion: 0.16
-Nodes (14): Stable saved-model metadata contract for future prediction flows., SavedModelMetadata, LocalPyCaretModelLoader, Path, Load local saved PyCaret model artifacts., load_saved_model_metadata_file(), Parse a saved-model metadata file, returning None when invalid., Path (+6 more)
-
-### Community 62 - "Observability Context"
-Cohesion: 0.13
-Nodes (22): bind_context(), correlation_scope(), current_context(), _empty_context_default(), new_correlation_id(), Any, Correlation context for log/metric/trace records. A small wrapper around…, Return a *copy* of the current correlation context mapping. (+14 more)
-
-### Community 63 - "Observability Metrics"
-Cohesion: 0.11
-Nodes (14): get_metrics_backend(), InMemoryMetricsBackend, MetricsBackend, NoopMetricsBackend, Protocol, Install ``backend`` as the active sink and return the previous one., Return the currently installed metrics backend., Strategy interface implemented by metric exporters. (+6 more)
-
-### Community 64 - "Registry Components"
-Cohesion: 0.13
-Nodes (17): build_streamlit_navigation(), default_page_label(), get_nav_sections(), get_page_by_label(), get_page_registry(), PageSpec, Central registry for Streamlit page navigation and rendering., Declarative Streamlit page registration. (+9 more)
-
-### Community 65 - "Safe HTTP Async Tests"
+### Community 57 - "FlamlConfig"
 Cohesion: 0.15
-Nodes (16): BaseException, Async counterpart of :func:`safe_fetch` with identical retry semantics., Fetch many URLs concurrently with bounded parallelism. Per-URL guards (SSRF,…, safe_fetch_async(), safe_fetch_many_async(), public_dns(), asyncio, fixture (+8 more)
+Nodes (6): FlamlConfig, Top-level FLAML AutoML configuration., _FakeAutoML, _make_service(), Minimal mock of flaml.AutoML for unit tests., TestFlamlService
 
-### Community 66 - "Safe HTTP Tests"
+### Community 58 - "list_registered_models"
+Cohesion: 0.19
+Nodes (21): list_registered_models(), Return all registered models from the MLflow model registry. Uses paginated…, _read_registry_cache(), _write_registry_cache(), _clear_cache(), _CountingClient, _FakeRegisteredModel, _FakeVersion (+13 more)
+
+### Community 59 - "CheckpointResolver"
+Cohesion: 0.13
+Nodes (20): CheckpointResolver, CheckpointSpec, ModelDownloadRequiredError, Any, Path, RuntimeError, Pinned Hugging Face checkpoint resolution with explicit download consent., Immutable model repository identity. (+12 more)
+
+### Community 60 - "log_exception"
+Cohesion: 0.10
+Nodes (35): AutoTabMLError, log_and_wrap(), log_exception(), Any, BaseException, Exception, Logger, Opt-in umbrella base class for application-level domain errors. (+27 more)
+
+### Community 61 - "TabFMConfig"
+Cohesion: 0.15
+Nodes (17): BaseModel, Configuration for a local TabFM holdout evaluation., TabFMConfig, Forecast one or more independent regular time series with TimesFM 2.5., TimesFMService, ModelFactory, _cached_resolver(), _Classifier (+9 more)
+
+### Community 62 - "observability/__init__.py"
 Cohesion: 0.14
-Nodes (7): Fetch ``url`` using the SSRF-resistant, bounded HTTP client. Retries are…, safe_fetch(), mock, MonkeyPatch, parametrize, TestRedirectGuards, TestSSRFHostBlocking
+Nodes (22): bind_context(), clear_context(), correlation_scope(), current_context(), _empty_context_default(), new_correlation_id(), Any, Correlation context for log/metric/trace records. A small wrapper around… (+14 more)
 
-### Community 67 - "Tracking Schemas"
-Cohesion: 0.13
-Nodes (20): Path, Artifact generation for comparison bundles., Write comparison artifacts and return their paths., _render_markdown(), write_comparison_artifacts(), Run history, comparison, and MLflow query layer for AutoTabML Studio., ComparisonBundle, Enum (+12 more)
+### Community 63 - "InMemoryMetricsBackend"
+Cohesion: 0.10
+Nodes (17): get_metrics_backend(), InMemoryMetricsBackend, MetricsBackend, NoopMetricsBackend, Protocol, Install ``backend`` as the active sink and return the previous one., Return the currently installed metrics backend., Strategy interface implemented by metric exporters. (+9 more)
 
-### Community 68 - "Tracking Filters"
+### Community 64 - "registry.py"
 Cohesion: 0.15
-Nodes (17): build_mlflow_filter_string(), Enum, str, Filtering and sorting helpers for run history queries., Fields available for sorting run history., Ascending or descending sort., Declarative filter for run history queries., Build an MLflow-compatible filter string from a RunHistoryFilter. (+9 more)
+Nodes (15): build_streamlit_navigation(), default_page_label(), get_nav_sections(), get_page_by_label(), PageSpec, Central registry for Streamlit page navigation and rendering., Declarative Streamlit page registration., Return pages grouped by section, preserving section order. Returns a list of… (+7 more)
 
-### Community 69 - "Tracking Tests"
-Cohesion: 0.18
-Nodes (11): HistoryService, Fetch extended detail for a single run., Resolve experiment name(s) to ids, building a name lookup map., High-level service for querying and inspecting run history., _FakeMLflowExperiment, _FakeMLflowRun, _patch_mlflow_query(), Patch mlflow_query module functions for testing. (+3 more)
+### Community 65 - "safe_fetch_async"
+Cohesion: 0.14
+Nodes (19): BaseException, RuntimeError, Async counterpart of :func:`safe_fetch` with identical retry semantics., Fetch many URLs concurrently with bounded parallelism. Per-URL guards (SSRF,…, Async counterpart of :func:`safe_download_to_path`., safe_download_to_path_async(), safe_fetch_async(), safe_fetch_many_async() (+11 more)
 
-### Community 70 - "Ingestion Metadata"
+### Community 66 - "SafeFetchPolicy"
+Cohesion: 0.11
+Nodes (24): Fetch ``url`` using the SSRF-resistant, bounded HTTP client. Retries are…, Convenience wrapper returning decoded text., Raised when a response declares a disallowed Content-Type., Async convenience wrapper returning decoded text., Tunable knobs for ``safe_fetch``., safe_fetch(), safe_fetch_text(), safe_fetch_text_async() (+16 more)
+
+### Community 67 - "RunHistoryItem"
+Cohesion: 0.13
+Nodes (24): Path, Artifact generation for comparison bundles., Write comparison artifacts and return their paths., _render_markdown(), write_comparison_artifacts(), _check_comparability(), _compute_config_differences(), _compute_metric_deltas() (+16 more)
+
+### Community 68 - "test_tracking.py"
+Cohesion: 0.12
+Nodes (23): cmd_history_list(), List MLflow runs from the history center., Enum, str, Filtering and sorting helpers for run history queries., Fields available for sorting run history., Ascending or descending sort., RunSortField (+15 more)
+
+### Community 69 - "HistoryService"
+Cohesion: 0.25
+Nodes (9): HistoryService, High-level service for querying and inspecting run history., _FakeMLflowExperiment, _FakeMLflowRun, _patch_mlflow_query(), Patch mlflow_query module functions for testing., Regression tests for run-ID prefix resolution (HistoryService.resolve_run_id)., TestHistoryService (+1 more)
+
+### Community 70 - "test_ingestion_utils.py"
 Cohesion: 0.13
 Nodes (18): compute_content_hash(), compute_schema_hash(), detect_file_extension(), extract_dataset_metadata(), Any, DataFrame, Metadata extraction and deterministic hashing for ingested datasets., Convert values to a stable, JSON-serializable representation. (+10 more)
 
-### Community 71 - "PyCaret MLflow Tracking"
-Cohesion: 0.12
-Nodes (16): _build_metrics(), _build_params(), _build_run_name(), _get_mlflow_module(), is_mlflow_available(), _log_artifacts(), _mlflow_exception_types(), MLflowExperimentTracker (+8 more)
+### Community 71 - "ProfilingResultSummary"
+Cohesion: 0.14
+Nodes (13): ProfilingResultSummary, Quick-access summary extracted from a profiling run., Any, DataFrame, Path, Suppress known non-actionable third-party warnings during profiling., Profiling service backed by ydata-profiling., _suppress_profiling_runtime_noise() (+5 more)
 
-### Community 72 - "Release Metadata"
+### Community 72 - "validate_public_release_metadata"
 Cohesion: 0.15
 Nodes (18): check_public_release_metadata(), _collect_contacts(), _has_license_metadata(), load_project_metadata(), main(), _normalized(), Any, Path (+10 more)
 
-### Community 73 - "Safe CSV Properties Tests"
-Cohesion: 0.14
-Nodes (19): dataframe_to_safe_csv(), Any, DataFrame, Safe CSV export helpers. Excel and similar spreadsheet tools can evaluate cells…, Return a copy safe for CSV export. Sanitizes string cells, column labels, index…, Serialize ``dataframe`` to CSV with formula-safe cells and strict quoting., sanitize_csv_dataframe(), _sanitize_csv_scalar() (+11 more)
+### Community 73 - "history_page.py"
+Cohesion: 0.08
+Nodes (33): Streamlit page for job and dataset run history., Render the MLflow run description panel for a job., Persist the generated description into job metadata., Optional collapsible section to browse raw MLflow runs., render_history_page(), _render_job_description(), _render_mlflow_section(), _save_description_to_job() (+25 more)
 
-### Community 74 - "Ingestion Tests"
-Cohesion: 0.16
-Nodes (10): ExcelLoader, Any, DataFrame, Path, Load local or remote Excel workbooks., MonkeyPatch, Path, TestBoundedCSVReading (+2 more)
+### Community 74 - "ExcelLoader"
+Cohesion: 0.19
+Nodes (10): ExcelLoader, Any, DataFrame, Path, Load local or remote Excel workbooks., KaggleLoader, Any, DataFrame (+2 more)
 
-### Community 75 - "Experiment Page"
-Cohesion: 0.13
-Nodes (21): pycaret_install_guidance(), Return a user-facing installation hint for environments without PyCaret., build_experiment_run_key(), default_compare_metric_for_task(), default_plot_ids_for_task(), default_tracking_mode(), default_tune_metric_for_task(), Streamlit page for the Train & Tune workflow (PyCaret). (+13 more)
+### Community 75 - "experiment_page.py"
+Cohesion: 0.07
+Nodes (44): MLflowTrackingMode, How MLflow tracking should be handled for experiments., _format_pycaret_import_error(), is_pycaret_available(), _probe_pycaret_import_error(), Exception, pycaret_install_guidance(), PyCaret setup helpers and experiment construction. (+36 more)
 
-### Community 76 - "Observability Metrics"
-Cohesion: 0.12
-Nodes (15): Gauge, Histogram, _merge_labels(), _Metric, Any, Pluggable metrics façade. Three primitive types are exposed – :class:`Counter`,…, Shared base – holds a metric name and forwards to the active backend., Point-in-time numeric value. (+7 more)
+### Community 76 - "metrics.py"
+Cohesion: 0.10
+Nodes (20): Counter, Gauge, Histogram, _merge_labels(), _Metric, Any, Pluggable metrics façade. Three primitive types are exposed – :class:`Counter`,…, Shared base – holds a metric name and forwards to the active backend. (+12 more)
 
-### Community 77 - "UA Analysis Artifacts"
+### Community 77 - "update-graph.cjs"
 Cohesion: 0.08
 Nodes (18): assignedIds, changed, configLayer, dataLayer, docsLayer, fs, graph, graphPath (+10 more)
 
-### Community 78 - "Compare Page"
-Cohesion: 0.13
-Nodes (21): _find_model_column(), _find_score_column(), _leaderboard_rows_to_df(), _load_leaderboard(), DataFrame, Streamlit page for comparing algorithm performance on a dataset., Try to load a leaderboard from the job's artifact paths., Convert a list of leaderboard row dicts to a clean DataFrame. (+13 more)
+### Community 78 - "compare_page.py"
+Cohesion: 0.23
+Nodes (14): _find_model_column(), _find_score_column(), _leaderboard_rows_to_df(), _load_leaderboard(), DataFrame, Streamlit page for comparing algorithm performance on a dataset., Try to load a leaderboard from the job's artifact paths., Convert a list of leaderboard row dicts to a clean DataFrame. (+6 more)
 
-### Community 79 - "Repositories Batch Runs"
+### Community 79 - "BatchRunRecord"
 Cohesion: 0.13
 Nodes (8): BatchRunRecord, Tracks an overall batch execution run., Connection, T, BatchRunRepository, Connection, Row, CRUD operations for batch runs and their items.
 
-### Community 80 - "Tracking Tests"
-Cohesion: 0.19
-Nodes (9): ComparisonService, Produce structured comparisons between two runs., Return a compact one-line summary of a run., run_summary_line(), _make_run(), Path, TestComparisonArtifacts, TestComparisonService (+1 more)
+### Community 80 - "ComparisonService"
+Cohesion: 0.26
+Nodes (6): ComparisonService, Produce structured comparisons between two runs., _make_run(), Path, TestComparisonArtifacts, TestComparisonService
 
-### Community 81 - "Capture Screenshots Scripts"
+### Community 81 - "capture_screenshots.py"
 Cohesion: 0.18
 Nodes (22): Page, capture(), choose_streamlit_option(), main(), navigate_to_page(), Path, Automated screenshot capture for AutoTabML Studio using Playwright. Launches a…, Navigate to Profiling and run it. (+14 more)
 
-### Community 82 - "Verify Optional Deps Scripts"
+### Community 82 - "verify_optional_deps.py"
+Cohesion: 0.37
+Nodes (13): is_lazypredict_available(), Return True if lazypredict is importable., main(), _make_iris_df(), DataFrame, _result(), _section(), verify_gx() (+5 more)
+
+### Community 83 - "test_observability.py"
+Cohesion: 0.13
+Nodes (22): configure_observability_logging(), CorrelationFilter, install_correlation_filter(), JsonFormatter, Logger, Structured (JSON) logging with correlation injection. The implementation is…, Attach :class:`CorrelationFilter` to ``logger`` (root by default). Idempotent:…, Configure the root logger for structured/observable output. Parameters… (+14 more)
+
+### Community 84 - "PredictionRequest"
+Cohesion: 0.05
+Nodes (29): BasePredictionService, ABC, Abstract prediction service contract., Return discoverable local saved models., Load a normalized model for prediction., LocalTabFMContextLoader, MLflowModelLoader, ModelLoader (+21 more)
+
+### Community 85 - "LocalArtifactManager"
+Cohesion: 0.16
+Nodes (8): LocalArtifactManager, DataFrame, Path, Create, write, and conservatively clean local workspace artifacts., _artifact_settings_for(), Path, Tests for centralized local artifact lifecycle management., TestLocalArtifactManager
+
+### Community 86 - "autorun.py"
 Cohesion: 0.20
-Nodes (16): is_lazypredict_available(), Return True if lazypredict is importable., main(), _make_iris_df(), DataFrame, _result(), _section(), verify_gx() (+8 more)
+Nodes (15): AutoRunConfig, AutoRunMode, AutoRunPlan, AutoRunResult, BaseModel, Enum, str, Guided, engine-aware Auto Run planning and execution. (+7 more)
 
-### Community 83 - "Observability Tests"
-Cohesion: 0.13
-Nodes (21): clear_context(), Reset the correlation context to an empty mapping., JsonFormatter, Render :class:`LogRecord` as a single-line JSON document. The output is stable…, Decorator that wraps a function call in :func:`start_span`., traced(), F, _make_record() (+13 more)
+### Community 87 - "._make_args"
+Cohesion: 0.10
+Nodes (9): Regression: experiment-tune/evaluate/save must catch setup errors cleanly., Direct functional tests for cmd_validate., Direct functional tests for cmd_history_list., Direct functional tests for cmd_profile., TestCmdBenchmark, TestCmdHistoryList, TestCmdProfile, TestCmdValidate (+1 more)
 
-### Community 84 - "Prediction Loader"
-Cohesion: 0.13
-Nodes (11): ModelLoadError, Raised when a prediction model cannot be loaded., Raised when a model artifact fails trust-boundary validation., TrustedArtifactError, MLflowModelLoader, Any, Load MLflow-backed pyfunc models., BaseTrustedArtifactError (+3 more)
-
-### Community 85 - "Artifacts Manager"
-Cohesion: 0.20
-Nodes (6): LocalArtifactManager, DataFrame, Path, Create, write, and conservatively clean local workspace artifacts., Return a filesystem-safe stem for generated artifact filenames., safe_artifact_stem()
-
-### Community 86 - "Autorun Components"
-Cohesion: 0.15
-Nodes (19): AutoRunMode, AutoRunPlan, AutoRunResult, BaseModel, Enum, str, Guided, engine-aware Auto Run planning and execution., evaluate_model() (+11 more)
-
-### Community 87 - "CLI Tests"
-Cohesion: 0.13
-Nodes (7): Regression: experiment-tune/evaluate/save must catch setup errors cleanly., Direct functional tests for cmd_history_list., Direct functional tests for cmd_profile., TestCmdBenchmark, TestCmdHistoryList, TestCmdProfile, TestExperimentCommandsErrorHandling
-
-### Community 88 - "CLI Tests"
+### Community 88 - "Path"
 Cohesion: 0.17
 Nodes (7): _build_input_spec(), Build an ingestion input spec from a CLI dataset locator., Path, Happy-path coverage for experiment-tune, experiment-evaluate, experiment-save., TestBuildInputSpec, TestExperimentCommandsHappyPath, TestCLIUCILocator
 
-### Community 89 - "Config Tests"
+### Community 89 - "Path"
 Cohesion: 0.16
 Nodes (7): Persist settings to ~/.autotabml/settings.json (secrets excluded)., save_settings(), Save non-secret settings to disk., Path, As of v0.2.0 the project builds with hatchling; the profiling extra no longer…, TestPackagingMetadata, TestSettingsPersistence
 
-### Community 90 - "Tracking Compare Service"
+### Community 90 - "RunHistoryFilter"
+Cohesion: 0.15
+Nodes (11): build_mlflow_filter_string(), Declarative filter for run history queries., Build an MLflow-compatible filter string from a RunHistoryFilter., RunHistoryFilter, Fetch extended detail for a single run., Resolve experiment name(s) to ids, building a name lookup map., Apply filters that cannot be expressed in MLflow filter syntax., List runs with optional filtering and sorting. (+3 more)
+
+### Community 91 - "test_product_improvements.py"
+Cohesion: 0.33
+Nodes (8): plan_auto_run(), DataFrame, suggest_targets(), integration, Path, test_auto_run_plan_requires_confirmation_ready_target(), test_auto_run_saves_reloads_and_predicts(), test_background_job_cancel_is_persisted()
+
+### Community 92 - "_FakeExperimentBase"
+Cohesion: 0.10
+Nodes (5): classification_df(), _FakeExperimentBase, DataFrame, fixture, regression_df()
+
+### Community 93 - "_cli_error"
 Cohesion: 0.17
-Nodes (15): _check_comparability(), _compute_config_differences(), _compute_metric_deltas(), Side-by-side run comparison service., Compare two runs and return a structured bundle with deltas and warnings., Apply filters that cannot be expressed in MLflow filter syntax., List runs with optional filtering and sorting., _sort_runs() (+7 more)
+Nodes (21): _cli_error(), cmd_benchmark(), cmd_deploy_export(), cmd_drift_check(), cmd_explain(), cmd_profile(), cmd_tabfm_run(), cmd_timesfm_forecast() (+13 more)
 
-### Community 91 - "Autorun Components"
-Cohesion: 0.19
-Nodes (17): AutoRunConfig, plan_auto_run(), Any, DataFrame, Path, Run FLAML on a training split and evaluate on an untouched holdout., run_auto_run(), suggest_targets() (+9 more)
-
-### Community 92 - "Ingestion Kaggle Loader"
-Cohesion: 0.19
-Nodes (10): CSVLoader, Any, DataFrame, Path, Load local or remote delimited tabular files into pandas., KaggleLoader, Any, DataFrame (+2 more)
-
-### Community 93 - "Security Safe HTTP"
-Cohesion: 0.21
-Nodes (17): Convenience wrapper returning decoded text., Raised when a remote response exceeds the configured byte cap., Raised when a response declares a disallowed Content-Type., Async convenience wrapper returning decoded text., Tunable knobs for ``safe_fetch``., ResponseTooLargeError, safe_fetch_text(), safe_fetch_text_async() (+9 more)
-
-### Community 94 - "Drift Components"
+### Community 94 - "drift.py"
 Cohesion: 0.22
 Nodes (17): build_drift_baseline(), _categorical_proportions(), compare_drift(), DriftLevel, DriftReport, FeatureBaseline, FeatureDrift, _level() (+9 more)
 
-### Community 95 - "Tracking Errors"
-Cohesion: 0.14
-Nodes (16): ComparisonError, ExperimentNotFoundError, Exception, Custom exceptions for the tracking and history layer., Raised when MLflow tracking is not available or configured., Raised when a requested run cannot be found., Raised when a requested MLflow experiment cannot be found., Raised when a comparison cannot be completed. (+8 more)
+### Community 95 - "tracking/errors.py"
+Cohesion: 0.21
+Nodes (12): ComparisonError, ExperimentNotFoundError, Exception, Custom exceptions for the tracking and history layer., Raised when MLflow tracking is not available or configured., Raised when a requested run cannot be found., Raised when a requested MLflow experiment cannot be found., Raised when a comparison cannot be completed. (+4 more)
 
-### Community 96 - "Ingestion HTML Table Loader"
-Cohesion: 0.24
-Nodes (6): HTMLTableLoader, Any, DataFrame, Extract HTML tables from a URL and return one table as a DataFrame., Any, DataFrame
+### Community 96 - "CSVLoader"
+Cohesion: 0.13
+Nodes (17): CSVLoader, Any, DataFrame, Path, Load local or remote delimited tabular files into pandas., ParseFailureError, Raised when a source is reachable but could not be parsed., get_loader() (+9 more)
 
-### Community 97 - "Security Tests"
+### Community 97 - "redact_key_in_text"
 Cohesion: 0.17
 Nodes (7): LogRecord, Replace anything that looks like an API key or credential in free text., redact_key_in_text(), Tests for security / masking helpers., TestLoggingRedaction, TestRedactKeyInText, TestSafeErrorMessage
 
-### Community 98 - "Tracking Tests"
-Cohesion: 0.17
-Nodes (7): _extract_dataset_name(), _extract_primary_metric(), _infer_run_type(), _normalize_run(), _safe_run_status(), TestFlamlRunType, TestMLflowNormalization
-
-### Community 99 - "Explainability Components"
+### Community 99 - "explain_global"
 Cohesion: 0.24
-Nodes (15): explain_global(), explain_prediction(), FeatureContribution, ModelExplanation, Any, BaseModel, DataFrame, Series (+7 more)
+Nodes (15): explain_global(), explain_prediction(), FeatureContribution, ModelExplanation, Any, BaseModel, DataFrame, ndarray (+7 more)
 
-### Community 100 - "State Session"
-Cohesion: 0.17
-Nodes (7): Any, setter, Mutable runtime state for the current user session., Return the session-only API key for the requested provider., Store a provider-specific API key in session memory only., Clear fetched models and selection when execution context changes., RuntimeState
+### Community 100 - "TimesFMConfig"
+Cohesion: 0.21
+Nodes (18): _backtest_group(), _backtest_metrics(), _build_model(), _forecast_group(), _output_frame(), _prepare_series(), Any, BaseModel (+10 more)
 
-### Community 101 - "Ingestion Async Tests"
+### Community 101 - "load_dataset_async"
 Cohesion: 0.26
 Nodes (8): load_dataset_async(), Async public entry point for full dataset loading., asyncio, mock, MonkeyPatch, Path, TestAsyncIngestionFactory, TestAsyncUCIHelpers
 
-### Community 102 - "Providers Anthropic Provider"
-Cohesion: 0.17
-Nodes (5): AnthropicProvider, Any, Verify that each provider is now backed by the official SDK client. The SDKs…, v0.2.0: ``httpx`` is no longer used by any LLM provider. (``httpx`` is still…, TestOfficialSDKIntegration
+### Community 102 - "foundation_models_page.py"
+Cohesion: 0.18
+Nodes (18): log_foundation_run(), Any, Path, Minimal MLflow summary logging for foundation-model runs., Log aggregate configuration, metrics, and the non-sensitive summary artifact., _dependency_status(), _download_artifacts(), cache_resource (+10 more)
 
-### Community 103 - "Repositories Saved Models"
+### Community 103 - "SavedLocalModelRecord"
 Cohesion: 0.20
 Nodes (8): BaseModel, Local saved-model metadata kept outside MLflow registry state., SavedLocalModelRecord, Connection, Path, Row, CRUD operations for saved local model rows., SavedModelRepository
 
-### Community 104 - "E2E Local Smoke Tests"
-Cohesion: 0.15
-Nodes (11): _classification_csv(), fixture, parametrize, Path, Verify the startup MLflow URI validation catches bad config., Write a small but realistic classification dataset (no network)., Verify the real startup path creates all expected resources., Common setup: settings, metadata store, loaded dataset. (+3 more)
+### Community 104 - "test_e2e_local_smoke.py"
+Cohesion: 0.12
+Nodes (12): is_ydata_available(), Return True if ydata-profiling is importable., Real end-to-end local smoke test — no mocks for core paths. Unlike…, Verify the startup MLflow URI validation catches bad config., Verify each optional dep has a clean availability check., Verify the real startup path creates all expected resources., Exercise the real pipeline — no mocks for any service code., _sqlite_uri() (+4 more)
 
-### Community 105 - "Storage Migrations"
+### Community 105 - "migrations.py"
 Cohesion: 0.31
 Nodes (13): apply_migrations(), _detect_legacy_version(), _ensure_version_table(), _get_applied_versions(), Migration, Connection, Incremental SQLite schema migrations for the local metadata store., Create the version table and apply any pending schema migrations. (+5 more)
 
-### Community 106 - "Repositories Projects"
+### Community 106 - "ProjectRecord"
 Cohesion: 0.21
 Nodes (7): ProjectRecord, Local project metadata for workspace navigation convenience., ProjectRepository, Connection, Row, CRUD operations for project rows., Upsert using an existing connection (used during initial migration).
 
-### Community 107 - "Logging Config"
-Cohesion: 0.21
-Nodes (11): configure_logging(), _configure_noisy_dependency_loggers(), Logging configuration for AutoTabML Studio. Thin compatibility shim over…, Reduce non-actionable third-party log noise in normal app and batch runs., Configure structured logging to stderr (12-factor compliant). Honors the…, configure_observability_logging(), Configure the root logger for structured/observable output. Parameters…, Plain-text formatter that scrubs obvious secrets from the message. (+3 more)
-
-### Community 108 - "Providers Tests"
-Cohesion: 0.23
-Nodes (9): _fetch_models(), Run an async coroutine from sync Streamlit code. Streamlit may already have a…, Build a provider instance and fetch models, updating state., _run_async(), _section_models(), Pick the best default from a fetched model list. 1. If the hardcoded default…, resolve_default_model(), _make_items() (+1 more)
-
-### Community 109 - "UI Cache"
+### Community 107 - "configure_logging"
 Cohesion: 0.24
-Nodes (12): _dataset_cache_signature(), _load_dataset_cached(), load_dataset_for_ui(), Any, Return a stable cache key payload for dataset loads when possible., Load a dataset with a Streamlit cache when the input is cacheable., MonkeyPatch, Path (+4 more)
+Nodes (8): configure_logging(), _configure_noisy_dependency_loggers(), Logging configuration for AutoTabML Studio. Thin compatibility shim over…, Reduce non-actionable third-party log noise in normal app and batch runs., Configure structured logging to stderr (12-factor compliant). Honors the…, Plain-text formatter that scrubs obvious secrets from the message., _RedactingTextFormatter, test_configure_logging_suppresses_non_actionable_dependency_noise()
 
-### Community 110 - "Provenance Components"
-Cohesion: 0.32
-Nodes (12): build_provenance(), _engine_packages(), _git_dirty(), _git_value(), _json_safe(), _package_version(), Any, Path (+4 more)
+### Community 108 - "cli.py"
+Cohesion: 0.18
+Nodes (18): cmd_auto_run(), cmd_batch_history(), cmd_batch_show(), cmd_job_cancel(), cmd_job_list(), cmd_job_status(), CLI entry points for AutoTabML Studio. Usage: python -m app.cli --version…, List batch run history from the local database. (+10 more)
 
-### Community 112 - "Predictions Page"
-Cohesion: 0.24
-Nodes (10): Streamlit page for model testing – evaluate a trained model on real-world data., Show evaluation metrics when ground-truth labels are available., _render_evaluation_metrics(), render_model_testing_page(), Unified Predictions page — combines Score New Data and Test & Evaluate., Delegate to the existing prediction page, skipping the outer title., Delegate to the existing Model Testing page, skipping the outer title., _render_evaluate_tab() (+2 more)
+### Community 109 - "test_list_cached_registered_models_uses_cache_until_invalidated"
+Cohesion: 0.53
+Nodes (6): MonkeyPatch, Path, _settings_for(), test_get_prediction_service_reuses_resource_instance(), test_list_cached_registered_models_uses_cache_until_invalidated(), test_load_dataset_for_ui_uses_cache_until_invalidated()
 
-### Community 113 - "Registry Tests"
-Cohesion: 0.17
-Nodes (7): List all registered models., BaseModel, Normalized MLflow registered model metadata., RegistryModelSummary, _read_registry_cache(), _write_registry_cache(), TestRegistrySchemas
+### Community 110 - "build_provenance"
+Cohesion: 0.28
+Nodes (14): build_provenance(), _engine_packages(), _git_dirty(), _git_value(), _json_safe(), _package_version(), Any, Path (+6 more)
 
-### Community 114 - "Tracking Tests"
+### Community 112 - "model_testing_page.py"
+Cohesion: 0.16
+Nodes (16): Streamlit page for model testing – evaluate a trained model on real-world data., Show evaluation metrics when ground-truth labels are available., _render_evaluation_metrics(), render_model_testing_page(), Unified Predictions page — combines Score New Data and Test & Evaluate., Delegate to the existing prediction page, skipping the outer title., Delegate to the existing Model Testing page, skipping the outer title., _render_evaluate_tab() (+8 more)
+
+### Community 113 - "ArtifactKind"
+Cohesion: 0.18
+Nodes (15): ArtifactKind, str, Supported local artifact directory kinds., BenchmarkArtifactsWriter, Path, Artifact generation for benchmark runs., Shared-path artifact writer for benchmark result bundles., Write benchmark artifacts to disk and return their paths. (+7 more)
+
+### Community 114 - "RunHistorySort"
 Cohesion: 0.29
 Nodes (7): BaseModel, Sort specification for run history queries., RunHistorySort, _build_order_by(), Translate a :class:`RunHistorySort` into MLflow ``order_by`` clauses. Only…, Validates that history sorting is correct and not partial-dataset., TestHistoryServiceSorting
 
-### Community 115 - "Autotabml Social Preview Documentation"
+### Community 115 - "AutoTabML Studio Social Preview"
 Cohesion: 0.17
 Nodes (12): AutoTabML Studio Social Preview, Benchmarking, CLI workflows, Dashboard, Local-first tabular ML workbench, MLflow-backed history, Model Registry, Portfolio-ready local ML tooling (+4 more)
 
-### Community 116 - "Integration Optional Deps Tests"
-Cohesion: 0.27
-Nodes (10): DataFrame, parametrize, Path, Optional integration checks for heavy dependency imports. These tests are…, _small_classification_df(), _sqlite_uri(), test_benchmark_executes_real_lazypredict_and_mlflow(), test_gx_validation_executes_real_expectations() (+2 more)
+### Community 116 - "profile_dataset"
+Cohesion: 0.19
+Nodes (14): profile_dataset(), DataFrame, Path, Convenience function: profile a DataFrame and optionally write artifacts., DataFrame, parametrize, Path, Optional integration checks for heavy dependency imports. These tests are… (+6 more)
 
-### Community 117 - "UA Analysis Artifacts"
+### Community 117 - "build-batches-10-18.cjs"
 Cohesion: 0.26
 Nodes (11): complexity(), fileSummary(), fs, make(), memberSummary(), path, special, tagsFor() (+3 more)
 
-### Community 118 - "Base Components"
-Cohesion: 0.24
-Nodes (5): BaseArtifacts, Path, Shared helpers for artifact path generation and persistence., Write artifacts for the current bundle and return the bundle of paths., ArtifactBundleT
+### Community 118 - "log_ui_exception"
+Cohesion: 0.21
+Nodes (15): flaml_install_guidance(), Return a user-facing installation hint for environments without FLAML., _build_flaml_run_key(), Streamlit page for the FLAML AutoML workflow., render_flaml_automl_page(), _render_flaml_results(), get_flaml_automl_service(), Return a cached FLAML AutoML service for the current UI settings. (+7 more)
 
-### Community 119 - "Providers Ollama Provider"
-Cohesion: 0.25
-Nodes (3): OllamaProvider, Any, Ollama has no auth — just check reachability.
+### Community 119 - "test_dataset_workspace.py"
+Cohesion: 0.21
+Nodes (9): Return a stable, unique session dataset label., resolve_session_dataset_name(), _make_loaded_dataset(), Path, Tests for shared dataset workspace helpers., Tests for the unified render_dataset_header helper., TestActiveDatasetSelection, TestRenderDatasetHeader (+1 more)
 
-### Community 120 - "Code Of Conduct"
+### Community 120 - "Code of Conduct"
 Cohesion: 0.18
 Nodes (11): Community interest, Code of Conduct, Enforcement actions, Giving and accepting feedback gracefully, Harassment-free participation, Maintainer enforcement responsibility, Positive environment, Project spaces (+3 more)
 
-### Community 121 - "Autotabml Studio Architecture Documentation"
+### Community 121 - "AutoML Modeling"
 Cohesion: 0.18
 Nodes (11): AutoML Modeling, Background Jobs, Data Quality, Dataset Ingestion, Deployment Bundle, External Providers, Metadata Store, ML Practitioner (+3 more)
 
-### Community 122 - "UA Analysis Artifacts"
+### Community 122 - "build-batches-6-9.cjs"
 Cohesion: 0.27
 Nodes (10): comp(), emit(), fileSummary(), fs, make(), memberSummary(), path, purpose (+2 more)
 
-### Community 123 - "Artifacts Manager"
-Cohesion: 0.24
-Nodes (7): Local artifact management utilities., ArtifactKind, datetime, Enum, str, Centralized local artifact path and lifecycle management. This manager only…, Supported local artifact directory kinds.
-
-### Community 124 - "Observability Tracing"
-Cohesion: 0.22
-Nodes (6): _NoopSpan, Any, BaseException, Protocol, The minimal span surface used by AutoTabML Studio call sites., SpanLike
-
-### Community 125 - "Providers Tests"
+### Community 123 - "manager.py"
 Cohesion: 0.33
-Nodes (3): build_provider(), Instantiate the concrete provider. Falls back to environment variables for…, TestBuildProvider
+Nodes (4): Local artifact management utilities., datetime, Enum, Centralized local artifact path and lifecycle management. This manager only…
 
-### Community 126 - "UA Analysis Artifacts"
+### Community 124 - "start_span"
+Cohesion: 0.15
+Nodes (13): _NoopSpan, Any, BaseException, Protocol, Optional OpenTelemetry tracing with a stdlib-only fallback. We deliberately do…, The minimal span surface used by AutoTabML Studio call sites., Open a span named ``name`` and yield a :class:`SpanLike`. When OpenTelemetry is…, SpanLike (+5 more)
+
+### Community 125 - "Namespace"
+Cohesion: 0.20
+Nodes (16): _build_prediction_request_kwargs(), _build_prediction_service(), cmd_predict_batch(), cmd_predict_history(), cmd_predict_single(), cmd_uci_list(), _load_prediction_row_payload(), _print_local_model_trust_notice() (+8 more)
+
+### Community 126 - "ua-assemble.cjs"
 Cohesion: 0.20
 Nodes (9): dir, fs, graph, ids, layers, output, path, scan (+1 more)
 
-### Community 127 - "Deployment Components"
+### Community 127 - "export_deployment_bundle"
 Cohesion: 0.36
 Nodes (8): _build_current_wheel(), DeploymentBundle, export_deployment_bundle(), BaseModel, Path, Portable prediction bundle generation., Create API, Docker, and command-line deployment assets for one trusted model., _sha256()
 
-### Community 128 - "Safe HTTP Tests"
-Cohesion: 0.25
-Nodes (6): fetch_url_bytes(), fetch_url_text(), Fetch a remote resource and return bytes, content-type, and final URL., Fetch a remote resource and return decoded text, content-type, and final URL., Confirm ingestion-facing wrappers translate guard errors into RemoteAccessError., TestIngestionIntegration
+### Community 128 - "fetch_url_bytes"
+Cohesion: 0.33
+Nodes (4): fetch_url_bytes(), Fetch a remote resource and return bytes, content-type, and final URL., Confirm ingestion-facing wrappers translate guard errors into RemoteAccessError., TestIngestionIntegration
 
-### Community 129 - "FLAML Setup Runner"
-Cohesion: 0.25
-Nodes (9): flaml_install_guidance(), is_flaml_available(), _probe_flaml_import_error(), Exception, Return the import-time failure when FLAML is unusable., Return True when FLAML is importable., Return a user-facing installation hint for environments without FLAML., Raise a clean dependency error when FLAML is unavailable. (+1 more)
+### Community 129 - "run_auto_run"
+Cohesion: 0.16
+Nodes (14): Any, Path, Run FLAML on a training split and evaluate on an untouched holdout., run_auto_run(), main(), Path, Subprocess entry point for persistent Auto Run jobs., _update() (+6 more)
 
-### Community 130 - "Security Tests"
+### Community 130 - "mask_secret"
 Cohesion: 0.39
 Nodes (3): mask_secret(), Mask a secret string, keeping only *reveal* chars at each end visible.…, TestMaskSecret
 
-### Community 131 - "Benchmark Leaderboard Documentation"
+### Community 131 - "Benchmark"
 Cohesion: 0.25
 Nodes (8): Benchmark, Benchmark configuration screen, Random seed: 42, Sample rows: 0 (full dataset), Target column: target, Task type: regression, Test size: 0.20, Top-k shortlist: 5
 
-### Community 132 - "History View Documentation"
+### Community 132 - "History view"
 Cohesion: 0.29
 Nodes (8): History navigation item, History view, Inspect run selector, Navigation sidebar, Run Detail, Run history table, Run metadata columns, Selected benchmark classification run
 
-### Community 133 - "Profiling Report Documentation"
+### Community 133 - "EDA / Profiling Dashboard"
 Cohesion: 0.36
 Nodes (8): Column Types: 11 Numeric, 0 Categorical, Data Quality Summary: 0.0% Missing, 0 Duplicates, Dataset Dimensions: 442 Rows, 11 Columns, Active Diabetes Dataset, Profiling Complete, Profiling Artifacts, EDA / Profiling Dashboard, Standard Report Mode
 
-### Community 134 - "Settings View Documentation"
+### Community 134 - "Settings view"
 Cohesion: 0.29
 Nodes (8): Accelerators, colab_mcp backend, Execution backend, Local backend, Application navigation, Promote version, Register model, Settings view
 
-### Community 135 - "Artifact Manager Tests"
-Cohesion: 0.46
-Nodes (4): _artifact_settings_for(), Path, Tests for centralized local artifact lifecycle management., TestLocalArtifactManager
+### Community 135 - "calculate_model_cost"
+Cohesion: 0.19
+Nodes (14): _section_model_cost_calculator(), calculate_model_cost(), get_model_pricing(), ModelCostEstimate, ModelPricing, Reference prices and token-cost estimates for hosted AI models., Standard per-million-token prices for a hosted model., Estimated input, output, and combined cost in US dollars. (+6 more)
 
-### Community 137 - "Experiment Lab Documentation"
+### Community 137 - "Benchmark configuration form"
 Cohesion: 0.29
 Nodes (7): Benchmark configuration form, Experiment Lab, Experiment navigation item, Navigation sidebar, Run Benchmark button, Target column selector, Task type selector (regression)
 
-### Community 138 - "Validation Summary Documentation"
+### Community 138 - "Data Validation"
 Cohesion: 0.29
 Nodes (7): Active Dataset: diabetes, Data Validation, Dataset Dimensions: 442 Rows, 11 Columns, Data Validation Screen, Target Column: target, Validation Complete, Validation Results: 5 Passed, 0 Warnings, 0 Failed
 
-### Community 140 - "CLI Tests"
+### Community 140 - "TestCliOutputEncoding"
 Cohesion: 0.29
 Nodes (3): Regression tests for CLI output encoding on Windows cp1252., Ensure compare CLI output uses ASCII-safe arrows (->), not Unicode → (\u2192)., TestCliOutputEncoding
 
-### Community 142 - "Observability Logging Setup"
-Cohesion: 0.33
-Nodes (5): CorrelationFilter, install_correlation_filter(), Logger, Attach :class:`CorrelationFilter` to ``logger`` (root by default). Idempotent:…, Inject the active correlation context onto every :class:`LogRecord`. Each key…
+### Community 142 - "store.py"
+Cohesion: 0.20
+Nodes (7): DatasetRecord, Locally persisted dataset lineage record., DatasetRepository, Connection, Row, CRUD operations for dataset rows., SQLite-backed local app metadata store. This store is a thin facade over the…
 
-### Community 143 - "Security Safe HTTP"
-Cohesion: 0.33
-Nodes (5): ValueError, Fetch up to ``sample_size`` bytes for content sniffing. Implemented on top of…, Async counterpart of :func:`safe_stream_sample`., safe_stream_sample(), safe_stream_sample_async()
+### Community 143 - "cmd_experiment_run"
+Cohesion: 0.27
+Nodes (14): _build_pycaret_service(), cmd_experiment_evaluate(), cmd_experiment_run(), cmd_experiment_save(), cmd_experiment_tune(), _default_experiment_fold_strategy(), _default_experiment_tracking_mode(), _pycaret_native_tracking_mode() (+6 more)
 
-### Community 144 - "Compare View Documentation"
+### Community 144 - "MLflow run comparison view"
 Cohesion: 0.33
 Nodes (6): Artifact Availability, Saved comparison artifacts, Comparison status: not comparable, MLflow run comparison view, Compare view screenshot, Metadata verification warnings
 
-### Community 145 - "Dashboard Overview Documentation"
+### Community 145 - "Dashboard"
 Cohesion: 0.33
 Nodes (6): dashboard-overview, Active dataset diabetes, Dashboard, Application navigation, Recent Local Jobs, Workspace metrics
 
-### Community 146 - "Dataset Intake Documentation"
+### Community 146 - "Loaded dataset 'diabetes'"
 Cohesion: 0.33
 Nodes (6): Benchmark, Loaded dataset 'diabetes', Experiment, Load Local Path, Profiling, Validation
 
-### Community 147 - "Prediction Center Documentation"
+### Community 147 - "Prediction Center Interface"
 Cohesion: 0.33
 Nodes (6): Discovered Local Model, Load Model Action, Model Loading Guidance, Prediction Center Interface, Prediction Navigation, Task Type Hint
 
-### Community 148 - "Registry View Documentation"
+### Community 148 - "e2e-demo-classifier"
 Cohesion: 0.33
 Nodes (6): e2e-demo-classifier, Model Version Promotion, Model Registry, Model Versions, Registered Models, Registry View Screenshot
 
-### Community 150 - "UA Analysis Artifacts"
+### Community 149 - "IngestionError"
+Cohesion: 0.19
+Nodes (12): EmptyDatasetError, IngestionError, Exception, Raised when a loaded dataset has no usable rows or columns., Base exception for user-facing ingestion failures., normalize_duplicate_column_names(), normalize_to_pandas(), DataFrame (+4 more)
+
+### Community 150 - "extract-ua-batches-10-13.cjs"
 Cohesion: 0.33
 Nodes (5): cp, fs, path, projectRoot, uaDir
 
-### Community 151 - "UA Analysis Artifacts"
+### Community 151 - "process-ua-batches-19-26.cjs"
 Cohesion: 0.33
 Nodes (5): cp, fs, path, projectRoot, uaDir
 
-### Community 152 - "PyCaret Init"
-Cohesion: 0.40
-Nodes (3): PyCaret-backed experiment lab for AutoTabML Studio., Saved model metadata plus its persisted metadata sidecar path., SavedModelArtifact
+### Community 152 - "notebook_page.py"
+Cohesion: 0.22
+Nodes (13): _generate_notebook_for_job(), Path, Notebook page – browse auto-generated notebooks per dataset / job. Each…, Generate and return notebook path for a job record., Render a simple preview of notebook cells., Execute *coro* from synchronous Streamlit code., Show notebooks grouped by dataset, one per job., _render_colab_mcp_notebook() (+5 more)
 
-### Community 153 - "Conftest Tests"
-Cohesion: 0.50
-Nodes (4): default_settings(), fixture, Shared test fixtures., runtime_state()
+### Community 153 - "recorders.py"
+Cohesion: 0.22
+Nodes (12): Profiling artifact generation helpers., ProfilingArtifactBundle, BaseModel, Paths and metadata for profiling artifacts produced., _enrich_metadata_with_description(), ensure_dataset_record(), Any, Helpers that map app workflows into local metadata-store records. (+4 more)
 
-### Community 154 - "UA Analysis Artifacts"
+### Community 154 - "ua-fingerprint-input.cjs"
 Cohesion: 0.40
 Nodes (4): fs, output, path, scan
 
-### Community 155 - "Security Safe HTTP"
+### Community 155 - "_is_blocked_ip"
 Cohesion: 0.50
 Nodes (4): _is_blocked_ip(), Return a human-readable reason if ``addr`` is in a blocked range., IPv4Address, IPv6Address
 
-### Community 156 - "Safe CSV Properties Tests"
-Cohesion: 0.50
-Nodes (4): composite, DrawFn, _dangerous_cell(), Generate a cell that begins with a known dangerous prefix.
+### Community 156 - "BatchRunItemRecord"
+Cohesion: 0.21
+Nodes (11): BatchRunItemRecord, Tracks a single dataset within a batch run through validate/profile/benchmark., Path, When ALL datasets are already completed, batch record counts must still be set., Regression: targets that previously had wrong casing must match their UCI…, test_declared_target_from_item_prefers_item_id_suffix_for_resume_keys(), test_full_resume_updates_batch_record_counts(), test_known_case_sensitive_target_mappings() (+3 more)
 
-### Community 157 - "Dataset Intake Documentation"
+### Community 157 - "Load Dataset Sources"
 Cohesion: 0.50
 Nodes (4): Dataset Intake page, Load Dataset Sources, Local dataset path: E:\Github\AutoTabML-Studio\datasets\sklearn\Diabetes\diabetes.csv, Local Path tab
 
-### Community 158 - "Prediction Center Documentation"
+### Community 158 - "Recent Prediction Jobs"
 Cohesion: 0.50
 Nodes (4): Model Source, Prediction Job Mode, Prediction Job Status, Recent Prediction Jobs
 
-### Community 159 - "Release Notes V0 2 0"
+### Community 159 - "AutoTabML Studio v0.2.0"
 Cohesion: 0.50
 Nodes (4): 0.1.x to 0.2.0 migration guide, v0.2.0 release notes, AutoTabML Studio v0.2.0, 0.1.x to 0.2.0 upgrade summary
 
-### Community 161 - "PyCaret Compare Runner"
-Cohesion: 0.67
-Nodes (3): create_model(), Any, Create one concrete model from a model id.
+### Community 160 - "ProfilingSettings"
+Cohesion: 0.19
+Nodes (7): ProfilingSettings, Configuration for the automated profiling layer., profiling_install_guidance(), Return a user-facing installation hint for profiling dependencies., ImportError, TestArtifactPaths, TestProfilingConfig
 
-### Community 162 - "PyCaret Tune Runner"
-Cohesion: 0.67
-Nodes (3): Any, Execute tune_model and optionally capture the tuner object., run_tune_model()
+### Community 161 - "FlamlAutoMLService"
+Cohesion: 0.21
+Nodes (7): _build_flaml_service(), FlamlAutoMLService, Any, Path, Build a leaderboard from FLAML's best_loss_per_estimator., FLAML-backed AutoML service., TestFlamlCLI
 
-### Community 163 - "Safe HTTP Tests"
+### Community 162 - "TestRuntimeState"
+Cohesion: 0.17
+Nodes (5): Switching to colab_mcp while provider=ollama should auto-reset provider., Switching backend when provider is valid for both should keep it., Setting the same backend value should not clear anything., backend_valid was removed — make sure it's not in to_dict., TestRuntimeState
+
+### Community 163 - ".run"
+Cohesion: 0.31
+Nodes (8): _build_estimator(), Any, DataFrame, ndarray, Path, Series, _resolve_task_type(), _score_predictions()
+
+### Community 167 - "Highlights"
+Cohesion: 0.20
+Nodes (9): Desktop and AI-provider experience, Evaluation and delivery, Guided Auto Run, Highlights, Performance and maintainability, Release Notes — v0.3.0, Security, Upgrade (+1 more)
+
+### Community 168 - "ua-arch-write-layers.js"
+Cohesion: 0.20
+Nodes (9): assigned, definitions, duplicates, fs, known, layers, missing, results (+1 more)
+
+### Community 169 - "profiling/__init__.py"
+Cohesion: 0.31
+Nodes (7): ProfilingError, ProfilingSetupError, Exception, Custom exceptions for the profiling layer., Raised when the profiling library cannot be initialized., Base exception for profiling failures., Automated profiling layer for AutoTabML Studio.
+
+### Community 191 - "BackgroundJobService"
+Cohesion: 0.32
+Nodes (4): BackgroundJobService, DataFrame, Path, Submit and control one local training process at a time.
+
+### Community 192 - "FlamlSearchConfig"
+Cohesion: 0.33
+Nodes (6): cmd_flaml_run(), cmd_flaml_save(), Run FLAML AutoML search from CLI., Run FLAML search and save the best model from CLI., FlamlSearchConfig, Configuration for the FLAML AutoML search.
+
+### Community 193 - "ExperimentInfo"
+Cohesion: 0.38
+Nodes (7): get_experiment_by_name(), list_experiments(), _normalize_experiment(), Return all active MLflow experiments., Return one experiment by name or raise ExperimentNotFoundError., ExperimentInfo, Normalized MLflow experiment metadata.
+
+### Community 194 - "evaluate_model"
+Cohesion: 0.33
+Nodes (6): evaluate_model(), Any, DataFrame, Series, Evaluate a fitted sklearn-compatible model on untouched data., test_evaluation_covers_regression()
+
+### Community 195 - ".load_raw_dataframe"
+Cohesion: 0.40
+Nodes (4): Any, DataFrame, Return a raw DataFrame and source details before normalization., Async counterpart of :meth:`load_raw_dataframe`. Loaders with native async I/O…
+
+### Community 196 - "get_page_registry"
+Cohesion: 0.40
+Nodes (3): get_page_registry(), Return the registered Streamlit pages in display order., TestFlamlPageRegistry
+
+### Community 197 - ".prepare_session"
+Cohesion: 0.40
+Nodes (3): Any, Prepare any runtime context needed before a job runs., Execute a job payload and return results. Concrete implementations will be…
+
+### Community 198 - "TestMetricSortDirection"
+Cohesion: 0.50
+Nodes (3): metric_sort_direction(), Return the expected ordering direction for a metric name., TestMetricSortDirection
+
+### Community 200 - "TestRunSummary"
+Cohesion: 0.50
+Nodes (3): Return a compact one-line summary of a run., run_summary_line(), TestRunSummary
+
+### Community 202 - "DataFrame"
 Cohesion: 0.67
-Nodes (3): public_dns(), fixture, Force hostname resolution to a *public* IP regardless of the host string. This…
+Nodes (4): classification_df(), DataFrame, fixture, regression_df()
+
+### Community 203 - ".trash-1786706008/tmp/ua-arch-analyze.js"
+Cohesion: 0.50
+Nodes (3): fs, [inputPath, outputPath], path
+
+### Community 205 - "_clear_registry_cache"
+Cohesion: 0.67
+Nodes (3): _clear_registry_cache(), fixture, Drop the in-process registry cache before and after every test.
 
 ## Knowledge Gaps
-- **198 isolated node(s):** `fs`, `path`, `ua`, `purpose`, `fs` (+193 more)
+- **218 isolated node(s):** `fs`, `path`, `ua`, `purpose`, `fs` (+213 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DatasetInputSpec` connect `UCI Loader Tests` to `PyCaret Experiment Tests`, `CLI Application`, `Prediction Schemas`, `Dataset Workspace`, `Ingestion URL Loader`, `Notebook Page`, `UCI Real Datasets Tests`, `Prediction Tests`, `Ingestion Base`, `Prediction Base`, `Prediction Selectors`, `Batch UCI Runner Scripts`, `UI Cache`, `Ingestion UCI Loader`, `Prediction Page`, `Ingestion Metadata`, `Ingestion Tests`, `Verify Optional Deps Scripts`, `CLI Tests`, `Ingestion Kaggle Loader`, `Ingestion HTML Table Loader`, `Ingestion Async Tests`, `E2E Local Smoke Tests`, `UI Cache`?**
-  _High betweenness centrality (0.105) - this node is a cross-community bridge._
-- **Why does `ExecutionBackend` connect `PyCaret Experiment Tests` to `Benchmark Schemas`, `CLI Application`, `FLAML Automl Tests`, `FLAML Schemas`, `Providers Base`, `Benchmark Tests`, `Config Models`, `Modeling Architecture Tests`, `Security Trusted Artifacts`, `CLI Tests`, `CLI Tests`, `Notebook Page`, `Colab MCP Backend Tests`, `PyCaret Init`, `CLI Tests`, `Backends Colab MCP Backend`, `PyCaret Service`, `PyCaret Selectors`, `PyCaret Summary`, `CLI Tests`, `Startup Components`, `Providers Tests`, `Settings Page`, `Prediction Tests`, `CLI Tests`, `CLI Tests`, `Config Tests`, `Tracking Tests`, `State Session`, `Providers Anthropic Provider`, `Providers Tests`, `Modeling Architecture Tests`, `Providers Tests`?**
-  _High betweenness centrality (0.089) - this node is a cross-community bridge._
-- **Why does `AppSettings` connect `CLI Tests` to `PyCaret Experiment Tests`, `CLI Application`, `FLAML Automl Tests`, `Prediction Schemas`, `Providers Base`, `Artifact Manager Tests`, `Config Models`, `CLI Tests`, `CLI Tests`, `History Page`, `Notebook Page`, `UCI Real Datasets Tests`, `Storage Models`, `Colab MCP Backend Tests`, `Prediction Tests`, `Conftest Tests`, `Backends Colab MCP Backend`, `Config Models`, `Batch UCI Runner Scripts`, `UI Cache`, `CLI Tests`, `Startup Components`, `Storage SQLite Connector`, `Validation Schemas`, `Prediction Tests`, `Experiment Page`, `Verify Optional Deps Scripts`, `Prediction Loader`, `CLI Tests`, `CLI Tests`, `Config Tests`, `Tracking Compare Service`, `Autorun Components`, `Tracking Tests`, `State Session`, `E2E Local Smoke Tests`, `UI Cache`?**
-  _High betweenness centrality (0.072) - this node is a cross-community bridge._
+- **Why does `ExecutionBackend` connect `ExecutionBackend` to `BenchmarkConfig`, `test_flaml_automl.py`, `ProfilingMode`, `flaml/service.py`, `LLMProvider`, `test_benchmark.py`, `test_colab_mcp_backend.py`, `_DummyTracker`, `SavedModelMetadata`, `dataset_workspace.py`, `TestCliOutputEncoding`, `TestCmdRegistryGates`, `ValidationRuleConfig`, `notebook_page.py`, `AppSettings`, `ColabMCPExecutionBackend`, `ExperimentResultBundle`, `ProfilingSettings`, `FlamlAutoMLService`, `test_modeling_exception_handling.py`, `TestRuntimeState`, `ExperimentTaskType`, `pycaret/summary.py`, `test_cli.py`, `app/errors.py`, `test_hardening_smoke.py`, `FlamlConfig`, `TestFlamlSchemas`, `FlamlSearchConfig`, `get_page_registry`, `TestMetricSortDirection`, `TestFlamlPageHelpers`, `TestDefaultModels`, `experiment_page.py`, `._make_args`, `Path`, `Path`, `_FakeExperimentBase`, `TestFlamlRunType`, `_FakeMLflow`?**
+  _High betweenness centrality (0.094) - this node is a cross-community bridge._
+- **Why does `DatasetInputSpec` connect `DatasetInputSpec` to `ExecutionBackend`, `test_prediction.py`, `dataset_workspace.py`, `url_loader.py`, `test_uci_real_datasets.py`, `IngestionError`, `IngestionSourceType`, `PredictionService`, `loader.py`, `batch_uci_runner.py`, `ui_cache.py`, `app/errors.py`, `UCIRepoLoader`, `test_hardening_smoke.py`, `.load_raw_dataframe`, `test_ingestion_utils.py`, `ExcelLoader`, `PredictionRequest`, `Path`, `CSVLoader`, `load_dataset_async`, `test_e2e_local_smoke.py`, `cli.py`, `test_list_cached_registered_models_uses_cache_until_invalidated`, `test_dataset_workspace.py`?**
+  _High betweenness centrality (0.083) - this node is a cross-community bridge._
+- **Why does `AppSettings` connect `AppSettings` to `ExecutionBackend`, `test_flaml_automl.py`, `test_prediction.py`, `LLMProvider`, `test_colab_mcp_backend.py`, `TestCmdRegistryGates`, `dataset_workspace.py`, `TestCliOutputEncoding`, `SavedModelMetadata`, `PredictionHistoryStore`, `IngestionSourceType`, `BatchRunItemRecord`, `ColabMCPExecutionBackend`, `loader.py`, `storage/models.py`, `FlamlAutoMLService`, `ui_cache.py`, `test_cli.py`, `app/errors.py`, `SQLiteConnector`, `test_hardening_smoke.py`, `FlamlConfig`, `TestFlamlSchemas`, `get_page_registry`, `TestMetricSortDirection`, `TestFlamlPageHelpers`, `TestDefaultModels`, `experiment_page.py`, `compare_page.py`, `PredictionRequest`, `LocalArtifactManager`, `._make_args`, `Path`, `Path`, `test_product_improvements.py`, `TestFlamlRunType`, `test_e2e_local_smoke.py`, `cli.py`, `test_list_cached_registered_models_uses_cache_until_invalidated`, `model_testing_page.py`, `log_ui_exception`?**
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
 - **Are the 167 inferred relationships involving `ExecutionBackend` (e.g. with `BaseExecutionBackend` and `ColabMCPExecutionBackend`) actually correct?**
   _`ExecutionBackend` has 167 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 81 inferred relationships involving `AppSettings` (e.g. with `ExecutionBackend` and `LLMProvider`) actually correct?**
