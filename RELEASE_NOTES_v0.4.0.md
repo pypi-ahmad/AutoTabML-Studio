@@ -37,6 +37,8 @@ prediction, tracking, registry, and deployment workflows.
   `typeguard` ranges do not overlap.
 - Keep Docker and `make install` release-safe by installing the broad compatible
   extra set and leaving TabFM to its dedicated environment.
+- Keep generated codebase-memory commit hashes out of detect-secrets false
+  positives while retaining the separate Gitleaks repository scan.
 
 ## Verification
 

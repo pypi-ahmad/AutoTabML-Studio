@@ -38,6 +38,8 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 - Docker and `make install` now select the broad compatible optional-dependency
   set instead of requesting the intentionally incompatible TabFM and profiling
   extras together.
+- The detect-secrets workflow now ignores generated `.codebase-memory` graph
+  metadata whose commit hash was incorrectly classified as a secret.
 
 ### Security
 
