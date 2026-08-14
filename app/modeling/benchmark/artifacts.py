@@ -99,8 +99,7 @@ def _render_markdown(bundle: BenchmarkResultBundle) -> str:
     if summary.warnings:
         lines.append("## Warnings")
         lines.append("")
-        for warning in summary.warnings:
-            lines.append(f"- {warning}")
+        lines.extend(f"- {warning}" for warning in summary.warnings)
         lines.append("")
 
     if bundle.top_models:
@@ -108,8 +107,10 @@ def _render_markdown(bundle: BenchmarkResultBundle) -> str:
         lines.append("")
         lines.append("| Rank | Model | Primary Score | Time (s) |")
         lines.append("|------|-------|---------------|----------|")
-        for row in bundle.top_models:
-            lines.append(f"| {row.rank} | {row.model_name} | {row.primary_score} | {row.training_time_seconds} |")
+        lines.extend(
+            f"| {row.rank} | {row.model_name} | {row.primary_score} | {row.training_time_seconds} |"
+            for row in bundle.top_models
+        )
         lines.append("")
 
     return "\n".join(lines)

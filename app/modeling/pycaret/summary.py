@@ -59,8 +59,7 @@ def leaderboard_to_dataframe(rows: list[ExperimentLeaderboardRow]) -> pd.DataFra
             "Stage": row.stage,
             "Warnings": "; ".join(row.warnings),
         }
-        for key, value in row.raw_metrics.items():
-            record[key] = value
+        record.update(row.raw_metrics)
         records.append(record)
     return pd.DataFrame(records)
 

@@ -22,6 +22,7 @@ and aims to follow [Semantic Versioning](https://semver.org/).
   and unused development/documentation dependencies.
 - Removed unused parameters from private experiment result renderers.
 - Simplified CSV delimiter resolution and result-table row construction.
+- Simplified model-summary normalization and Markdown artifact assembly.
 
 ### Fixed
 

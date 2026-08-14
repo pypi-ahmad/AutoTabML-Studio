@@ -34,10 +34,7 @@ def build_result_rows(
     for model_name, values in raw_results.iterrows():
         metric_map = values.to_dict()
         training_time = metric_map.get("Time Taken")
-        if training_time is not None and pd.notna(training_time):
-            training_time_value = float(training_time)
-        else:
-            training_time_value = None
+        training_time_value = float(training_time) if training_time is not None and pd.notna(training_time) else None
 
         rows.append(
             BenchmarkResultRow(
@@ -68,8 +65,7 @@ def leaderboard_to_dataframe(rows: list[BenchmarkResultRow]) -> pd.DataFrame:
             "Run Time": row.run_timestamp.isoformat(),
             "Warnings": "; ".join(row.warnings),
         }
-        for key, value in row.raw_metrics.items():
-            record[key] = value
+        record.update(row.raw_metrics)
         records.append(record)
     return pd.DataFrame(records)
 

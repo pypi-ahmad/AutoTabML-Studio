@@ -121,15 +121,15 @@ def _render_markdown(bundle: ExperimentResultBundle) -> str:
         lines.append("")
         lines.append("| Rank | Model | Score |")
         lines.append("|------|-------|-------|")
-        for row in bundle.compare_leaderboard[:10]:
-            lines.append(f"| {row.rank} | {row.model_name} | {row.primary_score} |")
+        lines.extend(
+            f"| {row.rank} | {row.model_name} | {row.primary_score} |" for row in bundle.compare_leaderboard[:10]
+        )
         lines.append("")
 
     if summary.warnings:
         lines.append("## Warnings")
         lines.append("")
-        for warning in summary.warnings:
-            lines.append(f"- {warning}")
+        lines.extend(f"- {warning}" for warning in summary.warnings)
         lines.append("")
 
     return "\n".join(lines)
