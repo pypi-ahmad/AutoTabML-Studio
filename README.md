@@ -44,7 +44,7 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 - **Zero cloud dependency.** Data never leaves your machine. No default outbound telemetry or external uploads.
 - **Three AutoML engines.** LazyPredict for quick benchmarks, PyCaret for full experiments, and Microsoft FLAML for fast, cost-efficient hyperparameter search.
 - **End-to-end tracking.** Every run is logged to MLflow with metrics, parameters, and artifacts. Compare, version, and promote models from one place.
-- **707 unit tests at 77.32% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
+- **708 unit tests at 77.32% coverage** with a CI-enforced ≥ 65% coverage gate and `ruff` lint on every push. `detect-secrets` + `gitleaks` security scanning.
 
 ---
 
@@ -258,7 +258,7 @@ Services with one runtime implementation stay concrete; shared base classes are 
 | **Observability** | JSON logging, metrics hooks, optional OpenTelemetry tracing |
 | **Metadata** | SQLite |
 | **AI Summaries** | OpenAI · Anthropic · Gemini · Ollama |
-| **Testing** | pytest (707 tests, 77.32% coverage), pytest-cov, pytest-asyncio, respx |
+| **Testing** | pytest (708 tests, 77.32% coverage), pytest-cov, pytest-asyncio, respx |
 
 ---
 

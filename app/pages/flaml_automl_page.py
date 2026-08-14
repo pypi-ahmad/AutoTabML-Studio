@@ -311,11 +311,11 @@ def render_flaml_automl_page() -> None:
 
     # ── Step 4: Results ───────────────────────────────────────────────
     st.subheader("4. Results")
-    _render_flaml_results(bundle, state.settings, metadata_store)
+    _render_flaml_results(bundle, state.settings)
     render_next_step_hint(current_step=4)
 
 
-def _render_flaml_results(bundle, app_settings, metadata_store) -> None:  # noqa: ANN001
+def _render_flaml_results(bundle, app_settings) -> None:  # noqa: ANN001
     summary = bundle.summary
     search = bundle.search_result
 

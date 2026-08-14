@@ -387,11 +387,11 @@ def render_experiment_page() -> None:
 
     # ── Step 4: Results ───────────────────────────────────────────────
     st.subheader("4. Results")
-    _render_bundle(bundle, settings)
+    _render_bundle(bundle)
     render_next_step_hint(current_step=4)
 
 
-def _render_bundle(bundle, settings) -> None:  # noqa: ANN001
+def _render_bundle(bundle) -> None:  # noqa: ANN001
     from app.pages.ui_labels import PLOT_LABELS, format_enum_value
 
     summary = bundle.summary
