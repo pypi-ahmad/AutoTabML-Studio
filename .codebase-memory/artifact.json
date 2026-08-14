@@ -1,0 +1,11 @@
+{
+    "schema_version": 2,
+    "commit": "4a0fd0b33a7e8c5d05661a1cf8df19fc03bb9b5c",
+    "indexed_at": "2026-08-14T13:30:33Z",
+    "project": "AutoTabML-Studio",
+    "nodes": 19820,
+    "edges": 39642,
+    "original_size": 31653888,
+    "compressed_size": 4792280,
+    "compression_level": 3
+}
