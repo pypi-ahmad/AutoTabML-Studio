@@ -7,7 +7,7 @@ import hashlib
 from importlib.metadata import PackageNotFoundError, version
 import json
 from pathlib import Path
-import subprocess
+import subprocess  # nosec B404
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -104,7 +104,7 @@ def _engine_packages(engine: str) -> list[str]:
 
 def _git_value(repo_root: Path | None, args: list[str]) -> str | None:
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603 B607
             ["git", *args], cwd=repo_root, check=True, capture_output=True, text=True, timeout=2
         )
         return result.stdout.strip() or None

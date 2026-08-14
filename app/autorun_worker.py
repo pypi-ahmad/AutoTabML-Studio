@@ -22,9 +22,7 @@ def main(request_path: Path) -> int:
     store = build_metadata_store(settings)
     if store is None:
         raise RuntimeError("Metadata storage is unavailable.")
-    record = store.get_job(job_id) or JobRecord(
-        job_id=job_id, job_type=AppJobType.FLAML, status=AppJobStatus.RUNNING
-    )
+    record = store.get_job(job_id) or JobRecord(job_id=job_id, job_type=AppJobType.FLAML, status=AppJobStatus.RUNNING)
     try:
         _update(store, record, 10, "loading data")
         dataframe = pd.read_csv(request["dataset_path"])

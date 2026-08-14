@@ -20,6 +20,9 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- CI now validates mutually incompatible optional extras in separate environments,
+  avoids a pipefail false failure in secret scanning, and documents reviewed
+  fixed-argv subprocess calls for Bandit.
 - Added optional `tabfm` and `timesfm` dependency extras and pinned exact model
   revisions for reproducible checkpoint resolution.
 

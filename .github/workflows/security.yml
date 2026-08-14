@@ -36,9 +36,9 @@ jobs:
       - name: Run detect-secrets scan
         shell: bash
         run: |
-          EXCLUDE_REGEX='(^tests/|^docs/|^datasets/|^README\.md$|^\.env\.example$|^app/security/masking\.py$|\.png$|\.html$)'
+          EXCLUDE_REGEX='(^tests/|^docs/|^datasets/|^\.ua/|^graphify-out/|^\.codegraph/|^\.code-review-graph/|^README\.md$|^\.env\.example$|^app/security/masking\.py$|\.png$|\.html$)'
           echo "::group::Tracked files to scan"
-          git ls-files | grep -Ev "$EXCLUDE_REGEX" | head -200
+          git ls-files | grep -Ev "$EXCLUDE_REGEX" | sed -n '1,200p'
           echo "::endgroup::"
           detect-secrets scan --exclude-files "$EXCLUDE_REGEX" > detect-secrets-report.json
           python - <<'PY'

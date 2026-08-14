@@ -42,10 +42,7 @@ class TestFetchModels:
 
 
 def test_model_cost_calculator_renders_reference_estimate() -> None:
-    app = AppTest.from_string(
-        "from app.pages.settings_page import render_settings_page\n"
-        "render_settings_page()\n"
-    )
+    app = AppTest.from_string("from app.pages.settings_page import render_settings_page\nrender_settings_page()\n")
 
     app.run(timeout=15)
 

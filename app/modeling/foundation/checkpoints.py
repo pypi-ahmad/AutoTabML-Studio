@@ -19,11 +19,11 @@ class CheckpointSpec:
 
 TABFM_CHECKPOINT = CheckpointSpec(
     repo_id="google/tabfm-1.0.0-pytorch",
-    revision="77cb9cc1b4fd3a9c77fbb9552c218200bb4dab83",
+    revision="77cb9cc1b4fd3a9c77fbb9552c218200bb4dab83",  # pragma: allowlist secret
 )
 TIMESFM_CHECKPOINT = CheckpointSpec(
     repo_id="google/timesfm-2.5-200m-pytorch",
-    revision="1d952420fba87f3c6dee4f240de0f1a0fbc790e3",
+    revision="1d952420fba87f3c6dee4f240de0f1a0fbc790e3",  # pragma: allowlist secret
 )
 
 

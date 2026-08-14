@@ -114,9 +114,7 @@ def run_auto_run(
         random_state=config.random_seed,
         stratify=dataframe[config.target_column] if plan.task_type == "classification" else None,
     )
-    fingerprint = hashlib.sha256(
-        pd.util.hash_pandas_object(dataframe, index=True).values.tobytes()
-    ).hexdigest()
+    fingerprint = hashlib.sha256(pd.util.hash_pandas_object(dataframe, index=True).values.tobytes()).hexdigest()
     service = FlamlAutoMLService(artifacts_dir=artifacts_dir, models_dir=models_dir)
     budget = 30 if config.mode == AutoRunMode.QUICK else config.time_budget
     bundle = service.run_automl(

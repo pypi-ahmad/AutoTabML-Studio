@@ -225,8 +225,5 @@ def build_streamlit_navigation(workspace_mode: WorkspaceMode):
         )
         for spec in _PAGES
     }
-    sections = {
-        title: [page_objects[spec.label] for spec in pages]
-        for title, pages in get_nav_sections()
-    }
+    sections = {title: [page_objects[spec.label] for spec in pages] for title, pages in get_nav_sections()}
     return sections, page_objects

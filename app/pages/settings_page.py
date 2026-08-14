@@ -400,7 +400,9 @@ def _section_model_cost_calculator() -> None:
             st.metric("Estimated total", f"${estimate.total_cost:,.6f}", border=True)
 
         st.info(pricing.details)
-        st.caption("Estimate only. Discounts, cache pricing, fast modes, and long-context tiers may change the final bill.")
+        st.caption(
+            "Estimate only. Discounts, cache pricing, fast modes, and long-context tiers may change the final bill."
+        )
 
 
 def _section_mlflow_descriptions(state: RuntimeState) -> None:

@@ -267,6 +267,7 @@ class TestBoundedCSVReading:
         csv_path.write_text("feature,target\n1,0\n2,1\n3,0\n4,1\n5,0\n", encoding="utf-8")
 
         seen_kwargs: dict[str, Any] = {}
+
         def fake_read_csv(*args, **kwargs):
             seen_kwargs.update(kwargs)
             return pd.DataFrame({"feature": [1, 2, 3], "target": [0, 1, 0]})

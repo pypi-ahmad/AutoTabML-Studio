@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 import signal
-import subprocess
+import subprocess  # nosec B404
 import sys
 from uuid import uuid4
 
@@ -57,7 +57,7 @@ class BackgroundJobService:
             metadata={"progress": 0, "stage": "queued", "job_dir": str(directory.resolve())},
         )
         self.store.record_job(record)
-        process = subprocess.Popen(
+        process = subprocess.Popen(  # nosec B603
             [sys.executable, "-m", "app.autorun_worker", str(request_path.resolve())],
             cwd=Path.cwd(),
             stdout=(directory / "worker.log").open("a", encoding="utf-8"),

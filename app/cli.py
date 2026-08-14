@@ -1423,7 +1423,9 @@ def cmd_tabfm_run(args: argparse.Namespace) -> None:
             context_rows=args.context_rows,
             n_estimators=args.n_estimators,
         )
-        output_dir = Path(args.artifacts_dir) if args.artifacts_dir else settings.artifacts.experiments_dir / "foundation"
+        output_dir = (
+            Path(args.artifacts_dir) if args.artifacts_dir else settings.artifacts.experiments_dir / "foundation"
+        )
         service = TabFMService()
         result = service.run(
             loaded.dataframe,
@@ -1497,7 +1499,9 @@ def cmd_timesfm_forecast(args: argparse.Namespace) -> None:
             frequency=args.frequency,
             backtest=not args.no_backtest,
         )
-        output_dir = Path(args.artifacts_dir) if args.artifacts_dir else settings.artifacts.experiments_dir / "foundation"
+        output_dir = (
+            Path(args.artifacts_dir) if args.artifacts_dir else settings.artifacts.experiments_dir / "foundation"
+        )
         result = TimesFMService().run(
             loaded.dataframe,
             config,

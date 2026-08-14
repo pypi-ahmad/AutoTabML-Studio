@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 import zipfile
@@ -49,9 +49,7 @@ def export_deployment_bundle(
             shutil.copy2(provenance_path, model_dir / provenance_path.name)
         (root / "serve.py").write_text(_SERVER_TEMPLATE, encoding="utf-8")
         (root / "predict.py").write_text(
-            _CLI_TEMPLATE.replace("__MODEL_FILE__", model_path.name).replace(
-                "__METADATA_FILE__", metadata_path.name
-            ),
+            _CLI_TEMPLATE.replace("__MODEL_FILE__", model_path.name).replace("__METADATA_FILE__", metadata_path.name),
             encoding="utf-8",
         )
         (root / "Dockerfile").write_text(_DOCKERFILE, encoding="utf-8")
@@ -63,11 +61,7 @@ def export_deployment_bundle(
         )
         (root / "requirements.txt").write_text(f"{package_requirement}\n", encoding="utf-8")
         (root / "README.md").write_text(_README, encoding="utf-8")
-        manifest = {
-            path.relative_to(root).as_posix(): _sha256(path)
-            for path in root.rglob("*")
-            if path.is_file()
-        }
+        manifest = {path.relative_to(root).as_posix(): _sha256(path) for path in root.rglob("*") if path.is_file()}
         (root / "checksums.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as archive:
             for path in root.rglob("*"):
@@ -83,7 +77,7 @@ def _sha256(path: Path) -> str:
 def _build_current_wheel(output_dir: Path) -> Path | None:
     output_dir.mkdir(parents=True, exist_ok=True)
     try:
-        subprocess.run(
+        subprocess.run(  # nosec B603
             [sys.executable, "-m", "build", "--wheel", "--outdir", str(output_dir), "."],
             check=True,
             capture_output=True,
