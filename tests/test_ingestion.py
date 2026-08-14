@@ -257,8 +257,8 @@ class TestDataFrameLoaderAndPreview:
         assert loaded.preview(1).shape == (1, 2)
 
 
-class TestChunkedCSVReading:
-    def test_csv_loader_reads_in_chunks_and_stops_after_row_limit(
+class TestBoundedCSVReading:
+    def test_csv_loader_passes_row_limit_to_pandas_parser(
         self,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
@@ -267,29 +267,9 @@ class TestChunkedCSVReading:
         csv_path.write_text("feature,target\n1,0\n2,1\n3,0\n4,1\n5,0\n", encoding="utf-8")
 
         seen_kwargs: dict[str, Any] = {}
-        consumed_chunks: list[int] = []
-
-        class FakeReader:
-            def __init__(self) -> None:
-                self._chunks = iter(
-                    [
-                        pd.DataFrame({"feature": [1, 2], "target": [0, 1]}),
-                        pd.DataFrame({"feature": [3, 4], "target": [0, 1]}),
-                        pd.DataFrame({"feature": [5], "target": [0]}),
-                    ]
-                )
-
-            def __iter__(self):
-                return self
-
-            def __next__(self):
-                chunk = next(self._chunks)
-                consumed_chunks.append(len(chunk))
-                return chunk
-
         def fake_read_csv(*args, **kwargs):
             seen_kwargs.update(kwargs)
-            return FakeReader()
+            return pd.DataFrame({"feature": [1, 2, 3], "target": [0, 1, 0]})
 
         monkeypatch.setattr(pd, "read_csv", fake_read_csv)
 
@@ -299,9 +279,9 @@ class TestChunkedCSVReading:
         )
 
         assert dataframe.shape == (3, 2)
-        assert consumed_chunks == [2, 2]
-        assert seen_kwargs["chunksize"] == 3
-        assert source_details["load_strategy"] == "chunked_read_csv"
+        assert seen_kwargs["nrows"] == 3
+        assert "chunksize" not in seen_kwargs
+        assert source_details["load_strategy"] == "pandas_read_csv"
 
 
 class TestFailures:

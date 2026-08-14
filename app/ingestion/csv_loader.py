@@ -19,7 +19,6 @@ from app.ingestion.url_loader import (
 )
 from app.ingestion.utils import sniff_delimiter
 
-_CSV_CHUNK_SIZE_ROWS = 50_000
 _CSV_SNIFF_BYTES = 8192
 
 
@@ -60,13 +59,13 @@ class CSVLoader(BaseLoader):
                     max_bytes=input_spec.local_max_file_bytes,
                 )
                 delimiter = self._update_delimiter_from_sample(path, input_spec, delimiter, read_kwargs)
-                dataframe = self._read_csv_in_chunks(path, read_kwargs, row_limit=row_limit)
+                dataframe = self._read_csv(path, read_kwargs, row_limit=row_limit)
                 source_details = {
                     "source_kind": "path",
                     "delimiter": delimiter or "auto",
                     "encoding": input_spec.encoding,
                     "file_size_bytes": file_size,
-                    "load_strategy": "chunked_read_csv",
+                    "load_strategy": "pandas_read_csv",
                 }
                 return dataframe, source_details
 
@@ -84,7 +83,7 @@ class CSVLoader(BaseLoader):
                         delimiter,
                         read_kwargs,
                     )
-                    dataframe = self._read_csv_in_chunks(
+                    dataframe = self._read_csv(
                         downloaded.path,
                         read_kwargs,
                         row_limit=row_limit,
@@ -96,7 +95,7 @@ class CSVLoader(BaseLoader):
                         "delimiter": delimiter or "auto",
                         "encoding": input_spec.encoding,
                         "file_size_bytes": downloaded.file_size_bytes,
-                        "load_strategy": "streamed_temp_file_chunked_read_csv",
+                        "load_strategy": "streamed_temp_file_pandas_read_csv",
                     }
                     return dataframe, source_details
 
@@ -159,7 +158,7 @@ class CSVLoader(BaseLoader):
                         read_kwargs,
                     )
                     dataframe = await asyncio.to_thread(
-                        self._read_csv_in_chunks,
+                        self._read_csv,
                         downloaded.path,
                         read_kwargs,
                         row_limit=row_limit,
@@ -171,7 +170,7 @@ class CSVLoader(BaseLoader):
                         "delimiter": delimiter or "auto",
                         "encoding": input_spec.encoding,
                         "file_size_bytes": downloaded.file_size_bytes,
-                        "load_strategy": "streamed_temp_file_chunked_read_csv_async",
+                        "load_strategy": "streamed_temp_file_pandas_read_csv_async",
                     }
                     return dataframe, source_details
 
@@ -226,32 +225,11 @@ class CSVLoader(BaseLoader):
         read_kwargs.pop("engine", None)
         return detected
 
-    def _read_csv_in_chunks(
+    def _read_csv(
         self,
         path: Path,
         read_kwargs: dict[str, Any],
         *,
         row_limit: int | None,
     ) -> pd.DataFrame:
-        chunksize = min(row_limit, _CSV_CHUNK_SIZE_ROWS) if row_limit is not None else _CSV_CHUNK_SIZE_ROWS
-        reader = pd.read_csv(path, chunksize=chunksize, **read_kwargs)
-
-        collected_chunks: list[pd.DataFrame] = []
-        remaining_rows = row_limit
-        for chunk in reader:
-            if remaining_rows is not None and len(chunk) > remaining_rows:
-                chunk = chunk.head(remaining_rows)
-            collected_chunks.append(chunk)
-
-            if remaining_rows is None:
-                continue
-
-            remaining_rows -= len(chunk)
-            if remaining_rows <= 0:
-                break
-
-        if not collected_chunks:
-            return pd.read_csv(path, nrows=0, **read_kwargs)
-        if len(collected_chunks) == 1:
-            return collected_chunks[0].reset_index(drop=True)
-        return pd.concat(collected_chunks, ignore_index=True)
+        return pd.read_csv(path, nrows=row_limit, **read_kwargs)

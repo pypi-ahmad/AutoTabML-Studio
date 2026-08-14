@@ -42,7 +42,7 @@ class TestAsyncIngestionFactory:
 
         assert loaded.dataframe.shape == (2, 2)
         assert loaded.metadata.source_details["routed_source_type"] == "csv"
-        assert loaded.metadata.source_details["load_strategy"] == "streamed_temp_file_chunked_read_csv_async"
+        assert loaded.metadata.source_details["load_strategy"] == "streamed_temp_file_pandas_read_csv_async"
 
     @pytest.mark.asyncio
     @respx.mock

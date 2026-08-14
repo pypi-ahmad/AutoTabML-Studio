@@ -56,6 +56,7 @@ Most tabular ML work is scattered across notebooks, throwaway scripts, and manua
 
 ### Data Preparation
 - **Multi-source ingestion** — CSV, Excel, TSV, URLs, HTML tables, UCI ML Repository, optional Kaggle
+- **Efficient CSV loading** — native bounded parsing avoids intermediate chunk copies
 - **Quality validation** — app-native checks + optional Great Expectations integration
 - **EDA profiling** — `ydata-profiling` reports with sampling safeguards for large datasets
 
@@ -379,7 +380,7 @@ verification scripts on a fresh `.venv` with Python 3.12.10:
 | Check | Command | Result |
 | --- | --- | --- |
 | Lockfile consistency | `uv lock --check` | passes |
-| Unit tests | `pytest tests/ -q` | **707 passed**, 30 deselected |
+| Unit tests | `pytest tests/ -q` | **708 passed**, 30 deselected |
 | Coverage gate | `pytest --cov=app --cov-fail-under=65` | **77.32%** (gate ≥ 65%) |
 | Lint | `ruff check app/ tests/ scripts/` | **All checks passed** |
 | Release metadata | `python -m app.release_metadata` | passes |
