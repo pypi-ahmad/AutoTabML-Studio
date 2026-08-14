@@ -59,7 +59,7 @@ class CSVLoader(BaseLoader):
                     max_bytes=input_spec.local_max_file_bytes,
                 )
                 delimiter = self._update_delimiter_from_sample(path, input_spec, delimiter, read_kwargs)
-                dataframe = self._read_csv(path, read_kwargs, row_limit=row_limit)
+                dataframe = pd.read_csv(path, nrows=row_limit, **read_kwargs)
                 source_details = {
                     "source_kind": "path",
                     "delimiter": delimiter or "auto",
@@ -83,10 +83,10 @@ class CSVLoader(BaseLoader):
                         delimiter,
                         read_kwargs,
                     )
-                    dataframe = self._read_csv(
+                    dataframe = pd.read_csv(
                         downloaded.path,
-                        read_kwargs,
-                        row_limit=row_limit,
+                        nrows=row_limit,
+                        **read_kwargs,
                     )
                     source_details = {
                         "source_kind": "url",
@@ -158,10 +158,10 @@ class CSVLoader(BaseLoader):
                         read_kwargs,
                     )
                     dataframe = await asyncio.to_thread(
-                        self._read_csv,
+                        pd.read_csv,
                         downloaded.path,
-                        read_kwargs,
-                        row_limit=row_limit,
+                        nrows=row_limit,
+                        **read_kwargs,
                     )
                     source_details = {
                         "source_kind": "url",
@@ -224,12 +224,3 @@ class CSVLoader(BaseLoader):
         read_kwargs["sep"] = detected
         read_kwargs.pop("engine", None)
         return detected
-
-    def _read_csv(
-        self,
-        path: Path,
-        read_kwargs: dict[str, Any],
-        *,
-        row_limit: int | None,
-    ) -> pd.DataFrame:
-        return pd.read_csv(path, nrows=row_limit, **read_kwargs)
