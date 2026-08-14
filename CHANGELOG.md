@@ -7,6 +7,8 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-14
+
 ### Added
 
 - Windows double-click launcher for the Streamlit UI.
@@ -15,8 +17,7 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 - Holdout evaluation, SHAP/native/permutation explanations, provenance, and drift.
 - FastAPI, standalone CLI, and non-root Docker deployment ZIPs.
 - Simplified callable Streamlit navigation.
-
-### Added
+- Interactive architecture map and committed code-understanding graphs.
 
 ### Changed
 
@@ -25,8 +26,12 @@ and aims to follow [Semantic Versioning](https://semver.org/).
 - Removed unused parameters from private experiment result renderers.
 - Simplified CSV delimiter resolution and result-table row construction.
 - Simplified model-summary normalization and Markdown artifact assembly.
+- Reduced CSV ingestion allocations and updated pinned CI dependencies.
 
-### Fixed
+### Security
+
+- Bound local Streamlit and container entry points to loopback by default.
+- Hardened untrusted URL ingestion, artifact integrity checks, and log redaction.
 
 ## [0.2.0] - 2026-06-22
 
@@ -219,5 +224,7 @@ upgrade for all 0.1.x users.
 
 - OSS companion documentation initialized (license, contributing, security, conduct, changelog).
 
+[Unreleased]: https://github.com/pypi-ahmad/AutoTabML-Studio/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/pypi-ahmad/AutoTabML-Studio/releases/tag/v0.3.0
 [0.2.0]: https://github.com/pypi-ahmad/AutoTabML-Studio/releases/tag/v0.2.0
 [2026-06-13]: https://github.com/pypi-ahmad/AutoTabML-Studio/releases/tag/v0.1.0

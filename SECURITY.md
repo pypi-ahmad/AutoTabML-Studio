@@ -4,17 +4,17 @@
 
 | Version | Supported |
 | ------- | --------- |
-| 0.2.x   | ✅ Yes    |
-| 0.1.x   | ⚠️ Best-effort (legacy) |
+| 0.3.x   | ✅ Yes    |
+| 0.2.x   | ⚠️ Best-effort (legacy) |
 | < 0.1   | ❌ No     |
 
-The current release line is **0.2.x**. Security fixes land on `main`
+The current release line is **0.3.x**. Security fixes land on `main`
 and are released as patch or minor versions as the severity warrants.
 
-## Security Posture — v0.2.0
+## Security Posture — v0.3.0
 
-The v0.2.0 release significantly hardens the security posture of the
-workbench. The following controls are now active by default.
+The v0.2.0 release established the hardened foundation, and v0.3.0 retains
+and extends it. The following controls are active by default.
 
 ### Ingestion
 

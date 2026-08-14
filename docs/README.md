@@ -17,7 +17,7 @@ exists, how it works, and how to use or extend it.
 | Operate, monitor, troubleshoot                         | [operations.md](operations.md)                                         |
 | Set up the dev environment and run the test suite     | [developer-guide.md](developer-guide.md)                               |
 | Report a security issue                                | [SECURITY.md](../SECURITY.md)                                          |
-| Read release notes                                    | [RELEASE_NOTES_v0.2.0.md](../RELEASE_NOTES_v0.2.0.md) → [CHANGELOG.md](../CHANGELOG.md) |
+| Read release notes                                    | [RELEASE_NOTES_v0.3.0.md](../RELEASE_NOTES_v0.3.0.md) → [CHANGELOG.md](../CHANGELOG.md) |
 
 ## Document map
 
@@ -34,8 +34,10 @@ exists, how it works, and how to use or extend it.
   upgrade from 0.1.x to 0.2.0.
 - [UPGRADE_SUMMARY.md](../UPGRADE_SUMMARY.md) — one-page
   upgrade cheat sheet.
+- [RELEASE_NOTES_v0.3.0.md](../RELEASE_NOTES_v0.3.0.md) — the
+  current v0.3.0 release announcement.
 - [RELEASE_NOTES_v0.2.0.md](../RELEASE_NOTES_v0.2.0.md) — the
-  v0.2.0 release announcement.
+  historical v0.2.0 release announcement.
 - [SECURITY.md](../SECURITY.md) — supported versions,
   disclosure channel, response SLA, hardening guide.
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — how to contribute
@@ -58,6 +60,7 @@ exists, how it works, and how to use or extend it.
 - Guided background Auto Run with cancellation.
 - Holdout evaluation, explanations, provenance, and prediction drift.
 - FastAPI, CLI, and Docker deployment bundles.
+- Windows double-click launching and hosted-model cost estimates.
 - Simplified navigation with advanced workflows retained.
 
 AutoTabML Studio is a **local-first automated machine-learning
@@ -66,9 +69,9 @@ evaluated, and deployable model — entirely on your machine.
 Three AutoML engines (LazyPredict, PyCaret, FLAML), end-to-end
 MLflow tracking, an MLflow-style model registry, AI-generated
 summaries (OpenAI, Anthropic, Gemini, Ollama), and a CLI that
-mirrors the Streamlit UI. v0.2.0 hardens the foundation:
-modern packaging, modern type safety, official SDK
-integrations, and a production-grade CI/CD surface.
+mirrors the Streamlit UI. v0.3.0 adds guided production
+workflows, evaluation and deployment artifacts, desktop launch
+tooling, and model-cost planning on the hardened v0.2 foundation.
 
 ## What is the philosophy?
 

@@ -3,20 +3,20 @@
 # AutoTabML Studio — production-grade multi-stage image.
 #
 # Build:
-#   docker build -t autotabml-studio:0.2.0 .
+#   docker build -t autotabml-studio:0.3.0 .
 #
 # Run (Streamlit UI):
 #   docker run --rm -p 127.0.0.1:8501:8501 \
 #     -v $(pwd)/artifacts:/app/artifacts \
 #     -e AUTOTABML_LOG_FORMAT=json \
-#     autotabml-studio:0.2.0
+#     autotabml-studio:0.3.0
 #
 # Run (CLI):
-#   docker run --rm -it autotabml-studio:0.2.0 autotabml --help
+#   docker run --rm -it autotabml-studio:0.3.0 autotabml --help
 #   docker run --rm -it \
 #     -v $(pwd)/data:/data:ro \
 #     -v $(pwd)/artifacts:/app/artifacts \
-#     autotabml-studio:0.2.0 \
+#     autotabml-studio:0.3.0 \
 #     autotabml benchmark /data/train.csv --target label
 
 ARG PYTHON_VERSION=3.12

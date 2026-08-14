@@ -1,6 +1,6 @@
 # Architecture Guide
 
-> **Status:** v0.2.0 architecture. Last reviewed: 2026-08-14.
+> **Status:** v0.3.0 architecture. Last reviewed: 2026-08-14.
 
 AutoTabML Studio is a **local-first ML workbench** with two faces
 (Streamlit UI + CLI) backed by the same service layer. This document

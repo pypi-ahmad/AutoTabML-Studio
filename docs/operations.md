@@ -270,7 +270,7 @@ autotabml init-local-storage
 ### Build the image
 
 ```bash
-docker build -t autotabml-studio:0.2.0 .
+docker build -t autotabml-studio:0.3.0 .
 ```
 
 ### Run with the bundled compose file
@@ -291,7 +291,7 @@ access requires an authenticated TLS reverse proxy in front of the application.
 docker run --rm -it \
   -v $(pwd)/data:/data:ro \
   -v $(pwd)/artifacts:/app/artifacts \
-  autotabml-studio:0.2.0 \
+  autotabml-studio:0.3.0 \
   autotabml benchmark /data/train.csv --target label
 ```
 
