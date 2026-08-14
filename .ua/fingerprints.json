@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "347ebb24914b7acd0a085e09402a1ce01fe3f4de",
-  "generatedAt": "2026-08-14T12:34:13.006Z",
+  "gitCommitHash": "1aa120114a83e5ff82e714d6752b0285a14af29b",
+  "generatedAt": "2026-08-14T12:48:29.275Z",
   "files": {
     ".code-review-graph/graph.db": {
       "filePath": ".code-review-graph/graph.db",
@@ -45,12 +45,12 @@
     },
     ".codegraph/codegraph.db": {
       "filePath": ".codegraph/codegraph.db",
-      "contentHash": "ffbbee6ca1de0d2dad2cbd6573cc4fce9ae9d3c963cbbf85d0b87baed0b910c6",
+      "contentHash": "15e581da2b3145104ef30e57e3c3532552267070d5295d0f8f46a815887bda66",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 57328,
+      "totalLines": 57595,
       "hasStructuralAnalysis": false
     },
     ".dockerignore": {
@@ -125,12 +125,12 @@
     },
     ".github/workflows/ci.yml": {
       "filePath": ".github/workflows/ci.yml",
-      "contentHash": "904a6f21c8558564b8765179ce0129f72d54addcb510e138cec46199ca59e0eb",
+      "contentHash": "05a26a32a7cc4082f38036c3401faf2f444a0a0703ade823c86af8e4117c81fe",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 235,
+      "totalLines": 237,
       "hasStructuralAnalysis": true
     },
     ".github/workflows/release-readiness.yml": {
@@ -145,12 +145,12 @@
     },
     ".github/workflows/security.yml": {
       "filePath": ".github/workflows/security.yml",
-      "contentHash": "9720f0eb6f4d37eb258d2ce77d68d74d362ff23cbd38e4a5e5df12d11eab059c",
+      "contentHash": "2648ac017142822bc06091b253c2e56e57d4276ffce85408d1ba57a8b5bba4fd",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 130,
+      "totalLines": 131,
       "hasStructuralAnalysis": true
     },
     ".gitleaks.toml": {
@@ -195,12 +195,12 @@
     },
     "CHANGELOG.md": {
       "filePath": "CHANGELOG.md",
-      "contentHash": "aa1f829d22937cb4d1c7de66d7e99ae246c5279aafc265a7b55bf4a1cb5ddf57",
+      "contentHash": "a32c553b131418fed46671b6322ac2b85e736af00e083ec0d1ed4ee30b5ff0bb",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 253,
+      "totalLines": 256,
       "hasStructuralAnalysis": true
     },
     "CODE_OF_CONDUCT.md": {
@@ -444,7 +444,7 @@
     },
     "app/autorun.py": {
       "filePath": "app/autorun.py",
-      "contentHash": "9933b4b1e2eee8249e32702fab1b8eacf206e392b04c0e2d5d2c6d5a150f99b6",
+      "contentHash": "5dd458ca1c567c1390762d632f0aa95d81ba90a8ad04177beb4892cdce0c3b80",
       "functions": [
         {
           "name": "suggest_targets",
@@ -476,7 +476,7 @@
           ],
           "returnType": "AutoRunResult",
           "exported": true,
-          "lineCount": 100
+          "lineCount": 98
         },
         {
           "name": "_write_json",
@@ -644,12 +644,12 @@
         "run_auto_run",
         "_write_json"
       ],
-      "totalLines": 214,
+      "totalLines": 212,
       "hasStructuralAnalysis": true
     },
     "app/autorun_worker.py": {
       "filePath": "app/autorun_worker.py",
-      "contentHash": "20d2463bde9d0e3e05931953b6e5f62a463c3ed59d59e3367a5a2d2d27e8cb20",
+      "contentHash": "43fc833329637e7fd291ef917b11956814b08464019df7084f5914933f5a0d66",
       "functions": [
         {
           "name": "main",
@@ -658,7 +658,7 @@
           ],
           "returnType": "int",
           "exported": true,
-          "lineCount": 45
+          "lineCount": 43
         },
         {
           "name": "_update",
@@ -733,7 +733,7 @@
         "main",
         "_update"
       ],
-      "totalLines": 73,
+      "totalLines": 71,
       "hasStructuralAnalysis": true
     },
     "app/backends/__init__.py": {
@@ -960,7 +960,7 @@
     },
     "app/background_jobs.py": {
       "filePath": "app/background_jobs.py",
-      "contentHash": "76c9a292e6da5261061297eb8f2776f89f6bcafe660614e4ebce6bfdad965213",
+      "contentHash": "6a2eeaabbdd6c60130c338326b53fdd20573cdeb379f0c762f3baf086fe79016",
       "functions": [],
       "classes": [
         {
@@ -1056,7 +1056,7 @@
     },
     "app/cli.py": {
       "filePath": "app/cli.py",
-      "contentHash": "486b710ede6b991a9a84bcf7a40339631d4f83b5913856be75ad57fc58d6ef48",
+      "contentHash": "f116cb4cc1aff02940f8c1166eee4594e434e4c060e3174e572e8c0f4aedc272",
       "functions": [
         {
           "name": "cmd_auto_run",
@@ -1462,7 +1462,7 @@
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 71
+          "lineCount": 73
         },
         {
           "name": "cmd_timesfm_forecast",
@@ -1471,7 +1471,7 @@
           ],
           "returnType": "None",
           "exported": true,
-          "lineCount": 54
+          "lineCount": 56
         },
         {
           "name": "_add_prediction_model_source_args",
@@ -1755,7 +1755,7 @@
         "cmd_flaml_run",
         "cmd_flaml_save"
       ],
-      "totalLines": 2284,
+      "totalLines": 2288,
       "hasStructuralAnalysis": true
     },
     "app/concurrency.py": {
@@ -2306,7 +2306,7 @@
     },
     "app/deployment.py": {
       "filePath": "app/deployment.py",
-      "contentHash": "95fe56fa5911e2a3746c61ce61d17de0bcd933e95a8acd4ac15aa33984b37eda",
+      "contentHash": "7698628377833dcab83175d2445779f42f06a4c3c48944e60395f050948c2f00",
       "functions": [
         {
           "name": "export_deployment_bundle",
@@ -2318,7 +2318,7 @@
           ],
           "returnType": "DeploymentBundle",
           "exported": true,
-          "lineCount": 54
+          "lineCount": 48
         },
         {
           "name": "_sha256",
@@ -2414,7 +2414,7 @@
         "_sha256",
         "_build_current_wheel"
       ],
-      "totalLines": 177,
+      "totalLines": 171,
       "hasStructuralAnalysis": true
     },
     "app/drift.py": {
@@ -6780,7 +6780,7 @@
     },
     "app/modeling/foundation/checkpoints.py": {
       "filePath": "app/modeling/foundation/checkpoints.py",
-      "contentHash": "f8546c5e8bee90ff2ce2296fdb78c1ff1adcfca2b612ff5459d5f043a48337d8",
+      "contentHash": "d603f8a6e65a5008ab74ab124c7978254d37dd38b6d8ceb0f62a5610441c7493",
       "functions": [
         {
           "name": "_snapshot_download",
@@ -12429,7 +12429,7 @@
     },
     "app/pages/registry.py": {
       "filePath": "app/pages/registry.py",
-      "contentHash": "596c485b36dd1ee6fbc036f5cb37d697336d796f40ea3a098ef4ec5075ff9256",
+      "contentHash": "e7ec4feb6beea57ee5187a84e17d94132287366695dc99a693974c59d5049f17",
       "functions": [
         {
           "name": "get_page_registry",
@@ -12478,7 +12478,7 @@
             "workspace_mode"
           ],
           "exported": true,
-          "lineCount": 28
+          "lineCount": 25
         }
       ],
       "classes": [
@@ -12525,7 +12525,7 @@
         "render_registered_page",
         "build_streamlit_navigation"
       ],
-      "totalLines": 233,
+      "totalLines": 230,
       "hasStructuralAnalysis": true
     },
     "app/pages/registry_page.py": {
@@ -12941,7 +12941,7 @@
     },
     "app/pages/settings_page.py": {
       "filePath": "app/pages/settings_page.py",
-      "contentHash": "40add7766a1a41ae83f681c7f1958d9c95cd34d587a194c35379d778708ffdf4",
+      "contentHash": "19a4ed6d3ce39419ae56142347935d29274595a531701dec528c6b70529c940f",
       "functions": [
         {
           "name": "_run_async",
@@ -13042,7 +13042,7 @@
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 43
+          "lineCount": 45
         },
         {
           "name": "_section_mlflow_descriptions",
@@ -13184,7 +13184,7 @@
         "_section_save",
         "_fetch_models"
       ],
-      "totalLines": 540,
+      "totalLines": 542,
       "hasStructuralAnalysis": true
     },
     "app/pages/shared_history.py": {
@@ -16326,7 +16326,7 @@
     },
     "app/provenance.py": {
       "filePath": "app/provenance.py",
-      "contentHash": "c68e0dd60d5d2e89ee8da81cdb8ef73c54d2654362572cb5b2846fc4604a99bd",
+      "contentHash": "e421fd115b73cbb0a81cf0f0bbf26affbb274f17c3c70e165a1b99fbd890b594",
       "functions": [
         {
           "name": "sha256_file",
@@ -25111,13 +25111,13 @@
     },
     "tests/test_hardening_smoke.py": {
       "filePath": "tests/test_hardening_smoke.py",
-      "contentHash": "761dcb9248e83fcb2321a13a7eb651323f3735e7c5d8886cb9fcf51c6972dfe9",
+      "contentHash": "09cf1d64997048a4880999273fcee18837b494be64b7f940142b18caba8d9f66",
       "functions": [
         {
           "name": "test_compose_publishes_workbench_on_loopback_only",
           "params": [],
           "exported": true,
-          "lineCount": 7
+          "lineCount": 5
         },
         {
           "name": "test_local_first_smoke_flow_persists_metadata_across_workflows",
@@ -25270,12 +25270,12 @@
         "test_local_first_smoke_flow_persists_metadata_across_workflows",
         "test_streamlit_config_disables_auto_sidebar_navigation"
       ],
-      "totalLines": 336,
+      "totalLines": 334,
       "hasStructuralAnalysis": true
     },
     "tests/test_ingestion.py": {
       "filePath": "tests/test_ingestion.py",
-      "contentHash": "af1f25753f1b493d644b0b136e2cc720df4f2cace6e6be0474afd0555cab662f",
+      "contentHash": "691b60babddf1a059d70e870f1b7e40a7c60c9e2c8d769f2f65de4f5b9bcb9c5",
       "functions": [],
       "classes": [
         {
@@ -25323,7 +25323,7 @@
           ],
           "properties": [],
           "exported": true,
-          "lineCount": 25
+          "lineCount": 26
         },
         {
           "name": "TestFailures",
@@ -25423,7 +25423,7 @@
         "TestBoundedCSVReading",
         "TestFailures"
       ],
-      "totalLines": 356,
+      "totalLines": 357,
       "hasStructuralAnalysis": true
     },
     "tests/test_ingestion_async.py": {
@@ -28822,14 +28822,14 @@
     },
     "tests/test_settings_page.py": {
       "filePath": "tests/test_settings_page.py",
-      "contentHash": "4d283ae350700731e75d362e5698392ee2a469b6e6eff9b924074f3dd1a14165",
+      "contentHash": "db4254ad9643259bd7b0e84268033806de636d24f2e78ddb047c6b7e64d7a7d1",
       "functions": [
         {
           "name": "test_model_cost_calculator_renders_reference_estimate",
           "params": [],
           "returnType": "None",
           "exported": true,
-          "lineCount": 17
+          "lineCount": 14
         }
       ],
       "classes": [
@@ -28891,7 +28891,7 @@
         "TestFetchModels",
         "test_model_cost_calculator_renders_reference_estimate"
       ],
-      "totalLines": 61,
+      "totalLines": 58,
       "hasStructuralAnalysis": true
     },
     "tests/test_startup.py": {
