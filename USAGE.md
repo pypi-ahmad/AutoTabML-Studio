@@ -633,6 +633,17 @@ autotabml history-show <run_id>
 autotabml compare-runs <run_id_1> <run_id_2>
 ```
 
+### Batch Runs
+
+```bash
+autotabml batch-history --limit 20
+autotabml batch-show <batch_id>
+```
+
+`batch-history` lists past multi-dataset batch runs with status and
+success/failed/skipped counts; `batch-show` prints the full detail for one
+batch run by ID.
+
 ### Model Registry
 
 ```bash
