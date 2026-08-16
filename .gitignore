@@ -54,3 +54,9 @@ _poll_ci2.py
 _wait.py
 _check*.py
 _poll*.py
+
+# Code intelligence tool artifacts
+.codebase-memory/
+.codegraph/
+.ua/
+graphify-out/
