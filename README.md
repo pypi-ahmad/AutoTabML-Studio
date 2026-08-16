@@ -6,9 +6,9 @@
 
 **Local-first automated machine learning workbench for tabular data.**
 
-Go from a raw CSV to a trained, evaluated, deployable model, entirely on your
-machine. A single service layer powers both the Streamlit UI and the CLI, so
-results are reproducible either way. No cloud account, no outbound telemetry.
+Go from a raw CSV to a trained, evaluated, deployable model — entirely on your machine.
+No cloud account, no outbound telemetry. A single service layer drives both the Streamlit UI and the CLI,
+so every workflow is reproducible either way.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/ci.yml)
 [![Security](https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/security.yml?branch=main&style=for-the-badge&logo=shieldsdotio&logoColor=white&label=Security)](https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/security.yml)
@@ -17,16 +17,16 @@ results are reproducible either way. No cloud account, no outbound telemetry.
 
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
 ![MLflow](https://img.shields.io/badge/MLflow-Tracking-0194E2?style=flat-square&logo=mlflow&logoColor=white)
-![pandas](https://img.shields.io/badge/pandas-DataFrames-150458?style=flat-square&logo=pandas&logoColor=white)
-![Pydantic](https://img.shields.io/badge/Pydantic-Schemas-E92063?style=flat-square&logo=pydantic&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
 ![PyCaret](https://img.shields.io/badge/PyCaret-AutoML-1D4ED8?style=flat-square)
 ![FLAML](https://img.shields.io/badge/FLAML-AutoML-00A4EF?style=flat-square&logo=microsoft&logoColor=white)
+![pandas](https://img.shields.io/badge/pandas-DataFrames-150458?style=flat-square&logo=pandas&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-Schemas-E92063?style=flat-square&logo=pydantic&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-Metadata-003B57?style=flat-square&logo=sqlite&logoColor=white)
 
 **Repository:** [github.com/pypi-ahmad/AutoTabML-Studio](https://github.com/pypi-ahmad/AutoTabML-Studio)
 
-[Features](#features) · [Quick start](#quick-start) · [Screenshots](#screenshots) · [Architecture](#architecture) · [Observability](#observability) · [Docs](#documentation)
+[Features](#features) · [Quick start](#quick-start) · [Workflow](#workflow) · [CLI](#cli) · [Configuration](#configuration) · [Architecture](#architecture) · [Docs](#documentation) · [Community](#community)
 
 </div>
 
@@ -37,15 +37,23 @@ results are reproducible either way. No cloud account, no outbound telemetry.
 - [What is AutoTabML Studio?](#what-is-autotabml-studio)
 - [Features](#features)
 - [Quick start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Install](#install)
+  - [Run](#run)
 - [Workflow](#workflow)
 - [Screenshots](#screenshots)
 - [Architecture](#architecture)
-- [CLI](#cli)
+  - [Module map](#module-map)
+  - [Tech stack](#tech-stack)
+- [CLI reference](#cli-reference)
 - [Configuration](#configuration)
+  - [Environment variables](#environment-variables)
 - [Observability](#observability)
 - [Testing & CI](#testing--ci)
 - [Known limitations](#known-limitations)
-- [Documentation](#documentation)
+- [Documentation index](#documentation-index)
+- [Community](#community)
+- [Disclaimer](#disclaimer)
 
 ---
 
@@ -53,34 +61,26 @@ results are reproducible either way. No cloud account, no outbound telemetry.
 
 Most tabular ML work is scattered across notebooks, throwaway scripts, and
 manual model-file management: a benchmark run in one notebook, a tuned model
-saved to some folder, a prediction script duplicated for every project. There
-is rarely one place that remembers what data trained a model, what it scored,
-or which version is actually deployed.
+saved somewhere, a prediction script duplicated for every project. There is
+rarely one place that remembers what data trained a model, what it scored,
+or which version is deployed.
 
-AutoTabML Studio is a **local-first AutoML workbench** that consolidates that
-entire lifecycle — ingest, validate, profile, train, predict, track, register —
-into one workspace. It ships two front ends, a **Streamlit UI** for interactive
-work and a **CLI** for scripted/headless runs, both driven by the exact same
-service layer in `app/`. Nothing is UI-only or CLI-only: whatever you can click
-through, you can also automate, and the results are identical either way.
+AutoTabML Studio consolidates that entire lifecycle — ingest, validate, profile,
+benchmark, train, predict, track, register, and export — into one local workspace.
+It ships a **Streamlit UI** for interactive exploration and a **CLI** for scripted
+or headless runs; both use the same service layer, so results are identical either way.
 
-It targets a single user running everything on their own machine: a data
-scientist or ML engineer who wants to go from a raw CSV to a trained, evaluated,
-deployable model without provisioning cloud infrastructure, standing up a
-tracking server, or wiring together separate tools for ingestion, training, and
-model management.
-
-- **Zero cloud dependency** — data never leaves your machine; no default outbound telemetry or external uploads
-- **Three AutoML engines** — LazyPredict for quick benchmarks, PyCaret for full experiments, Microsoft FLAML for fast, cost-efficient hyperparameter search
-- **Foundation models** — research-only TabFM classification/regression and TimesFM 2.5 forecasting, both revision-pinned and local
-- **End-to-end tracking** — MLflow logs aggregate metrics, parameters, and safe summary artifacts when installed; compare, version, and promote deployable models from one place
-- **729 unit tests**, a CI-enforced ≥ 65% coverage gate, `ruff` lint, and `detect-secrets` + `gitleaks` scanning on every push
+- **Zero cloud dependency** — data never leaves your machine; no outbound telemetry by default
+- **Three AutoML engines** — LazyPredict for quick sweeps, PyCaret for full experiments, Microsoft FLAML for time-budget search
+- **Foundation models** — Google TabFM (research-only) and TimesFM 2.5 (forecasting), both revision-pinned and local
+- **End-to-end tracking** — MLflow logs metrics, parameters, and safe artifacts; compare, version, and promote models from one place
+- **Production-grade quality** — 729 unit tests, ≥ 65% CI coverage gate, `ruff` lint, secret scanning on every push
 
 > [!NOTE]
-> "Local-first" is a hard boundary, not a marketing line: MLflow runs against a
-> local SQLite backend, the model registry is a local store, and outbound
-> network calls only happen when you explicitly opt in (an LLM provider key, a
-> Kaggle download, an on-demand foundation-model checkpoint fetch).
+> "Local-first" is a hard boundary: MLflow runs against a local SQLite backend,
+> the model registry is a local store, and network calls only happen when you
+> explicitly opt in (an LLM provider key, a Kaggle download, a foundation-model
+> checkpoint fetch).
 
 ---
 
@@ -92,20 +92,20 @@ model management.
 
 **Data preparation**
 - Multi-source ingestion — CSV, Excel, TSV, URLs, HTML tables, UCI ML Repository, optional Kaggle
-- Efficient CSV loading — native bounded parsing avoids intermediate chunk copies
+- Bounded CSV parsing — avoids intermediate chunk copies on large files
 - Quality validation — app-native checks + optional Great Expectations integration
-- EDA profiling — `ydata-profiling` reports with sampling safeguards for large datasets
+- EDA profiling — `ydata-profiling` HTML reports with large-dataset sampling
 
 </td>
 <td width="50%">
 
 **Modeling**
-- Quick Benchmark — screen 30+ algorithms via LazyPredict in seconds
-- Train & Tune — full PyCaret pipeline (compare → tune → evaluate → finalize → save)
-- FLAML AutoML — fast, lightweight AutoML with time-budget control
-- Google TabFM — non-commercial research evaluation for mixed-type classification and regression
-- Google TimesFM 2.5 — single/grouped time-series forecasts with q10–q90 uncertainty and holdout backtests
-- Classification and regression task types
+- **Quick Benchmark** — screen 30+ algorithms via LazyPredict in seconds
+- **Train & Tune** — full PyCaret pipeline: compare → tune → evaluate → finalize → save
+- **FLAML AutoML** — fast, cost-efficient hyperparameter search with time-budget control
+- **Google TabFM** — non-commercial research evaluation for classification and regression
+- **Google TimesFM 2.5** — single/grouped time-series forecasts with q10–q90 uncertainty
+- **Auto Run** — guided end-to-end pipeline as a cancellable background job
 
 </td>
 </tr>
@@ -113,8 +113,10 @@ model management.
 <td width="50%">
 
 **Predictions & evaluation**
-- Batch and single-row scoring with form-based or JSON input
+- Batch and single-row scoring (form-based or JSON input)
 - Model testing against held-out data with ground-truth labels
+- Drift detection — compare new data against a saved baseline
+- SHAP-based model explainability
 - Downloadable, Colab-compatible notebooks auto-generated for every run
 
 </td>
@@ -122,10 +124,10 @@ model management.
 
 **Operations**
 - MLflow model registry — Champion / Candidate / Archived lifecycle
-- Run history and side-by-side algorithm comparison
-- Structured observability — JSON logs, metrics hooks, optional tracing, run correlation
-- AI-generated summaries — OpenAI, Anthropic, Gemini, or local Ollama
-- CLI for scripted, repeatable workflows
+- Run history, side-by-side comparison, and algorithm leaderboards
+- Structured observability — JSON logs, metrics hooks, optional OpenTelemetry tracing
+- AI-generated summaries via OpenAI, Anthropic, Gemini, or local Ollama
+- Export deployment bundles (model + metadata + provenance + FastAPI server)
 
 </td>
 </tr>
@@ -137,77 +139,83 @@ model management.
 
 ### Prerequisites
 
-| Requirement | Version |
+| Requirement | Notes |
 | --- | --- |
-| Python | 3.10 – 3.13 (`uv` defaults to 3.12 via `.python-version`; use 3.11 or 3.12 for PyCaret support) |
+| Python 3.10 – 3.13 | `uv` defaults to 3.12 via `.python-version`; use 3.11 or 3.12 for PyCaret support |
+| [uv](https://docs.astral.sh/uv/) | Fast Python package manager; install with `pip install uv` |
 | OS | Windows, macOS, Linux |
 
 ### Install
 
 ```bash
-# 1. Sync the lockfile into a local environment
-uv sync --locked --group dev
+git clone https://github.com/pypi-ahmad/AutoTabML-Studio.git
+cd AutoTabML-Studio
 
-# 2. Add optional extras as needed
-uv sync --locked --group dev --extra benchmark   # LazyPredict + boosted baselines
-uv sync --locked --group dev --extra experiment  # PyCaret full pipeline (Python 3.11/3.12)
-uv sync --locked --group dev --extra flaml       # Microsoft FLAML AutoML
-uv sync --locked --group dev --extra validation  # Great Expectations
-uv sync --locked --group dev --extra profiling   # ydata-profiling EDA reports
-uv sync --locked --group dev --extra tabfm       # Google TabFM (Python 3.11+; research-only weights)
-uv sync --locked --group dev --extra timesfm     # Google TimesFM 2.5
+# Sync base environment (UI + CLI, no ML engines)
+uv sync --locked --group dev
 ```
 
-`uv` resolves against the committed lockfile and the repo's `.python-version`
-(`3.12`) by default. CI enforces `uv lock --check` and `uv sync --locked` so
-local installs and GitHub Actions resolve the same environment. If dependency
-metadata changes, refresh pins with `uv lock --python 3.12` and commit the
-updated `uv.lock`.
+Install only the extras you need:
+
+```bash
+uv sync --locked --group dev --extra benchmark    # LazyPredict + boosted baselines
+uv sync --locked --group dev --extra experiment   # PyCaret full pipeline (Python 3.11/3.12 only)
+uv sync --locked --group dev --extra flaml        # Microsoft FLAML AutoML
+uv sync --locked --group dev --extra validation   # Great Expectations
+uv sync --locked --group dev --extra profiling    # ydata-profiling EDA reports
+uv sync --locked --group dev --extra tabfm        # Google TabFM (Python 3.11+; research-only)
+uv sync --locked --group dev --extra timesfm      # Google TimesFM 2.5
+uv sync --locked --group dev --extra providers    # OpenAI / Anthropic / Gemini / Ollama
+```
 
 > [!IMPORTANT]
-> `tabfm` and `profiling` are declared as a uv conflict: TabFM requires
-> `typeguard<3` while `ydata-profiling` requires `typeguard>=4`. Sync them into
-> separate uv environments if you need both workflows.
+> `tabfm` and `profiling` declare a `uv` conflict — TabFM requires `typeguard<3`
+> while `ydata-profiling` requires `typeguard>=4`. Sync them into separate virtual
+> environments if you need both.
 
 ### Run
 
-On Windows, double-click **`Launch AutoTabML Studio.cmd`** in the repository
-root. It uses `uv` and opens the UI in your browser at `http://localhost:8561`.
+**Windows:** double-click **`Launch AutoTabML Studio.cmd`** in the repo root.
+It opens the UI at `http://localhost:8561`.
 
-Or from a terminal:
+**Terminal:**
 
 ```bash
-uv run autotabml init-local-storage   # Initialize SQLite + artifact dirs
+uv run autotabml init-local-storage   # Initialize SQLite + artifact directories
 uv run autotabml doctor               # Verify runtime dependencies
-uv run streamlit run app/main.py      # Launch the UI
+uv run streamlit run app/main.py      # Launch the Streamlit UI
 ```
+
+> [!TIP]
+> Run `autotabml doctor` after install to confirm all required paths, the
+> database, and any optional dependency groups are wired up correctly.
 
 ---
 
 ## Workflow
 
-The recommended path is **Auto Run**: confirm a target, review the inferred
-task and FLAML plan, then launch a cancellable background job. It saves the
-model, holdout evaluation, explanation, provenance, and a row-free drift
-baseline.
+The recommended path is **Auto Run**: confirm a target column, review the inferred
+task type and FLAML plan, then launch a cancellable background job. It saves the
+model, holdout evaluation, provenance, and a row-free drift baseline automatically.
 
 ```
-Load Data → Validate → Profile → Benchmark → Train / FLAML → Predict → Compare → Register
+Load Data → Validate → Profile → Benchmark → Train / FLAML / Foundation → Predict → Compare → Register
 ```
 
 | Step | What happens |
 | --- | --- |
-| **Load Data** | Upload a file, paste a URL, or pick a UCI dataset |
-| **Validate** *(optional)* | Check for missing values, schema issues, and data leakage |
-| **Profile** *(optional)* | Generate a visual EDA summary |
+| **Load Data** | Upload CSV/Excel, paste a URL, pick a UCI dataset, or pull from Kaggle |
+| **Validate** *(optional)* | Check for nulls, schema issues, leakage, and distribution anomalies |
+| **Profile** *(optional)* | Generate a visual EDA summary with `ydata-profiling` |
 | **Quick Benchmark** | Screen 30+ algorithms — ranked leaderboard in seconds |
 | **Train & Tune** | Fine-tune the best algorithm with PyCaret and save a production model |
-| **FLAML AutoML** | Run FLAML with time-budget or iteration-budget constraints |
-| **Foundation Models** | Evaluate TabFM under its non-commercial weights license, or forecast with TimesFM 2.5 |
+| **FLAML AutoML** | Run time-budget or iteration-budget constrained AutoML |
+| **Foundation Models** | Evaluate TabFM (research-only) or forecast with TimesFM 2.5 |
 | **Predict** | Score new data (single row or batch file) with any saved model |
-| **Compare & Register** | Review run history, compare results, promote models |
+| **Compare & Register** | Review run history, compare results, promote models to Champion |
+| **Export** | Package a model + FastAPI server bundle for deployment |
 
-See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
+See **[USAGE.md](USAGE.md)** for the full step-by-step guide with screenshots.
 
 ---
 
@@ -246,55 +254,65 @@ See **[USAGE.md](USAGE.md)** for the full step-by-step guide.
 
 ## Architecture
 
-[Open the interactive architecture map](docs/autotabml-studio-architecture.html) for guided views, source-linked components, and diagram export.
+[Open the interactive architecture map](docs/autotabml-studio-architecture.html) — explorable component map with guided views and source-linked evidence.
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Streamlit UI                      │
-│  Dashboard · Load · Validate · Profile · Benchmark  │
-│  Train & Tune · FLAML · Foundation Models · Predict │
-│  Compare · Notebook · Registry · Settings           │
-├─────────────────────────────────────────────────────┤
-│                   CLI (argparse)                    │
-├──────────────┬──────────────┬───────────────────────┤
-│  Ingestion   │  Validation  │     Profiling         │
-├──────────────┼──────────────┼───────────────────────┤
-│ LazyPredict │ PyCaret │ FLAML │ TabFM │ TimesFM 2.5 │
-├──────────────┴──────────────┴───────────────────────┤
-│  Prediction · Tracking · Registry · Observability   │
-│  Storage                                             │
-├─────────────────────────────────────────────────────┤
-│  MLflow (SQLite) · SQLite Metadata · artifacts/     │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                       Streamlit UI (app/pages/)              │
+│  Dashboard · Load · Validate · Profile · Benchmark          │
+│  Train & Tune · FLAML · Foundation Models · AutoRun         │
+│  Predict · Compare · History · Registry · Settings          │
+├─────────────────────────────────────────────────────────────┤
+│                     CLI (app/cli.py)                        │
+├──────────────┬──────────────┬──────────────────────────────┤
+│  Ingestion   │  Validation  │     Profiling                │
+│  (CSV·Excel· │  (native +   │     (ydata-profiling)        │
+│  URL·Kaggle· │  Great Exp.) │                              │
+│  UCI·HTML)   │              │                              │
+├──────────────┴──────────────┴──────────────────────────────┤
+│       ML Engines                                            │
+│  LazyPredict · PyCaret · FLAML · TabFM · TimesFM 2.5       │
+├─────────────────────────────────────────────────────────────┤
+│  Prediction · Tracking · Registry · Observability          │
+│  Notebooks · Deployment · Storage · Security               │
+├─────────────────────────────────────────────────────────────┤
+│  MLflow (SQLite) · SQLite Metadata · artifacts/            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Streamlit pages are thin entry points; all business logic lives in the
-service layer. Services with a single runtime implementation stay concrete —
-shared base classes are reserved for real multi-implementation or published
-extension boundaries.
+Streamlit pages are thin entry points — all business logic lives in the service layer.
+Services with a single implementation stay concrete; base classes are reserved for
+real multi-implementation or published extension boundaries.
+
+### Module map
 
 <details>
-<summary>Module map</summary>
+<summary>Click to expand</summary>
 
 | Module | Responsibility |
 | --- | --- |
-| `app/ingestion/` | Source routing, loaders, normalization, metadata hashing |
-| `app/validation/` | Quality rules, optional Great Expectations checks |
-| `app/profiling/` | Profiling orchestration, selectors, summaries |
+| `app/ingestion/` | Source routing, loaders (CSV, Excel, URL, Kaggle, UCI, HTML), normalization, metadata hashing |
+| `app/validation/` | Quality rules, Great Expectations builders, context, and runner |
+| `app/profiling/` | ydata-profiling orchestration, selectors, summaries |
 | `app/modeling/benchmark/` | LazyPredict orchestration, ranking, MLflow logging |
 | `app/modeling/pycaret/` | PyCaret compare, tune, evaluate, finalize, save |
 | `app/modeling/flaml/` | FLAML AutoML service, artifacts, tracking |
-| `app/modeling/foundation/` | Pinned TabFM/TimesFM adapters, consent gates, artifacts, context persistence, MLflow summaries |
-| `app/prediction/` | Model discovery, loading, schema checks, scoring |
-| `app/tracking/` | MLflow queries, history, run comparison |
-| `app/registry/` | MLflow model registration and promotion |
+| `app/modeling/foundation/` | Pinned TabFM/TimesFM adapters, consent gates, artifacts, context persistence |
+| `app/prediction/` | Model discovery, loading, schema checks, single-row and batch scoring |
+| `app/tracking/` | MLflow history queries, comparison, run filtering |
+| `app/registry/` | MLflow model registration and stage promotion |
 | `app/observability/` | Structured logging, correlation context, metrics hooks, optional tracing |
-| `app/storage/` | SQLite metadata store |
-| `app/providers/` | LLM integrations plus reference token pricing and cost estimates |
+| `app/storage/` | SQLite metadata store, recorders, repositories |
+| `app/providers/` | LLM integrations (OpenAI, Anthropic, Gemini, Ollama) + pricing catalog |
 | `app/notebooks/` | Jupyter notebook generation |
+| `app/security/` | Secret masking, SSRF-resistant HTTP, formula-injection-safe CSV, trusted artifact loader |
 | `app/config/` | Pydantic settings, enums, environment binding |
-| `app/pages/` | Streamlit page entry points |
-| `app/cli.py` | CLI entry point |
+| `app/pages/` | Streamlit page entry points (20 pages) |
+| `app/cli.py` | CLI entry point (32 commands) |
+| `app/autorun.py` | Guided end-to-end AutoML job orchestration |
+| `app/deployment.py` | Deployment bundle export (model + FastAPI server) |
+| `app/drift.py` | Input-distribution drift detection |
+| `app/explainability.py` | SHAP model explanation |
 
 </details>
 
@@ -311,86 +329,127 @@ extension boundaries.
 | Observability | JSON logging, metrics hooks, optional OpenTelemetry tracing |
 | Metadata | SQLite |
 | AI summaries | OpenAI · Anthropic · Gemini · Ollama |
+| Security | SSRF-safe HTTP, formula-injection-safe CSV, checksum-verified model loading |
 | Testing | pytest (729 tests), pytest-cov, pytest-asyncio, respx |
 
 ---
 
-## CLI
+## CLI reference
 
-```bash
-autotabml auto-run data/train.csv --target target --mode auto --time-budget 120
-autotabml job-list
-autotabml job-status <job-id>
-autotabml job-cancel <job-id>
-autotabml drift-check data/new.csv --baseline artifacts/models/model_drift_baseline.json
-autotabml deploy-export --model artifacts/models/model.pkl --metadata artifacts/models/model.json --output deploy/model
-```
+All commands are run as `uv run autotabml <command>` (or `autotabml <command>` with the venv active).
 
-Examples assume the synced `.venv` is active; prefix with `uv run` otherwise.
+### Diagnostics
 
-```bash
-autotabml --version
-autotabml info
-autotabml doctor
-```
+| Command | Description |
+| --- | --- |
+| `info` | Show version, workspace mode, execution backend, artifact paths |
+| `doctor` | Run startup diagnostics (CUDA, DB, artifact dirs, stale files) |
+| `init-local-storage` | Initialize SQLite database and artifact directories |
 
-```bash
-# Data preparation
-autotabml validate data/train.csv --target price --artifacts-dir artifacts/validation
-autotabml profile data/train.csv --artifacts-dir artifacts/profiling
+### Data
 
-# Modeling
-autotabml benchmark data/train.csv --target target --task-type auto
-autotabml experiment-run data/train.csv --target target --task-type classification --n-select 3
-autotabml flaml-run data/train.csv --target target --task-type auto --time-budget 120
-autotabml flaml-save data/train.csv --target target --save-name best_model
-autotabml tabfm-run data/train.csv --target target --accept-tabfm-license --allow-download
-autotabml timesfm-forecast data/demand.csv --timestamp date --target demand --horizon 12 --allow-download
+| Command | Description |
+| --- | --- |
+| `validate <csv> --target <col>` | Run data validation (null checks, schema, Great Expectations) |
+| `profile <csv>` | Generate EDA profiling report (ydata-profiling HTML + JSON) |
+| `uci-list [--search <term>]` | Browse/search the UCI ML Repository catalog |
 
-# Operations
-autotabml predict-history --limit 10
-autotabml history-list --run-type experiment --limit 10
-autotabml batch-history --limit 20
-autotabml registry-list
-```
+### Modeling
+
+| Command | Description |
+| --- | --- |
+| `benchmark <csv> --target <col>` | Screen 30+ algorithms with LazyPredict |
+| `experiment-run <csv> --target <col>` | PyCaret compare_models across all estimators |
+| `experiment-tune <csv> --target <col> --model <id>` | PyCaret tune_model for one estimator |
+| `experiment-evaluate <csv> --target <col> --model <id>` | PyCaret evaluation plots |
+| `experiment-save <csv> --target <col> --model <id>` | PyCaret finalize + save model |
+| `flaml-run <csv> --target <col> --time-budget 120` | FLAML AutoML search with time budget |
+| `flaml-save <csv> --target <col> --save-name <name>` | FLAML search + save best model |
+| `tabfm-run <csv> --target <col> --accept-tabfm-license --allow-download` | TabFM holdout eval (research-only) |
+| `timesfm-forecast <csv> --timestamp <col> --target <col> --horizon 12 --allow-download` | TimesFM 2.5 forecast |
+| `auto-run <csv> --target <col> --mode auto --time-budget 120` | Guided end-to-end AutoML job |
+
+### Predictions & operations
+
+| Command | Description |
+| --- | --- |
+| `predict-single --model <path> --input '{"col": val}'` | Score a single JSON row |
+| `predict-batch <csv> --model <path>` | Score a full dataset file |
+| `predict-history [--limit 10]` | List recent prediction job history |
+| `drift-check <csv> --baseline <json>` | Compare new data against a saved drift baseline |
+| `explain --model <path>` | Print saved SHAP explanation artifact |
+| `deploy-export --model <pkl> --metadata <json> --output <dir>` | Export a deployment bundle |
+
+### History & registry
+
+| Command | Description |
+| --- | --- |
+| `history-list [--run-type <type>] [--limit 20]` | List MLflow runs with optional filters |
+| `history-show <run-id>` | Show parameters, metrics, and artifacts for one MLflow run |
+| `compare-runs <run-id-a> <run-id-b>` | Side-by-side metric and config diff of two runs |
+| `batch-history [--limit 20]` | List AutoML batch run history from SQLite |
+| `batch-show <run-id>` | Show dataset-level detail for one batch run |
+| `registry-list` | List all registered models |
+| `registry-show <model-name>` | List all versions of one registered model |
+| `registry-register --run-id <id> --name <name>` | Register a model with the MLflow registry |
+| `registry-promote --name <name> --version <n> --stage champion` | Promote a model version |
+
+### Background jobs
+
+| Command | Description |
+| --- | --- |
+| `job-list` | List recent background jobs |
+| `job-status <job-id>` | Show full JSON record for one job |
+| `job-cancel <job-id>` | Cancel one active background job |
 
 ---
 
 ## Configuration
 
-Settings resolve in order: Pydantic defaults → persisted `settings.json` →
-environment variables.
+Settings resolve in this order: **Pydantic defaults → `~/.autotabml/settings.json` → environment variables**.
+
+The Streamlit Settings page writes preferences to `~/.autotabml/settings.json`; API keys are kept in session state and environment variables only — never persisted to disk.
+
+### Environment variables
 
 ```bash
-# Core settings (AUTOTABML_ prefix)
-AUTOTABML_WORKSPACE_MODE=dashboard
-AUTOTABML_EXECUTION__BACKEND=local
+# Core runtime (AUTOTABML_ prefix, __ as nested delimiter)
+AUTOTABML_WORKSPACE_MODE=dashboard          # dashboard | headless
+AUTOTABML_EXECUTION__BACKEND=local          # local | colab_mcp
 AUTOTABML_MLFLOW__TRACKING_URI=sqlite:///artifacts/mlflow/mlflow.db
+AUTOTABML_LOG_FORMAT=json                   # json | text
+AUTOTABML_LOG_LEVEL=INFO
 
-# LLM provider keys (no prefix)
+# LLM provider keys (no prefix — never committed)
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GEMINI_API_KEY=...
+
+# Optional integrations
+KAGGLE_USERNAME=...
+KAGGLE_KEY=...
+OLLAMA_BASE_URL=http://localhost:11434       # default
 ```
 
-See [.env.example](.env.example) for the full list.
+See [.env.example](.env.example) for the complete variable list. Copy it to `.env` and fill in your values.
+
+> [!IMPORTANT]
+> Never commit API keys. The security workflow runs `detect-secrets` and
+> `gitleaks` on every push and PR to prevent accidental credential exposure.
 
 ---
 
 ## Observability
 
-Runtime observability is local-first: nothing is exported anywhere unless you
-explicitly wire an exporter.
+All observability is local-first — nothing is exported unless you explicitly wire an exporter.
 
-- Set `AUTOTABML_LOG_FORMAT=json` to emit one JSON document per log line to stderr; the default stays `text` for local development
-- Training and prediction workflows automatically attach correlation fields (`correlation_id`, `run_id`, `experiment_name`, `run_name`, `task_type`) when available
-- Metrics hooks live behind `app.observability`, so the default in-process backend can be swapped for Prometheus, StatsD, or OTLP adapters at startup without touching workflow code
-- Tracing is a no-op by default and upgrades automatically when `opentelemetry-api` is installed and configured
+- `AUTOTABML_LOG_FORMAT=json` emits one JSON document per log line to stderr
+- Training and prediction workflows attach correlation fields (`correlation_id`, `run_id`, `experiment_name`) automatically
+- Metrics hooks in `app/observability` can swap from the default in-process backend to Prometheus, StatsD, or OTLP without touching workflow code
+- Tracing is a no-op by default; it upgrades automatically when `opentelemetry-api` is installed and configured
 
 ```bash
-AUTOTABML_LOG_FORMAT=json
-AUTOTABML_LOG_LEVEL=INFO
-uv run streamlit run app/main.py
+AUTOTABML_LOG_FORMAT=json AUTOTABML_LOG_LEVEL=INFO uv run streamlit run app/main.py
 ```
 
 ---
@@ -398,33 +457,22 @@ uv run streamlit run app/main.py
 ## Testing & CI
 
 ```bash
-uv run pytest                                # Unit tests
-uv run pytest -m integration                 # Integration suite
-uv run pytest --cov=app --cov-fail-under=65  # Coverage gate
+uv run pytest                                 # Run unit tests
+uv run pytest -m integration                  # Integration suite
+uv run pytest --cov=app --cov-fail-under=65   # Coverage gate (≥ 65%)
+uv run ruff check app/ tests/ scripts/        # Lint
+uv lock --check                               # Lockfile consistency
 ```
 
-| Workflow | Purpose |
-| --- | --- |
-| [CI](.github/workflows/ci.yml) | Lint (ruff) · unit tests (Python 3.11 + 3.13) · coverage ≥ 65% · E2E smoke |
-| [Security](.github/workflows/security.yml) | `detect-secrets` + `gitleaks` on every push and PR |
-| [Release](.github/workflows/release-readiness.yml) | Build validation + `twine check` for tagged releases |
-
-CI uses the committed `uv.lock` for deterministic installs before linting,
-testing, coverage, and release validation. Dependabot runs weekly dependency
-updates.
+| Workflow | Trigger | Purpose |
+| --- | --- | --- |
+| [CI](.github/workflows/ci.yml) | Push / PR | Lint · unit tests (3.11 + 3.13) · coverage ≥ 65% · E2E smoke |
+| [Security](.github/workflows/security.yml) | Push / PR | `detect-secrets` + `gitleaks` + `bandit` + `pip-audit` |
+| [Release](.github/workflows/release-readiness.yml) | Tag push | Build validation + `twine check` |
 
 > [!NOTE]
-> The verified-output numbers below come from running the project's own
-> test, lint, and verification scripts on a fresh `.venv` with Python 3.12.10 —
-> the same commands CI and Security run on every push.
-
-| Check | Command | Result |
-| --- | --- | --- |
-| Lockfile consistency | `uv lock --check` | passes |
-| Unit tests | `pytest tests/ -q` | **729 passed**, 30 deselected |
-| Coverage gate | `pytest --cov=app --cov-fail-under=65` | CI gate ≥ 65% |
-| Lint | `ruff check app/ tests/ scripts/` | all checks passed |
-| Release metadata | `python -m app.release_metadata` | passes |
+> Verified results on a fresh `.venv` with Python 3.12.10:
+> 729 tests pass, 30 deselected; ruff all checks passed; `uv lock --check` passes.
 
 ---
 
@@ -433,62 +481,99 @@ updates.
 | Constraint | Detail |
 | --- | --- |
 | PyCaret requires Python < 3.13 | All other features work on 3.10 – 3.13 |
-| TabFM weights | Separate `tabfm-non-commercial-v1.0` license; non-commercial, non-production research only; Python 3.11+ |
-| First model use | TabFM and TimesFM require explicit approval before downloading their pinned Hugging Face snapshots |
+| TabFM weights | Separate `tabfm-non-commercial-v1.0` license; research/non-production only; Python 3.11+ |
+| Foundation model first use | TabFM and TimesFM require explicit opt-in before downloading their pinned Hugging Face snapshots |
 | GPU training | Requires NVIDIA + CUDA; falls back to CPU automatically |
 | Large datasets | 100K+ rows trigger automatic sampling |
-| Kaggle | CLI-only; not exposed in the UI |
+| Kaggle | CLI-only; not exposed in the Streamlit UI |
 | Single-user | Designed for individual local use |
-| Background concurrency | One training job runs at a time |
-| Drift meaning | Input-distribution drift only, not target/concept drift |
-| AI summaries | Require an API key or local Ollama |
+| Background concurrency | One training job at a time |
+| Drift scope | Input-distribution drift only — not concept drift |
+| AI summaries | Require an API key or a running local Ollama instance |
 
 > [!WARNING]
 > TabFM's pretrained weights carry a separate non-commercial research license.
-> The app blocks TabFM-derived contexts from registry promotion and deployment
-> export to keep that boundary enforced.
+> The app blocks TabFM-derived model contexts from registry promotion and
+> deployment export to keep that boundary enforced.
 
 ---
 
-## Documentation
+## Documentation index
 
-[docs/README.md](docs/README.md) is the full documentation index (a "where do
-I want to go" table plus the complete document map). The tables below cover the
-same ground inline.
-
-**Using the app**
+### Using the app
 
 | Resource | Description |
 | --- | --- |
-| [USAGE.md](USAGE.md) | Every page, every CLI command, every configuration knob, in detail |
+| [USAGE.md](USAGE.md) | Complete guide — every page, every CLI command, every configuration knob |
 | [Interactive architecture](docs/autotabml-studio-architecture.html) | Explorable system map with guided views and source evidence |
 
-**Understanding & extending the codebase**
+### Understanding the codebase
 
 | Resource | Description |
 | --- | --- |
 | [docs/architecture.md](docs/architecture.md) | Module map, data-flow diagrams, reliability/security/performance model, extension points |
 | [docs/developer-guide.md](docs/developer-guide.md) | Local setup, common commands, test strategy, release hygiene, troubleshooting |
 | [docs/operations.md](docs/operations.md) | Day-1 verification, day-2 monitoring, failure modes, reset procedures, container operations |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Development setup, verification gates, documentation expectations, PR guidance |
+| [docs/README.md](docs/README.md) | Full documentation index |
 
-**Upgrading & release history**
+### Upgrading
 
 | Resource | Description |
 | --- | --- |
-| [CHANGELOG.md](CHANGELOG.md) | Chronological list of changes (Keep a Changelog format) |
-| [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) | Step-by-step upgrades across supported release lines |
+| [CHANGELOG.md](CHANGELOG.md) | Chronological change history (Keep a Changelog format) |
+| [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) | Step-by-step upgrade instructions |
 | [UPGRADE_SUMMARY.md](UPGRADE_SUMMARY.md) | One-page upgrade cheat sheet |
-| [RELEASE_NOTES_v0.4.0.md](RELEASE_NOTES_v0.4.0.md) | Current release highlights and upgrade steps |
-| [RELEASE_NOTES_v0.3.0.md](RELEASE_NOTES_v0.3.0.md) | Historical v0.3.0 release announcement |
-| [RELEASE_NOTES_v0.2.0.md](RELEASE_NOTES_v0.2.0.md) | Historical v0.2.0 release announcement |
+| [RELEASE_NOTES_v0.4.0.md](RELEASE_NOTES_v0.4.0.md) | Current release highlights |
 
-**Policies**
+### Policies & community
 
 | Resource | Description |
 | --- | --- |
-| [SECURITY.md](SECURITY.md) | Supported versions, disclosure channel, response SLA, hardening guide |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Development setup, verification gates, PR guidance |
+| [SECURITY.md](SECURITY.md) | Supported versions, vulnerability disclosure, response SLA, hardening guide |
+| [DISCLAIMER.md](DISCLAIMER.md) | Data responsibility, no-warranty, no-financial-support statement |
+| [SUPPORT.md](SUPPORT.md) | Where to get help, report bugs, and request features |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community expectations |
 | [LICENSE](LICENSE) | MIT License |
 
-<p align="center">Made with ❤️ by Ahmad Mujtaba</p>
+---
+
+## Community
+
+AutoTabML Studio is free, open-source, and community-driven. Everyone is welcome —
+whether you are filing your first bug report, suggesting a feature, or submitting a pull request.
+
+| Want to… | Go here |
+| --- | --- |
+| Ask a question | [GitHub Discussions](https://github.com/pypi-ahmad/AutoTabML-Studio/discussions) |
+| Report a bug | [Bug Report](https://github.com/pypi-ahmad/AutoTabML-Studio/issues/new?template=bug_report.yml) |
+| Request a feature | [Feature Request](https://github.com/pypi-ahmad/AutoTabML-Studio/issues/new?template=feature_request.yml) |
+| Contribute code | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Report a vulnerability | [Security Advisories](https://github.com/pypi-ahmad/AutoTabML-Studio/security/advisories/new) *(private)* |
+| Get help | [SUPPORT.md](SUPPORT.md) |
+
+> [!NOTE]
+> **No financial support needed or wanted.** This project is free and will stay free.
+> The maintainer does not accept donations, sponsorships, or any financial contributions.
+> If you find it useful, open a PR or leave a ⭐.
+
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
+
+---
+
+## Disclaimer
+
+All data you load into AutoTabML Studio is processed **entirely on your machine**.
+The project maintainer has no access to your data and accepts no responsibility for it.
+You are fully responsible for ensuring you have the right to process the data you use
+and for complying with applicable regulations (GDPR, HIPAA, CCPA, etc.).
+
+AI summary features send summarized (not raw) context to the LLM provider you configure —
+you are responsible for that provider relationship.
+
+See [DISCLAIMER.md](DISCLAIMER.md) for the complete statement including the no-warranty and
+no-financial-support policy.
+
+---
+
+<p align="center">Made with ❤️ by <a href="https://github.com/pypi-ahmad">Ahmad Mujtaba</a></p>

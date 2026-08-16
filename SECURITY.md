@@ -130,6 +130,13 @@ environment, the following additional steps are recommended:
   short-lived credentials from your provider's identity service
   (e.g. OpenAI's service accounts) instead of long-lived keys.
 
+## Data Responsibility
+
+AutoTabML Studio runs entirely on your machine. The maintainer has no access to
+your data and accepts no responsibility for data you process with this software.
+You are responsible for compliance with any applicable regulations. See
+[DISCLAIMER.md](DISCLAIMER.md) for the full statement.
+
 ## Acknowledgements
 
 We thank the security researchers and contributors who have

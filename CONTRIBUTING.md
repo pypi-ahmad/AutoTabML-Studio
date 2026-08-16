@@ -1,8 +1,15 @@
 # Contributing to AutoTabML Studio
 
-Thank you for helping improve AutoTabML Studio. Keep changes focused, preserve the
-local-first data boundary, and include tests and documentation for user-visible
-behavior.
+Welcome, and thank you for considering a contribution! AutoTabML Studio is a
+community-driven project and every contribution — a bug report, a documentation fix,
+a test, or a new feature — is genuinely appreciated.
+
+This is a local-first, fully free project. No financial contributions are needed or
+wanted; the best way to support the project is with code, tests, and thoughtful
+issue reports.
+
+Keep changes focused, preserve the local-first data boundary, and include tests
+and documentation for user-visible behavior.
 
 ## Set up the repository
 
@@ -59,3 +66,9 @@ and any compatibility or security implications. Follow the
 Report vulnerabilities privately through
 [GitHub Security Advisories](https://github.com/pypi-ahmad/AutoTabML-Studio/security/advisories/new),
 not a public issue. See the [security policy](SECURITY.md) for details.
+
+## Data responsibility
+
+AutoTabML Studio processes data locally. Never commit real datasets, API keys,
+or model artifacts to the repository. See [DISCLAIMER.md](DISCLAIMER.md) for
+the full data-responsibility statement.
