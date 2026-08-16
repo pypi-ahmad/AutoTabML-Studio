@@ -1,794 +1,932 @@
-# Usage Guide — AutoTabML Studio
+# AutoTabML Studio — Usage Guide
 
-> **Local-first automated machine learning for tabular data.**
-> Everything runs on your machine. Your data never leaves your environment.
-
-AutoTabML Studio is an interactive workbench that takes you from a raw dataset to a
-trained, evaluated, and deployable model — without writing code.
+> Complete reference for the Streamlit UI and CLI. Covers every page, every command, and every configuration knob.
 
 ---
 
-## Table of Contents
+## Contents
 
-- [Who This Is For](#who-this-is-for)
-- [Before You Start](#before-you-start)
-- [Starting the App](#starting-the-app)
-- [Core Workflow](#core-workflow)
-- [Pages Reference](#pages-reference)
-  - [Dashboard](#dashboard)
-  - [Load Data](#load-data)
-  - [Data Validation](#data-validation)
-  - [Data Profiling](#data-profiling)
-  - [Quick Benchmark](#quick-benchmark)
-  - [Train & Tune](#train--tune)
-  - [FLAML AutoML](#flaml-automl)
-  - [Foundation Models](#foundation-models)
-  - [Predictions](#predictions)
-  - [Test & Evaluate](#test--evaluate)
-  - [Models](#models)
-  - [History](#history)
-  - [Algorithm Comparison](#algorithm-comparison)
-  - [Model Registry](#model-registry)
-  - [Notebooks](#notebooks)
-  - [Settings](#settings)
-- [CLI Reference](#cli-reference)
+- [Who this is for](#who-this-is-for)
+- [Before you start](#before-you-start)
+- [Starting the app](#starting-the-app)
+- [Core workflow: Auto Run](#core-workflow-auto-run)
+- [Pages reference](#pages-reference)
+- [CLI reference](#cli-reference)
 - [Configuration](#configuration)
-  - [Environment Variables](#environment-variables)
-  - [Optional Dependencies](#optional-dependencies)
-- [Input & Output](#input--output)
+- [Input & output formats](#input--output-formats)
 - [Troubleshooting](#troubleshooting)
-- [Limitations](#limitations)
+- [Known limitations](#known-limitations)
 
 ---
 
-## Who This Is For
+## Who this is for
 
-- **Data analysts** who want to find the best algorithm for a dataset without writing
-  Python scripts.
-- **Data scientists** who need a quick screening-to-production pipeline on their own
-  machine.
-- **Business users** who want to upload a spreadsheet, train a model, and score new
-  data through a guided interface.
+AutoTabML Studio is for **data scientists and ML engineers** who want to go from a raw CSV to a trained, evaluated, and deployable model — entirely on their own machine, without provisioning cloud infrastructure.
 
-No cloud account is required. No data is uploaded to external servers.
+You bring your own API keys and data. Everything runs locally. No data leaves your machine unless you explicitly configure a remote LLM provider for AI summaries.
 
 ---
 
-## Before You Start
+## Before you start
 
-| Requirement | Details |
-|-------------|---------|
-| **Python**  | 3.10, 3.11, 3.12, or 3.13 |
-| **OS**      | Windows, macOS, or Linux |
-| **Install** | `uv sync --locked --extra benchmark --extra experiment` (standard modeling workflows) |
+### Requirements
 
-Install only the features you need:
+| Requirement | Notes |
+| --- | --- |
+| Python 3.10 – 3.13 | Use 3.11 or 3.12 for the broadest extra compatibility (PyCaret requires <3.13; TabFM requires >=3.11) |
+| [uv](https://docs.astral.sh/uv/) | Fast Python package manager — install with `pip install uv` |
+| OS | Windows, macOS, or Linux |
+
+### Clone and install
 
 ```bash
-# Core only (data loading, validation rules, settings)
-pip install -e .
+git clone https://github.com/pypi-ahmad/AutoTabML-Studio.git
+cd AutoTabML-Studio
 
-# Add optional capabilities
-pip install -e ".[validation]"     # Great Expectations data checks
-pip install -e ".[profiling]"      # ydata-profiling EDA reports
-pip install -e ".[benchmark]"      # LazyPredict algorithm screening
-pip install -e ".[experiment]"     # PyCaret model training (Python < 3.13)
-pip install -e ".[flaml]"          # Microsoft FLAML AutoML
-pip install -e ".[tabfm]"          # Google TabFM (Python 3.11+; research only)
-pip install -e ".[timesfm]"        # Google TimesFM 2.5 forecasting
-pip install -e ".[gpu]"            # GPU-accelerated training (XGBoost, LightGBM, CatBoost)
-
-# Combine only the extras you need. Keep TabFM and profiling in separate environments.
-pip install -e ".[validation,profiling,benchmark,experiment,flaml,gpu,timesfm]"
+# Install the base environment (UI + CLI, no ML engines)
+uv sync --locked --group dev
 ```
 
-> **Note:** The `experiment` group requires Python < 3.13 due to a PyCaret dependency
-> constraint. TabFM requires Python 3.11+ and conflicts with the `profiling` extra
-> because their upstream `typeguard` requirements do not overlap. Other features
-> support Python 3.10–3.13.
+### Optional extras
 
-### First-Time Setup
+Install only the extras you need. Each adds a specific ML engine or integration:
+
+| Extra | Installs | Python constraint |
+| --- | --- | --- |
+| `benchmark` | LazyPredict, XGBoost, LightGBM, CatBoost baselines | 3.10 – 3.13 |
+| `experiment` | PyCaret full pipeline (compare, tune, evaluate, save) | < 3.13 only |
+| `flaml` | Microsoft FLAML AutoML | 3.10 – 3.13 |
+| `validation` | Great Expectations data validation | 3.10 – 3.13 |
+| `profiling` | ydata-profiling EDA reports | 3.10 – 3.13 (**conflicts with `tabfm`**) |
+| `tabfm` | Google TabFM research weights | >= 3.11 (**conflicts with `profiling`**) |
+| `timesfm` | Google TimesFM 2.5 forecasting | 3.10 – 3.13 |
+| `gpu` | GPU-enabled XGBoost, LightGBM, CatBoost | 3.10 – 3.13 |
+| `kaggle` | Kaggle dataset download | 3.10 – 3.13 |
+| `uci` | UCI ML Repository access | 3.10 – 3.13 |
+| `colab` | Google Colab MCP remote execution | 3.10 – 3.13 |
+| `providers` | OpenAI, Anthropic, Gemini, Ollama LLM summaries | 3.10 – 3.13 |
+| `explain` | SHAP model explainability | 3.10 – 3.13 |
+| `serve` | FastAPI + Uvicorn deployment server | 3.10 – 3.13 |
 
 ```bash
-# Create local directories and metadata database
-autotabml init-local-storage
-
-# Verify your environment
-autotabml doctor
+# Examples — combine extras as needed
+uv sync --locked --group dev --extra benchmark
+uv sync --locked --group dev --extra experiment
+uv sync --locked --group dev --extra flaml
+uv sync --locked --group dev --extra providers
 ```
 
-`init-local-storage` creates the `artifacts/` directory tree and a local SQLite
-database for metadata. `doctor` checks CUDA availability, database status, artifact
-directories, and reports any startup issues.
+> [!IMPORTANT]
+> `tabfm` and `profiling` cannot be installed in the same virtual environment.
+> They have incompatible `typeguard` requirements (`<3` vs `>=4`).
+> Sync them into separate environments if you need both workflows.
 
 ---
 
-## Starting the App
+## Starting the app
 
-### Streamlit UI (Interactive)
+### Initialize storage (first run only)
 
-On Windows, double-click **`Launch AutoTabML Studio.cmd`** in the repository
-folder. It starts the app through the project's `uv` environment.
+```bash
+uv run autotabml init-local-storage
+```
 
-From a terminal:
+Creates the artifact directories and the app metadata SQLite database. Safe to run again — it is idempotent.
+
+### Verify your environment
+
+```bash
+uv run autotabml doctor
+```
+
+Reports CUDA availability, database status, artifact directories, optional dependency groups, and any stale files. Run this after install to confirm everything is wired up.
+
+### Launch the Streamlit UI
+
+**Windows** — double-click `Launch AutoTabML Studio.cmd` in the repo root. Opens `http://localhost:8561` in your browser automatically.
+
+**Terminal:**
 
 ```bash
 uv run streamlit run app/main.py
 ```
 
-Opens in your browser at `http://localhost:8561`. The sidebar provides guided
-navigation through every step.
+### Notebook mode
 
-### CLI (Scripted / Headless)
+Set `AUTOTABML_WORKSPACE_MODE=notebook` to start in the Notebook page instead of the Dashboard. Useful for headless or Colab-style environments.
+
+> [!NOTE]
+> The default execution backend is `colab_mcp` (Google Colab MCP remote execution).
+> If you are running everything locally, set `AUTOTABML_EXECUTION__BACKEND=local`
+> in your `.env` file or environment before starting the app.
+
+---
+
+## Core workflow: Auto Run
+
+**Auto Run** is the recommended end-to-end path. It submits a full guided AutoML pipeline as a background job and saves the model, holdout evaluation, provenance, and a drift baseline automatically.
+
+### When to use Auto Run
+
+- You want a trained, evaluated, saved model in one click or one command.
+- You are not sure which algorithm or hyperparameter strategy to use.
+- You want reproducible results with minimal configuration.
+
+Use the manual workflow (individual pages or CLI commands) when you need fine-grained control over each step, want to compare specific algorithms, or are working with time-series data.
+
+### UI path
+
+1. Open **Auto Run** from the sidebar.
+2. Load or select your dataset.
+3. Select the target column. The app infers task type (classification vs. regression) automatically.
+4. Review the inferred FLAML plan (time budget, mode, estimators).
+5. Click **Start Auto Run**. A background job is submitted; progress updates in real time.
+
+When the job completes, the model is saved to `artifacts/models/`, MLflow run logged, and a drift baseline written.
+
+### CLI path
 
 ```bash
-autotabml --help
+uv run autotabml auto-run data/train.csv --target price --mode auto --time-budget 120
 ```
 
-Core data, modeling, prediction, tracking, and registry workflows also have CLI
-equivalents. See
-[CLI Reference](#cli-reference) below.
+Check job progress:
+
+```bash
+uv run autotabml job-list
+uv run autotabml job-status <job-id>
+```
+
+Cancel if needed:
+
+```bash
+uv run autotabml job-cancel <job-id>
+```
 
 ---
 
-## Core Workflow
+## Pages reference
 
-### Recommended: Auto Run
+### Home (Dashboard)
 
-Load a dataset, open **Auto Run**, confirm the target and inferred task, then
-launch. Training runs in a local subprocess; SQLite-backed status survives
-navigation and browser refreshes. Completion produces a saved model, untouched
-holdout metrics, explanations, provenance, and a drift baseline. One training
-job runs at a time.
+Shows workflow progress, recent activity, and quick links to every step. Use it as your launch pad — it highlights which steps have been completed and what to do next.
 
-AutoTabML Studio follows a five-step workflow. Steps 2a and 2b are optional:
-
-```
-① Load Data → ②? Validate → ②? Profile → ③ Quick Benchmark → ④ Train & Tune → ⑤ Predict
-```
-
-Each page shows a workflow banner indicating your current step and progress.
-
-| Step | Page | Purpose |
-|------|------|---------|
-| **1** | Load Data | Upload or connect to a dataset |
-| **2** *(optional)* | Data Validation | Check data quality before training |
-| **2** *(optional)* | Data Profiling | Visual summary of distributions and correlations |
-| **3** | Quick Benchmark | Screen dozens of algorithms to find the best candidates |
-| **4** | Train & Tune | Fine-tune the best algorithm and save a production model |
-| **5** | Predictions | Score new data with your saved model |
-
-You can skip optional steps and jump directly from Load Data to Quick Benchmark.
-The **FLAML AutoML** and **Foundation Models** pages are alternative modeling paths,
-not required steps in the five-step guided workflow.
+**Tip:** The Dashboard shows the most recent dataset and model. Navigate directly to any step from here.
 
 ---
-
-## Pages Reference
-
-### Dashboard
-
-The landing page. Shows:
-
-- **Welcome flow** for first-time users with example datasets (Iris, Heart Disease,
-  Wine Quality)
-- **Active dataset spotlight** with row/column counts and completion progress
-- **Recommended next step** based on what you have already completed
-- **Recent activity** from your job history
 
 ### Load Data
 
-**Title:** 📥 Load Data
+**Section: ① Prepare**
 
-Load a dataset from one of four sources:
+Load a dataset from any supported source:
 
-| Source | Description |
-|--------|-------------|
-| **📁 Upload** | Drag-and-drop or browse for CSV, TSV, TXT, DATA, XLSX, XLS, XLSM, or XLSB files |
-| **📂 Local Path** | Enter a file path to a supported file on your machine |
-| **🌐 Web URL** | Paste an HTTP/HTTPS link to a remote CSV or data file |
-| **🏛️ UCI Dataset Library** | Search and load datasets from the UCI Machine Learning Repository |
+| Source | How to use |
+| --- | --- |
+| Local file | Drag and drop or browse for a CSV, Excel, or TSV file |
+| Remote URL | Paste a direct link to a CSV or Excel file |
+| UCI ML Repository | Search by name or ID — fetches and caches automatically |
+| Kaggle | Enter a dataset slug (requires `KAGGLE_USERNAME` and `KAGGLE_KEY`; `kaggle` extra) |
 
-After loading, you can:
+Outputs a loaded dataset stored in session state for downstream pages.
 
-- Preview the first 50 rows
-- View a column summary (data type, non-null percentage, uniqueness)
-- See which cleanup steps were applied automatically
-- Set the loaded dataset as active for all downstream pages
-
-The **Loaded** tab lists previously loaded datasets so you can switch between them.
-
-### Data Validation
-
-**Title:** ✅ Data Validation · *Optional step*
-
-Run quality checks on your active dataset before training. Configuration options:
-
-- **Target column** — the column your model will predict
-- **Required columns** — columns that must be present
-- **Uniqueness check columns** — columns expected to have unique values
-- **Data leakage detection** — flag potential leakage from the target
-- **Minimum row count** — fail if the dataset is too small
-
-Results show a pass/fail summary with details on each check.
-
-> Requires the `validation` optional dependency for Great Expectations integration.
-> Without it, app-native validation rules still run.
-
-### Data Profiling
-
-**Title:** 📊 Data Profiling · *Optional step*
-
-Generate a visual exploratory data analysis (EDA) report covering distributions,
-correlations, missing values, and data types.
-
-- For large datasets (50,000+ rows or 100+ columns), a compact mode with sampling is
-  used automatically.
-- The generated profile can be viewed directly in the app.
-
-> Requires the `profiling` optional dependency (`ydata-profiling`).
-
-### Quick Benchmark
-
-**Title:** 🏁 Quick Benchmark
-
-Screen dozens of algorithms on your data in one click. No tuning, no model saving —
-just a ranked leaderboard.
-
-**Configuration:**
-
-1. **Target column** — the column to predict
-2. **Task type** — Classification or Regression (or auto-detect)
-3. **Run mode** — Quick (sampled, fast), Standard (balanced), or Deep (full dataset)
-4. **Advanced options:**
-   - Ranking metric (e.g., Balanced Accuracy, R²)
-   - Number of top models to display
-   - Held-back data percentage (10–50%)
-   - Random seed for reproducibility
-
-**Output:** A ranked leaderboard of algorithms with scores. The page suggests your
-next step: go to Train & Tune to build a production model from the top-performing
-algorithm.
-
-> Requires the `benchmark` optional dependency.
-
-### Train & Tune
-
-**Title:** 🧪 Train & Tune
-
-Build a production-ready model. Unlike Quick Benchmark, this step:
-
-- Compares algorithms with cross-validation
-- Tunes hyperparameters on the best candidate
-- Lets you evaluate with diagnostic charts
-- Saves a final model that can be used for predictions
-
-**Configuration:**
-
-1. **Target column** — the column to predict
-2. **Task type** — Classification, Regression, or Auto
-3. **Training options** — train/test split, cross-validation folds, fold strategy,
-   preprocessing toggle
-4. **Experiment tracking** — Automatic, Manual, or Off
-5. **GPU** — Off, Auto, or Force
-
-After training, you can:
-
-- **Tune** the top model's hyperparameters
-- **Evaluate** with charts (confusion matrix, AUC, residuals, feature importance, etc.)
-- **Save** the model for use in Predictions
-
-> Requires the `experiment` optional dependency (`pycaret`). Python < 3.13 only.
-
-### FLAML AutoML
-
-**Title:** 🔥 FLAML AutoML
-
-An alternative to Train & Tune powered by Microsoft FLAML — a fast, lightweight AutoML
-framework that searches for the best model within a time or iteration budget.
-
-**When to use FLAML instead of Train & Tune:**
-
-- You want automated model selection without manual tuning steps
-- You prefer time-budgeted search (e.g. "find the best model in 2 minutes")
-- You want to try multiple estimators (LightGBM, XGBoost, Random Forest, CatBoost, etc.) simultaneously
-
-**Configuration:**
-
-1. **Target column** — the column to predict
-2. **Task type** — Classification, Regression, or Auto-detect
-3. **Time budget** — Quick (60s), Standard (120s), Deep (300s), or Custom
-4. **Advanced options** — estimator selection, metric, CV folds, ensemble, early stopping, random seed
-
-**After search:**
-
-- View the search summary (best estimator, best loss, duration)
-- Browse the leaderboard of all estimators tried
-- Save the best model for use in Predictions
-- Download artifacts (leaderboard CSV, summary JSON)
-
-**CLI support:**
-
-```bash
-autotabml flaml-run data/train.csv --target target --task-type auto --time-budget 120
-autotabml flaml-save data/train.csv --target target --task-type classification --save-name my_model
-```
-
-> Requires the `flaml` optional dependency: `pip install -e ".[flaml]"`
-
-### Foundation Models
-
-**Title:** Foundation Models
-
-Run one of two local, revision-pinned Google model workflows against the active
-dataset:
-
-- **TabFM 1.0** evaluates tabular classification or regression from a sampled
-  context. You choose the target, task type, context-row count, and ensemble size.
-  It requires explicit acceptance of the non-commercial weights license and
-  separate consent before the first model download. An optional saved context can
-  be reused by Predictions, but cannot be registered, exported, or used in
-  production.
-- **TimesFM 2.5** produces point forecasts and q10–q90 uncertainty for a single
-  series or grouped series. You choose timestamp, numeric target, optional group,
-  horizon, context length, and frequency override. Optional final-horizon
-  backtesting reports aggregate error metrics.
-
-Both workflows execute on the local machine even when the Colab MCP backend is
-selected. The first approved download is about 1 GB; later runs reuse the pinned
-Hugging Face cache. Run artifacts are written under
-`artifacts/experiments/foundation/` and only aggregate metrics are sent to MLflow.
-
-```bash
-uv sync --locked --extra tabfm       # dedicated environment; do not combine with profiling
-uv sync --locked --extra timesfm
-```
-
-### Predictions
-
-**Title:** 🔮 Predictions
-
-Score new data using a saved model. Two tabs:
-
-**📄 Score a File (Batch)**
-- Upload a CSV or Excel file
-- Get predictions (and confidence scores where applicable) for every row
-- Download results
-
-**✏️ Predict One Record**
-- Fill in a form with one row of data
-- Get an instant prediction
-- JSON input is also available behind an expander for power users
-
-**Model sources:**
-- Saved models from Train & Tune, FLAML AutoML, or Quick Benchmark (auto-discovered)
-- Saved TabFM contexts (research-only, prediction-only)
-- Manual file path
-- MLflow registry (if configured)
-
-### Test & Evaluate
-
-**Title:** 📊 Test & Evaluate
-
-Measure how well a trained model performs on data it has never seen.
-
-1. Select a saved model
-2. Upload a test dataset that includes ground-truth labels
-3. View performance metrics
-
-This page is accessed through the Predictions page as a second tab
-("📊 Test & Evaluate").
-
-### Models
-
-**Title:** 🗂️ Models
-
-Browse every model you have trained or registered:
-
-- 🔬 Models from Train & Tune
-- 🏁 Models from Quick Benchmark
-- Research-only saved TabFM contexts
-- 📦 Models from the Model Registry (if configured)
-
-Each model card shows metadata: task type, dataset, creation date, and source.
-
-### History
-
-**Title:** 📋 History
-
-Every workflow run — validation, profiling, benchmark, experiment, foundation-model,
-or prediction — is
-recorded here.
-
-**Filters:**
-- Workflow type (All / Validation / Profiling / Benchmark / Experiment / Prediction)
-- Dataset name (text search)
-- Result limit (5–500, default 50)
-
-Expand any run to view its full summary, parameters, and metrics.
-
-### Algorithm Comparison
-
-**Title:** ⚖️ Algorithm Comparison
-
-Compare how different algorithms performed on the same dataset. Select a past
-benchmark or experiment run to view side-by-side rankings, scores, and the best
-algorithm.
-
-### Model Registry
-
-**Title:** 🏷️ Model Registry
-
-Manage versioned copies of your best models. Promotion stages:
-
-| Stage | Meaning |
-|-------|---------|
-| ⭐ **Champion** | Production-ready — this is the model you trust |
-| 🧪 **Candidate** | Under evaluation — promoted for testing |
-| 📦 **Archived** | Retired from active use |
-
-> Requires MLflow tracking to be enabled in Settings.
-
-### Notebooks
-
-**Title:** 📓 Notebooks
-
-Auto-generated Jupyter notebooks for every job you have run. Each notebook
-reproduces the steps of that run in plain Python. You can:
-
-- Download notebooks
-- Open directly in Google Colab (if the Colab backend is configured)
-
-### Settings
-
-**Title:** ⚙️ Settings
-
-Two tabs:
-
-**Essentials:**
-- 🔒 Privacy reminder
-- Workspace mode (Dashboard or Notebook)
-- GPU status (read-only detection)
-- Run summaries toggle (auto-generate plain-English summaries of each run)
-
-**Advanced:**
-- Execution backend (Local or Colab MCP)
-- GPU configuration
-- LLM provider and credentials (OpenAI, Anthropic, Gemini, Ollama)
-- Model cost calculator for input/output token estimates and pricing-tier notes
-- Model directory paths
-- Tracking server configuration
-
-The calculator uses these standard USD prices per 1M tokens:
-
-| Model | Input | Output |
-| --- | ---: | ---: |
-| Sonnet 5 | $2.00 | $10.00 |
-| Gemini Flash 3.7 | $0.75 | $3.75 |
-| Gemini 3.5 Flash Lite | $0.30 | $2.50 |
-| GPT 5.6 Luna | $0.20 | $1.20 |
-| GPT 5.6 Terra | $2.00 | $12.00 |
-| Grok 4.6 | $2.00 | $6.00 |
-
-Select a model and enter the expected input and output token counts. The result
-shows each component and the estimated total; the pricing note identifies batch,
-cache, fast-mode, promotional, or long-context conditions that may change the bill.
-
-API keys are stored locally and never sent to AutoTabML Studio servers — they go
-directly to the provider you configure.
+> [!NOTE]
+> Kaggle is available in the UI when the `kaggle` extra is installed and credentials are set.
+> Large datasets (>100 K rows) are automatically sampled to 50 K rows for profiling and benchmarking.
 
 ---
 
-## CLI Reference
+### Validation
 
-```bash
-autotabml auto-run data/train.csv --target target --mode balanced --time-budget 120
-autotabml job-list --limit 20
-autotabml job-status <job-id>
-autotabml job-cancel <job-id>
-autotabml explain artifacts/autorun/<job-id>/explanation.json
-autotabml drift-check data/current.csv --baseline artifacts/models/model_drift_baseline.json
-autotabml deploy-export --model artifacts/models/model.pkl --metadata artifacts/models/model_metadata.json --output artifacts/deployments/model
-```
+**Section: ① Prepare**
 
-Deployment ZIPs provide FastAPI `/health`, `/metadata`, and `/predict`
-endpoints, a standalone prediction command, and a non-root Dockerfile. Add
-authentication and TLS before public exposure.
+Checks the loaded dataset for quality issues before modeling:
 
-All operations available in the UI can also be run from the command line.
+- Null value counts and percentages (warn at 50%, fail at 95%)
+- Duplicate rows
+- Schema consistency
+- Optional Great Expectations suite (requires `validation` extra)
 
-### System
+Results are saved to `artifacts/validation/` as a summary JSON and optional GX data docs.
 
-```bash
-autotabml --version               # Print version
-autotabml info                    # Environment summary
-autotabml init-local-storage      # Create directories and database
-autotabml doctor                  # Check CUDA, database, artifacts, cleanup
-```
+**Tip:** Run Validation before Profiling — it catches hard blockers early.
 
-### Data Preparation
+---
 
-```bash
-# Validate a dataset
-autotabml validate path/to/data.csv --target Price
+### Profiling
 
-# Profile a dataset
-autotabml profile path/to/data.csv
+**Section: ① Prepare**
 
-# Search the UCI repository
-autotabml uci-list --search "heart" --limit 10
-```
+Generates a full EDA report using `ydata-profiling` (requires `profiling` extra):
 
-Dataset locators accept multiple formats:
+- Distributions, correlations, missing values, interactions
+- HTML report + machine-readable `summary.json`
+- Sampling applied automatically for large datasets (>50 K rows: standard mode; >200 K: minimal mode)
 
-| Format | Example |
-|--------|---------|
-| Local file | `data/sales.csv` |
-| Remote URL | `https://example.com/data.csv` |
-| UCI by ID | `uci:53` |
-| UCI by name | `uci:Heart Disease` |
+Output saved to `artifacts/profiling/`.
 
-### Benchmarking
+> [!WARNING]
+> `profiling` and `tabfm` cannot be installed together. See [Before you start](#before-you-start).
 
-```bash
-autotabml benchmark data.csv \
-  --target Price \
-  --task-type regression \
-  --top-k 10 \
-  --test-size 0.2
-```
+---
 
-Key flags: `--task-type`, `--test-size`, `--random-state`, `--stratify`,
-`--ranking-metric`, `--sample-rows`, `--top-k`, `--prefer-gpu`,
-`--include-model`, `--exclude-model`.
+### Quick Benchmark
 
-### Experiment (Train & Tune)
+**Section: ② Build**
 
-```bash
-# Compare algorithms
-autotabml experiment-run data.csv --target Churn --task-type classification
+Screens 30+ algorithms in seconds using LazyPredict (requires `benchmark` extra):
 
-# Tune the best model
-autotabml experiment-tune data.csv --target Churn --model-id lr --task-type classification
+- Trains all classifiers or regressors without tuning
+- Ranks results by Balanced Accuracy (classification) or Adjusted R² (regression)
+- Output: ranked leaderboard + MLflow run
 
-# Evaluate with charts
-autotabml experiment-evaluate data.csv --target Churn --model-id lr \
-  --task-type classification --plot confusion_matrix --plot auc
+Use this to identify the top 3–5 candidates before investing in tuning.
 
-# Save the final model
-autotabml experiment-save data.csv --target Churn --model-id lr \
-  --task-type classification --save-name my_model
-```
+**Tip:** Sort the leaderboard by your target metric before proceeding to Train & Tune.
+
+---
+
+### Train & Tune
+
+**Section: ② Build**
+
+Full PyCaret experiment pipeline (requires `experiment` extra, Python < 3.13):
+
+| Step | What it does |
+| --- | --- |
+| Compare | Runs `compare_models()` across all estimators; returns a ranked leaderboard |
+| Tune | Runs `tune_model()` on a selected model ID; grid or random search |
+| Evaluate | Generates evaluation plots (confusion matrix, AUC, residuals, etc.) |
+| Save | Finalizes and saves the model to `artifacts/models/` with a SHA256 sidecar |
+
+All steps log metrics and artifacts to MLflow automatically.
+
+> [!NOTE]
+> PyCaret requires Python < 3.13. On Python 3.13, use FLAML or the benchmark page instead.
+
+---
 
 ### FLAML AutoML
 
-```bash
-# Run FLAML search
-autotabml flaml-run data.csv --target Churn --task-type classification --time-budget 120
+**Section: ② Build**
 
-# Run FLAML search and save the best model
-autotabml flaml-save data.csv --target Churn --task-type auto --save-name flaml_best
+Microsoft FLAML automated model selection (requires `flaml` extra):
 
-# Customize estimators and metric
-autotabml flaml-run data.csv --target price --task-type regression \
-  --estimator lgbm --estimator xgboost --metric r2 --n-splits 10
-```
+- Time-budget or iteration-budget search
+- Supports XGBoost, LightGBM, random forest, extra trees, linear models, k-NN
+- Logs leaderboard and best model to MLflow
 
-Key flags: `--time-budget`, `--max-iter`, `--metric`, `--n-splits`, `--seed`,
-`--ensemble`, `--early-stop`, `--estimator`.
+Use FLAML when you want fast AutoML without PyCaret's Python version constraint.
+
+---
 
 ### Foundation Models
 
+**Section: ② Build**
+
+Two local foundation models for specialized use cases:
+
+#### Google TabFM (research only)
+
+Tabular foundation model for classification and regression. Non-commercial, research-only weights.
+
+> [!WARNING]
+> TabFM requires explicit license acceptance (`tabfm-non-commercial-v1.0`).
+> TabFM-derived model contexts cannot be promoted in the registry or exported for deployment.
+> Requires the `tabfm` extra and Python >= 3.11.
+
+- Downloads a pinned Hugging Face snapshot on first use (opt-in required)
+- Runs holdout evaluation; optionally saves a context artifact
+
+#### Google TimesFM 2.5
+
+Time-series forecasting with point and quantile (q10–q90) predictions.
+
+- Requires the `timesfm` extra
+- Downloads a pinned Hugging Face snapshot on first use (opt-in required)
+- Supports single and grouped series; configurable horizon and frequency
+- Optional holdout backtest
+
+---
+
+### Predictions
+
+**Section: unlabeled**
+
+Two modes in one page:
+
+**Batch scoring** — score a full CSV file using any saved model. Outputs predictions CSV to `artifacts/predictions/`.
+
+**Model testing** — score a file that includes ground-truth labels; computes accuracy/RMSE against actuals.
+
+Select a model from the dropdown (shows all models in `artifacts/models/` and registered MLflow models).
+
+---
+
+### Models
+
+**Section: unlabeled**
+
+Browse all saved model files in `artifacts/models/`. Each entry shows the model name, task type, algorithm, and save date. Click a model to view its metadata, provenance, and associated MLflow run.
+
+---
+
+### History
+
+**Section: Review**
+
+Full run history from MLflow. Filter by run type (benchmark, experiment, flaml, tabfm, timesfm) and task type. Sort by start time, duration, model name, or primary score.
+
+---
+
+### Compare
+
+**Section: Review**
+
+Side-by-side comparison of any two MLflow runs: metric deltas, parameter diffs, and algorithm details. Select two runs from the dropdowns and click Compare.
+
+---
+
+### Notebook
+
+**Section: Review**
+
+Generates a reproducible Jupyter notebook for a dataset run. The notebook includes data loading, preprocessing, training, and evaluation — ready to run in Colab or locally.
+
+---
+
+### Registry
+
+**Section: Admin**
+
+MLflow Model Registry interface:
+
+| Action | How |
+| --- | --- |
+| Register a model | Select a saved model artifact and click Register |
+| Promote to Champion | Move a version to the `champion` alias |
+| Set as Candidate | Move to `candidate` alias |
+| Archive | Tag version as `archived` |
+
+> [!WARNING]
+> TabFM-derived model contexts are blocked from registry promotion. The app enforces the non-commercial license boundary.
+
+---
+
+### Settings
+
+**Section: Admin**
+
+Configure workspace preferences without editing files:
+
+- **LLM provider** — select OpenAI, Anthropic, Gemini, or Ollama; enter your API key (kept in session state only, never written to disk)
+- **Execution backend** — local or Colab MCP
+- **Workspace mode** — dashboard or notebook
+- **Model** — select the LLM model for AI summaries (with cost estimates)
+
+Changes are saved to `~/.autotabml/settings.json`. API keys are not included.
+
+---
+
+## CLI reference
+
+All commands: `uv run autotabml <command>` (or `autotabml <command>` with the venv active).
+
+Global flag: `--version` — print version and exit.
+
+---
+
+### Diagnostics
+
+| Command | Description |
+| --- | --- |
+| `info` | Show version, workspace mode, execution backend, artifact paths, and database path |
+| `doctor` | Run startup diagnostics: CUDA, database, artifact dirs, optional extras, stale file cleanup |
+| `init-local-storage` | Create artifact directories and initialize the app metadata SQLite database |
+
+---
+
+### Data
+
+#### `validate`
+
 ```bash
-# TabFM classification/regression research evaluation
-autotabml tabfm-run data/train.csv \
-  --target target \
-  --task-type auto \
-  --accept-tabfm-license \
-  --allow-download
-
-# Save a prediction-only research context
-autotabml tabfm-run data/train.csv \
-  --target target \
-  --accept-tabfm-license \
-  --save-context tabfm_research_context
-
-# TimesFM single or grouped forecast with a final-horizon backtest
-autotabml timesfm-forecast data/demand.csv \
-  --timestamp date \
-  --target demand \
-  --group store_id \
-  --horizon 12 \
-  --allow-download
+uv run autotabml validate data/train.csv --target price
 ```
 
-The `--allow-download` flag is required only until the pinned checkpoint is in the
-local Hugging Face cache. TabFM always requires `--accept-tabfm-license`.
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | Path, URL, or `uci:<id>` |
+| `--target <col>` | — | Target column name |
+| `--min-rows <n>` | 1 | Fail if row count is below threshold |
+| `--artifacts-dir <dir>` | artifacts/validation/ | Output directory |
 
-### Prediction
+#### `profile`
 
 ```bash
-# Batch prediction
-autotabml predict-batch new_data.csv \
+uv run autotabml profile data/train.csv
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | Path, URL, or `uci:<id>` |
+| `--artifacts-dir <dir>` | artifacts/profiling/ | Output directory |
+
+#### `uci-list`
+
+```bash
+uv run autotabml uci-list --search iris --limit 10
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--search <query>` | — | Filter by name |
+| `--area <area>` | — | Filter by subject area |
+| `--limit <n>` | 20 | Maximum results |
+
+---
+
+### Benchmarking
+
+#### `benchmark`
+
+```bash
+uv run autotabml benchmark data/train.csv --target target --task-type auto
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | Path, URL, or `uci:<id>` |
+| `--target <col>` | required | Target column |
+| `--task-type` | `auto` | `auto`, `classification`, `regression` |
+| `--test-size <float>` | 0.2 | Holdout fraction |
+| `--random-state <int>` | 42 | Random seed |
+| `--stratify` | `auto` | `auto`, `true`, `false` |
+| `--ranking-metric <str>` | Balanced Accuracy / Adjusted R² | Metric to rank by |
+| `--sample-rows <n>` | — | Sample large datasets to N rows |
+| `--top-k <n>` | 5 | Top K models to return |
+| `--prefer-gpu` | `auto` | `auto`, `true`, `false` |
+| `--include-model <name>` | — | Repeat to include only these models |
+| `--exclude-model <name>` | — | Repeat to exclude models |
+| `--artifacts-dir <dir>` | artifacts/benchmark/ | Output directory |
+
+---
+
+### PyCaret experiments
+
+#### `experiment-run`
+
+```bash
+uv run autotabml experiment-run data/train.csv --target target --task-type classification --n-select 3
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | |
+| `--target <col>` | required | |
+| `--task-type` | `auto` | `auto`, `classification`, `regression` |
+| `--train-size <float>` | 0.7 | Training fraction |
+| `--fold <int>` | 5 | Cross-validation folds |
+| `--fold-strategy <str>` | stratifiedkfold / kfold | Fold strategy |
+| `--preprocess` | `auto` | `auto`, `true`, `false` |
+| `--ignore-feature <col>` | — | Repeat to exclude features |
+| `--compare-metric <str>` | Accuracy / R2 | Metric for compare ranking |
+| `--n-select <int>` | — | Top N models to return |
+| `--budget-time <min>` | — | Time limit in minutes |
+| `--no-turbo` | False | Disable turbo mode (all estimators) |
+| `--use-gpu` | `false` | `false`, `true`, `force` |
+| `--artifacts-dir <dir>` | artifacts/experiments/ | |
+
+#### `experiment-tune`
+
+```bash
+uv run autotabml experiment-tune data/train.csv --target target --model-id rf --task-type classification
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--model-id <id>` | required | Algorithm ID from compare output |
+| `--task-type` | required | `classification` or `regression` |
+| `--tune-metric <str>` | AUC / R2 | Optimization metric |
+| `--n-iter <int>` | — | Tuning iterations |
+| `--use-gpu` | `false` | `false`, `true`, `force` |
+
+#### `experiment-evaluate`
+
+```bash
+uv run autotabml experiment-evaluate data/train.csv --target target --model-id rf --task-type classification --plot confusion_matrix --plot auc
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--plot <plot_id>` | all | Repeat for multiple plots |
+| `--use-gpu` | `false` | |
+
+#### `experiment-save`
+
+```bash
+uv run autotabml experiment-save data/train.csv --target target --model-id rf --task-type classification --save-name my_model
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--save-name <name>` | auto-generated | Output model filename stem |
+| `--save-snapshot` | False | Also save a PyCaret pipeline snapshot |
+| `--use-gpu` | `false` | |
+
+---
+
+### FLAML AutoML
+
+#### `flaml-run`
+
+```bash
+uv run autotabml flaml-run data/train.csv --target target --task-type auto --time-budget 120
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | |
+| `--target <col>` | required | |
+| `--task-type` | `auto` | `auto`, `classification`, `regression` |
+| `--time-budget <secs>` | 120 | Search time limit |
+| `--max-iter <int>` | — | Maximum iterations |
+| `--metric <str>` | accuracy / r2 | Optimization metric |
+| `--n-splits <int>` | 5 | Cross-validation splits |
+| `--seed <int>` | 0 | Random seed |
+| `--ensemble` | False | Enable ensembling |
+| `--early-stop` | False | Enable early stopping |
+| `--estimator <name>` | — | Repeat to restrict estimator set |
+
+#### `flaml-save`
+
+Same flags as `flaml-run`, plus:
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--save-name <name>` | auto-generated | Output model filename stem |
+
+---
+
+### Foundation models
+
+#### `tabfm-run`
+
+```bash
+uv run autotabml tabfm-run data/train.csv --target target --accept-tabfm-license --allow-download
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | |
+| `--target <col>` | required | |
+| `--task-type` | `auto` | `auto`, `classification`, `regression` |
+| `--context-rows <n>` | — | Rows to use as in-context examples |
+| `--n-estimators <n>` | — | Ensemble size |
+| `--allow-download` | False | **Required** to download checkpoint on first use |
+| `--accept-tabfm-license` | False | **Required** — accepts the non-commercial license |
+| `--save-context <NAME>` | — | Save context artifact with this name |
+| `--artifacts-dir <dir>` | artifacts/experiments/ | |
+
+> [!WARNING]
+> `--accept-tabfm-license` is required on every run. It signals explicit acceptance of the
+> `tabfm-non-commercial-v1.0` license. Do not use TabFM for commercial or production workloads.
+
+#### `timesfm-forecast`
+
+```bash
+uv run autotabml timesfm-forecast data/demand.csv --timestamp date --target demand --horizon 12 --allow-download
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | |
+| `--timestamp <col>` | required | Timestamp column |
+| `--target <col>` | required | Value column to forecast |
+| `--group <col>` | — | Optional grouping column for panel data |
+| `--horizon <int>` | 12 | Forecast steps ahead |
+| `--context-length <int>` | — | Historical context window |
+| `--frequency <freq>` | — | Pandas frequency string (e.g., `D`, `M`) |
+| `--no-backtest` | False | Skip holdout backtest |
+| `--allow-download` | False | **Required** to download checkpoint on first use |
+| `--artifacts-dir <dir>` | artifacts/experiments/ | |
+
+---
+
+### Predictions
+
+#### `predict-single`
+
+Score a single row:
+
+```bash
+uv run autotabml predict-single \
   --model-source local_saved_model \
-  --model-path artifacts/models/my_model
+  --model-path artifacts/models/my_model.pkl \
+  --row-json '{"age": 35, "income": 50000, "score": 720}'
+```
 
-# Single-row prediction
-autotabml predict-single \
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--model-source` | required | `local_saved_model`, `mlflow_run`, `mlflow_registered_model` |
+| `--model-path <path>` | — | Path to `.pkl` (for `local_saved_model`) |
+| `--model-id <id>` | — | MLflow artifact path (for `mlflow_run`) |
+| `--model-uri <uri>` | — | MLflow model URI |
+| `--model-name <name>` | — | Registry model name (for `mlflow_registered_model`) |
+| `--model-version <n>` | — | Registry version |
+| `--model-alias <alias>` | — | Registry alias (e.g., `champion`) |
+| `--metadata-path <path>` | — | Path to model metadata JSON |
+| `--task-type` | — | Override task type |
+| `--schema-mode` | `strict` | `strict` or `warn` |
+| `--row-json <json>` | — | Input as JSON string |
+| `--row-file <path>` | — | Input as single-row CSV file |
+| `--run-id <id>` | — | MLflow run ID |
+| `--output-dir <dir>` | artifacts/predictions/ | |
+
+#### `predict-batch`
+
+```bash
+uv run autotabml predict-batch data/new.csv \
   --model-source local_saved_model \
-  --model-path artifacts/models/my_model \
-  --row-json '{"feature1": 42, "feature2": "A"}'
-
-# View prediction history
-autotabml predict-history --limit 10
+  --model-path artifacts/models/my_model.pkl \
+  --output-path artifacts/predictions/scored.csv
 ```
 
-Model sources: `local_saved_model`, `mlflow_run`, `mlflow_registered_model`.
+Same model-source flags as `predict-single`, plus:
 
-### History & Comparison
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | Input file to score |
+| `--output-path <path>` | artifacts/predictions/predictions.csv | Output CSV path |
+
+#### `predict-history`
 
 ```bash
-autotabml history-list --run-type benchmark --limit 10
-autotabml history-show <run_id>
-autotabml compare-runs <run_id_1> <run_id_2>
+uv run autotabml predict-history --limit 20
 ```
 
-### Batch Runs
+---
+
+### Operations
+
+#### `drift-check`
 
 ```bash
-autotabml batch-history --limit 20
-autotabml batch-show <batch_id>
+uv run autotabml drift-check data/new.csv --baseline artifacts/models/model_drift_baseline.json
 ```
 
-`batch-history` lists past multi-dataset batch runs with status and
-success/failed/skipped counts; `batch-show` prints the full detail for one
-batch run by ID.
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | New data to check |
+| `--baseline <json>` | required | Saved baseline JSON from a previous run |
+| `--source-type` | — | Override source type |
 
-### Model Registry
+#### `explain`
 
 ```bash
-autotabml registry-list
-autotabml registry-show my_model
-autotabml registry-register my_model --source "runs:/<run_id>/model"
-autotabml registry-promote my_model 1 --action champion
+uv run autotabml explain artifacts/models/explanation.json
 ```
 
-Promotion actions: `champion`, `candidate`, `archived`.
+Prints a saved SHAP explanation artifact as formatted JSON.
+
+#### `deploy-export`
+
+```bash
+uv run autotabml deploy-export \
+  --model artifacts/models/my_model.pkl \
+  --metadata artifacts/models/my_model.json \
+  --provenance artifacts/models/my_model_provenance.json \
+  --output deploy/my_model_bundle
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--model <path>` | required | Path to `.pkl` model file |
+| `--metadata <path>` | required | Path to model metadata JSON |
+| `--provenance <path>` | — | Optional provenance JSON |
+| `--output <path>` | required | Output bundle directory |
+
+#### `batch-history` / `batch-show`
+
+```bash
+uv run autotabml batch-history --limit 20
+uv run autotabml batch-show <batch-id>
+```
+
+---
+
+### History & registry
+
+#### `history-list`
+
+```bash
+uv run autotabml history-list --run-type experiment --limit 20
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--run-type` | `all` | `all`, `benchmark`, `experiment`, `flaml`, `tabfm`, `timesfm`, `unknown` |
+| `--task-type` | — | Filter by classification or regression |
+| `--sort-by` | `start_time` | `start_time`, `duration`, `model_name`, `primary_score` |
+| `--sort-dir` | `descending` | `ascending` or `descending` |
+| `--limit <n>` | 50 | Maximum rows |
+
+#### `history-show`
+
+```bash
+uv run autotabml history-show <run-id>
+```
+
+#### `compare-runs`
+
+```bash
+uv run autotabml compare-runs <run-id-a> <run-id-b>
+```
+
+#### `registry-list` / `registry-show`
+
+```bash
+uv run autotabml registry-list
+uv run autotabml registry-show my_model
+```
+
+#### `registry-register`
+
+```bash
+uv run autotabml registry-register my_model \
+  --source runs://<run-id>/model \
+  --run-id <run-id> \
+  --description "Best classifier from experiment 2026-08-17"
+```
+
+#### `registry-promote`
+
+```bash
+uv run autotabml registry-promote my_model 3 --action champion
+uv run autotabml registry-promote my_model 2 --action archived
+```
+
+`--action` choices: `champion`, `candidate`, `archived`.
+
+---
+
+### Background jobs
+
+#### `auto-run`
+
+```bash
+uv run autotabml auto-run data/train.csv --target price --mode auto --time-budget 120 --save-name best_model
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `<dataset>` | required | |
+| `--target <col>` | required | |
+| `--task-type` | `auto` | `auto`, `classification`, `regression` |
+| `--mode` | `auto` | `auto`, `quick`, `balanced`, `deep` |
+| `--time-budget <secs>` | 120 | FLAML time budget |
+| `--save-name <name>` | auto-generated | Output model name |
+
+| Mode | Description |
+| --- | --- |
+| `auto` | Automatically selects strategy based on dataset size and complexity |
+| `quick` | Fast pass — short time budget, fewer estimators |
+| `balanced` | Medium time budget, broad estimator set |
+| `deep` | Long time budget, full estimator set with ensembling |
+
+#### `job-list` / `job-status` / `job-cancel`
+
+```bash
+uv run autotabml job-list --limit 10
+uv run autotabml job-status <job-id>
+uv run autotabml job-cancel <job-id>
+```
 
 ---
 
 ## Configuration
 
-### Environment Variables
+Settings resolve in this order: **Pydantic defaults → `~/.autotabml/settings.json` → environment variables**.
 
-All settings can be overridden with environment variables. Copy `.env.example` to
-`.env` and uncomment the values you want to change.
+The Settings page writes to `~/.autotabml/settings.json`. API keys are never written there — they are kept in session state and read from environment variables only.
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `AUTOTABML_WORKSPACE_MODE` | `dashboard` | UI mode (`dashboard` or `notebook`) |
-| `AUTOTABML_EXECUTION__BACKEND` | `colab_mcp` | Execution backend (`local` or `colab_mcp`) |
-| `AUTOTABML_ARTIFACTS__ROOT_DIR` | `artifacts` | Root directory for all output files |
-| `AUTOTABML_DATABASE__PATH` | `artifacts/app/app_metadata.sqlite3` | SQLite metadata database |
-| `AUTOTABML_MLFLOW__TRACKING_URI` | `sqlite:///artifacts/mlflow/mlflow.db` | MLflow tracking server URI |
-| `AUTOTABML_MLFLOW__REGISTRY_URI` | `sqlite:///artifacts/mlflow/mlflow.db` | MLflow model registry URI |
-| `AUTOTABML_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server for local AI summaries |
-| `AUTOTABML_PROVIDER__BASE_URL` | *(none)* | Optional base-URL override for the selected hosted provider |
-| `AUTOTABML_LOG_LEVEL` | `INFO` | Logging verbosity |
-| `AUTOTABML_LOG_FORMAT` | `text` | Log encoding (`text` or newline-delimited `json`) |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Direct Ollama-provider fallback URL |
-| `OPENAI_API_KEY` | *(none)* | OpenAI API key for AI-generated summaries |
-| `ANTHROPIC_API_KEY` | *(none)* | Anthropic API key for AI-generated summaries |
-| `GEMINI_API_KEY` | *(none)* | Google Gemini API key for AI-generated summaries |
+### Using a `.env` file
 
-Nested settings use double underscores: `AUTOTABML_MLFLOW__TRACKING_URI`.
+Copy `.env.example` to `.env` and fill in your values:
 
-### Optional Dependencies
+```bash
+cp .env.example .env
+```
 
-| Group | What It Enables | Install |
-|-------|----------------|---------|
-| `validation` | Great Expectations data checks | `pip install -e ".[validation]"` |
-| `profiling` | ydata-profiling EDA reports | `pip install -e ".[profiling]"` |
-| `benchmark` | LazyPredict algorithm screening | `pip install -e ".[benchmark]"` |
-| `experiment` | PyCaret model training (Python < 3.13) | `pip install -e ".[experiment]"` |
-| `flaml` | Time-budgeted Microsoft FLAML AutoML | `pip install -e ".[flaml]"` |
-| `tabfm` | Google TabFM research evaluation (Python 3.11+) | `pip install -e ".[tabfm]"` |
-| `timesfm` | Google TimesFM 2.5 forecasting | `pip install -e ".[timesfm]"` |
-| `gpu` | GPU-accelerated XGBoost, LightGBM, CatBoost | `pip install -e ".[gpu]"` |
-| `kaggle` | Kaggle dataset downloads (CLI only) | `pip install -e ".[kaggle]"` |
-| `uci` | UCI repository search and loading | `pip install -e ".[uci]"` |
-| `colab` | Google Colab MCP backend | `pip install -e ".[colab]"` |
-| `providers` | OpenAI, Anthropic, Gemini, and Ollama summaries | `pip install -e ".[providers]"` |
-| `explain` | SHAP model explanations | `pip install -e ".[explain]"` |
-| `serve` | FastAPI and Uvicorn deployment runtime | `pip install -e ".[serve]"` |
-| `dev` group | pytest, build, lint, and type tools | `uv sync --locked --group dev` |
+`uv run` and Streamlit both load `.env` automatically.
 
-Pages that require optional dependencies show a guided message when the dependency
-is missing, with the exact install command.
+### Environment variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `AUTOTABML_WORKSPACE_MODE` | `dashboard` | Startup mode: `dashboard` or `notebook` |
+| `AUTOTABML_EXECUTION__BACKEND` | `colab_mcp` | Execution backend: `local` or `colab_mcp` — **set to `local` for local-only use** |
+| `AUTOTABML_ARTIFACTS__ROOT_DIR` | `artifacts/` | Override artifact root directory |
+| `AUTOTABML_DATABASE__PATH` | `artifacts/app/app_metadata.sqlite3` | App metadata SQLite path |
+| `AUTOTABML_MLFLOW__TRACKING_URI` | `sqlite:///artifacts/mlflow/mlflow.db` | MLflow tracking URI |
+| `AUTOTABML_MLFLOW__REGISTRY_URI` | `sqlite:///artifacts/mlflow/mlflow.db` | MLflow registry URI |
+| `AUTOTABML_PROVIDER__BASE_URL` | — | Override LLM provider base URL |
+| `AUTOTABML_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama base URL |
+| `AUTOTABML_LOG_LEVEL` | `INFO` | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `AUTOTABML_LOG_FORMAT` | `text` | Log format: `text` or `json` |
+| `OPENAI_API_KEY` | — | OpenAI API key (no prefix — read directly by provider) |
+| `ANTHROPIC_API_KEY` | — | Anthropic Claude API key |
+| `GEMINI_API_KEY` | — | Google Gemini API key |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama fallback URL |
+| `KAGGLE_USERNAME` | — | Kaggle username for dataset download |
+| `KAGGLE_KEY` | — | Kaggle API key |
+
+> [!NOTE]
+> `AUTOTABML_EXECUTION__BACKEND` defaults to `colab_mcp` to support remote Colab workflows.
+> If you are running entirely locally, add `AUTOTABML_EXECUTION__BACKEND=local` to your `.env`.
+
+> [!IMPORTANT]
+> API keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`) are not prefixed with
+> `AUTOTABML_` because provider client libraries read them directly. They must never be
+> committed to version control.
 
 ---
 
-## Input & Output
+## Input & output formats
 
-### Supported Input Formats
+### Supported input formats
 
-| Format | Extensions | Source |
-|--------|-----------|--------|
-| CSV | `.csv` | Upload, Local Path, Web URL |
-| Delimited text | `.tsv`, `.txt`, `.data` | Upload, Local Path |
-| Excel | `.xlsx`, `.xls`, `.xlsm`, `.xlsb` | Upload, Local Path |
-| UCI Repository | — | Built-in search by name or ID |
+| Format | Extension | Notes |
+| --- | --- | --- |
+| CSV | `.csv` | Default; bounded parsing |
+| TSV | `.tsv` | Tab-separated |
+| Excel | `.xlsx`, `.xls`, `.xlsb` | First sheet by default |
+| Remote URL | `https://...` | Direct link to CSV or Excel file; SSRF-hardened |
+| UCI ML Repository | `uci:<id>` | Fetched and cached locally |
+| Kaggle | dataset slug | CLI only; requires credentials |
+| HTML table | URL with `--source-type html_table` | Extracts first table |
 
-### Output Files
+### Artifact output layout
 
-All output is stored under the `artifacts/` directory:
+All outputs are written under the artifacts root (default `artifacts/`, override with `AUTOTABML_ARTIFACTS__ROOT_DIR`):
 
 ```
 artifacts/
-├── app/                  # Metadata database
-│   └── app_metadata.sqlite3
-├── benchmark/            # Benchmark results and leaderboards
-├── autorun/              # Completed Auto Run reports, explanations, and baselines
-├── jobs/                 # Background-job requests, status, and logs
-├── comparisons/          # Side-by-side run comparisons
-├── deployments/          # Exported FastAPI/CLI/Docker bundles
-├── experiments/          # Experiment runs and snapshots
-│   ├── foundation/       # TabFM and TimesFM run artifacts
-│   └── snapshots/
-├── mlflow/               # MLflow tracking database
-│   └── mlflow.db
-├── models/               # Saved production models
-├── predictions/          # Prediction output files and history
-│   └── history.jsonl
-├── profiling/            # Data profiling reports
-├── tmp/                  # Temporary files (auto-cleaned after 24h)
-└── validation/           # Validation reports
+  validation/          — Validation reports, Great Expectations outputs
+  profiling/           — HTML profile report + summary.json
+  benchmark/           — leaderboard.csv + summary.json
+  experiments/         — PyCaret run artifacts
+    snapshots/         — PyCaret pipeline snapshots
+  flaml/               — FLAML run artifacts
+  models/              — model.pkl + model.sha256 + model.json metadata
+  predictions/         — batch prediction CSVs + history.jsonl
+  comparisons/         — compare-runs diff artifacts
+  mlflow/              — mlflow.db (MLflow SQLite backend)
+  app/                 — app_metadata.sqlite3 (job/dataset history)
+  tmp/                 — Temporary files (auto-cleaned after 24 h; failed runs after 48 h)
 ```
 
-Prediction output files include a `prediction` column (and `prediction_score` for
-classification tasks with confidence).
+> [!NOTE]
+> Every saved model file (`model.pkl`) has a corresponding `.sha256` sidecar.
+> The app verifies this checksum before loading any model to prevent tampered artifact loading.
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
-| "Train & Tune" page shows missing dependency | `pycaret` not installed | `pip install -e ".[experiment]"` |
-| "Quick Benchmark" page shows missing dependency | `lazypredict` not installed | `pip install -e ".[benchmark]"` |
-| Profiling page shows missing dependency | `ydata-profiling` not installed | `pip install -e ".[profiling]"` |
-| Foundation Models page shows missing TabFM/TimesFM dependency | Selected model extra is not installed | Install `.[tabfm]` or `.[timesfm]` and restart |
-| `profiling` and `tabfm` cannot resolve together | Their upstream `typeguard` constraints conflict | Keep them in separate virtual environments |
-| `autotabml doctor` reports no CUDA | GPU drivers not installed or no NVIDIA GPU | Install CUDA toolkit, or use CPU (default) |
-| Model Registry page is empty | MLflow tracking not initialized | Run `autotabml init-local-storage` |
-| Benchmark stalls on large datasets | Dataset exceeds sampling threshold | Use "Quick" run mode or set `--sample-rows` |
-| "Could not load model" error on Predictions page | Model file moved or deleted | Re-save the model from Train & Tune |
-| Settings changes not taking effect | Streamlit caches session state | Refresh the browser page after saving |
-| `experiment` install fails on Python 3.13 | PyCaret does not support 3.13 yet | Use Python 3.10–3.12 for experiment features |
-
-Run `autotabml doctor` to diagnose environment issues. It checks CUDA, database
-connectivity, artifact directories, and stale temporary files.
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| `ModuleNotFoundError: lazypredict` | `benchmark` extra not installed | `uv sync --locked --extra benchmark` |
+| `ModuleNotFoundError: pycaret` | `experiment` extra not installed | `uv sync --locked --extra experiment` |
+| `ModuleNotFoundError: flaml` | `flaml` extra not installed | `uv sync --locked --extra flaml` |
+| `ModuleNotFoundError: ydata_profiling` | `profiling` extra not installed | `uv sync --locked --extra profiling` |
+| `PyCaret requires Python < 3.13` | Running Python 3.13 | Use Python 3.11 or 3.12: `uv sync --python 3.12 --extra experiment` |
+| `tabfm requires --accept-tabfm-license` | License flag not passed | Add `--accept-tabfm-license` to `tabfm-run` command |
+| `typeguard conflict between tabfm and profiling` | Both extras in same venv | Use separate venvs: one for `tabfm`, one for `profiling` |
+| MLflow shows no runs | Tracking URI not initialized | Run `uv run autotabml init-local-storage` |
+| GPU not detected, training on CPU | No NVIDIA GPU or CUDA not installed | Expected fallback — install CUDA toolkit if GPU is available |
+| Dataset sampled to 50 K rows | Dataset exceeds 100 K rows | Expected behavior; increase `AUTOTABML_BENCHMARK__SAMPLING_ROW_THRESHOLD` in settings |
+| Kaggle download not available in UI | Kaggle extra not installed or credentials missing | Install `kaggle` extra; set `KAGGLE_USERNAME` and `KAGGLE_KEY` |
+| `API key not found` in Settings | Key not in environment | Set `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` in `.env` |
+| App uses Colab MCP backend instead of running locally | Default backend is `colab_mcp` | Set `AUTOTABML_EXECUTION__BACKEND=local` in `.env` |
+| `TrustedArtifactError: checksum mismatch` | Model file was modified after save | Re-save the model using `experiment-save` or `flaml-save` |
+| SQLite database locked | Another process holds the DB | Stop other `autotabml` or `streamlit` processes; retry |
 
 ---
 
-## Limitations
+## Known limitations
 
-- **PyCaret experiments require Python < 3.13.** TabFM requires Python 3.11+.
-- **TabFM is research-only.** Its weights are non-commercial and its saved contexts
-  cannot be registered or deployment-exported.
-- **TabFM and profiling require separate environments** because their upstream
-  `typeguard` constraints conflict.
-- **TimesFM covariates and fine-tuning are not enabled.** The integration provides
-  point/quantile forecasting and optional holdout backtesting.
-- **GPU acceleration** requires compatible NVIDIA hardware and CUDA drivers. The app
-  falls back to CPU automatically when GPU is unavailable.
-- **Kaggle integration** is available as an optional CLI dependency but is not exposed
-  in the Streamlit UI.
-- **MLflow tracking** uses a local SQLite database by default. Remote MLflow servers
-  can be configured via environment variables but are not tested as a primary use case.
-- **Large datasets** (100,000+ rows) trigger automatic sampling in benchmark and
-  profiling to maintain reasonable run times.
-- **Concurrent users** are not explicitly supported. The app is designed for
-  single-user, local-first operation.
-- **AI-generated run summaries** require an API key (OpenAI, Anthropic, Gemini) or a
-  local Ollama instance. Without one, summaries are not generated.
+| Constraint | Detail |
+| --- | --- |
+| PyCaret requires Python < 3.13 | Use Python 3.11 or 3.12 for PyCaret features |
+| TabFM: non-commercial research only | `tabfm-non-commercial-v1.0` license; cannot be used in production or commercial contexts; Python >= 3.11 required |
+| tabfm + profiling conflict | Incompatible `typeguard` versions; install in separate virtual environments |
+| First foundation model use | TabFM and TimesFM download pinned Hugging Face snapshots on first run — requires `--allow-download` |
+| GPU training | Requires NVIDIA GPU with CUDA; falls back to CPU automatically |
+| Large datasets | Datasets with >100 K rows are automatically sampled to 50 K rows for benchmarking and profiling |
+| Kaggle | CLI-only — not available in the Streamlit UI |
+| Single-user | One active training job at a time |
+| Background concurrency | Background jobs queue; concurrent job execution is not supported |
+| Drift scope | Input-distribution drift only — not concept drift or target drift |
+| AI summaries | Require an API key (OpenAI, Anthropic, Gemini) or a running local Ollama instance |
+| Default backend | `AUTOTABML_EXECUTION__BACKEND` defaults to `colab_mcp`; set to `local` for fully local operation |
