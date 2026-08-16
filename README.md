@@ -490,3 +490,5 @@ same ground inline.
 | [SECURITY.md](SECURITY.md) | Supported versions, disclosure channel, response SLA, hardening guide |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community expectations |
 | [LICENSE](LICENSE) | MIT License |
+
+<p align="center">Made with ❤️ by Ahmad Mujtaba</p>
