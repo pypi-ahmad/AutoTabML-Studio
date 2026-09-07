@@ -86,7 +86,7 @@ tabfm = [
     "huggingface-hub>=0.34,<2; python_version >= '3.11'",
 ]
 timesfm = [
-    "timesfm[torch]>=2.0.2,<2.1",
+    "timesfm[torch]>=2.0.2,<3.1",
     "huggingface-hub>=0.34,<2",
 ]
 gpu = [
