@@ -1,8 +1,6 @@
 # AutoTabML Studio Documentation
 
-Welcome to the AutoTabML Studio documentation. This is a zero-to-hero
-handbook: each document explains what the project is, why each piece
-exists, how it works, and how to use or extend it.
+Welcome to the AutoTabML Studio documentation. Each document covers what the project is, why each piece exists, how it works, and how to use or extend it.
 
 ## Where to start
 
@@ -69,9 +67,9 @@ exists, how it works, and how to use or extend it.
 - Streamlit and container access on `http://localhost:8561`.
 - Simplified navigation with advanced workflows retained.
 
-AutoTabML Studio is a **local-first automated machine-learning
-workbench** that takes you from a raw CSV to a trained,
-evaluated, and deployable model — entirely on your machine.
+AutoTabML Studio is a local-first automated machine-learning
+workbench that takes you from a raw CSV to a trained,
+evaluated, and deployable model, entirely on your machine.
 Three AutoML engines (LazyPredict, PyCaret, FLAML), pinned local Google
 TabFM/TimesFM foundation-model workflows, end-to-end
 MLflow tracking, an MLflow-style model registry, AI-generated

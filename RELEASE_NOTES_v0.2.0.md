@@ -7,7 +7,7 @@
 > migration required. No public API removed.
 
 This is a quality, security, and developer-experience release.
-It does not introduce new user-facing features — instead, it
+It does not introduce new user-facing features. Instead, it
 hardens the foundation: tooling, packaging, security posture,
 type safety, CI, and the LLM-provider integrations. 0.2.0 is
 the recommended upgrade for all 0.1.x users.
@@ -17,8 +17,8 @@ the recommended upgrade for all 0.1.x users.
 ### Modern Python packaging
 
 - Migrated the build backend from `setuptools` to
-  **`hatchling`** (PEP 621, PyPA-recommended, fast).
-- Adopted **PEP 735 dependency groups** (`dev`, `security`,
+  `hatchling` (PEP 621, PyPA-recommended, fast).
+- Adopted PEP 735 dependency groups (`dev`, `security`,
   `docs`); `uv sync` now installs the `dev` group by default.
 - Added a `py.typed` marker (PEP 561) so downstream projects
   can use `mypy` / `pyright` against `app` for full type
@@ -30,25 +30,25 @@ the recommended upgrade for all 0.1.x users.
 
 ### Tooling
 
-- **Ruff** rule set widened to `F, E4, E7, E9, I, UP, B, C4,
+- Ruff rule set widened to `F, E4, E7, E9, I, UP, B, C4,
   PIE, RET, SIM, N, W`. Per-file-ignores preserve ML
   (`X_train`/`X_test` snake-case) and Streamlit
   (`st.sidebar`) idioms.
-- **`ruff format`** enabled in CI. The repo is now
+- `ruff format` enabled in CI. The repo is now
   black-compatible by default; the format check fails
   the build on any drift.
-- **`pre-commit`** config added with SHA-pinned hooks for
+- `pre-commit` config added with SHA-pinned hooks for
   ruff, mypy, and the standard pre-commit-hooks set.
-- **`.editorconfig`** added for cross-editor consistency.
-- **`Makefile`** added with `install`, `sync`, `test`,
+- `.editorconfig` added for cross-editor consistency.
+- `Makefile` added with `install`, `sync`, `test`,
   `test-cov`, `lint`, `format`, `type-check`, `security`,
   `build`, `clean`, `doctor` targets.
 
 ### Type safety
 
-- Adopted **Microsoft Pyright** as a second static type
-  checker alongside mypy. `pyright app/` reports **0
-  errors** and ~960 informational warnings (all on
+- Adopted Pyright as a second static type
+  checker alongside mypy. `pyright app/` reports 0
+  errors and ~960 informational warnings (all on
   third-party type stubs we cannot fix without forking
   upstream).
 - The `app/providers/` interfaces, the `app.modeling`
@@ -58,10 +58,10 @@ the recommended upgrade for all 0.1.x users.
 ### LLM provider modernization
 
 The four `app/providers/*.py` files have been rewritten on
-top of the **official SDKs**. The public interface is
-**unchanged** (same `BaseProvider`, same `ModelItem`, same
-`build_provider` factory). The change is invisible to
-callers but removes ~200 lines of bespoke HTTP plumbing.
+top of the official SDKs. The public interface is unchanged
+(same `BaseProvider`, same `ModelItem`, same `build_provider`
+factory). The change is invisible to callers but removes
+~200 lines of bespoke HTTP plumbing.
 
 | Provider   | 0.1.x          | 0.2.0                          |
 | ---------- | -------------- | ------------------------------ |
@@ -81,32 +81,32 @@ uv sync --locked --extra providers
 
 ### Security hardening
 
-- **Telemetry explicit off**: `.streamlit/config.toml` sets
+- Telemetry explicitly disabled: `.streamlit/config.toml` sets
   `gatherUsageStats = false` at both the client and browser
   level. The "no outbound telemetry" claim is now verifiable
   in source.
-- **CI security surface expanded**: `bandit` (static
+- CI security surface expanded: `bandit` (static
   security review) and `pip-audit` (vulnerability scan) now
   run in CI alongside the existing `detect-secrets` and
   `gitleaks` checks.
-- **GitHub Actions supply chain hardened**: all third-party
+- GitHub Actions supply chain hardened: all third-party
   actions (`actions/checkout`, `actions/setup-python`,
   `astral-sh/setup-uv`, `actions/upload-artifact`,
   `actions/download-artifact`) are pinned to their v6.0.0
   commit SHAs with inline version comments.
-- **`SECURITY.md` rewritten**: supported-versions table,
+- `SECURITY.md` rewritten with a supported-versions table,
   response SLA (7 days), hardening guide for production
   deployments, and a private advisory channel via GitHub
   Security Advisories.
 
 ### CI / CD
 
-- New **Type Check (Pyright)** job in `ci.yml`.
-- New **Security (Bandit + pip-audit)** job in `ci.yml` and
+- New Type Check (Pyright) job in `ci.yml`.
+- New Security (Bandit + pip-audit) job in `ci.yml` and
   `security.yml`.
-- Lint job split into **Ruff check** + **Ruff format check**
+- Lint job split into Ruff check and Ruff format check
   so a format failure cannot mask a lint regression.
-- New **`.github/CODEOWNERS`** — the maintainer is required
+- New `.github/CODEOWNERS`: the maintainer is required
   to review changes to `app/security/`, `app/providers/`,
   `app/backends/`, `.github/`, `pyproject.toml`, `uv.lock`,
   `Makefile`, `.pre-commit-config.yaml`, and `.editorconfig`.

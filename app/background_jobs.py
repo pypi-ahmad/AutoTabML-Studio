@@ -25,6 +25,9 @@ class BackgroundJobService:
         self.jobs_dir = jobs_dir
 
     def submit_auto_run(self, dataframe: pd.DataFrame, config: AutoRunConfig) -> JobRecord:
+        # One-at-a-time constraint: scan the most recent 100 persisted jobs
+        # rather than holding a process-level lock so the check survives
+        # restarts and works across the UI and CLI simultaneously.
         active = [
             job
             for job in self.store.list_recent_jobs(limit=100)
@@ -57,6 +60,10 @@ class BackgroundJobService:
             metadata={"progress": 0, "stage": "queued", "job_dir": str(directory.resolve())},
         )
         self.store.record_job(record)
+        # stdout and stderr are merged into worker.log so the UI can tail a
+        # single file.  CREATE_NO_WINDOW (Windows-only; 0 on other platforms)
+        # prevents a console popup when the subprocess is spawned from a
+        # windowed application like the Streamlit browser session.
         process = subprocess.Popen(  # nosec B603
             [sys.executable, "-m", "app.autorun_worker", str(request_path.resolve())],
             cwd=Path.cwd(),
@@ -81,6 +88,9 @@ class BackgroundJobService:
             return record
         record.status = AppJobStatus.CANCEL_REQUESTED
         directory = Path(str(record.metadata["job_dir"]))
+        # Sentinel file: the worker process polls for this file and exits
+        # cleanly when it appears.  SIGTERM is sent as a backup in case the
+        # worker is blocked in a long FLAML iteration and cannot poll.
         (directory / "cancel.requested").touch()
         pid = int(record.metadata.get("pid", 0))
         if pid > 0:

@@ -122,6 +122,10 @@ def _json_safe(value: Any) -> Any:
 
 
 def _sanitize(value: Any) -> Any:
+    # Key-name heuristic: any dict key containing "secret", "token",
+    # "password", or "api_key" (case-insensitive) has its value replaced with
+    # "[REDACTED]" before the manifest is written to disk.  Values themselves
+    # are never inspected — only key names are checked.
     if isinstance(value, dict):
         return {
             str(key): (

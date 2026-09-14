@@ -26,6 +26,9 @@ class RuntimeState:
 
     def __init__(self, settings: AppSettings | None = None) -> None:
         self.settings: AppSettings = settings or load_settings()
+        # API keys are held in SecretStr so they are never accidentally
+        # serialized or logged.  They live only in this session object —
+        # they are never written to settings.json.
         self.provider_api_keys: dict[LLMProvider, SecretStr] = {}
         self.fetched_models: list[ModelItem] = []
         self.model_fetch_error: str | None = None

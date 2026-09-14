@@ -30,6 +30,9 @@ def explain_global(
     """Return global feature importance using native or permutation importance."""
 
     names = list(features.columns)
+    # Fallback chain: SHAP (capped at 100 rows — expensive tree traversal) →
+    # native feature_importances_ → |coef_| → permutation importance (slowest,
+    # always available for any sklearn-compatible model).
     shap_values = _shap_importance(model, features.head(min(max_rows, 100)))
     if shap_values is not None and len(shap_values) == len(names):
         values = shap_values
@@ -42,6 +45,7 @@ def explain_global(
     elif shap_values is None:
         coefficients = getattr(model, "coef_", None)
         if coefficients is not None and np.asarray(coefficients).shape[-1] == len(names):
+            # coef_ is 2-D for multiclass (classes × features); average across classes.
             values = np.abs(np.asarray(coefficients, dtype=float)).reshape(-1, len(names)).mean(axis=0)
             method = "absolute_coefficient"
         else:
@@ -59,12 +63,16 @@ def explain_global(
 
 
 def _shap_importance(model: Any, sample: pd.DataFrame) -> np.ndarray | None:
+    # ImportError → shap extra not installed (expected); TypeError/ValueError/
+    # AttributeError → model type unsupported by shap.Explainer.  Both are
+    # treated as "SHAP unavailable" rather than fatal — the caller falls back.
     try:
         import shap
 
         values = np.asarray(shap.Explainer(model, sample)(sample).values, dtype=float)
         if values.ndim == 2:
             return np.abs(values).mean(axis=0)
+        # ndim == 3: multiclass (samples × features × classes)
         if values.ndim == 3:
             return np.abs(values).mean(axis=(0, 2))
     except (ImportError, TypeError, ValueError, AttributeError):

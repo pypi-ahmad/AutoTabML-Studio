@@ -33,16 +33,20 @@ def evaluate_model(model: Any, features: pd.DataFrame, target: pd.Series, *, tas
             "f1_macro": float(metrics.f1_score(target, predicted, average="macro", zero_division=0)),
         }
         counts = target.value_counts(normalize=True)
+        # 20% minority threshold is a common heuristic for "meaningful imbalance".
         if len(counts) > 1 and float(counts.min()) < 0.20:
             warnings.append("Target is imbalanced; prefer balanced accuracy and macro F1.")
         if hasattr(model, "predict_proba"):
             probabilities = np.asarray(model.predict_proba(features))
+            # ROC-AUC and Brier score are only meaningful for binary classifiers
+            # (shape[1] == 2).  Multiclass probability metrics are skipped here.
             if probabilities.ndim == 2 and probabilities.shape[1] == 2:
                 positive = probabilities[:, 1]
                 try:
                     values["roc_auc"] = float(metrics.roc_auc_score(target, positive))
                     calibration["brier_score"] = float(metrics.brier_score_loss(target, positive))
                 except ValueError:
+                    # sklearn raises ValueError when the holdout has only one class.
                     warnings.append("Probability metrics were unavailable for this holdout.")
     else:
         values = {

@@ -42,11 +42,11 @@ active by default.
 - **Secret masking** in logs: the JSON formatter scrubs
   `sk-...` / `AI...` / `Bearer ...` / `user:password@host` patterns
   before the log line is emitted.
-- **API keys are not persisted** to `~/.autotabml/settings.json` —
-  the file is for non-secret preferences only. The Settings page
+- API keys are not persisted to `~/.autotabml/settings.json`.
+  The file is for non-secret preferences only. The Settings page
   keeps API keys in `st.session_state` and reads them from
   environment variables.
-- **No outbound telemetry by default**: `~/.streamlit/config.toml`
+- No outbound telemetry by default: `~/.streamlit/config.toml`
   sets `gatherUsageStats = false` at both the client and browser
   levels so the "local-first" claim is verifiable.
 

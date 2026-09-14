@@ -189,6 +189,9 @@ def _get_applied_versions(connection: sqlite3.Connection) -> set[int]:
 
 
 def _detect_legacy_version(connection: sqlite3.Connection) -> int:
+    # Databases created before the schema_migrations table existed stored their
+    # version in app_metadata_info.  If that table is also absent, fall back to
+    # table-presence heuristics so existing data is never re-migrated.
     if not _table_exists(connection, _LEGACY_INFO_TABLE):
         if _table_exists(connection, "batch_runs") and _table_exists(connection, "batch_run_items"):
             return 2

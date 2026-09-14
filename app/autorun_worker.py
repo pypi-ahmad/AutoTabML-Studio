@@ -26,6 +26,9 @@ def main(request_path: Path) -> int:
     try:
         _update(store, record, 10, "loading data")
         dataframe = pd.read_csv(request["dataset_path"])
+        # Poll the sentinel file written by BackgroundJobService.cancel().
+        # KeyboardInterrupt is raised deliberately to fall through to the
+        # CANCELLED handler below; it is not an actual keyboard signal.
         if (directory / "cancel.requested").exists():
             raise KeyboardInterrupt
         _update(store, record, 20, "training")

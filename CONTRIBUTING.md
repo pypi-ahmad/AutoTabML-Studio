@@ -1,8 +1,6 @@
 # Contributing to AutoTabML Studio
 
-Welcome, and thank you for considering a contribution! AutoTabML Studio is a
-community-driven project and every contribution — a bug report, a documentation fix,
-a test, or a new feature — is genuinely appreciated.
+Welcome. AutoTabML Studio is a community-driven project and every contribution is appreciated, whether it is a bug report, a documentation fix, a test, or a new feature.
 
 This is a local-first, fully free project. No financial contributions are needed or
 wanted; the best way to support the project is with code, tests, and thoughtful
