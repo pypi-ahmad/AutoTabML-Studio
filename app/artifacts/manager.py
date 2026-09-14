@@ -104,6 +104,9 @@ class LocalArtifactManager:
         return self._ensure_unique(candidate)
 
     def write_text(self, path: Path, content: str, *, encoding: str = "utf-8") -> Path:
+        # Atomic write: content goes to a sibling .partial file first, then
+        # renamed over the target.  Any crash mid-write leaves a .partial
+        # orphan that cleanup_failed_partial_artifacts() will remove.
         path.parent.mkdir(parents=True, exist_ok=True)
         partial_path = self._partial_path_for(path)
         partial_path.write_text(content, encoding=encoding)

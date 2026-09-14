@@ -53,6 +53,7 @@ def validate_prediction_dataframe(
     metadata_available = bool(loaded_model.feature_columns)
 
     if loaded_model.feature_columns:
+        # dict.fromkeys deduplicates while preserving training-set order.
         expected_columns = list(dict.fromkeys(loaded_model.feature_columns))
         missing_columns = [column for column in expected_columns if column not in normalized.columns]
         unexpected_columns = [column for column in normalized.columns if column not in expected_columns]
@@ -80,6 +81,8 @@ def validate_prediction_dataframe(
             if validation_mode == SchemaValidationMode.WARN:
                 normalized = normalized.drop(columns=unexpected_columns, errors="ignore")
 
+        # Reindex forces columns into the same order as training; sklearn
+        # models are sensitive to column ordering even when names match.
         if not missing_columns and set(expected_columns).issubset(set(normalized.columns)):
             normalized = normalized.reindex(columns=expected_columns)
 

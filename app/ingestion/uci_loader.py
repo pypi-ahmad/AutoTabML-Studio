@@ -29,6 +29,8 @@ def list_available_uci_datasets(
     """Return structured UCI catalog rows by parsing ``list_available_datasets`` output."""
 
     ucimlrepo = _import_ucimlrepo()
+    # ucimlrepo.list_available_datasets prints to stdout instead of returning
+    # structured data; redirect_stdout captures the output for parsing.
     buffer = io.StringIO()
     with contextlib.redirect_stdout(buffer):
         ucimlrepo.list_available_datasets(filter=filter, search=search, area=area)

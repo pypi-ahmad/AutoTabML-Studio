@@ -65,6 +65,8 @@ class _EnvironmentSettings(BaseSettings):
 
 def load_settings() -> AppSettings:
     """Load settings from the local JSON file, falling back to defaults."""
+    # override=False: shell-level env vars already set take precedence over
+    # any .env file, so the system environment is never silently clobbered.
     load_dotenv(override=False)
 
     raw: dict = {}

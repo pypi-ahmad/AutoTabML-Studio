@@ -75,6 +75,8 @@ def plan_auto_run(dataframe: pd.DataFrame, config: AutoRunConfig) -> AutoRunPlan
     task = config.task_type
     if task == "auto":
         unique = target.nunique()
+        # Dynamic threshold: up to 10 % of rows, clamped to [2, 20].  A
+        # non-numeric target is always classification regardless of cardinality.
         class_limit = min(20, max(2, int(len(target) * 0.1)))
         task = "classification" if not pd.api.types.is_numeric_dtype(target) or unique <= class_limit else "regression"
     reasons = ["FLAML provides a time-bounded search and a directly savable model."]
@@ -108,12 +110,17 @@ def run_auto_run(
     plan = plan_auto_run(dataframe, config)
     if not is_flaml_available():
         raise RuntimeError("Auto Run requires the FLAML optional dependency.")
+    # Holdout is carved out before any training so FLAML never sees it.
+    # Stratified split preserves class balance for classification; plain random
+    # split is used for regression (stratify=None).
     train, holdout = train_test_split(
         dataframe,
         test_size=0.2,
         random_state=config.random_seed,
         stratify=dataframe[config.target_column] if plan.task_type == "classification" else None,
     )
+    # Fingerprint covers the full dataset, not just the training split, so
+    # the same source file always maps to the same provenance entry.
     fingerprint = hashlib.sha256(pd.util.hash_pandas_object(dataframe, index=True).values.tobytes()).hexdigest()
     service = FlamlAutoMLService(artifacts_dir=artifacts_dir, models_dir=models_dir)
     budget = 30 if config.mode == AutoRunMode.QUICK else config.time_budget
@@ -194,6 +201,9 @@ def run_auto_run(
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> Path:
+    # Atomic write: write to a sibling .tmp file, then rename over the target.
+    # Path.replace() is atomic on POSIX and near-atomic on Windows (same volume),
+    # so a reader never sees a partial file even if the process is killed mid-write.
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     temporary.replace(path)

@@ -45,6 +45,8 @@ class DriftReport(BaseModel):
 
 
 def build_drift_baseline(dataframe: pd.DataFrame, *, max_rows: int = 50_000) -> DriftBaseline:
+    # Sample cap keeps baseline computation fast for very large datasets.
+    # random_state=42 makes the sample deterministic given the same data.
     frame = dataframe.sample(max_rows, random_state=42) if len(dataframe) > max_rows else dataframe
     features: dict[str, FeatureBaseline] = {}
     for name in frame.columns:
@@ -52,6 +54,9 @@ def build_drift_baseline(dataframe: pd.DataFrame, *, max_rows: int = 50_000) -> 
         missing = float(series.isna().mean())
         if pd.api.types.is_numeric_dtype(series):
             clean = pd.to_numeric(series, errors="coerce").dropna()
+            # Decile edges stored as bin boundaries; deduplication handles
+            # constant or near-constant columns.  Open-ended outer edges ensure
+            # prediction values outside the training range still fall in a bin.
             bins = sorted({float(v) for v in clean.quantile(np.linspace(0, 1, 11)).tolist()})
             if len(bins) < 2:
                 bins = [float(clean.min()) - 1.0, float(clean.max()) + 1.0] if len(clean) else [0.0, 1.0]
@@ -63,7 +68,10 @@ def build_drift_baseline(dataframe: pd.DataFrame, *, max_rows: int = 50_000) -> 
                 proportions=_numeric_proportions(series, bins),
             )
         else:
+            # "<MISSING>" is a literal sentinel stored in the baseline; it is
+            # intentionally kept separate from any category named "missing".
             normalized = series.fillna("<MISSING>").astype(str)
+            # Top-50 categories kept; all others collapse into "<OTHER>" at compare time.
             categories = normalized.value_counts().head(50).index.tolist()
             features[str(name)] = FeatureBaseline(
                 kind="categorical",
@@ -136,11 +144,13 @@ def _psi(expected: list[float], actual: list[float]) -> float:
     size = max(len(expected), len(actual))
     left = np.pad(np.asarray(expected, dtype=float), (0, size - len(expected)), constant_values=0)
     right = np.pad(np.asarray(actual, dtype=float), (0, size - len(actual)), constant_values=0)
+    # 1e-6 floor prevents log(0); PSI is undefined when a bucket is empty.
     left, right = np.clip(left, 1e-6, None), np.clip(right, 1e-6, None)
     return float(np.sum((right - left) * np.log(right / left)))
 
 
 def _level(psi: float) -> DriftLevel:
+    # Industry-standard PSI thresholds: < 0.10 stable, 0.10–0.25 warning, ≥ 0.25 high.
     if psi >= 0.25:
         return DriftLevel.HIGH
     if psi >= 0.10:

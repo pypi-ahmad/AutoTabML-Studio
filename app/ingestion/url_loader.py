@@ -361,6 +361,8 @@ def probe_url(
     except (UnsafeURLError, UnsafeContentTypeError, ResponseTooLargeError) as exc:
         raise RemoteAccessError(f"Refused to inspect remote dataset URL: {exc}") from exc
     except httpx.HTTPStatusError as exc:
+        # 405 Method Not Allowed / 501 Not Implemented: server doesn't support
+        # HEAD — fall back to fetching a small GET sample for type detection.
         if exc.response.status_code not in {405, 501}:
             raise RemoteAccessError(f"Failed to inspect remote dataset URL: {exc}") from exc
         probe_method = "get-sniff"
@@ -439,6 +441,7 @@ async def probe_url_async(
     except (UnsafeURLError, UnsafeContentTypeError, ResponseTooLargeError) as exc:
         raise RemoteAccessError(f"Refused to inspect remote dataset URL: {exc}") from exc
     except httpx.HTTPStatusError as exc:
+        # 405 / 501: server does not support HEAD — fall back to GET-sniff.
         if exc.response.status_code not in {405, 501}:
             raise RemoteAccessError(f"Failed to inspect remote dataset URL: {exc}") from exc
         probe_method = "get-sniff"

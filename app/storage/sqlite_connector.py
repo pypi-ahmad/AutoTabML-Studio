@@ -68,6 +68,9 @@ class SQLiteConnector:
         for attempt in range(self._lock_retries + 1):
             with self.connect() as connection:
                 try:
+                    # BEGIN IMMEDIATE acquires a write lock upfront, preventing
+                    # the SQLITE_BUSY error that would occur with a plain BEGIN
+                    # when another writer commits between our read and write.
                     connection.execute("BEGIN IMMEDIATE")
                     result = operation(connection)
                     connection.commit()
@@ -98,12 +101,17 @@ class SQLiteConnector:
         raise RuntimeError("SQLite write retry loop exhausted unexpectedly.")
 
     def _open_connection(self) -> sqlite3.Connection:
+        # isolation_level=None puts sqlite3 in autocommit mode so we can
+        # issue "BEGIN IMMEDIATE" manually and control transaction boundaries
+        # ourselves rather than relying on Python's implicit BEGIN.
         connection = sqlite3.connect(
             self._db_path,
             timeout=self._timeout_seconds,
             isolation_level=None,
         )
         connection.row_factory = sqlite3.Row
+        # WAL allows one writer and multiple concurrent readers without blocking.
+        # NORMAL durability is sufficient for local metadata (recoverable on crash).
         connection.execute("PRAGMA journal_mode=WAL")
         connection.execute("PRAGMA synchronous=NORMAL")
         connection.execute("PRAGMA foreign_keys=ON")
