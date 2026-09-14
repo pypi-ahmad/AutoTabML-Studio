@@ -6,8 +6,8 @@
 
 **Local-first automated machine learning workbench for tabular data.**
 
-Go from a raw CSV to a trained, evaluated, deployable model — entirely on your machine.
-No cloud account, no outbound telemetry. A single service layer drives both the Streamlit UI and the CLI,
+Go from a raw CSV to a trained, evaluated, deployable model, entirely on your machine.
+No cloud account. No outbound telemetry. A single service layer drives both the Streamlit UI and the CLI,
 so every workflow is reproducible either way.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/pypi-ahmad/AutoTabML-Studio/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/pypi-ahmad/AutoTabML-Studio/actions/workflows/ci.yml)
@@ -65,8 +65,8 @@ saved somewhere, a prediction script duplicated for every project. There is
 rarely one place that remembers what data trained a model, what it scored,
 or which version is deployed.
 
-AutoTabML Studio consolidates that entire lifecycle — ingest, validate, profile,
-benchmark, train, predict, track, register, and export — into one local workspace.
+AutoTabML Studio consolidates that entire lifecycle (ingest, validate, profile,
+benchmark, train, predict, track, register, and export) into one local workspace.
 It ships a **Streamlit UI** for interactive exploration and a **CLI** for scripted
 or headless runs; both use the same service layer, so results are identical either way.
 
@@ -540,8 +540,7 @@ uv lock --check                               # Lockfile consistency
 
 ## Community
 
-AutoTabML Studio is free, open-source, and community-driven. Everyone is welcome —
-whether you are filing your first bug report, suggesting a feature, or submitting a pull request.
+AutoTabML Studio is free, open-source, and community-driven. Everyone is welcome, whether you are filing a bug report, suggesting a feature, or opening a pull request.
 
 | Want to… | Go here |
 | --- | --- |

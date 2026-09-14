@@ -4,7 +4,7 @@
 
 **You are fully responsible for any data you load, process, or export using AutoTabML Studio.**
 
-AutoTabML Studio is a local-first tool — all processing happens on your machine. The
+AutoTabML Studio is a local-first tool; all processing happens on your machine. The
 project maintainer has no access to your data, no visibility into what you run, and
 no ability to recover, protect, or take responsibility for anything you process with
 this software.
@@ -18,7 +18,7 @@ Before using the app with sensitive, personal, proprietary, or regulated data:
   are never included in those requests, but you remain responsible for any
   information derived from your data.
 - Foundation model checkpoints (TabFM, TimesFM) carry their own licenses. TabFM
-  in particular is non-commercial and research-only — review its license before use.
+  in particular is non-commercial and research-only; review its license before use.
 
 ## No Warranty
 
@@ -46,4 +46,4 @@ any of these providers.
 This project is free and will remain free. The author does not want, need, or accept
 financial contributions, sponsorships, or donations of any kind. If you find the
 project useful, the best way to contribute is through code, bug reports, or
-documentation — see [CONTRIBUTING.md](CONTRIBUTING.md).
+documentation. See [CONTRIBUTING.md](CONTRIBUTING.md).

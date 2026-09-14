@@ -339,7 +339,7 @@ sqlite3 /app/artifacts/app/app_metadata.sqlite3 "SELECT COUNT(*) FROM jobs"
 
 - **Rotate provider API keys** regularly. Set them via env vars
   at startup (`OPENAI_API_KEY=...`) and never write them to
-  `settings.json` — that file is for non-secrets only.
+  `settings.json` (that file is for non-secrets only).
 - **Drop `app.metadata.sqlite3` to a read-only mount** if the
   container runs in a hostile environment.
 - **Use Sigstore / cosign** to sign the container image at

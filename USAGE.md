@@ -21,7 +21,7 @@
 
 ## Who this is for
 
-AutoTabML Studio is for **data scientists and ML engineers** who want to go from a raw CSV to a trained, evaluated, and deployable model — entirely on their own machine, without provisioning cloud infrastructure.
+AutoTabML Studio is for data scientists and ML engineers who want to go from a raw CSV to a trained, evaluated, and deployable model, entirely on their own machine, without provisioning cloud infrastructure.
 
 You bring your own API keys and data. Everything runs locally. No data leaves your machine unless you explicitly configure a remote LLM provider for AI summaries.
 
@@ -91,7 +91,7 @@ uv sync --locked --group dev --extra providers
 uv run autotabml init-local-storage
 ```
 
-Creates the artifact directories and the app metadata SQLite database. Safe to run again — it is idempotent.
+Creates the artifact directories and the app metadata SQLite database. Safe to run again; it is idempotent.
 
 ### Verify your environment
 
@@ -169,7 +169,7 @@ uv run autotabml job-cancel <job-id>
 
 ### Home (Dashboard)
 
-Shows workflow progress, recent activity, and quick links to every step. Use it as your launch pad — it highlights which steps have been completed and what to do next.
+Shows workflow progress, recent activity, and quick links to every step. It highlights which steps have been completed and what to do next.
 
 **Tip:** The Dashboard shows the most recent dataset and model. Navigate directly to any step from here.
 
@@ -209,7 +209,7 @@ Checks the loaded dataset for quality issues before modeling:
 
 Results are saved to `artifacts/validation/` as a summary JSON and optional GX data docs.
 
-**Tip:** Run Validation before Profiling — it catches hard blockers early.
+**Tip:** Run Validation before Profiling; it catches hard blockers early.
 
 ---
 
@@ -351,7 +351,7 @@ Side-by-side comparison of any two MLflow runs: metric deltas, parameter diffs, 
 
 **Section: Review**
 
-Generates a reproducible Jupyter notebook for a dataset run. The notebook includes data loading, preprocessing, training, and evaluation — ready to run in Colab or locally.
+Generates a reproducible Jupyter notebook for a dataset run. The notebook includes data loading, preprocessing, training, and evaluation, ready to run in Colab or locally.
 
 ---
 
@@ -808,7 +808,7 @@ uv run autotabml job-cancel <job-id>
 
 Settings resolve in this order: **Pydantic defaults → `~/.autotabml/settings.json` → environment variables**.
 
-The Settings page writes to `~/.autotabml/settings.json`. API keys are never written there — they are kept in session state and read from environment variables only.
+The Settings page writes to `~/.autotabml/settings.json`. API keys are never written there; they are kept in session state and read from environment variables only.
 
 ### Using a `.env` file
 
