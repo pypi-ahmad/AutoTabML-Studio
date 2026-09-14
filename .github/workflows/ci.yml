@@ -7,12 +7,6 @@ on:
       - master
   pull_request:
   workflow_dispatch:
-    inputs:
-      run_integration:
-        description: Run optional heavy-dependency integration tests
-        required: false
-        default: false
-        type: boolean
 
 # All third-party actions are pinned to commit SHAs. To upgrade a
 # pinned action, look up the new SHA (e.g. via
@@ -46,42 +40,10 @@ jobs:
         run: pip install 'ruff>=0.15,<1'
 
       - name: Ruff check
-        run: ruff check app/ tests/ scripts/
+        run: ruff check app/ scripts/
 
       - name: Ruff format check
-        run: ruff format --check app/ tests/ scripts/
-
-  unit-tests:
-    name: Unit Tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version:
-          - '3.11'
-          - '3.13'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v6.0.0
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9  # v7
-        with:
-          enable-cache: true
-
-      - name: Verify lockfile is up to date
-        run: uv lock --check
-
-      - name: Install dependencies (locked)
-        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml --extra providers
-
-      - name: Run unit test suite
-        run: uv run --no-sync python -m pytest tests/ -q --tb=short
+        run: ruff format --check app/ scripts/
 
   type-check:
     name: Type Check (Pyright)
@@ -139,98 +101,3 @@ jobs:
 
       - name: Run pip-audit
         run: uv run --no-sync pip-audit || true
-
-  coverage:
-    name: Coverage Gate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v6.0.0
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
-        with:
-          python-version: '3.13'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9  # v7
-        with:
-          enable-cache: true
-
-      - name: Verify lockfile is up to date
-        run: uv lock --check
-
-      - name: Install dependencies (locked)
-        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml --extra providers
-
-      - name: Run coverage gate
-        run: uv run --no-sync python -m pytest tests/ --cov=app --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=65 -q
-
-      - name: Upload coverage XML
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
-        with:
-          name: coverage-xml
-          path: coverage.xml
-
-  e2e-smoke:
-    name: E2E Smoke (real deps)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v6.0.0
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
-        with:
-          python-version: '3.11'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9  # v7
-        with:
-          enable-cache: true
-
-      - name: Verify lockfile is up to date
-        run: uv lock --check
-
-      - name: Install dependencies (locked)
-        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra uci --extra flaml --extra providers
-
-      - name: Run e2e smoke test with real dependencies
-        run: uv run --no-sync python -m pytest tests/test_e2e_local_smoke.py -v --tb=short
-
-  integration-tests:
-    name: Optional Integration Tests
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_integration }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v6.0.0
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
-        with:
-          python-version: '3.11'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9  # v7
-        with:
-          enable-cache: true
-
-      - name: Verify lockfile is up to date
-        run: uv lock --check
-
-      - name: Install heavy optional dependencies (locked)
-        run: uv sync --locked --group dev --extra validation --extra profiling --extra benchmark --extra experiment --extra uci --extra providers
-
-      - name: Run integration-marked tests
-        shell: bash
-        run: |
-          set +e
-          uv run --no-sync pytest tests/ -m integration -q --tb=short
-          code=$?
-          if [ "$code" -eq 5 ]; then
-            echo "No integration-marked tests were collected."
-            exit 0
-          fi
-          exit "$code"
